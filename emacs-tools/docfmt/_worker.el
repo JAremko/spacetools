@@ -9,23 +9,25 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+;;; Commentary:
+;;; Code:
 
 (when (and load-file-name
            noninteractive)
-  (setq gc-cons-threshold 10000000000))
-
-(load
- (concat
-  (file-name-directory
-   (or load-file-name
-       buffer-file-name))
-  "../lib/toc-org.elc")
- nil t)
-
-(declare-function toc-org-hrefify-gh "../lib/toc-org.el" (str &optional hash))
+  (setq gc-cons-threshold 1000000000))
 
 (eval-when-compile
   (require 'cl))
+
+(defconst spacemacs--docfmt-lib-dir
+  (file-truename
+   (concat
+    (file-name-directory
+     (or load-file-name
+         buffer-file-name))
+    "../lib/")))
+
+(load (concat spacemacs--docfmt-lib-dir "toc-org.elc")  nil t)
 
 (defconst spacemacs--docfmt-empty-line-regexp "^[ \t]*$")
 (defconst spacemacs--docfmt-tree-trunk-regexp "^[ 	]*|_")

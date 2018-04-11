@@ -11,10 +11,12 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+;;; Commentary:
+;;; Code:
 
 (when (and load-file-name
            noninteractive)
-  (setq gc-cons-threshold 10000000000))
+  (setq gc-cons-threshold 1000000000))
 
 (eval-when-compile
   (require 'cl)
@@ -30,13 +32,8 @@
        buffer-file-name))
   "../lib/toc-org.elc"))
 
-(defconst spacemacs--root-dir
-  (file-truename
-   (concat
-    (file-name-directory
-     (or load-file-name (buffer-file-name)))
-    "../../../"))
-  "Root directory of Spacemacs")
+(defvar spacemacs--root-dir nil
+  "Original root directory of the documentation.")
 
 (declare-function toc-org-hrefify-gh "../lib/toc-org.el" (str &optional hash))
 
@@ -433,7 +430,8 @@ contextual information."
                :type
                (org-export-get-parent item)))
         (item-tag (org-element-property :tag item))
-        (checkbox (org-element-property :checkbox item)))
+        (checkbox (org-element-property :checkbox item))
+        (children (format "{:tag :item-children :children [%s]}" contents)))
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
@@ -446,7 +444,6 @@ contextual information."
                     ":type :%s "
                     ":bullet %s "
                     ":checkbox %s "
-                    ":item-tag %s "
                     ":children [%s]}")
             type
             (format
@@ -454,17 +451,21 @@ contextual information."
              (spacemacs/org-edn-escape-string
               (org-element-property :bullet item)))
             (when checkbox (format ":%s" (symbol-name checkbox)))
-            (when item-tag
-              (if (char-or-string-p item-tag)
-                  (format "{:tag :plain-text :value \"%s\"}"
-                          (spacemacs/org-edn-escape-string item-tag))
-                (org-export-data-with-backend item-tag 'spacemacs-edn info)))
-            contents)))
+            (if item-tag
+                (format
+                 "{:tag :item-tag :value \"%s\"} %s"
+                 (if (char-or-string-p item-tag)
+                     (spacemacs/org-edn-escape-string item-tag)
+                   (org-export-data-with-backend item-tag
+                                                 'spacemacs-edn
+                                                 info))
+                 children)
+              children))))
 
 ;;;; Keyword
 
 (defun spacemacs//org-edn-keyword (keyword _contents _info)
-  "Transcode a KEYWORD element From Org to Spacemacs EDN.
+  "Transcode a KEYWORD element From Org to Spacemacs EDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "{:tag :keyword :key \"%s\" :value \"%s\"}"
           (spacemacs/org-edn-escape-string
@@ -515,7 +516,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 embedded into a web page.")
 
 (defun spacemacs//org-edn-link (link desc info)
-  "Transcode a LINK object From Org to Spacemacs EDN.))
+  "Transcode a LINK object From Org to Spacemacs EDN.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
@@ -532,21 +533,16 @@ INFO is a plist holding contextual information.  See
                        spacemacs--org-edn-embeddable-file-path-regexp
                        path)))
     (when local-org-link?
-      (plist-put
-       info
-       :spacemacs-edn-warnings
-       (concat
-        (plist-get info :spacemacs-edn-warnings)
-        (format
-         (concat "Link \"%s\" "
-                 "in \"%s\" "
-                 "should target the org file at "
-                 "GitHub "
-                 "(GitHub style anchors are supported)\n"
-                 "See footnote of %S\n")
-         raw-link
-         file
-         spacemacs-readme-template-url))))
+      (spacemacs/org-edn-error
+       (concat "Link \"%s\" "
+               "in \"%s\" "
+               "should target the org file at "
+               "GitHub "
+               "(GitHub style anchors are supported)\n"
+               "See footnote of %S\n")
+       raw-link
+       file
+       spacemacs-readme-template-url))
     (cond
      ((string-match spacemacs--org-edn-git-url-root-regexp
                     raw-link)
@@ -642,8 +638,8 @@ contextual information."
          (parent-type
           (symbol-name
            (car
-             (org-export-get-parent
-              plain-list))))
+            (org-export-get-parent
+             plain-list))))
          (parent-hl
           (org-export-get-parent-headline
            plain-list))
@@ -869,32 +865,22 @@ holding export options."
                                     file
                                     t))
           (unless has-description?
-            (plist-put
-             info
-             :spacemacs-edn-warnings
+            (spacemacs/org-edn-error
              (concat
-              (plist-get info :spacemacs-edn-warnings)
-              (format
-               (concat
-                "File \"%s\" "
-                "doesn't have top level "
-                "\"Description\" headline\n"
-                "See %S\n")
-               file
-               spacemacs-readme-template-url))))
+              "File \"%s\" "
+              "doesn't have top level "
+              "\"Description\" headline\n"
+              "See %S\n")
+             file
+             spacemacs-readme-template-url))
           (unless has-feature-list?
-            (plist-put
-             info
-             :spacemacs-edn-warnings
-             (concat
-              (plist-get info :spacemacs-edn-warnings)
-              (format
-               (concat "File \"%s\" "
-                       "doesn't have \"Features:\"(With a colon) list in the "
-                       "top level \"Description\" headline\n"
-                       "See %S\n")
-               file
-               spacemacs-readme-template-url)))))))
+            (spacemacs/org-edn-error
+             (concat "File \"%s\" "
+                     "doesn't have \"Features:\"(With a colon) list in the "
+                     "top level \"Description\" headline\n"
+                     "See %S\n")
+             file
+             spacemacs-readme-template-url)))))
     (format (concat "{:tag :root "
                     ;; ":export-data #inst \"%s\" "
                     ":file-has-description? %s "
@@ -979,45 +965,46 @@ FIXME: Figure out where they come from :"
 
 ;;; End-user functions
 
-(defun spacemacs/export-docs-to-edn (exp-dir file-list)
-  "Export org files in FILE-LIST into EXP-DIR."
-  (unwind-protect
-      (dolist (file file-list)
-        (let* ((target-file-name (concat
-                                  exp-dir
-                                  (string-remove-suffix
-                                   ".org"
-                                   (string-remove-prefix
-                                    (file-truename
-                                     spacemacs--root-dir)
-                                    (file-truename file)))
-                                  ".edn"))
-               (target-file-dir
-                (file-name-as-directory
-                 (file-name-directory target-file-name))))
-          ;; FIXME: Close enough. But it will be better if we
-          ;; export stuff into separate folders and then merge.
-          (while (not (file-accessible-directory-p target-file-dir))
-            (condition-case err
-                (make-directory target-file-dir t)
-              (error (spacemacs/org-edn-warn
-                      "make-directory \"%s\" failed with \"%s\". Retrying..."
-                      target-file-dir
-                      err))))
-          (spacemacs/org-edn-message
-           "Exporting \"%s\" into \"%s\""
-           file
-           target-file-name)
-          (with-temp-buffer
-            (find-file file)
-            (org-export-to-file
-                'spacemacs-edn
-                target-file-name))
-          (if (and (file-readable-p target-file-name)
-                   (> (nth 7 (file-attributes target-file-name)) 0))
-              (spacemacs/org-edn-message
-               "Successfully exported \"%s\""
-               file)
-            (spacemacs/org-edn-error
-             "Export finished but \"%s\" doesn't exist or empty"
-             target-file-name))))))
+(defun spacemacs/export-docs-to-edn (root-dir exp-dir file-list)
+  "Export org files in FILE-LIST into EXP-DIR.
+ROOT-DIR is original documentation root directory."
+  (let* ((spacemacs--root-dir (file-truename root-dir))
+         (default-directory spacemacs--root-dir))
+    (dolist (file file-list)
+      (let* ((target-file-name (concat
+                                exp-dir
+                                (string-remove-suffix
+                                 ".org"
+                                 (string-remove-prefix
+                                  spacemacs--root-dir
+                                  (file-truename file)))
+                                ".edn"))
+             (target-file-dir
+              (file-name-as-directory
+               (file-name-directory target-file-name))))
+        ;; FIXME: Close enough. But it will be better if we
+        ;; export stuff into separate folders and then merge.
+        (while (not (file-accessible-directory-p target-file-dir))
+          (condition-case err
+              (make-directory target-file-dir t)
+            (error (spacemacs/org-edn-error
+                    "make-directory \"%s\" failed with \"%s\". Retrying..."
+                    target-file-dir
+                    err))))
+        (spacemacs/org-edn-message
+         "Exporting \"%s\" into \"%s\""
+         file
+         target-file-name)
+        (with-temp-buffer
+          (find-file file)
+          (org-export-to-file
+              'spacemacs-edn
+              target-file-name))
+        (if (and (file-readable-p target-file-name)
+                 (> (nth 7 (file-attributes target-file-name)) 0))
+            (spacemacs/org-edn-message
+             "Successfully exported \"%s\""
+             file)
+          (spacemacs/org-edn-error
+           "Export finished but \"%s\" doesn't exist or empty"
+           target-file-name))))))
