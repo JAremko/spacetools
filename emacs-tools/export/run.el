@@ -22,12 +22,13 @@
   (concat
    "Spacemacs documentation formatting tool\n"
    "=======================================\n"
-   "First argument is root directory (usually ~/.emacs.d/).\n"
-   "It will be used to transform patches.\n"
+   "First argument is the root directory (usually ~/.emacs.d/).\n"
+   "It will be used to transform paths.\n"
    "The rest of arguments are \"*.org\" file paths or directories.\n"
-   "If a file path is a directory - it will be searched\n"
-   "for *.org files.\n"
-   "Files will be exported into \"export/target\" directory.")
+   "Directories will be searched for *.org files.\n"
+   "Files will be exported into \"export/target\" directory of the tool.\n"
+   "Script can be called only with the first argument. In this case\n"
+   "a default list of Spacemacs documentation files will be used.")
   "Help text for the script.")
 
 (declare-function spacemacs//spacetools-find-org-files "shared.el" (paths))
@@ -68,6 +69,16 @@
 (defvar spacemacs--export-docs-copy-queue '()
   "Queue of static dependencies to be copied to
 the export dir.")
+(defvar spacemacs--export-docs-default-exclude
+  `("export/"
+    "private/"
+    "tests/"
+    "elpa/"
+    "layers/LAYERS.org")
+  "List of Spacemacs folders and ORG files that normally
+ shouldn't be exported.")
+
+
 
 (defun spacemacs//export-docs-copy-file-to-target-dir (file-path)
   "Copy file at FILE-PATH into `spacemacs-export-docs-target-dir'.
@@ -145,11 +156,19 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
     (spacemacs//export-docs-copy-file-to-target-dir
      (pop spacemacs--export-docs-copy-queue))))
 
+(defun spacemacs//export-docs-build-default-list (root-dir)
+  "Create default list of Spacemacs documentation files to export."
+  (let ((exclude-re (regexp-opt (mapcar
+                                 (apply-partially 'concat root-dir)
+                                 spacemacs--export-docs-default-exclude))))
+    (delete 0 (mapcar (lambda (path) (or (string-match-p exclude-re path) path))
+                      (directory-files-recursively root-dir "\\.org$")))))
+
 (defun spacemacs//export-docs-run (arg-list)
   "Main function for running as a script. ARG-LIST is an argument list.
 See `spacemacs-export-docs-help-text' for description."
-  (when (or (member (car arg-list) '("-h" "help"))
-            (< (length arg-list) 2)
+  (when (or (not arg-list)
+            (member (car arg-list) '("-h" "help"))
             (not (file-directory-p (car arg-list))))
     (error spacemacs-export-docs-help-text))
   (setq spacemacs--export-docs-workers-fin 0
@@ -157,9 +176,11 @@ See `spacemacs-export-docs-help-text' for description."
   (let* ((default-directory spacemacs-export-docs-run-file-dir)
          (w-path (progn (byte-compile-file "_worker.el")
                         (file-truename "_worker.elc")))
-         (root-dir (file-name-as-directory (pop arg-list)))
+         (root-dir (file-truename (file-name-as-directory (pop arg-list))))
          (files (let ((default-directory root-dir))
-                  (spacemacs//spacetools-find-org-files arg-list)))
+                  (spacemacs//spacetools-find-org-files
+                   (or arg-list
+                       (spacemacs//export-docs-build-default-list root-dir)))))
          (f-length (length files))
          (w-count (min (spacemacs//spacetools-get-cpu-count) f-length)))
     (setq spacemacs--export-docs-worker-count w-count
