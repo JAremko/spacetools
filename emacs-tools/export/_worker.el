@@ -454,12 +454,12 @@ contextual information."
             (if item-tag
                 (format
                  "%s {:tag :item-tag :value \"%s\"}"
+                 children
                  (if (char-or-string-p item-tag)
                      (spacemacs/org-edn-escape-string item-tag)
                    (org-export-data-with-backend item-tag
                                                  'spacemacs-edn
-                                                 info))
-                 children)
+                                                 info)))
               children))))
 
 ;;;; Keyword
