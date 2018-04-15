@@ -21,6 +21,8 @@
 (defmethod node :body [_] ::body)
 (defmethod node :italic [_] ::italic)
 (defmethod node :list-item [_] ::list-item)
+(defmethod node :item-children [_] ::item-children)
+(defmethod node :item-tag [_] ::item-tag)
 (defmethod node :keyword [_] ::keyword)
 (defmethod node :line-break [_] ::line-break)
 (defmethod node :org-file-path [_] ::org-file-path)
@@ -297,6 +299,31 @@
                                   :spacedoc.data.example/value]))
 
 
+;;;; item-children
+
+(s/def :spacedoc.data.item-children/tag #{:item-children})
+(s/def :spacedoc.data.item-children/child
+  (s/or :block-element ::block-element
+        :inline-element ::inline-element))
+(s/def :spacedoc.data.item-children/children
+  (s/coll-of :spacedoc.data.item-children/child
+             :kind vector?
+             :min-count 1
+             :into []))
+(s/def ::item-children (s/keys :req-un [:spacedoc.data.item-children/tag
+                                        :spacedoc.data.item-children/children]))
+
+
+;;;;item-tag
+
+(s/def :spacedoc.data.item-tag/tag #{:item-tag})
+(s/def :spacedoc.data.item-tag/value
+  (s/or :string ::non-empty-string
+        :inline-element ::inline-element))
+(s/def ::item-tag (s/keys :req-un [:spacedoc.data.item-tag/tag
+                                   :spacedoc.data.item-tag/value]))
+
+
 ;;;; list-item node
 ;; FIXME: Splite into types to check for list type and its items type match.
 
@@ -304,22 +331,12 @@
 (s/def :spacedoc.data.list-item/type #{:ordered :unordered :descriptive})
 (s/def :spacedoc.data.list-item/bullet ::non-empty-string)
 (s/def :spacedoc.data.list-item/checkbox (s/nilable #{:trans :off :on}))
-(s/def :spacedoc.data.list-item/item-tag (s/nilable
-                                          (s/or
-                                           :string ::non-empty-string
-                                           :inline-element ::inline-element)))
-(s/def :spacedoc.data.list-item/child (s/or :block-element ::block-element
-                                            :inline-element ::inline-element))
-(s/def :spacedoc.data.list-item/children
-  (s/coll-of :spacedoc.data.list-item/child
-             :kind vector?
-             :min-count 1
-             :into []))
+(s/def :spacedoc.data.list-item/children (s/cat :children ::item-children
+                                                :tag (s/? ::item-tag)))
 (s/def ::list-item (s/keys :req-un [:spacedoc.data.list-item/tag
                                     :spacedoc.data.list-item/type
                                     :spacedoc.data.list-item/bullet
                                     :spacedoc.data.list-item/checkbox
-                                    :spacedoc.data.list-item/item-tag
                                     :spacedoc.data.list-item/children]))
 
 

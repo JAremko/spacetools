@@ -453,7 +453,7 @@ contextual information."
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
                 (format
-                 "{:tag :item-tag :value \"%s\"} %s"
+                 "%s {:tag :item-tag :value \"%s\"}"
                  (if (char-or-string-p item-tag)
                      (spacemacs/org-edn-escape-string item-tag)
                    (org-export-data-with-backend item-tag
