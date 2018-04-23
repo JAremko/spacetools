@@ -22,7 +22,7 @@
        (filter #(.endsWith (lower-case %) ".edn"))
        (vec)))
 
-(util/children-tags :body (apply util/read-spacedoc-files spacedoc-file-paths))
+(util/children-tags :body (apply util/read-files spacedoc-file-paths))
 
 
 (println "====== OK =========")

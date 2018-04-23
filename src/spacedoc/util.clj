@@ -1,5 +1,4 @@
 (ns spacedoc.util
-  (:gen-class)
   (:require [clojure.core.reducers :refer [fold]]
             [clojure.set :as set :refer [union]]
             [clojure.java.io :as io]
@@ -9,8 +8,8 @@
             [spacedoc.conf :as conf]))
 
 
-(defn explain-deepest
-  "Validate each node in DOC using multi-spec MSPEC.
+(defn explain-str-deepest
+  "Validate each node in DOC Spacedoc structure using multi-spec MSPEC.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
   The function returns `nil` If all nodes are valid."
@@ -18,14 +17,14 @@
   (or (when-let [c (:children doc)]
         (reduce
          (fn [_ v]
-           (when-let [fail (explain-deepest mspec v)]
+           (when-let [fail (explain-str-deepest mspec v)]
              (reduced fail)))
          nil c))
       (when-not (s/valid? mspec doc)
         (s/explain-str mspec doc))))
 
 
-(defn read-spacedoc-files
+(defn read-files
   "Read Spacedoc END files"
   ([file-path]
    (io!
@@ -33,29 +32,34 @@
       (with-open [input (->> file-path
                              (clojure.java.io/reader)
                              (java.io.PushbackReader.))]
-        (let [objs (repeatedly (partial edn/read {:eof :fin} input))]
-          (if (= :fin (second objs))
-            (first objs)
-            (throw
-             (Exception.
-              "Spacdoc file should contain single top level form")))))
+        (let [[obj fin] (repeatedly 2 (partial edn/read {:eof :fin} input))]
+          (when-some [e (cond (not= :fin fin)
+                              "File should contain single top level form"
+                              (not (s/valid? :spacedoc.data/root obj))
+                              (format
+                               "Spec validation filed: (%s)"
+                               (explain-str-deepest
+                                :spacedoc.data/obj->spec
+                                obj)))]
+            (throw (Exception. e)))
+          obj))
       (catch Exception e
         (throw
          (Exception.
-          (format "\"%s\" During parsing of \"%s\" file" e file-path)))))))
+          (format "\"%s\" During reading of \"%s\" file" e file-path)))))))
   ([file-path & fs]
    (fold
     conf/*n-threads*
     (fn
       ([xs x] (merge xs x))
       ([] '()))
-    #(conj %1 (read-spacedoc-files %2))
+    #(conj %1 (read-files %2))
     (conj fs file-path))))
 
 
 (defn children-tags
   "Return tag set of all children of a node specified by :tag value TAG
-  in IN-DOCS Spacemacs EDN documentation EDN structures."
+  in IN-DOCS Spacedoc structures."
   ([tag]
    (fn [xs]
      (->> xs
