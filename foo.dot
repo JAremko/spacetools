@@ -1,0 +1,889 @@
+0: digraph {
+1: rankdir=LR;
+2: spacedocdatalinebreak [shape=box,label=":spacedoc.data/line-break",style=filled,fillcolor="#CCCCCC", height=null,width=null
+3:           ];
+4: spacedocdatalinebreak->node4801 [label="",style=null,constraint=true,dir=null];
+5: node4801 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.line-break/tag])",style=null,fillcolor="null", height=null,width=null
+6:           ];
+7: spacedocdatalinebreaktag [shape=box,label=":spacedoc.data.line-break/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+8:           ];
+9: spacedocdatalinebreaktag->node4802 [label="",style=null,constraint=true,dir=null];
+10: node4802 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:line-break</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+11:           ];
+12: spacedocdatanonemptystring [shape=box,label=":spacedoc.data/non-empty-string",style=filled,fillcolor="#CCCCCC", height=null,width=null
+13:           ];
+14: spacedocdatanonemptystring->node4803 [label="",style=null,constraint=true,dir=null];
+15: node4803 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+16:           ];
+17: spacedocdataplainlist [shape=box,label=":spacedoc.data/plain-list",style=filled,fillcolor="#CCCCCC", height=null,width=null
+18:           ];
+19: spacedocdataplainlist->node4804 [label="",style=null,constraint=true,dir=null];
+20: node4804 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.plain-list/tag :spacedoc.data.plain-list/type :spacedoc.data.plain-list/children])",style=null,fillcolor="null", height=null,width=null
+21:           ];
+22: spacedocdataitemtagvalue [shape=box,label=":spacedoc.data.item-tag/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+23:           ];
+24: spacedocdataitemtagvalue->node4805 [label="",style=null,constraint=true,dir=null];
+25: node4805 [shape=oval,label="(clojure.spec.alpha/or :string :spacedoc.data/non-empty-string :inline-element :spacedoc.data/inline-element)",style=null,fillcolor="null", height=null,width=null
+26:           ];
+27: spacedocdatainlinecontainer [shape=box,label=":spacedoc.data/inline-container",style=filled,fillcolor="#CCCCCC", height=null,width=null
+28:           ];
+29: spacedocdatainlinecontainer->node4806 [label="",style=null,constraint=true,dir=null];
+30: node4806 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/inline-container :tag)",style=null,fillcolor="null", height=null,width=null
+31:           ];
+32: spacedocdatalistitemtag [shape=box,label=":spacedoc.data.list-item/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+33:           ];
+34: spacedocdatalistitemtag->node4807 [label="",style=null,constraint=true,dir=null];
+35: node4807 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:list-item</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+36:           ];
+37: spacedocdatablockelement [shape=box,label=":spacedoc.data/block-element",style=filled,fillcolor="#CCCCCC", height=null,width=null
+38:           ];
+39: spacedocdatablockelement->node4808 [label="",style=null,constraint=true,dir=null];
+40: node4808 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/block-element :tag)",style=null,fillcolor="null", height=null,width=null
+41:           ];
+42: spacedocdataplainlisttype [shape=box,label=":spacedoc.data.plain-list/type",style=filled,fillcolor="#CCCCCC", height=null,width=null
+43:           ];
+44: spacedocdataplainlisttype->node4809 [label="",style=null,constraint=true,dir=null];
+45: node4809 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:unordered</td></tr><tr><td port="f2">:ordered</td></tr><tr><td port="f3">:descriptive</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+46:           ];
+47: spacedocdatainlineleaf [shape=box,label=":spacedoc.data/inline-leaf",style=filled,fillcolor="#CCCCCC", height=null,width=null
+48:           ];
+49: spacedocdatainlineleaf->node4810 [label="",style=null,constraint=true,dir=null];
+50: node4810 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/inline-leaf :tag)",style=null,fillcolor="null", height=null,width=null
+51:           ];
+52: spacedocdataitemchildrentag [shape=box,label=":spacedoc.data.item-children/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+53:           ];
+54: spacedocdataitemchildrentag->node4811 [label="",style=null,constraint=true,dir=null];
+55: node4811 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:item-children</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+56:           ];
+57: spacedocdataplainlistchildren [shape=box,label=":spacedoc.data.plain-list/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+58:           ];
+59: spacedocdataplainlistchildren->node4812 [label="",style=null,constraint=true,dir=null];
+60: node4812 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/list-item :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+61:           ];
+62: spacedocdataitemtag [shape=box,label=":spacedoc.data/item-tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+63:           ];
+64: spacedocdataitemtag->node4813 [label="",style=null,constraint=true,dir=null];
+65: node4813 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.item-tag/tag :spacedoc.data.item-tag/value])",style=null,fillcolor="null", height=null,width=null
+66:           ];
+67: spacedocdataitemchildren [shape=box,label=":spacedoc.data/item-children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+68:           ];
+69: spacedocdataitemchildren->node4814 [label="",style=null,constraint=true,dir=null];
+70: node4814 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.item-children/tag :spacedoc.data.item-children/children])",style=null,fillcolor="null", height=null,width=null
+71:           ];
+72: spacedocdatainlineelement [shape=box,label=":spacedoc.data/inline-element",style=filled,fillcolor="#CCCCCC", height=null,width=null
+73:           ];
+74: spacedocdatainlineelement->node4815 [label="",style=null,constraint=true,dir=null];
+75: node4815 [shape=oval,label="(clojure.spec.alpha/or :inline-container :spacedoc.data/inline-container :inline-leaf :spacedoc.data/inline-leaf)",style=null,fillcolor="null", height=null,width=null
+76:           ];
+77: spacedocdatalistitembullet [shape=box,label=":spacedoc.data.list-item/bullet",style=filled,fillcolor="#CCCCCC", height=null,width=null
+78:           ];
+79: spacedocdatalistitembullet->node4816 [label="",style=null,constraint=true,dir=null];
+80: node4816 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+81:           ];
+82: spacedocdataitemchildrenchild [shape=box,label=":spacedoc.data.item-children/child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+83:           ];
+84: spacedocdataitemchildrenchild->node4817 [label="",style=null,constraint=true,dir=null];
+85: node4817 [shape=oval,label="(clojure.spec.alpha/or :block-element :spacedoc.data/block-element :inline-element :spacedoc.data/inline-element)",style=null,fillcolor="null", height=null,width=null
+86:           ];
+87: spacedocdataitemtagtag [shape=box,label=":spacedoc.data.item-tag/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+88:           ];
+89: spacedocdataitemtagtag->node4818 [label="",style=null,constraint=true,dir=null];
+90: node4818 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:item-tag</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+91:           ];
+92: spacedocdataplainlisttag [shape=box,label=":spacedoc.data.plain-list/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+93:           ];
+94: spacedocdataplainlisttag->node4819 [label="",style=null,constraint=true,dir=null];
+95: node4819 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:plain-list</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+96:           ];
+97: spacedocdataitemchildrenchildren [shape=box,label=":spacedoc.data.item-children/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+98:           ];
+99: spacedocdataitemchildrenchildren->node4820 [label="",style=null,constraint=true,dir=null];
+100: node4820 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data.item-children/child :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+101:           ];
+102: spacedocdatalistitemtype [shape=box,label=":spacedoc.data.list-item/type",style=filled,fillcolor="#CCCCCC", height=null,width=null
+103:           ];
+104: spacedocdatalistitemtype->node4821 [label="",style=null,constraint=true,dir=null];
+105: node4821 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:unordered</td></tr><tr><td port="f2">:ordered</td></tr><tr><td port="f3">:descriptive</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+106:           ];
+107: spacedocdatalistitem [shape=box,label=":spacedoc.data/list-item",style=filled,fillcolor="#CCCCCC", height=null,width=null
+108:           ];
+109: spacedocdatalistitem->node4822 [label="",style=null,constraint=true,dir=null];
+110: node4822 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.list-item/tag :spacedoc.data.list-item/type :spacedoc.data.list-item/bullet :spacedoc.data.list-item/checkbox :spacedoc.data.list-item/children])",style=null,fillcolor="null", height=null,width=null
+111:           ];
+112: spacedocdatalistitemcheckbox [shape=box,label=":spacedoc.data.list-item/checkbox",style=filled,fillcolor="#CCCCCC", height=null,width=null
+113:           ];
+114: spacedocdatalistitemcheckbox->node4823 [label="",style=null,constraint=true,dir=null];
+115: node4823 [shape=oval,label="(clojure.spec.alpha/nilable #{:off :trans :on})",style=null,fillcolor="null", height=null,width=null
+116:           ];
+117: spacedocdatalistitemchildren [shape=box,label=":spacedoc.data.list-item/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+118:           ];
+119: spacedocdatalistitemchildren->node4824 [label="",style=null,constraint=true,dir=null];
+120: node4824 [shape=oval,label="(clojure.spec.alpha/cat :children :spacedoc.data/item-children :tag (clojure.spec.alpha/? :spacedoc.data/item-tag))",style=null,fillcolor="null", height=null,width=null
+121:           ];
+122: spacedocdataheadlinelevel3 [shape=box,label=":spacedoc.data/headline-level-3",style=filled,fillcolor="#CCCCCC", height=null,width=null
+123:           ];
+124: spacedocdataheadlinelevel3->node4825 [label="",style=null,constraint=true,dir=null];
+125: node4825 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-level-3/tag :spacedoc.data.headline-level-3/level :spacedoc.data.headline-level-3/children]))",style=null,fillcolor="null", height=null,width=null
+126:           ];
+127: spacedocdataheadlinelevel3tag [shape=box,label=":spacedoc.data.headline-level-3/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+128:           ];
+129: spacedocdataheadlinelevel3tag->node4826 [label="",style=null,constraint=true,dir=null];
+130: node4826 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+131:           ];
+132: spacedocdataheadlinelevel [shape=box,label=":spacedoc.data.headline/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+133:           ];
+134: spacedocdataheadlinelevel->node4827 [label="",style=null,constraint=true,dir=null];
+135: node4827 [shape=oval,label="nat-int?",style=null,fillcolor="null", height=null,width=null
+136:           ];
+137: spacedocdataheadlinelevel3level [shape=box,label=":spacedoc.data.headline-level-3/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+138:           ];
+139: spacedocdataheadlinelevel3level->node4828 [label="",style=null,constraint=true,dir=null];
+140: node4828 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">3</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+141:           ];
+142: spacedocdataheadlineghid [shape=box,label=":spacedoc.data.headline/gh-id",style=filled,fillcolor="#CCCCCC", height=null,width=null
+143:           ];
+144: spacedocdataheadlineghid->node4829 [label="",style=null,constraint=true,dir=null];
+145: node4829 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (re-matches #"^[\pL\pN\p{Pc}-]+$" %)))",style=null,fillcolor="null", height=null,width=null
+146:           ];
+147: spacedocdataheadlinepathid [shape=box,label=":spacedoc.data.headline/path-id",style=filled,fillcolor="#CCCCCC", height=null,width=null
+148:           ];
+149: spacedocdataheadlinepathid->node4830 [label="",style=null,constraint=true,dir=null];
+150: node4830 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (re-matches #"^[\pL\pN\p{Pc}/-]+$" %)))",style=null,fillcolor="null", height=null,width=null
+151:           ];
+152: spacedocdataheadlinelevel3child [shape=box,label=":spacedoc.data/headline-level-3-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+153:           ];
+154: spacedocdataheadlinelevel3child->node4831 [label="",style=null,constraint=true,dir=null];
+155: node4831 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-level-3-child :tag)",style=null,fillcolor="null", height=null,width=null
+156:           ];
+157: spacedocdataheadlinevalue [shape=box,label=":spacedoc.data.headline/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+158:           ];
+159: spacedocdataheadlinevalue->node4832 [label="",style=null,constraint=true,dir=null];
+160: node4832 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+161:           ];
+162: spacedocdataheadlinelevel3children [shape=box,label=":spacedoc.data.headline-level-3/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+163:           ];
+164: spacedocdataheadlinelevel3children->node4833 [label="",style=null,constraint=true,dir=null];
+165: node4833 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-3-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+166:           ];
+167: spacedocdataheadlinetag [shape=box,label=":spacedoc.data.headline/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+168:           ];
+169: spacedocdataheadlinetag->node4834 [label="",style=null,constraint=true,dir=null];
+170: node4834 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:description</td></tr><tr><td port="f2">:headline</td></tr><tr><td port="f3">:todo</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+171:           ];
+172: spacedocdataheadlinechildren [shape=box,label=":spacedoc.data.headline/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+173:           ];
+174: spacedocdataheadlinechildren->node4835 [label="",style=null,constraint=true,dir=null];
+175: node4835 [shape=oval,label="(clojure.spec.alpha/nilable (clojure.spec.alpha/or :headline-child :spacedoc.data/headline-child :headline-children (clojure.spec.alpha/coll-of :spacedoc.data/headline-child :kind vector? :into [])))",style=null,fillcolor="null", height=null,width=null
+176:           ];
+177: spacedocdataheadlinechild [shape=box,label=":spacedoc.data/headline-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+178:           ];
+179: spacedocdataheadlinechild->node4836 [label="",style=null,constraint=true,dir=null];
+180: node4836 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-child :tag)",style=null,fillcolor="null", height=null,width=null
+181:           ];
+182: spacedocdataheadline [shape=box,label=":spacedoc.data/headline",style=filled,fillcolor="#CCCCCC", height=null,width=null
+183:           ];
+184: spacedocdataheadline->node4837 [label="",style=null,constraint=true,dir=null];
+185: node4837 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.headline/tag :spacedoc.data.headline/value :spacedoc.data.headline/gh-id :spacedoc.data.headline/path-id :spacedoc.data.headline/level :spacedoc.data.headline/children])",style=null,fillcolor="null", height=null,width=null
+186:           ];
+187: spacedocdataverbatim [shape=box,label=":spacedoc.data/verbatim",style=filled,fillcolor="#CCCCCC", height=null,width=null
+188:           ];
+189: spacedocdataverbatim->node4838 [label="",style=null,constraint=true,dir=null];
+190: node4838 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.verbatim/tag :spacedoc.data.verbatim/value])",style=null,fillcolor="null", height=null,width=null
+191:           ];
+192: spacedocdataverbatimvalue [shape=box,label=":spacedoc.data.verbatim/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+193:           ];
+194: spacedocdataverbatimvalue->node4839 [label="",style=null,constraint=true,dir=null];
+195: node4839 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+196:           ];
+197: spacedocdataverbatimtag [shape=box,label=":spacedoc.data.verbatim/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+198:           ];
+199: spacedocdataverbatimtag->node4840 [label="",style=null,constraint=true,dir=null];
+200: node4840 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:verbatim</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+201:           ];
+202: spacedocdataheadlinelevel1 [shape=box,label=":spacedoc.data/headline-level-1",style=filled,fillcolor="#CCCCCC", height=null,width=null
+203:           ];
+204: spacedocdataheadlinelevel1->node4841 [label="",style=null,constraint=true,dir=null];
+205: node4841 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-level-1/tag :spacedoc.data.headline-level-1/level :spacedoc.data.headline-level-1/children]))",style=null,fillcolor="null", height=null,width=null
+206:           ];
+207: spacedocdataheadlinelevel1level [shape=box,label=":spacedoc.data.headline-level-1/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+208:           ];
+209: spacedocdataheadlinelevel1level->node4842 [label="",style=null,constraint=true,dir=null];
+210: node4842 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">1</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+211:           ];
+212: spacedocdataheadlinelevel1tag [shape=box,label=":spacedoc.data.headline-level-1/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+213:           ];
+214: spacedocdataheadlinelevel1tag->node4843 [label="",style=null,constraint=true,dir=null];
+215: node4843 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+216:           ];
+217: spacedocdataheadlinelevel1children [shape=box,label=":spacedoc.data.headline-level-1/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+218:           ];
+219: spacedocdataheadlinelevel1children->node4844 [label="",style=null,constraint=true,dir=null];
+220: node4844 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-1-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+221:           ];
+222: spacedocdataheadlinelevel1child [shape=box,label=":spacedoc.data/headline-level-1-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+223:           ];
+224: spacedocdataheadlinelevel1child->node4845 [label="",style=null,constraint=true,dir=null];
+225: node4845 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-level-1-child :tag)",style=null,fillcolor="null", height=null,width=null
+226:           ];
+227: spacedocdataparagraph [shape=box,label=":spacedoc.data/paragraph",style=filled,fillcolor="#CCCCCC", height=null,width=null
+228:           ];
+229: spacedocdataparagraph->node4846 [label="",style=null,constraint=true,dir=null];
+230: node4846 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.paragraph/tag :spacedoc.data.paragraph/children])",style=null,fillcolor="null", height=null,width=null
+231:           ];
+232: spacedocdataparagraphchildren [shape=box,label=":spacedoc.data.paragraph/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+233:           ];
+234: spacedocdataparagraphchildren->node4847 [label="",style=null,constraint=true,dir=null];
+235: node4847 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/paragraph-child :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+236:           ];
+237: spacedocdataparagraphchild [shape=box,label=":spacedoc.data/paragraph-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+238:           ];
+239: spacedocdataparagraphchild->node4848 [label="",style=null,constraint=true,dir=null];
+240: node4848 [shape=oval,label="(clojure.spec.alpha/or :inline-container :spacedoc.data/inline-container :inline-leaf :spacedoc.data/inline-leaf)",style=null,fillcolor="null", height=null,width=null
+241:           ];
+242: spacedocdataparagraphtag [shape=box,label=":spacedoc.data.paragraph/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+243:           ];
+244: spacedocdataparagraphtag->node4849 [label="",style=null,constraint=true,dir=null];
+245: node4849 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:paragraph</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+246:           ];
+247: spacedocdataheadlinelevel4child [shape=box,label=":spacedoc.data/headline-level-4-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+248:           ];
+249: spacedocdataheadlinelevel4child->node4850 [label="",style=null,constraint=true,dir=null];
+250: node4850 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-level-4-child :tag)",style=null,fillcolor="null", height=null,width=null
+251:           ];
+252: spacedocdataweblinktag [shape=box,label=":spacedoc.data.web-link/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+253:           ];
+254: spacedocdataweblinktag->node4851 [label="",style=null,constraint=true,dir=null];
+255: node4851 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:web-link</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+256:           ];
+257: spacedocdataweblink [shape=box,label=":spacedoc.data/web-link",style=filled,fillcolor="#CCCCCC", height=null,width=null
+258:           ];
+259: spacedocdataweblink->node4852 [label="",style=null,constraint=true,dir=null];
+260: node4852 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.web-link/tag :spacedoc.data.web-link/value :spacedoc.data.web-link/children])",style=null,fillcolor="null", height=null,width=null
+261:           ];
+262: spacedocdataweblinkvalue [shape=box,label=":spacedoc.data.web-link/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+263:           ];
+264: spacedocdataweblinkvalue->node4853 [label="",style=null,constraint=true,dir=null];
+265: node4853 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+266:           ];
+267: spacedocdataweblinkchildren [shape=box,label=":spacedoc.data.web-link/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+268:           ];
+269: spacedocdataweblinkchildren->node4854 [label="",style=null,constraint=true,dir=null];
+270: node4854 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+271:           ];
+272: spacedocdatainlinecontainerchildren [shape=box,label=":spacedoc.data/inline-container-children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+273:           ];
+274: spacedocdatainlinecontainerchildren->node4855 [label="",style=null,constraint=true,dir=null];
+275: node4855 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+276:           ];
+277: spacedocdataheadlinelink [shape=box,label=":spacedoc.data/headline-link",style=filled,fillcolor="#CCCCCC", height=null,width=null
+278:           ];
+279: spacedocdataheadlinelink->node4856 [label="",style=null,constraint=true,dir=null];
+280: node4856 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-link/tag :spacedoc.data.headline-link/target-headline-gh-id :spacedoc.data.headline-link/children])",style=null,fillcolor="null", height=null,width=null
+281:           ];
+282: spacedocdataheadlinelinkchildren [shape=box,label=":spacedoc.data.headline-link/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+283:           ];
+284: spacedocdataheadlinelinkchildren->node4857 [label="",style=null,constraint=true,dir=null];
+285: node4857 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+286:           ];
+287: spacedocdataheadlinelinktag [shape=box,label=":spacedoc.data.headline-link/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+288:           ];
+289: spacedocdataheadlinelinktag->node4858 [label="",style=null,constraint=true,dir=null];
+290: node4858 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline-link</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+291:           ];
+292: spacedocdataheadlinelinktargetheadlineghid [shape=box,label=":spacedoc.data.headline-link/target-headline-gh-id",style=filled,fillcolor="#CCCCCC", height=null,width=null
+293:           ];
+294: spacedocdataheadlinelinktargetheadlineghid->node4859 [label="",style=null,constraint=true,dir=null];
+295: node4859 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+296:           ];
+297: spacedocdataheadlinelevel6 [shape=box,label=":spacedoc.data/headline-level-6",style=filled,fillcolor="#CCCCCC", height=null,width=null
+298:           ];
+299: spacedocdataheadlinelevel6->node4860 [label="",style=null,constraint=true,dir=null];
+300: node4860 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">"Avoid deep headline nesting."</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+301:           ];
+302: spacedocdatasection [shape=box,label=":spacedoc.data/section",style=filled,fillcolor="#CCCCCC", height=null,width=null
+303:           ];
+304: spacedocdatasection->node4861 [label="",style=null,constraint=true,dir=null];
+305: node4861 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.section/tag :spacedoc.data.section/children])",style=null,fillcolor="null", height=null,width=null
+306:           ];
+307: spacedocdatasectiontag [shape=box,label=":spacedoc.data.section/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+308:           ];
+309: spacedocdatasectiontag->node4862 [label="",style=null,constraint=true,dir=null];
+310: node4862 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:section</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+311:           ];
+312: spacedocdatasectionchildren [shape=box,label=":spacedoc.data.section/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+313:           ];
+314: spacedocdatasectionchildren->node4863 [label="",style=null,constraint=true,dir=null];
+315: node4863 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/block-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+316:           ];
+317: spacedocdataheadlinelevel5level [shape=box,label=":spacedoc.data.headline-level-5/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+318:           ];
+319: spacedocdataheadlinelevel5level->node4864 [label="",style=null,constraint=true,dir=null];
+320: node4864 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">5</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+321:           ];
+322: spacedocdataheadlinelevel5tag [shape=box,label=":spacedoc.data.headline-level-5/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+323:           ];
+324: spacedocdataheadlinelevel5tag->node4865 [label="",style=null,constraint=true,dir=null];
+325: node4865 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+326:           ];
+327: spacedocdataheadlinelevel5 [shape=box,label=":spacedoc.data/headline-level-5",style=filled,fillcolor="#CCCCCC", height=null,width=null
+328:           ];
+329: spacedocdataheadlinelevel5->node4866 [label="",style=null,constraint=true,dir=null];
+330: node4866 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-level-5/tag :spacedoc.data.headline-level-5/level :spacedoc.data.headline-level-5/children]))",style=null,fillcolor="null", height=null,width=null
+331:           ];
+332: spacedocdataheadlinelevel5child [shape=box,label=":spacedoc.data/headline-level-5-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+333:           ];
+334: spacedocdataheadlinelevel5child->node4867 [label="",style=null,constraint=true,dir=null];
+335: node4867 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-level-5-child :tag)",style=null,fillcolor="null", height=null,width=null
+336:           ];
+337: spacedocdataheadlinelevel5children [shape=box,label=":spacedoc.data.headline-level-5/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+338:           ];
+339: spacedocdataheadlinelevel5children->node4868 [label="",style=null,constraint=true,dir=null];
+340: node4868 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-5-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+341:           ];
+342: spacedocdatasubscriptchildren [shape=box,label=":spacedoc.data.subscript/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+343:           ];
+344: spacedocdatasubscriptchildren->node4869 [label="",style=null,constraint=true,dir=null];
+345: node4869 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+346:           ];
+347: spacedocdatasubscript [shape=box,label=":spacedoc.data/subscript",style=filled,fillcolor="#CCCCCC", height=null,width=null
+348:           ];
+349: spacedocdatasubscript->node4870 [label="",style=null,constraint=true,dir=null];
+350: node4870 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.subscript/tag :spacedoc.data.subscript/children])",style=null,fillcolor="null", height=null,width=null
+351:           ];
+352: spacedocdatasubscripttag [shape=box,label=":spacedoc.data.subscript/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+353:           ];
+354: spacedocdatasubscripttag->node4871 [label="",style=null,constraint=true,dir=null];
+355: node4871 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:subscript</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+356:           ];
+357: spacedocdatafeaturelist [shape=box,label=":spacedoc.data/feature-list",style=filled,fillcolor="#CCCCCC", height=null,width=null
+358:           ];
+359: spacedocdatafeaturelist->node4872 [label="",style=null,constraint=true,dir=null];
+360: node4872 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.feature-list/tag :spacedoc.data.feature-list/type :spacedoc.data.feature-list/children])",style=null,fillcolor="null", height=null,width=null
+361:           ];
+362: spacedocdatafeaturelisttype [shape=box,label=":spacedoc.data.feature-list/type",style=filled,fillcolor="#CCCCCC", height=null,width=null
+363:           ];
+364: spacedocdatafeaturelisttype->node4873 [label="",style=null,constraint=true,dir=null];
+365: node4873 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:unordered</td></tr><tr><td port="f2">:ordered</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+366:           ];
+367: spacedocdatafeaturelisttag [shape=box,label=":spacedoc.data.feature-list/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+368:           ];
+369: spacedocdatafeaturelisttag->node4874 [label="",style=null,constraint=true,dir=null];
+370: node4874 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:feature-list</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+371:           ];
+372: spacedocdatafeaturelistchildren [shape=box,label=":spacedoc.data.feature-list/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+373:           ];
+374: spacedocdatafeaturelistchildren->node4875 [label="",style=null,constraint=true,dir=null];
+375: node4875 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/list-item :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+376:           ];
+377: spacedocdatasrclanguage [shape=box,label=":spacedoc.data.src/language",style=filled,fillcolor="#CCCCCC", height=null,width=null
+378:           ];
+379: spacedocdatasrclanguage->node4876 [label="",style=null,constraint=true,dir=null];
+380: node4876 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+381:           ];
+382: spacedocdatasrc [shape=box,label=":spacedoc.data/src",style=filled,fillcolor="#CCCCCC", height=null,width=null
+383:           ];
+384: spacedocdatasrc->node4877 [label="",style=null,constraint=true,dir=null];
+385: node4877 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.src/tag :spacedoc.data.src/language :spacedoc.data.src/value])",style=null,fillcolor="null", height=null,width=null
+386:           ];
+387: spacedocdatasrcvalue [shape=box,label=":spacedoc.data.src/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+388:           ];
+389: spacedocdatasrcvalue->node4878 [label="",style=null,constraint=true,dir=null];
+390: node4878 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+391:           ];
+392: spacedocdatasrctag [shape=box,label=":spacedoc.data.src/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+393:           ];
+394: spacedocdatasrctag->node4879 [label="",style=null,constraint=true,dir=null];
+395: node4879 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:src</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+396:           ];
+397: spacedocdataheadlinelevel2tag [shape=box,label=":spacedoc.data.headline-level-2/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+398:           ];
+399: spacedocdataheadlinelevel2tag->node4880 [label="",style=null,constraint=true,dir=null];
+400: node4880 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+401:           ];
+402: spacedocdataheadlinelevel2level [shape=box,label=":spacedoc.data.headline-level-2/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+403:           ];
+404: spacedocdataheadlinelevel2level->node4881 [label="",style=null,constraint=true,dir=null];
+405: node4881 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">2</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+406:           ];
+407: spacedocdataheadlinelevel2 [shape=box,label=":spacedoc.data/headline-level-2",style=filled,fillcolor="#CCCCCC", height=null,width=null
+408:           ];
+409: spacedocdataheadlinelevel2->node4882 [label="",style=null,constraint=true,dir=null];
+410: node4882 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-level-2/tag :spacedoc.data.headline-level-2/level :spacedoc.data.headline-level-2/children]))",style=null,fillcolor="null", height=null,width=null
+411:           ];
+412: spacedocdataheadlinelevel2child [shape=box,label=":spacedoc.data/headline-level-2-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+413:           ];
+414: spacedocdataheadlinelevel2child->node4883 [label="",style=null,constraint=true,dir=null];
+415: node4883 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/headline-level-2-child :tag)",style=null,fillcolor="null", height=null,width=null
+416:           ];
+417: spacedocdataheadlinelevel2children [shape=box,label=":spacedoc.data.headline-level-2/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+418:           ];
+419: spacedocdataheadlinelevel2children->node4884 [label="",style=null,constraint=true,dir=null];
+420: node4884 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-2-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+421:           ];
+422: spacedocdataorgfilepathtargetheadlineghid [shape=box,label=":spacedoc.data.org-file-path/target-headline-gh-id",style=filled,fillcolor="#CCCCCC", height=null,width=null
+423:           ];
+424: spacedocdataorgfilepathtargetheadlineghid->node4885 [label="",style=null,constraint=true,dir=null];
+425: node4885 [shape=oval,label="string?",style=null,fillcolor="null", height=null,width=null
+426:           ];
+427: spacedocdataorgfilepathvalue [shape=box,label=":spacedoc.data.org-file-path/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+428:           ];
+429: spacedocdataorgfilepathvalue->node4886 [label="",style=null,constraint=true,dir=null];
+430: node4886 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+431:           ];
+432: spacedocdataorgfilepathchildren [shape=box,label=":spacedoc.data.org-file-path/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+433:           ];
+434: spacedocdataorgfilepathchildren->node4887 [label="",style=null,constraint=true,dir=null];
+435: node4887 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+436:           ];
+437: spacedocdataorgfilepath [shape=box,label=":spacedoc.data/org-file-path",style=filled,fillcolor="#CCCCCC", height=null,width=null
+438:           ];
+439: spacedocdataorgfilepath->node4888 [label="",style=null,constraint=true,dir=null];
+440: node4888 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.org-file-path/tag :spacedoc.data.org-file-path/value :spacedoc.data.org-file-path/raw-link :spacedoc.data.org-file-path/target-headline-gh-id :spacedoc.data.org-file-path/children])",style=null,fillcolor="null", height=null,width=null
+441:           ];
+442: spacedocdataorgfilepathtag [shape=box,label=":spacedoc.data.org-file-path/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+443:           ];
+444: spacedocdataorgfilepathtag->node4889 [label="",style=null,constraint=true,dir=null];
+445: node4889 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:org-file-path</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+446:           ];
+447: spacedocdataorgfilepathrawlink [shape=box,label=":spacedoc.data.org-file-path/raw-link",style=filled,fillcolor="#CCCCCC", height=null,width=null
+448:           ];
+449: spacedocdataorgfilepathrawlink->node4890 [label="",style=null,constraint=true,dir=null];
+450: node4890 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+451:           ];
+452: spacedocdatabodychild [shape=box,label=":spacedoc.data/body-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+453:           ];
+454: spacedocdatabodychild->node4891 [label="",style=null,constraint=true,dir=null];
+455: node4891 [shape=oval,label="(clojure.spec.alpha/multi-spec spacedoc.data/body-child :tag)",style=null,fillcolor="null", height=null,width=null
+456:           ];
+457: spacedocdataunderlinechildren [shape=box,label=":spacedoc.data.underline/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+458:           ];
+459: spacedocdataunderlinechildren->node4892 [label="",style=null,constraint=true,dir=null];
+460: node4892 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+461:           ];
+462: spacedocdataunderline [shape=box,label=":spacedoc.data/underline",style=filled,fillcolor="#CCCCCC", height=null,width=null
+463:           ];
+464: spacedocdataunderline->node4893 [label="",style=null,constraint=true,dir=null];
+465: node4893 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.underline/tag :spacedoc.data.underline/children])",style=null,fillcolor="null", height=null,width=null
+466:           ];
+467: spacedocdataunderlinetag [shape=box,label=":spacedoc.data.underline/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+468:           ];
+469: spacedocdataunderlinetag->node4894 [label="",style=null,constraint=true,dir=null];
+470: node4894 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:underline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+471:           ];
+472: spacedocdataverse [shape=box,label=":spacedoc.data/verse",style=filled,fillcolor="#CCCCCC", height=null,width=null
+473:           ];
+474: spacedocdataverse->node4895 [label="",style=null,constraint=true,dir=null];
+475: node4895 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.verse/tag :spacedoc.data.verse/children])",style=null,fillcolor="null", height=null,width=null
+476:           ];
+477: spacedocdataversetag [shape=box,label=":spacedoc.data.verse/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+478:           ];
+479: spacedocdataversetag->node4896 [label="",style=null,constraint=true,dir=null];
+480: node4896 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:verse</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+481:           ];
+482: spacedocdataversechildren [shape=box,label=":spacedoc.data.verse/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+483:           ];
+484: spacedocdataversechildren->node4897 [label="",style=null,constraint=true,dir=null];
+485: node4897 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+486:           ];
+487: spacedocdatacenter [shape=box,label=":spacedoc.data/center",style=filled,fillcolor="#CCCCCC", height=null,width=null
+488:           ];
+489: spacedocdatacenter->node4898 [label="",style=null,constraint=true,dir=null];
+490: node4898 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.center/tag :spacedoc.data.center/children])",style=null,fillcolor="null", height=null,width=null
+491:           ];
+492: spacedocdatacenterchild [shape=box,label=":spacedoc.data/center-child",style=filled,fillcolor="#CCCCCC", height=null,width=null
+493:           ];
+494: spacedocdatacenterchild->node4899 [label="",style=null,constraint=true,dir=null];
+495: node4899 [shape=oval,label="(clojure.spec.alpha/or :inline-container :spacedoc.data/inline-container :inline-leaf :spacedoc.data/inline-leaf)",style=null,fillcolor="null", height=null,width=null
+496:           ];
+497: spacedocdatacentertag [shape=box,label=":spacedoc.data.center/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+498:           ];
+499: spacedocdatacentertag->node4900 [label="",style=null,constraint=true,dir=null];
+500: node4900 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:center</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+501:           ];
+502: spacedocdatacenterchildren [shape=box,label=":spacedoc.data.center/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+503:           ];
+504: spacedocdatacenterchildren->node4901 [label="",style=null,constraint=true,dir=null];
+505: node4901 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/center-child :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+506:           ];
+507: spacedocdatastrikethroughtag [shape=box,label=":spacedoc.data.strike-through/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+508:           ];
+509: spacedocdatastrikethroughtag->node4902 [label="",style=null,constraint=true,dir=null];
+510: node4902 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:strike-through</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+511:           ];
+512: spacedocdatastrikethrough [shape=box,label=":spacedoc.data/strike-through",style=filled,fillcolor="#CCCCCC", height=null,width=null
+513:           ];
+514: spacedocdatastrikethrough->node4903 [label="",style=null,constraint=true,dir=null];
+515: node4903 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.strike-through/tag :spacedoc.data.strike-through/children])",style=null,fillcolor="null", height=null,width=null
+516:           ];
+517: spacedocdatastrikethroughchildren [shape=box,label=":spacedoc.data.strike-through/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+518:           ];
+519: spacedocdatastrikethroughchildren->node4904 [label="",style=null,constraint=true,dir=null];
+520: node4904 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+521:           ];
+522: spacedocdataembeddableweblink [shape=box,label=":spacedoc.data/embeddable-web-link",style=filled,fillcolor="#CCCCCC", height=null,width=null
+523:           ];
+524: spacedocdataembeddableweblink->node4905 [label="",style=null,constraint=true,dir=null];
+525: node4905 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.embeddable-web-link/tag :spacedoc.data.embeddable-web-link/value :spacedoc.data.embeddable-web-link/children])",style=null,fillcolor="null", height=null,width=null
+526:           ];
+527: spacedocdataembeddableweblinktag [shape=box,label=":spacedoc.data.embeddable-web-link/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+528:           ];
+529: spacedocdataembeddableweblinktag->node4906 [label="",style=null,constraint=true,dir=null];
+530: node4906 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:embeddable-web-link</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+531:           ];
+532: spacedocdataembeddableweblinkchildren [shape=box,label=":spacedoc.data.embeddable-web-link/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+533:           ];
+534: spacedocdataembeddableweblinkchildren->node4907 [label="",style=null,constraint=true,dir=null];
+535: node4907 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+536:           ];
+537: spacedocdataembeddableweblinkvalue [shape=box,label=":spacedoc.data.embeddable-web-link/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+538:           ];
+539: spacedocdataembeddableweblinkvalue->node4908 [label="",style=null,constraint=true,dir=null];
+540: node4908 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+541:           ];
+542: spacedocdatakbdvalue [shape=box,label=":spacedoc.data.kbd/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+543:           ];
+544: spacedocdatakbdvalue->node4909 [label="",style=null,constraint=true,dir=null];
+545: node4909 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/non-empty-string :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+546:           ];
+547: spacedocdatakbd [shape=box,label=":spacedoc.data/kbd",style=filled,fillcolor="#CCCCCC", height=null,width=null
+548:           ];
+549: spacedocdatakbd->node4910 [label="",style=null,constraint=true,dir=null];
+550: node4910 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.kbd/tag :spacedoc.data.kbd/value])",style=null,fillcolor="null", height=null,width=null
+551:           ];
+552: spacedocdatakbdtag [shape=box,label=":spacedoc.data.kbd/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+553:           ];
+554: spacedocdatakbdtag->node4911 [label="",style=null,constraint=true,dir=null];
+555: node4911 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:kbd</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+556:           ];
+557: spacedocdatakeywordkey [shape=box,label=":spacedoc.data.keyword/key",style=filled,fillcolor="#CCCCCC", height=null,width=null
+558:           ];
+559: spacedocdatakeywordkey->node4912 [label="",style=null,constraint=true,dir=null];
+560: node4912 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+561:           ];
+562: spacedocdatakeyword [shape=box,label=":spacedoc.data/keyword",style=filled,fillcolor="#CCCCCC", height=null,width=null
+563:           ];
+564: spacedocdatakeyword->node4913 [label="",style=null,constraint=true,dir=null];
+565: node4913 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.keyword/tag :spacedoc.data.keyword/key :spacedoc.data.keyword/value])",style=null,fillcolor="null", height=null,width=null
+566:           ];
+567: spacedocdatakeywordvalue [shape=box,label=":spacedoc.data.keyword/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+568:           ];
+569: spacedocdatakeywordvalue->node4914 [label="",style=null,constraint=true,dir=null];
+570: node4914 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+571:           ];
+572: spacedocdatakeywordtag [shape=box,label=":spacedoc.data.keyword/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+573:           ];
+574: spacedocdatakeywordtag->node4915 [label="",style=null,constraint=true,dir=null];
+575: node4915 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:keyword</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+576:           ];
+577: spacedocdatalinkchildren [shape=box,label=":spacedoc.data.link/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+578:           ];
+579: spacedocdatalinkchildren->node4916 [label="",style=null,constraint=true,dir=null];
+580: node4916 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+581:           ];
+582: spacedocdatalink [shape=box,label=":spacedoc.data/link",style=filled,fillcolor="#CCCCCC", height=null,width=null
+583:           ];
+584: spacedocdatalink->node4917 [label="",style=null,constraint=true,dir=null];
+585: node4917 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.link/tag :spacedoc.data.link/children])",style=null,fillcolor="null", height=null,width=null
+586:           ];
+587: spacedocdatalinktag [shape=box,label=":spacedoc.data.link/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+588:           ];
+589: spacedocdatalinktag->node4918 [label="",style=null,constraint=true,dir=null];
+590: node4918 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:org-file-path</td></tr><tr><td port="f2">:headline-link</td></tr><tr><td port="f3">:embeddable-web-link</td></tr><tr><td port="f4">:embeddable-file-path</td></tr><tr><td port="f5">:file-path</td></tr><tr><td port="f6">:web-link</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+591:           ];
+592: spacedocdatafilepathtag [shape=box,label=":spacedoc.data.file-path/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+593:           ];
+594: spacedocdatafilepathtag->node4919 [label="",style=null,constraint=true,dir=null];
+595: node4919 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:file-path</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+596:           ];
+597: spacedocdatafilepath [shape=box,label=":spacedoc.data/file-path",style=filled,fillcolor="#CCCCCC", height=null,width=null
+598:           ];
+599: spacedocdatafilepath->node4920 [label="",style=null,constraint=true,dir=null];
+600: node4920 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.file-path/tag :spacedoc.data.file-path/value :spacedoc.data.file-path/children])",style=null,fillcolor="null", height=null,width=null
+601:           ];
+602: spacedocdatafilepathchildren [shape=box,label=":spacedoc.data.file-path/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+603:           ];
+604: spacedocdatafilepathchildren->node4921 [label="",style=null,constraint=true,dir=null];
+605: node4921 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+606:           ];
+607: spacedocdatafilepathvalue [shape=box,label=":spacedoc.data.file-path/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+608:           ];
+609: spacedocdatafilepathvalue->node4922 [label="",style=null,constraint=true,dir=null];
+610: node4922 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+611:           ];
+612: spacedocdataexamplevalue [shape=box,label=":spacedoc.data.example/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+613:           ];
+614: spacedocdataexamplevalue->node4923 [label="",style=null,constraint=true,dir=null];
+615: node4923 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+616:           ];
+617: spacedocdataexample [shape=box,label=":spacedoc.data/example",style=filled,fillcolor="#CCCCCC", height=null,width=null
+618:           ];
+619: spacedocdataexample->node4924 [label="",style=null,constraint=true,dir=null];
+620: node4924 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.example/tag :spacedoc.data.example/value])",style=null,fillcolor="null", height=null,width=null
+621:           ];
+622: spacedocdataexampletag [shape=box,label=":spacedoc.data.example/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+623:           ];
+624: spacedocdataexampletag->node4925 [label="",style=null,constraint=true,dir=null];
+625: node4925 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:example</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+626:           ];
+627: spacedocdatatablecellchildren [shape=box,label=":spacedoc.data.table-cell/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+628:           ];
+629: spacedocdatatablecellchildren->node4926 [label="",style=null,constraint=true,dir=null];
+630: node4926 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 0 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+631:           ];
+632: spacedocdatatablecelltag [shape=box,label=":spacedoc.data.table-cell/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+633:           ];
+634: spacedocdatatablecelltag->node4927 [label="",style=null,constraint=true,dir=null];
+635: node4927 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:table-cell</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+636:           ];
+637: spacedocdatatablecell [shape=box,label=":spacedoc.data/table-cell",style=filled,fillcolor="#CCCCCC", height=null,width=null
+638:           ];
+639: spacedocdatatablecell->node4928 [label="",style=null,constraint=true,dir=null];
+640: node4928 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.table-cell/tag :spacedoc.data.table-cell/children])",style=null,fillcolor="null", height=null,width=null
+641:           ];
+642: spacedocdatafixedwidthvalue [shape=box,label=":spacedoc.data.fixed-width/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+643:           ];
+644: spacedocdatafixedwidthvalue->node4929 [label="",style=null,constraint=true,dir=null];
+645: node4929 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+646:           ];
+647: spacedocdatafixedwidth [shape=box,label=":spacedoc.data/fixed-width",style=filled,fillcolor="#CCCCCC", height=null,width=null
+648:           ];
+649: spacedocdatafixedwidth->node4930 [label="",style=null,constraint=true,dir=null];
+650: node4930 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.fixed-width/tag :spacedoc.data.fixed-width/value])",style=null,fillcolor="null", height=null,width=null
+651:           ];
+652: spacedocdatafixedwidthtag [shape=box,label=":spacedoc.data.fixed-width/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+653:           ];
+654: spacedocdatafixedwidthtag->node4931 [label="",style=null,constraint=true,dir=null];
+655: node4931 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:fixed-width</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+656:           ];
+657: spacedocdatatodotag [shape=box,label=":spacedoc.data.todo/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+658:           ];
+659: spacedocdatatodotag->node4932 [label="",style=null,constraint=true,dir=null];
+660: node4932 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:todo</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+661:           ];
+662: spacedocdatatodo [shape=box,label=":spacedoc.data/todo",style=filled,fillcolor="#CCCCCC", height=null,width=null
+663:           ];
+664: spacedocdatatodo->node4933 [label="",style=null,constraint=true,dir=null];
+665: node4933 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.todo/tag]))",style=null,fillcolor="null", height=null,width=null
+666:           ];
+667: spacedocdatabodychildren [shape=box,label=":spacedoc.data.body/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+668:           ];
+669: spacedocdatabodychildren->node4934 [label="",style=null,constraint=true,dir=null];
+670: node4934 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/body-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+671:           ];
+672: spacedocdatabodytag [shape=box,label=":spacedoc.data.body/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+673:           ];
+674: spacedocdatabodytag->node4935 [label="",style=null,constraint=true,dir=null];
+675: node4935 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:body</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+676:           ];
+677: spacedocdatabody [shape=box,label=":spacedoc.data/body",style=filled,fillcolor="#CCCCCC", height=null,width=null
+678:           ];
+679: spacedocdatabody->node4936 [label="",style=null,constraint=true,dir=null];
+680: node4936 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.body/tag :spacedoc.data.body/children])",style=null,fillcolor="null", height=null,width=null
+681:           ];
+682: spacedocdatadescriptiontag [shape=box,label=":spacedoc.data.description/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+683:           ];
+684: spacedocdatadescriptiontag->node4937 [label="",style=null,constraint=true,dir=null];
+685: node4937 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:description</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+686:           ];
+687: spacedocdatadescriptionchildren [shape=box,label=":spacedoc.data.description/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+688:           ];
+689: spacedocdatadescriptionchildren->node4938 [label="",style=null,constraint=true,dir=null];
+690: node4938 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-1-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+691:           ];
+692: spacedocdatadescription [shape=box,label=":spacedoc.data/description",style=filled,fillcolor="#CCCCCC", height=null,width=null
+693:           ];
+694: spacedocdatadescription->node4939 [label="",style=null,constraint=true,dir=null];
+695: node4939 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.description/tag :spacedoc.data.description/value :spacedoc.data.description/level :spacedoc.data.description/children]))",style=null,fillcolor="null", height=null,width=null
+696:           ];
+697: spacedocdatadescriptionlevel [shape=box,label=":spacedoc.data.description/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+698:           ];
+699: spacedocdatadescriptionlevel->node4940 [label="",style=null,constraint=true,dir=null];
+700: node4940 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">1</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+701:           ];
+702: spacedocdatadescriptionvalue [shape=box,label=":spacedoc.data.description/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+703:           ];
+704: spacedocdatadescriptionvalue->node4941 [label="",style=null,constraint=true,dir=null];
+705: node4941 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">"Description"</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+706:           ];
+707: spacedocdatalinkchildren [shape=box,label=":spacedoc.data/link-children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+708:           ];
+709: spacedocdatalinkchildren->node4942 [label="",style=null,constraint=true,dir=null];
+710: node4942 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+711:           ];
+712: spacedocdataplaintexttag [shape=box,label=":spacedoc.data.plain-text/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+713:           ];
+714: spacedocdataplaintexttag->node4943 [label="",style=null,constraint=true,dir=null];
+715: node4943 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:plain-text</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+716:           ];
+717: spacedocdataplaintextvalue [shape=box,label=":spacedoc.data.plain-text/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+718:           ];
+719: spacedocdataplaintextvalue->node4944 [label="",style=null,constraint=true,dir=null];
+720: node4944 [shape=oval,label="string?",style=null,fillcolor="null", height=null,width=null
+721:           ];
+722: spacedocdataplaintext [shape=box,label=":spacedoc.data/plain-text",style=filled,fillcolor="#CCCCCC", height=null,width=null
+723:           ];
+724: spacedocdataplaintext->node4945 [label="",style=null,constraint=true,dir=null];
+725: node4945 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.plain-text/tag :spacedoc.data.plain-text/value])",style=null,fillcolor="null", height=null,width=null
+726:           ];
+727: spacedocdataquotetag [shape=box,label=":spacedoc.data.quote/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+728:           ];
+729: spacedocdataquotetag->node4946 [label="",style=null,constraint=true,dir=null];
+730: node4946 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:quote</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+731:           ];
+732: spacedocdataquotechildren [shape=box,label=":spacedoc.data.quote/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+733:           ];
+734: spacedocdataquotechildren->node4947 [label="",style=null,constraint=true,dir=null];
+735: node4947 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/paragraph :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+736:           ];
+737: spacedocdataquote [shape=box,label=":spacedoc.data/quote",style=filled,fillcolor="#CCCCCC", height=null,width=null
+738:           ];
+739: spacedocdataquote->node4948 [label="",style=null,constraint=true,dir=null];
+740: node4948 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.quote/tag :spacedoc.data.quote/children])",style=null,fillcolor="null", height=null,width=null
+741:           ];
+742: spacedocdatarootfilehasdescription [shape=box,label=":spacedoc.data.root/file-has-description?",style=filled,fillcolor="#CCCCCC", height=null,width=null
+743:           ];
+744: spacedocdatarootfilehasdescription->node4949 [label="",style=null,constraint=true,dir=null];
+745: node4949 [shape=oval,label="boolean?",style=null,fillcolor="null", height=null,width=null
+746:           ];
+747: spacedocdatarootfilehasfeaturelist [shape=box,label=":spacedoc.data.root/file-has-feature-list?",style=filled,fillcolor="#CCCCCC", height=null,width=null
+748:           ];
+749: spacedocdatarootfilehasfeaturelist->node4950 [label="",style=null,constraint=true,dir=null];
+750: node4950 [shape=oval,label="boolean?",style=null,fillcolor="null", height=null,width=null
+751:           ];
+752: spacedocdatarootchildren [shape=box,label=":spacedoc.data.root/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+753:           ];
+754: spacedocdatarootchildren->node4951 [label="",style=null,constraint=true,dir=null];
+755: node4951 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/body :into [] :distinct true :kind vector? :count 1)",style=null,fillcolor="null", height=null,width=null
+756:           ];
+757: spacedocdataroottag [shape=box,label=":spacedoc.data.root/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+758:           ];
+759: spacedocdataroottag->node4952 [label="",style=null,constraint=true,dir=null];
+760: node4952 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:root</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+761:           ];
+762: spacedocdataroot [shape=box,label=":spacedoc.data/root",style=filled,fillcolor="#CCCCCC", height=null,width=null
+763:           ];
+764: spacedocdataroot->node4953 [label="",style=null,constraint=true,dir=null];
+765: node4953 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.root/tag :spacedoc.data.root/file-has-description? :spacedoc.data.root/file-has-feature-list? :spacedoc.data.root/headline-path-ids :spacedoc.data.root/children])",style=null,fillcolor="null", height=null,width=null
+766:           ];
+767: spacedocdatarootheadlinepathids [shape=box,label=":spacedoc.data.root/headline-path-ids",style=filled,fillcolor="#CCCCCC", height=null,width=null
+768:           ];
+769: spacedocdatarootheadlinepathids->node4954 [label="",style=null,constraint=true,dir=null];
+770: node4954 [shape=oval,label="(clojure.spec.alpha/coll-of string? :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+771:           ];
+772: spacedocdataembeddablefilepathtag [shape=box,label=":spacedoc.data.embeddable-file-path/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+773:           ];
+774: spacedocdataembeddablefilepathtag->node4955 [label="",style=null,constraint=true,dir=null];
+775: node4955 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:embeddable-file-path</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+776:           ];
+777: spacedocdataembeddablefilepathvalue [shape=box,label=":spacedoc.data.embeddable-file-path/value",style=filled,fillcolor="#CCCCCC", height=null,width=null
+778:           ];
+779: spacedocdataembeddablefilepathvalue->node4956 [label="",style=null,constraint=true,dir=null];
+780: node4956 [shape=oval,label="(clojure.spec.alpha/and string? (fn [%] (>= (count %) 1)))",style=null,fillcolor="null", height=null,width=null
+781:           ];
+782: spacedocdataembeddablefilepathchildren [shape=box,label=":spacedoc.data.embeddable-file-path/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+783:           ];
+784: spacedocdataembeddablefilepathchildren->node4957 [label="",style=null,constraint=true,dir=null];
+785: node4957 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :kind vector?)",style=null,fillcolor="null", height=null,width=null
+786:           ];
+787: spacedocdataembeddablefilepath [shape=box,label=":spacedoc.data/embeddable-file-path",style=filled,fillcolor="#CCCCCC", height=null,width=null
+788:           ];
+789: spacedocdataembeddablefilepath->node4958 [label="",style=null,constraint=true,dir=null];
+790: node4958 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.embeddable-file-path/tag :spacedoc.data.embeddable-file-path/value :spacedoc.data.embeddable-file-path/children])",style=null,fillcolor="null", height=null,width=null
+791:           ];
+792: spacedocdatasuperscriptchildren [shape=box,label=":spacedoc.data.superscript/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+793:           ];
+794: spacedocdatasuperscriptchildren->node4959 [label="",style=null,constraint=true,dir=null];
+795: node4959 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+796:           ];
+797: spacedocdatasuperscript [shape=box,label=":spacedoc.data/superscript",style=filled,fillcolor="#CCCCCC", height=null,width=null
+798:           ];
+799: spacedocdatasuperscript->node4960 [label="",style=null,constraint=true,dir=null];
+800: node4960 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.superscript/tag :spacedoc.data.superscript/children])",style=null,fillcolor="null", height=null,width=null
+801:           ];
+802: spacedocdatasuperscripttag [shape=box,label=":spacedoc.data.superscript/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+803:           ];
+804: spacedocdatasuperscripttag->node4961 [label="",style=null,constraint=true,dir=null];
+805: node4961 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:superscript</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+806:           ];
+807: spacedocdatatablechildren [shape=box,label=":spacedoc.data.table/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+808:           ];
+809: spacedocdatatablechildren->node4962 [label="",style=null,constraint=true,dir=null];
+810: node4962 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/table-row :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+811:           ];
+812: spacedocdatatablerowtag [shape=box,label=":spacedoc.data.table-row/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+813:           ];
+814: spacedocdatatablerowtag->node4963 [label="",style=null,constraint=true,dir=null];
+815: node4963 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:table-row</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+816:           ];
+817: spacedocdatatablerowchildren [shape=box,label=":spacedoc.data.table-row/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+818:           ];
+819: spacedocdatatablerowchildren->node4964 [label="",style=null,constraint=true,dir=null];
+820: node4964 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/table-cell :into [] :min-count 0 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+821:           ];
+822: spacedocdatatabletag [shape=box,label=":spacedoc.data.table/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+823:           ];
+824: spacedocdatatabletag->node4965 [label="",style=null,constraint=true,dir=null];
+825: node4965 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:table</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+826:           ];
+827: spacedocdatatable [shape=box,label=":spacedoc.data/table",style=filled,fillcolor="#CCCCCC", height=null,width=null
+828:           ];
+829: spacedocdatatable->node4966 [label="",style=null,constraint=true,dir=null];
+830: node4966 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.table/tag :spacedoc.data.table/type :spacedoc.data.table/children])",style=null,fillcolor="null", height=null,width=null
+831:           ];
+832: spacedocdatatablerow [shape=box,label=":spacedoc.data/table-row",style=filled,fillcolor="#CCCCCC", height=null,width=null
+833:           ];
+834: spacedocdatatablerow->node4967 [label="",style=null,constraint=true,dir=null];
+835: node4967 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.table-row/tag :spacedoc.data.table-row/children])",style=null,fillcolor="null", height=null,width=null
+836:           ];
+837: spacedocdataheadlinelevel4level [shape=box,label=":spacedoc.data.headline-level-4/level",style=filled,fillcolor="#CCCCCC", height=null,width=null
+838:           ];
+839: spacedocdataheadlinelevel4level->node4968 [label="",style=null,constraint=true,dir=null];
+840: node4968 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">4</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+841:           ];
+842: spacedocdataheadlinelevel4tag [shape=box,label=":spacedoc.data.headline-level-4/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+843:           ];
+844: spacedocdataheadlinelevel4tag->node4969 [label="",style=null,constraint=true,dir=null];
+845: node4969 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:headline</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+846:           ];
+847: spacedocdataheadlinelevel4 [shape=box,label=":spacedoc.data/headline-level-4",style=filled,fillcolor="#CCCCCC", height=null,width=null
+848:           ];
+849: spacedocdataheadlinelevel4->node4970 [label="",style=null,constraint=true,dir=null];
+850: node4970 [shape=oval,label="(clojure.spec.alpha/merge :spacedoc.data/headline (clojure.spec.alpha/keys :req-un [:spacedoc.data.headline-level-4/tag :spacedoc.data.headline-level-4/level :spacedoc.data.headline-level-4/children]))",style=null,fillcolor="null", height=null,width=null
+851:           ];
+852: spacedocdataheadlinelevel4children [shape=box,label=":spacedoc.data.headline-level-4/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+853:           ];
+854: spacedocdataheadlinelevel4children->node4971 [label="",style=null,constraint=true,dir=null];
+855: node4971 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/headline-level-4-child :into [] :distinct true :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+856:           ];
+857: spacedocdataboldtag [shape=box,label=":spacedoc.data.bold/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+858:           ];
+859: spacedocdataboldtag->node4972 [label="",style=null,constraint=true,dir=null];
+860: node4972 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:bold</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+861:           ];
+862: spacedocdataboldchildren [shape=box,label=":spacedoc.data.bold/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+863:           ];
+864: spacedocdataboldchildren->node4973 [label="",style=null,constraint=true,dir=null];
+865: node4973 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+866:           ];
+867: spacedocdatabold [shape=box,label=":spacedoc.data/bold",style=filled,fillcolor="#CCCCCC", height=null,width=null
+868:           ];
+869: spacedocdatabold->node4974 [label="",style=null,constraint=true,dir=null];
+870: node4974 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.bold/tag :spacedoc.data.bold/children])",style=null,fillcolor="null", height=null,width=null
+871:           ];
+872: spacedocdataitalictag [shape=box,label=":spacedoc.data.italic/tag",style=filled,fillcolor="#CCCCCC", height=null,width=null
+873:           ];
+874: spacedocdataitalictag->node4975 [label="",style=null,constraint=true,dir=null];
+875: node4975 [shape=plaintext,label=<<table border="1" cellborder="0" cellpadding="3" cellspacing="0"><tr><td port="f0">#{...}</td></tr><tr><td port="f1">:italic</td></tr></table>>,style=null,fillcolor="null", height=null,width=null
+876:           ];
+877: spacedocdataitalicchildren [shape=box,label=":spacedoc.data.italic/children",style=filled,fillcolor="#CCCCCC", height=null,width=null
+878:           ];
+879: spacedocdataitalicchildren->node4976 [label="",style=null,constraint=true,dir=null];
+880: node4976 [shape=oval,label="(clojure.spec.alpha/coll-of :spacedoc.data/inline-element :into [] :min-count 1 :kind vector?)",style=null,fillcolor="null", height=null,width=null
+881:           ];
+882: spacedocdataitalic [shape=box,label=":spacedoc.data/italic",style=filled,fillcolor="#CCCCCC", height=null,width=null
+883:           ];
+884: spacedocdataitalic->node4977 [label="",style=null,constraint=true,dir=null];
+885: node4977 [shape=oval,label="(clojure.spec.alpha/keys :req-un [:spacedoc.data.italic/tag :spacedoc.data.italic/children])",style=null,fillcolor="null", height=null,width=null
+886:           ];
+887: 
+888: }

@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [lower-case]]
+            [spacedoc.viz :as viz]
             [spacedoc.data :as data]
             [spacedoc.util :as util]
             [spacedoc.conf :as conf]))
@@ -22,7 +23,6 @@
        (filter #(.endsWith (lower-case %) ".edn"))
        (vec)))
 
-(util/children-tags :body (apply util/read-files spacedoc-file-paths))
+(def spacedocs (pmap util/fp->spacedoc spacedoc-file-paths))
 
-
-(println "====== OK =========")
+(map println (util/node-graph spacedocs))
