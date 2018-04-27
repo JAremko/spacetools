@@ -4,10 +4,6 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
-            [lacij.layouts.core :as g]
-            [lacij.layouts.layout :as gl]
-            [lacij.edit.graph :as ge]
-            [lacij.view.graphview :as gv]
             [spacedoc.data :as data]
             [spacedoc.conf :as conf]))
 
