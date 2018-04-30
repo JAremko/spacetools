@@ -4,7 +4,7 @@
             [clojure.string :refer [lower-case]]
             [spacedoc.viz :as viz]
             [spacedoc.data :as data]
-            [spacedoc.util :as util]
+            [spacedoc.io :as io]
             [spacedoc.conf :as conf]))
 
 
@@ -13,16 +13,14 @@
   [& args]
   (println "Hello, World!"))
 
+
 (def doc-dir (clojure.java.io/file "emacs-tools/export/target"))
 
-(def spacedoc-file-paths
-  (->> doc-dir
-       (file-seq)
-       (filter #(.isFile %))
-       (map str)
-       (filter #(.endsWith (lower-case %) ".edn"))
-       (vec)))
 
-(def spacedocs (pmap util/fp->spacedoc spacedoc-file-paths))
+(def edn-files (io/edn-files-in-dir doc-dir))
 
-(map println (util/node-graph spacedocs))
+
+(def spacedocs (pmap io/fp->spacedoc edn-files))
+
+
+(map println (data/node-graph spacedocs))

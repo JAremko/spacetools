@@ -362,6 +362,7 @@
 ;;;; table node
 
 (s/def :spacedoc.data.table/tag #{:table})
+(s/def :spacedoc.data.table/type #{:org})
 (s/def :spacedoc.data.table/children (s/coll-of ::table-row
                                                 :kind vector?
                                                 :min-count 1
