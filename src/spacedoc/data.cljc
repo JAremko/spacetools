@@ -1,10 +1,9 @@
 (ns spacedoc.data
-  (:require [clojure.core.reducers :refer [fold monoid]]
+  (:require [clojure.core.reducers :as r]
             [clojure.set :as set :refer [union]]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
-            [spacedoc.data :as data]
-            [spacedoc.conf :as conf]))
+            [spacedoc.data :as data]))
 
 
 (load "data_spec")
@@ -73,22 +72,28 @@
   the first invalidation will be reported.
   The function returns `nil` If all nodes are valid."
   [node]
-  (or (first (keep (partial explain-str-deepest) (:children node)))
+  (or (some->> node
+               :children
+               (keep (partial explain-str-deepest)))
       (when-not (s/valid? (node->spec node) node)
         (s/explain-str (node->spec node) node))))
 
 
-(def children-tag-s (comp (partial into #{} (map :tag)) :children))
+(def children-tag-s (comp (partial into #{} (map :tag))
+                       :children))
 
 
 (defn node-graph
-  "Return node graph of all nodes IN-DOCS Spacedoc collections."
+  "Return mapping between nodes and children sets."
+  [root-node]
+  (r/reduce
+   (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
+   (tree-seq :children :children root-node)))
+
+
+(defn node-graph-aggregate
+  "Return `node-graph` of all nodes IN-DOCS Spacedoc collections united."
   [in-docs]
-  (fold conf/*n-threads*
-        (monoid (partial merge-with union) (constantly nil))
-        (fn [m1 m2]
-          (merge-with union m1 (reduce
-                                #(update %1 (:tag %2) union (children-tag-s %2))
-                                {}
-                                (tree-seq :children :children m2))))
-        in-docs))
+  (r/fold
+   (r/monoid (partial merge-with union) hash-map)
+   (r/map node-graph in-docs)))

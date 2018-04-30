@@ -2,10 +2,10 @@
   (:gen-class)
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [lower-case]]
+            [criterium.core :as c]
             [spacedoc.viz :as viz]
             [spacedoc.data :as data]
-            [spacedoc.io :as io]
-            [spacedoc.conf :as conf]))
+            [spacedoc.io :as io]))
 
 
 (defn -main
@@ -22,5 +22,6 @@
 
 (def spacedocs (pmap io/fp->spacedoc edn-files))
 
+(mapv println (data/node-graph-aggregate spacedocs))
 
-(map println (data/node-graph spacedocs))
+;; (c/with-progress-reporting (c/bench (doall (data/node-graph-aggregate spacedocs)) :verbose))

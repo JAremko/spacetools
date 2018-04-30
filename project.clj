@@ -9,4 +9,5 @@
                  [org.clojure/tools.cli "0.3.5"]]
   :main spacedoc.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}
+             :dev {:dependencies [[criterium "0.4.4"]]}})
