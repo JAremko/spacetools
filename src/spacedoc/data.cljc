@@ -2,8 +2,7 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :as set :refer [union]]
             [clojure.edn :as edn]
-            [clojure.spec.alpha :as s]
-            [spacedoc.data :as data]))
+            [clojure.spec.alpha :as s]))
 
 
 (load "data_spec")
@@ -57,16 +56,20 @@
 (def ^:private doc-ns *ns*)
 
 
+(eval `(s/def ::valid-node ~all-tags))
+
+
 (defn node->spec
   [node]
-  (->> node
-       (:tag)
-       (data/all-tags)
-       (name)
-       (keyword (str doc-ns))))
+  (or (some->> node
+               (:tag)
+               (all-tags)
+               (name)
+               (keyword (str doc-ns)))
+      ::valid-node))
 
 
-(defn explain-str-deepest
+(defn explain-deepest
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
@@ -74,9 +77,10 @@
   [node]
   (or (some->> node
                :children
-               (keep (partial explain-str-deepest)))
+               (keep (partial explain-deepest))
+               first)
       (when-not (s/valid? (node->spec node) node)
-        (s/explain-str (node->spec node) node))))
+        (s/explain-data (node->spec node) node))))
 
 
 (def children-tag-s (comp (partial into #{} (map :tag))
