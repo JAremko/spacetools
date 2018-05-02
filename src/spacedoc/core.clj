@@ -23,8 +23,10 @@
 
 (def spacedocs (pmap io/fp->spacedoc edn-files))
 
-;; (println (first (filter exc/failure? spacedocs)))
+#_ (println (first (filter exc/failure? spacedocs)))
 
-(mapv println (data/node-graph-aggregate (map deref spacedocs)))
 
-;; (c/with-progress-reporting (c/bench (doall (data/node-graph-aggregate spacedocs)) :verbose))
+(viz/draw-graph-svg "graph.svg" (data/node-relations-aggregate (map deref spacedocs)))
+
+
+#_ (c/with-progress-reporting (c/bench (doall (data/node-graph-aggregate spacedocs)) :verbose))

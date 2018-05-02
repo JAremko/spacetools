@@ -87,7 +87,7 @@
                        :children))
 
 
-(defn node-graph
+(defn node-relations
   "Return mapping between nodes and children sets."
   [root-node]
   (r/reduce
@@ -95,9 +95,9 @@
    (tree-seq :children :children root-node)))
 
 
-(defn node-graph-aggregate
-  "Return `node-graph` of all nodes IN-DOCS Spacedoc collections united."
+(defn node-relations-aggregate
+  "Return `node-relations` of all nodes IN-DOCS Spacedoc collections united."
   [in-docs]
   (r/fold
    (r/monoid (partial merge-with union) hash-map)
-   (r/map node-graph in-docs)))
+   (r/map node-relations in-docs)))

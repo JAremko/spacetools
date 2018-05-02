@@ -2,17 +2,26 @@
   (:require [lacij.layouts.core :as g]
             [lacij.layouts.layout :as gl]
             [lacij.edit.graph :as ge]
-            [lacij.view.graphview :as gv]))
+            [lacij.view.graphview :as gv]
+            [clojure.core.reducers :as r]
+            [clojure.set :refer [union]]
+            [spacedoc.data :as data]))
 
 
-(defn add-nodes [g & nodes]
-  (reduce (fn [g node]
-            (ge/add-node g node (name node)))
-          g
-          nodes))
+(defn- add-nodes
+  [graph t->c]
+  (r/reduce
+   (r/monoid
+    (fn [g tag]
+      (-> g
+          (ge/add-node tag (name tag))
+          (ge/add-label tag (when (tag (tag t->c)) ["⟳"]) :font-size "20")))
+    (constantly graph))
+   (keys t->c)))
 
 
-(defn add-edges [g & edges]
+(defn- add-edges
+  [g edges]
   (reduce (fn [g [src dst]]
             (let [id (keyword (str (name src) "-" (name dst)))]
               (ge/add-edge g id src dst)))
@@ -20,23 +29,31 @@
           edges))
 
 
-(defn gen-graph3
-  []
-  (-> (ge/graph :width 800 :height 600)
-      (ge/add-default-node-attrs :width 25 :height 25 :shape :circle)
-      (add-nodes :r :s :t :u :v :w :x :y :t1 :t2 :t3 :t4 :t5
-                 :v1 :v2 :v3 :u1 :u2 :w1 :w2
-                 :x1 :x2 :x3 :x4 :x5 :y1 :y2 :y3)
-      (add-edges [:s :r] [:t :s] [:u :s] [:v :s]
-                 [:t1 :t] [:t2 :t] [:t3 :t] [:t4 :t] [:t5 :t]
-                 [:u1 :u] [:u2 :u] [:v1 :v] [:v2 :v] [:v3 :v]
-                 [:w :r] [:w1 :w] [:w2 :w] [:y :w]
-                 [:y3 :y] [:y2 :y] [:y1 :y]
-                 [:x :r] [:x1 :x] [:x2 :x] [:x3 :x] [:x4 :x] [:x5 :x])))
+(defn- edges
+  [t->c]
+  (eduction
+   (partition-all 2)
+   ;; NOTE: lacij has stack overflow problem.
+   (filter (fn [[src dst]] (not= src dst)))
+   (some->> t->c
+            (reduce-kv
+             (fn [rset tag children]
+               (conj rset (map (partial vector tag) children)))
+             #{})
+            vec
+            flatten)))
 
 
-((defn main []
-   (let [g (-> (gen-graph3)
-               (gl/layout :radial :radius 90)
-               (ge/build))]
-     (gv/export g "radial.svg" :indent "yes"))))
+(defn draw-graph-svg
+  [file tag->children]
+  (when (seq tag->children)
+    (gv/export
+     (-> (ge/graph :width 1000 :height 3000)
+         (ge/add-default-node-attrs :shape :circle :r 60)
+         (ge/add-default-edge-style :stroke "royalblue")
+         (add-nodes tag->children)
+         (add-edges (edges tag->children))
+         (gl/layout :radial :radius 300)
+         (ge/build))
+     file
+     :indent "yes")))
