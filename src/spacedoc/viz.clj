@@ -8,6 +8,14 @@
             [spacedoc.data :as data]))
 
 
+(defn- rand-color
+  []
+  (apply
+   format
+   "rgb(%s, %s, %s)"
+   (repeatedly 3 (partial rand-nth (range 20 255 5)))))
+
+
 (defn- add-nodes
   [graph t->c]
   (r/reduce
@@ -24,7 +32,8 @@
   [g edges]
   (reduce (fn [g [src dst]]
             (let [id (keyword (str (name src) "-" (name dst)))]
-              (ge/add-edge g id src dst)))
+              (ge/add-edge g id src dst :style {:stroke-width "2"
+                                                :stroke (rand-color)})))
           g
           edges))
 
@@ -47,13 +56,13 @@
 (defn draw-graph-svg
   [file tag->children]
   (when (seq tag->children)
-    (gv/export
-     (-> (ge/graph :width 1000 :height 3000)
-         (ge/add-default-node-attrs :shape :circle :r 60)
-         (ge/add-default-edge-style :stroke "royalblue")
-         (add-nodes tag->children)
-         (add-edges (edges tag->children))
-         (gl/layout :radial :radius 300)
-         (ge/build))
-     file
-     :indent "yes")))
+    (io!
+     (gv/export
+      (-> (ge/graph :width 800 :height 600)
+          (ge/add-default-node-attrs :shape :circle :r 80)
+          (add-nodes tag->children)
+          (add-edges (edges tag->children))
+          (gl/layout :radial :radius 400)
+          (ge/build))
+      file
+      :indent "yes"))))
