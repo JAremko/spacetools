@@ -10,21 +10,18 @@
 
 (defn- rand-color
   []
-  (apply
-   format
-   "rgb(%s, %s, %s)"
-   (repeatedly 3 (partial rand-nth (range 20 255 5)))))
+  (apply format "rgb(%s, %s, %s)" (repeatedly 3 (partial rand-nth (range 20 255 5)))))
 
 
 (defn- add-nodes
-  [graph t->c]
+  [g t->c]
   (r/reduce
    (r/monoid
-    (fn [g tag]
-      (-> g
+    (fn [rg tag]
+      (-> rg
           (ge/add-node tag (name tag))
           (ge/add-label tag (when (tag (tag t->c)) ["⟳"]) :font-size "20")))
-    (constantly graph))
+    (constantly g))
    (keys t->c)))
 
 
@@ -42,7 +39,7 @@
   [t->c]
   (eduction
    (partition-all 2)
-   ;; NOTE: lacij has stack overflow problem.
+   ;; NOTE: lacij has stack overflow problem with cycles.
    (filter (fn [[src dst]] (not= src dst)))
    (some->> t->c
             (reduce-kv
@@ -59,10 +56,10 @@
     (io!
      (gv/export
       (-> (ge/graph :width 800 :height 600)
-          (ge/add-default-node-attrs :shape :circle :r 80)
+          (ge/add-default-node-attrs :shape :circle :r 90)
           (add-nodes tag->children)
           (add-edges (edges tag->children))
-          (gl/layout :radial :radius 400)
+          (gl/layout :radial :radius 600)
           (ge/build))
       file
       :indent "yes"))))

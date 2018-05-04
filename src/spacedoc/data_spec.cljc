@@ -1,6 +1,25 @@
 (in-ns 'spacedoc.data)
 
 
+;;;; Helpers
+
+(defmulti node->spec-k :tag)
+(s/def ::known-node #{:known-node})
+(defmethod node->spec-k :default [_] ::known-node)
+(s/def ::node (s/multi-spec node->spec-k :tag))
+
+(defmacro ^:private defnode
+  [k spec-form]
+  `(do
+     (defmethod node->spec-k ~(keyword (name k)) [_#] ~k)
+     (s/def ~k ~spec-form)))
+
+
+;;;; anything
+
+(s/def ::any any?)
+
+
 ;;;; Shared specs
 
 (s/def ::non-empty-string (s/and string? #(>= (count  %) 1)))
@@ -23,30 +42,30 @@
                                            :kind vector?
                                            :min-count 1
                                            :into []))
-(s/def ::kbd (s/keys :req-un [:spacedoc.data.kbd/tag
-                              :spacedoc.data.kbd/value]))
+(defnode ::kbd (s/keys :req-un [:spacedoc.data.kbd/tag
+                                :spacedoc.data.kbd/value]))
 
 
 ;;;; line-break node
 
 (s/def :spacedoc.data.line-break/tag #{:line-break})
-(s/def ::line-break (s/keys :req-un [:spacedoc.data.line-break/tag]))
+(defnode ::line-break (s/keys :req-un [:spacedoc.data.line-break/tag]))
 
 
 ;;;; plain-text node
 
 (s/def :spacedoc.data.plain-text/tag #{:plain-text})
 (s/def :spacedoc.data.plain-text/value string?)
-(s/def ::plain-text (s/keys :req-un [:spacedoc.data.plain-text/tag
-                                     :spacedoc.data.plain-text/value]))
+(defnode ::plain-text (s/keys :req-un [:spacedoc.data.plain-text/tag
+                                       :spacedoc.data.plain-text/value]))
 
 
 ;;;; verbatim node
 
 (s/def :spacedoc.data.verbatim/tag #{:verbatim})
 (s/def :spacedoc.data.verbatim/value ::non-empty-string)
-(s/def ::verbatim (s/keys :req-un [:spacedoc.data.verbatim/tag
-                                   :spacedoc.data.verbatim/value]))
+(defnode ::verbatim (s/keys :req-un [:spacedoc.data.verbatim/tag
+                                     :spacedoc.data.verbatim/value]))
 
 
 ;;;; inline element
@@ -67,49 +86,49 @@
 
 (s/def :spacedoc.data.bold/tag #{:bold})
 (s/def :spacedoc.data.bold/children ::inline-container-children)
-(s/def ::bold (s/keys :req-un [:spacedoc.data.bold/tag
-                               :spacedoc.data.bold/children]))
+(defnode ::bold (s/keys :req-un [:spacedoc.data.bold/tag
+                                 :spacedoc.data.bold/children]))
 
 
 ;;;; italic node
 
 (s/def :spacedoc.data.italic/tag #{:italic})
 (s/def :spacedoc.data.italic/children ::inline-container-children)
-(s/def ::italic (s/keys :req-un [:spacedoc.data.italic/tag
-                                 :spacedoc.data.italic/children]))
+(defnode ::italic (s/keys :req-un [:spacedoc.data.italic/tag
+                                   :spacedoc.data.italic/children]))
 
 
 ;;;; strike-through node
 
 (s/def :spacedoc.data.strike-through/tag #{:strike-through})
 (s/def :spacedoc.data.strike-through/children ::inline-container-children)
-(s/def ::strike-through (s/keys :req-un
-                                [:spacedoc.data.strike-through/tag
-                                 :spacedoc.data.strike-through/children]))
+(defnode ::strike-through (s/keys :req-un
+                                  [:spacedoc.data.strike-through/tag
+                                   :spacedoc.data.strike-through/children]))
 
 
 ;;;; subscript node
 
 (s/def :spacedoc.data.subscript/tag #{:subscript})
 (s/def :spacedoc.data.subscript/children ::inline-container-children)
-(s/def ::subscript (s/keys :req-un [:spacedoc.data.subscript/tag
-                                    :spacedoc.data.subscript/children]))
+(defnode ::subscript (s/keys :req-un [:spacedoc.data.subscript/tag
+                                      :spacedoc.data.subscript/children]))
 
 
 ;;;; superscript node
 
 (s/def :spacedoc.data.superscript/tag #{:superscript})
 (s/def :spacedoc.data.superscript/children ::inline-container-children)
-(s/def ::superscript (s/keys :req-un [:spacedoc.data.superscript/tag
-                                      :spacedoc.data.superscript/children]))
+(defnode ::superscript (s/keys :req-un [:spacedoc.data.superscript/tag
+                                        :spacedoc.data.superscript/children]))
 
 
 ;;;; underline node
 
 (s/def :spacedoc.data.underline/tag #{:underline})
 (s/def :spacedoc.data.underline/children ::inline-container-children)
-(s/def ::underline (s/keys :req-un [:spacedoc.data.underline/tag
-                                    :spacedoc.data.underline/children]))
+(defnode ::underline (s/keys :req-un [:spacedoc.data.underline/tag
+                                      :spacedoc.data.underline/children]))
 
 
 ;;;; link
@@ -124,8 +143,8 @@
                                   :kind vector?
                                   :into []))
 (s/def :spacedoc.data.link/children ::link-children)
-(s/def ::link (s/keys :req-un [:spacedoc.data.link/tag
-                               :spacedoc.data.link/children]))
+(defnode ::link (s/keys :req-un [:spacedoc.data.link/tag
+                                 :spacedoc.data.link/children]))
 
 
 ;;;; org-file-path node
@@ -135,7 +154,7 @@
 (s/def :spacedoc.data.org-file-path/raw-link ::non-empty-string)
 (s/def :spacedoc.data.org-file-path/target-headline-gh-id string?)
 (s/def :spacedoc.data.org-file-path/children ::link-children)
-(s/def ::org-file-path
+(defnode ::org-file-path
   (s/keys :req-un [:spacedoc.data.org-file-path/tag
                    :spacedoc.data.org-file-path/value
                    :spacedoc.data.org-file-path/raw-link
@@ -148,7 +167,7 @@
 (s/def :spacedoc.data.embeddable-file-path/tag #{:embeddable-file-path})
 (s/def :spacedoc.data.embeddable-file-path/value ::non-empty-string)
 (s/def :spacedoc.data.embeddable-file-path/children ::link-children)
-(s/def ::embeddable-file-path
+(defnode ::embeddable-file-path
   (s/keys :req-un [:spacedoc.data.embeddable-file-path/tag
                    :spacedoc.data.embeddable-file-path/value
                    :spacedoc.data.embeddable-file-path/children]))
@@ -159,7 +178,7 @@
 (s/def :spacedoc.data.file-path/tag #{:file-path})
 (s/def :spacedoc.data.file-path/value ::non-empty-string)
 (s/def :spacedoc.data.file-path/children ::link-children)
-(s/def ::file-path
+(defnode ::file-path
   (s/keys :req-un [:spacedoc.data.file-path/tag
                    :spacedoc.data.file-path/value
                    :spacedoc.data.file-path/children]))
@@ -170,7 +189,7 @@
 (s/def :spacedoc.data.embeddable-web-link/tag #{:embeddable-web-link})
 (s/def :spacedoc.data.embeddable-web-link/value ::non-empty-string)
 (s/def :spacedoc.data.embeddable-web-link/children ::link-children)
-(s/def ::embeddable-web-link
+(defnode ::embeddable-web-link
   (s/keys :req-un [:spacedoc.data.embeddable-web-link/tag
                    :spacedoc.data.embeddable-web-link/value
                    :spacedoc.data.embeddable-web-link/children]))
@@ -181,7 +200,7 @@
 (s/def :spacedoc.data.web-link/tag #{:web-link})
 (s/def :spacedoc.data.web-link/value ::non-empty-string)
 (s/def :spacedoc.data.web-link/children ::link-children)
-(s/def ::web-link
+(defnode ::web-link
   (s/keys :req-un [:spacedoc.data.web-link/tag
                    :spacedoc.data.web-link/value
                    :spacedoc.data.web-link/children]))
@@ -192,7 +211,7 @@
 (s/def :spacedoc.data.headline-link/tag #{:headline-link})
 (s/def :spacedoc.data.headline-link/target-headline-gh-id ::non-empty-string)
 (s/def :spacedoc.data.headline-link/children ::link-children)
-(s/def ::headline-link
+(defnode ::headline-link
   (s/keys :req-un [:spacedoc.data.headline-link/tag
                    :spacedoc.data.headline-link/target-headline-gh-id
                    :spacedoc.data.headline-link/children]))
@@ -206,8 +225,8 @@
                                                     :kind vector?
                                                     :min-count 1
                                                     :into []))
-(s/def ::paragraph (s/keys :req-un [:spacedoc.data.paragraph/tag
-                                    :spacedoc.data.paragraph/children]))
+(defnode ::paragraph (s/keys :req-un [:spacedoc.data.paragraph/tag
+                                      :spacedoc.data.paragraph/children]))
 
 
 ;;;; inline container
@@ -237,16 +256,16 @@
                                                  :kind vector?
                                                  :min-count 1
                                                  :into []))
-(s/def ::center (s/keys :req-un [:spacedoc.data.center/tag
-                                 :spacedoc.data.center/children]))
+(defnode ::center (s/keys :req-un [:spacedoc.data.center/tag
+                                   :spacedoc.data.center/children]))
 
 
 ;;;; example node
 
 (s/def :spacedoc.data.example/tag #{:example})
 (s/def :spacedoc.data.example/value ::non-empty-string)
-(s/def ::example (s/keys :req-un [:spacedoc.data.example/tag
-                                  :spacedoc.data.example/value]))
+(defnode ::example (s/keys :req-un [:spacedoc.data.example/tag
+                                    :spacedoc.data.example/value]))
 
 
 ;;;; item-children
@@ -260,8 +279,8 @@
              :kind vector?
              :min-count 1
              :into []))
-(s/def ::item-children (s/keys :req-un [:spacedoc.data.item-children/tag
-                                        :spacedoc.data.item-children/children]))
+(defnode ::item-children (s/keys :req-un [:spacedoc.data.item-children/tag
+                                          :spacedoc.data.item-children/children]))
 
 
 ;;;;item-tag
@@ -270,12 +289,9 @@
 (s/def :spacedoc.data.item-tag/value
   (s/or :string ::non-empty-string
         :inline-element ::inline-element))
-(s/def ::item-tag (s/keys :req-un [:spacedoc.data.item-tag/tag
-                                   :spacedoc.data.item-tag/value]))
+(defnode ::item-tag (s/keys :req-un [:spacedoc.data.item-tag/tag
+                                     :spacedoc.data.item-tag/value]))
 
-
-;;;; list-item node
-;; FIXME: Splite into types to check for list type and its items type match.
 
 (s/def :spacedoc.data.list-item/tag #{:list-item})
 (s/def :spacedoc.data.list-item/type #{:ordered :unordered :descriptive})
@@ -283,11 +299,11 @@
 (s/def :spacedoc.data.list-item/checkbox (s/nilable #{:trans :off :on}))
 (s/def :spacedoc.data.list-item/children (s/cat :children ::item-children
                                                 :tag (s/? ::item-tag)))
-(s/def ::list-item (s/keys :req-un [:spacedoc.data.list-item/tag
-                                    :spacedoc.data.list-item/type
-                                    :spacedoc.data.list-item/bullet
-                                    :spacedoc.data.list-item/checkbox
-                                    :spacedoc.data.list-item/children]))
+(defnode ::list-item (s/keys :req-un [:spacedoc.data.list-item/tag
+                                      :spacedoc.data.list-item/type
+                                      :spacedoc.data.list-item/bullet
+                                      :spacedoc.data.list-item/checkbox
+                                      :spacedoc.data.list-item/children]))
 
 
 ;;;; feature-list node
@@ -298,9 +314,9 @@
                                                        :kind vector?
                                                        :min-count 1
                                                        :into []))
-(s/def ::feature-list (s/keys :req-un [:spacedoc.data.feature-list/tag
-                                       :spacedoc.data.feature-list/type
-                                       :spacedoc.data.feature-list/children]))
+(defnode ::feature-list (s/keys :req-un [:spacedoc.data.feature-list/tag
+                                         :spacedoc.data.feature-list/type
+                                         :spacedoc.data.feature-list/children]))
 
 
 ;;;; plain-list node
@@ -311,9 +327,9 @@
                                                      :kind vector?
                                                      :min-count 1
                                                      :into []))
-(s/def ::plain-list (s/keys :req-un [:spacedoc.data.plain-list/tag
-                                     :spacedoc.data.plain-list/type
-                                     :spacedoc.data.plain-list/children]))
+(defnode ::plain-list (s/keys :req-un [:spacedoc.data.plain-list/tag
+                                       :spacedoc.data.plain-list/type
+                                       :spacedoc.data.plain-list/children]))
 
 
 ;;;; quote node
@@ -323,8 +339,8 @@
                                                 :kind vector?
                                                 :min-count 1
                                                 :into []))
-(s/def ::quote (s/keys :req-un [:spacedoc.data.quote/tag
-                                :spacedoc.data.quote/children]))
+(defnode ::quote (s/keys :req-un [:spacedoc.data.quote/tag
+                                  :spacedoc.data.quote/children]))
 
 
 ;;;; src node
@@ -332,9 +348,9 @@
 (s/def :spacedoc.data.src/tag #{:src})
 (s/def :spacedoc.data.src/language ::non-empty-string)
 (s/def :spacedoc.data.src/value ::non-empty-string)
-(s/def ::src (s/keys :req-un [:spacedoc.data.src/tag
-                              :spacedoc.data.src/language
-                              :spacedoc.data.src/value]))
+(defnode ::src (s/keys :req-un [:spacedoc.data.src/tag
+                                :spacedoc.data.src/language
+                                :spacedoc.data.src/value]))
 
 
 ;;;; table-row node
@@ -344,8 +360,8 @@
                                                     :kind vector?
                                                     :min-count 0
                                                     :into []))
-(s/def ::table-row (s/keys :req-un [:spacedoc.data.table-row/tag
-                                    :spacedoc.data.table-row/children]))
+(defnode ::table-row (s/keys :req-un [:spacedoc.data.table-row/tag
+                                      :spacedoc.data.table-row/children]))
 
 
 ;;;; table-cell node
@@ -355,8 +371,8 @@
                                                      :kind vector?
                                                      :min-count 0
                                                      :into []))
-(s/def ::table-cell (s/keys :req-un [:spacedoc.data.table-cell/tag
-                                     :spacedoc.data.table-cell/children]))
+(defnode ::table-cell (s/keys :req-un [:spacedoc.data.table-cell/tag
+                                       :spacedoc.data.table-cell/children]))
 
 
 ;;;; table node
@@ -367,9 +383,9 @@
                                                 :kind vector?
                                                 :min-count 1
                                                 :into []))
-(s/def ::table (s/keys :req-un [:spacedoc.data.table/tag
-                                :spacedoc.data.table/type
-                                :spacedoc.data.table/children]))
+(defnode ::table (s/keys :req-un [:spacedoc.data.table/tag
+                                  :spacedoc.data.table/type
+                                  :spacedoc.data.table/children]))
 
 
 ;;;; verse node
@@ -379,16 +395,16 @@
                                                 :kind vector?
                                                 :min-count 1
                                                 :into []))
-(s/def ::verse (s/keys :req-un [:spacedoc.data.verse/tag
-                                :spacedoc.data.verse/children]))
+(defnode ::verse (s/keys :req-un [:spacedoc.data.verse/tag
+                                  :spacedoc.data.verse/children]))
 
 
 ;;;; fixed-width node
 
 (s/def :spacedoc.data.fixed-width/tag #{:fixed-width})
 (s/def :spacedoc.data.fixed-width/value ::non-empty-string)
-(s/def ::fixed-width (s/keys :req-un [:spacedoc.data.fixed-width/tag
-                                      :spacedoc.data.fixed-width/value]))
+(defnode ::fixed-width (s/keys :req-un [:spacedoc.data.fixed-width/tag
+                                        :spacedoc.data.fixed-width/value]))
 
 
 ;;;; keyword node
@@ -396,9 +412,9 @@
 (s/def :spacedoc.data.keyword/tag #{:keyword})
 (s/def :spacedoc.data.keyword/key ::non-empty-string)
 (s/def :spacedoc.data.keyword/value ::non-empty-string)
-(s/def ::keyword (s/keys :req-un [:spacedoc.data.keyword/tag
-                                  :spacedoc.data.keyword/key
-                                  :spacedoc.data.keyword/value]))
+(defnode ::keyword (s/keys :req-un [:spacedoc.data.keyword/tag
+                                    :spacedoc.data.keyword/key
+                                    :spacedoc.data.keyword/value]))
 
 
 ;; block group
@@ -425,8 +441,8 @@
                                                   :kind vector?
                                                   :min-count 1
                                                   :into []))
-(s/def ::section (s/keys :req-un [:spacedoc.data.section/tag
-                                  :spacedoc.data.section/children]))
+(defnode ::section (s/keys :req-un [:spacedoc.data.section/tag
+                                    :spacedoc.data.section/children]))
 
 
 ;;;; Headlines
@@ -442,17 +458,9 @@
                                                 #"^[\pL\pN\p{Pc}/-]+$"
                                                 %)))
 (s/def :spacedoc.data.headline/level nat-int?)
-(s/def :spacedoc.data.headline/tag #{:headline :description :todo})
-(defmulti ^:private  headline-child :tag)
-(defmethod headline-child :headline [_] ::headline)
-(defmethod headline-child :section [_] ::section)
-(defmethod headline-child :todo [_] ::todo)
-(s/def ::headline-child (s/multi-spec headline-child :tag))
-(s/def :spacedoc.data.headline/children
-  (s/nilable (s/or :headline-child ::headline-child
-                   :headline-children (s/coll-of ::headline-child
-                                                 :kind vector?
-                                                 :into []))))
+(s/def :spacedoc.data.headline/tag keyword?)
+(s/def :spacedoc.data.headline/children (s/nilable vector?))
+
 (s/def ::headline
   (s/keys :req-un [:spacedoc.data.headline/tag
                    :spacedoc.data.headline/value
@@ -467,52 +475,52 @@
   [max-level]
   (cons
    'do
-   (->> (range 1 (inc max-level))
-        (map (fn [n]
-               (let [[child hl]
-                     (mapv #(keyword
-                             (str *ns*)
-                             (format %1 n))
-                           ["headline-level-%s-child"
-                            "headline-level-%s"])
-                     child-mm (symbol (format "headline-level-%s-child" n))
-                     [tag level children]
-                     (mapv #(keyword
-                             (format %1 n))
-                           ["spacedoc.data.headline-level-%s/tag"
-                            "spacedoc.data.headline-level-%s/level"
-                            "spacedoc.data.headline-level-%s/children"])
-                     next-hl (keyword (str *ns*)
-                                      (str "headline-level-" (inc n)))]
-                 `(do
-                    (s/def ~tag #{:headline})
-                    (s/def ~level #{~n})
-                    (defmulti ^:private  ~child-mm :tag)
-                    (defmethod ~child-mm :headline [_#] ~next-hl)
-                    (defmethod ~child-mm :todo [_#] ::todo)
-                    (defmethod ~child-mm :section [_#] ::section)
-                    (s/def ~child (s/multi-spec ~child-mm :tag))
-                    (s/def ~children (s/coll-of ~child
-                                                :kind vector?
-                                                :min-count 1
-                                                :distinct true
-                                                :into []))
-                    (s/def ~hl
-                      (s/merge
-                       ::headline
-                       (s/keys :req-un [~tag
-                                        ~level
-                                        ~children]))))))))))
+   (cons
+    `(defnode ~(keyword (str doc-ns-str "/headline-level-" (inc max-level)))
+       #{"Avoid deep headline nesting."})
+    (->> (range 1 (inc max-level))
+         (map (fn [n]
+                (let [[child hl]
+                      (mapv #(keyword
+                              (str *ns*)
+                              (format %1 n))
+                            ["headline-level-%s-child"
+                             "headline-level-%s"])
+                      child-mm (symbol (format "headline-level-%s-child" n))
+                      [tag level children]
+                      (mapv #(keyword
+                              (format %1 n))
+                            ["spacedoc.data.headline-level-%s/tag"
+                             "spacedoc.data.headline-level-%s/level"
+                             "spacedoc.data.headline-level-%s/children"])
+                      next-hl (keyword doc-ns-str
+                                       (str "headline-level-" (inc n)))]
+                  `(do
+                     (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
+                     (s/def ~level #{~n})
+                     (defmulti ^:private  ~child-mm :tag)
+                     (defmethod ~child-mm
+                       ~(keyword (format "headline-level-%s" (inc n)))
+                       [_#] ~next-hl)
+                     (defmethod ~child-mm :todo [_#] ::todo)
+                     (defmethod ~child-mm :section [_#] ::section)
+                     (s/def ~child (s/multi-spec ~child-mm :tag))
+                     (s/def ~children (s/coll-of ~child
+                                                 :kind vector?
+                                                 :min-count 1
+                                                 :distinct true
+                                                 :into []))
+                     (defnode ~hl
+                       (s/merge
+                        ::headline
+                        (s/keys :req-un [~tag
+                                         ~level
+                                         ~children])))))))))))
 
 
 ;;;; Generate 5 levels of headline nodes
 
 (gen-headlines 5)
-
-
-;;;; headline node level 6
-
-(s/def ::headline-level-6 #{"Avoid deep headline nesting."})
 
 
 ;;;; description node
@@ -525,7 +533,7 @@
                                                       :min-count 1
                                                       :distinct true
                                                       :into []))
-(s/def ::description
+(defnode ::description
   (s/merge
    ::headline
    (s/keys :req-un [:spacedoc.data.description/tag
@@ -535,10 +543,9 @@
 
 
 ;;;; todo node
-;; NOTE: Mb merge into headline node and use TODO flag instead?
 
 (s/def :spacedoc.data.todo/tag #{:todo})
-(s/def ::todo
+(defnode ::todo
   (s/merge
    ::headline
    (s/keys :req-un [:spacedoc.data.todo/tag])))
@@ -559,18 +566,18 @@
                                                :count 1
                                                :distinct true
                                                :into []))
-(s/def ::root (s/keys :req-un [:spacedoc.data.root/tag
-                               :spacedoc.data.root/file-has-description?
-                               :spacedoc.data.root/file-has-feature-list?
-                               :spacedoc.data.root/headline-path-ids
-                               :spacedoc.data.root/children]))
+(defnode ::root (s/keys :req-un [:spacedoc.data.root/tag
+                                 :spacedoc.data.root/file-has-description?
+                                 :spacedoc.data.root/file-has-feature-list?
+                                 :spacedoc.data.root/headline-path-ids
+                                 :spacedoc.data.root/children]))
 
 
 ;;;; body node
 
 (s/def :spacedoc.data.body/tag #{:body})
 (defmulti ^:private  body-child :tag)
-(defmethod body-child :headline [_] ::headline-level-1)
+(defmethod body-child :headline-level-1 [_] ::headline-level-1)
 (defmethod body-child :description [_] ::description)
 (defmethod body-child :todo [_] ::todo)
 (defmethod body-child :section [_] ::section)
@@ -580,5 +587,5 @@
                                                :min-count 1
                                                :distinct true
                                                :into []))
-(s/def ::body (s/keys :req-un [:spacedoc.data.body/tag
-                               :spacedoc.data.body/children]))
+(defnode ::body (s/keys :req-un [:spacedoc.data.body/tag
+                                 :spacedoc.data.body/children]))

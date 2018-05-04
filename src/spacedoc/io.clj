@@ -6,10 +6,10 @@
             [spacedoc.data :as data]))
 
 
-(defn fp->spacedoc
-  "Read Spacedoc END file."
+(defn fp->*spacedoc-m
+  "Read and validate Spacedoc END file."
   ([file]
-   (fp->spacedoc :spacedoc.data/root file))
+   (fp->*spacedoc-m :spacedoc.data/root file))
   ([root-node-spec file]
    (io!
     (exc/try-on

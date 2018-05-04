@@ -7,7 +7,7 @@
                  [lacij/lacij "0.10.0"]
                  [funcool/cats "2.2.0"]
                  [net.cgrand/xforms "0.16.0"]
-                 [org.clojure/tools.cli "0.3.5"]]
+                 [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

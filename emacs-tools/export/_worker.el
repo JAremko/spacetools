@@ -368,7 +368,7 @@ holding contextual information."
      (cond
       (todo? :todo)
       (description? :description)
-      (t :headline))
+      (t (format "%s-level-%s" :headline level)))
      (spacemacs/org-edn-escape-string raw-value)
      (spacemacs/org-edn-escape-string (string-remove-prefix "#" gh-id))
      (spacemacs/org-edn-escape-string path-id)

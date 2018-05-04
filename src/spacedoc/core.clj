@@ -1,18 +1,31 @@
 (ns spacedoc.core
   (:gen-class)
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :refer [lower-case]]
-            [criterium.core :as c]
+  (:require [clojure.string :refer [lower-case]]
+            [clojure.tools.cli :refer [parse-opts]]
+            [cats.core :as m]
             [cats.monad.exception :as exc]
             [spacedoc.viz :as viz]
             [spacedoc.data :as data]
             [spacedoc.io :as io]))
 
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+(def cli-options
+  ;; An option with a required argument
+  [["-p" "--port PORT" "Port number"
+    :default 80
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+   ;; A non-idempotent option
+   ["-v" nil "Verbosity level"
+    :id :verbosity
+    :default 0
+    :assoc-fn (fn [m k _] (update-in m [k] inc))]
+   ;; A boolean option defaulting to nil
+   ["-h" "--help"]])
+
+
+(defn -main [& args]
+  (parse-opts args cli-options))
 
 
 (def doc-dir (clojure.java.io/file "emacs-tools/export/target"))
@@ -21,12 +34,11 @@
 (def edn-files (io/edn-files-in-dir doc-dir))
 
 
-(def spacedocs (pmap io/fp->spacedoc edn-files))
-
-#_ (println (first (filter exc/failure? spacedocs)))
+(def spacedocs (pmap io/fp->*spacedoc-m edn-files))
 
 
-(viz/draw-graph-svg "graph.svg" (data/node-relations-aggregate (map deref spacedocs)))
+(println (ex-data (:e (first (filter exc/failure? spacedocs)))))
+;; (println (:e (first (filter exc/failure? spacedocs))))
 
 
-#_ (c/with-progress-reporting (c/bench (doall (data/node-graph-aggregate spacedocs)) :verbose))
+;; (viz/draw-graph-svg "graph.svg" (apply data/node-relations (map deref spacedocs)))
