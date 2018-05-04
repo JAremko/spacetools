@@ -279,8 +279,9 @@
              :kind vector?
              :min-count 1
              :into []))
-(defnode ::item-children (s/keys :req-un [:spacedoc.data.item-children/tag
-                                          :spacedoc.data.item-children/children]))
+(defnode ::item-children
+  (s/keys :req-un [:spacedoc.data.item-children/tag
+                   :spacedoc.data.item-children/children]))
 
 
 ;;;;item-tag

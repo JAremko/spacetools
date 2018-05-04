@@ -1,7 +1,6 @@
 (ns spacedoc.data
   (:require [clojure.core.reducers :as r]
-            [clojure.set :as set :refer [union]]
-            [clojure.edn :as edn]
+            [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]))
 
 
@@ -12,8 +11,6 @@
 
 
 (def all-tags (remove #{:default} (keys (methods node->spec-k))))
-
-all-tags
 
 
 (defn explain-deepest

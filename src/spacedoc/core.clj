@@ -1,7 +1,6 @@
 (ns spacedoc.core
   (:gen-class)
-  (:require [clojure.string :refer [lower-case]]
-            [clojure.tools.cli :refer [parse-opts]]
+  (:require [clojure.tools.cli :refer [parse-opts]]
             [cats.core :as m]
             [cats.monad.exception :as exc]
             [spacedoc.viz :as viz]
@@ -41,4 +40,4 @@
 ;; (println (:e (first (filter exc/failure? spacedocs))))
 
 
-;; (viz/draw-graph-svg "graph.svg" (apply data/node-relations (map deref spacedocs)))
+(io/export-graph-svg "graph.svg" (viz/build-graph (apply data/node-relations (map deref spacedocs))))

@@ -1,8 +1,9 @@
 (ns spacedoc.io
   (:require [clojure.java.io :as io]
             [clojure.edn :as edn]
-            [cats.monad.exception :as exc]
             [clojure.spec.alpha :as s]
+            [cats.monad.exception :as exc]
+            [lacij.view.graphview :as gv]
             [spacedoc.data :as data]))
 
 
@@ -34,3 +35,8 @@
 (defn edn-files-in-dir
   [root-dir]
   (sequence (filter edn-file?) (file-seq root-dir)))
+
+
+(defn export-graph-svg
+  [file graph]
+  (io! (gv/export graph file :indent "yes")))

@@ -1,11 +1,7 @@
 (ns spacedoc.viz
-  (:require [lacij.layouts.core :as g]
-            [lacij.layouts.layout :as gl]
+  (:require [lacij.layouts.layout :as gl]
             [lacij.edit.graph :as ge]
-            [lacij.view.graphview :as gv]
-            [clojure.core.reducers :as r]
-            [clojure.set :refer [union]]
-            [spacedoc.data :as data]))
+            [clojure.core.reducers :as r]))
 
 
 (defn- rand-color
@@ -50,16 +46,12 @@
             flatten)))
 
 
-(defn draw-graph-svg
-  [file tag->children]
+(defn build-graph
+  [tag->children]
   (when (seq tag->children)
-    (io!
-     (gv/export
-      (-> (ge/graph :width 800 :height 600)
-          (ge/add-default-node-attrs :shape :circle :r 90)
-          (add-nodes tag->children)
-          (add-edges (edges tag->children))
-          (gl/layout :radial :radius 600)
-          (ge/build))
-      file
-      :indent "yes"))))
+    (-> (ge/graph :width 1200 :height 800)
+        (ge/add-default-node-attrs :shape :circle :r 90)
+        (add-nodes tag->children)
+        (add-edges (edges tag->children))
+        (gl/layout :radial :radius 800)
+        (ge/build))))
