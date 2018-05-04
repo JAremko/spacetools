@@ -983,7 +983,7 @@ ROOT-DIR is original documentation root directory."
               (file-name-as-directory
                (file-name-directory target-file-name))))
         ;; FIXME: Close enough. But it will be better if we
-        ;; export stuff into separate folders and then merge.
+        ;; export stuff into separate directories and then merge.
         (while (not (file-accessible-directory-p target-file-dir))
           (condition-case err
               (make-directory target-file-dir t)

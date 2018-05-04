@@ -8,36 +8,32 @@
             [spacedoc.io :as io]))
 
 
-(def cli-options
-  ;; An option with a required argument
-  [["-p" "--port PORT" "Port number"
-    :default 80
-    :parse-fn #(Integer/parseInt %)
-    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
-   ;; A non-idempotent option
-   ["-v" nil "Verbosity level"
-    :id :verbosity
-    :default 0
-    :assoc-fn (fn [m k _] (update-in m [k] inc))]
-   ;; A boolean option defaulting to nil
+(def ops
+  [["-i" "--input DIRECTORY" "Inpu directory"
+    :validate [io/directory? "Input isn't a directory."]]
    ["-h" "--help"]])
 
 
+;; NOTE: Doesn't work with lain run
 (defn -main [& args]
-  (parse-opts args cli-options))
+  (let [{{:keys [input]} :options errors :errors} (parse-opts args ops)]
+    #_ (println input errors)
+    (println (io/root-dir))))
 
 
-(def doc-dir (clojure.java.io/file "emacs-tools/export/target"))
+;; (def doc-dir (clojure.java.io/file "emacs-tools/export/target"))
 
 
-(def edn-files (io/edn-files-in-dir doc-dir))
+;; (def edn-files (io/edn-files-in-dir doc-dir))
 
 
-(def spacedocs (pmap io/fp->*spacedoc-m edn-files))
+;; (def spacedocs (pmap io/fp->*spacedoc-m edn-files))
 
 
-(println (ex-data (:e (first (filter exc/failure? spacedocs)))))
+;; (println (ex-data (:e (first (filter exc/failure? spacedocs)))))
 ;; (println (:e (first (filter exc/failure? spacedocs))))
 
 
-(io/export-graph-svg "graph.svg" (viz/build-graph (apply data/node-relations (map deref spacedocs))))
+;; (io/export-graph-svg "graph.svg" (viz/build-graph (apply data/node-relations (map deref spacedocs))))
+
+;; (println (viz/build-graph (apply data/node-relations (map deref spacedocs))))

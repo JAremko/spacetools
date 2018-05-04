@@ -75,7 +75,7 @@ the export dir.")
     "tests/"
     "elpa/"
     "layers/LAYERS.org")
-  "List of Spacemacs folders and ORG files that normally
+  "List of Spacemacs directories and ORG files that normally
  shouldn't be exported.")
 
 

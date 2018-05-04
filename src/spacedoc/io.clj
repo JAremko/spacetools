@@ -7,6 +7,32 @@
             [spacedoc.data :as data]))
 
 
+(defn directory?
+  [file-path]
+  (io!
+   (when-let [f (io/file file-path)]
+     (and (.exists f)
+          (.isDirectory f)))))
+
+
+(defn root-dir
+  []
+  (io!
+   (let [d (-> (class *ns*)
+               .getProtectionDomain
+               .getCodeSource
+               .getLocation
+               .getPath
+               io/file
+               .getParent)
+         from-root (str d "./emacs-tools")
+         from-target (str d "/../../emacs-tools")]
+     (cond
+       (directory? from-root) d
+       (directory? from-target) (.getCanonicalPath (io/file (str d "/../../")))
+       :else (System/getProperty "user.dir")))))
+
+
 (defn fp->*spacedoc-m
   "Read and validate Spacedoc END file."
   ([file]
@@ -28,13 +54,12 @@
 
 (defn edn-file?
   [file]
-  (and (.isFile file)
-       (re-matches #"(?i).*\.edn$" (str file))))
+  (io! (and (.isFile file) (re-matches #"(?i).*\.edn$" (str file)))))
 
 
 (defn edn-files-in-dir
   [root-dir]
-  (sequence (filter edn-file?) (file-seq root-dir)))
+  (io! (sequence (filter edn-file?) (file-seq root-dir))))
 
 
 (defn export-graph-svg
