@@ -1,11 +1,11 @@
 (ns spacedoc.core
   (:gen-class)
-  (:require [clojure.tools.cli :refer [parse-opts]]
-            [cats.core :as m]
-            [cats.monad.exception :as exc]
-            [spacedoc.viz :as viz]
+  (:require [cats.core :as m]
             [spacedoc.data :as data]
-            [spacedoc.io :as io]))
+            [clojure.string :refer [join]]
+            [spacedoc.io :as io]
+            [cats.monad.exception :as exc]
+            [clojure.core.reducers :as r]))
 
 
 (def ops
@@ -14,26 +14,21 @@
    ["-h" "--help"]])
 
 
-;; NOTE: Doesn't work with lain run
+(defn fmt-err
+  [err]
+  (let [{:keys [cause data]} (Throwable->map err)]
+    (format "Cause: %s\nData: %s\n" cause data)))
+
+
 (defn -main [& args]
-  (let [{{:keys [input]} :options errors :errors} (parse-opts args ops)]
-    #_ (println input errors)
-    (println (io/root-dir))))
-
-
-;; (def doc-dir (clojure.java.io/file "emacs-tools/export/target"))
-
-
-;; (def edn-files (io/edn-files-in-dir doc-dir))
-
-
-;; (def spacedocs (pmap io/fp->*spacedoc-m edn-files))
-
-
-;; (println (ex-data (:e (first (filter exc/failure? spacedocs)))))
-;; (println (:e (first (filter exc/failure? spacedocs))))
-
-
-;; (io/export-graph-svg "graph.svg" (viz/build-graph (apply data/node-relations (map deref spacedocs))))
-
-;; (println (viz/build-graph (apply data/node-relations (map deref spacedocs))))
+  (let [e (m/mlet
+           [input (io/args->spacedocs-m args ops)]
+           (eduction (filter exc/failure?)
+                     (map m/extract)
+                     (map fmt-err)
+                     input))]
+    (if-let [err-msg (cond (exc/failure? e) (fmt-err (m/extract e))
+                           (seq e) (join "\n\n" e))]
+      (do (println err-msg)
+          (System/exit 2))
+      (println "All good!"))))

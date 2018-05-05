@@ -1,2 +1,10 @@
-.nrepl-port
-*.svg
+.*
+!.gitignore
+\#*
+*.jar
+target
+clojure.iws
+clojure.ipr
+nbproject/private/
+maven-classpath
+maven-classpath.properties
