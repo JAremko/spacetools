@@ -1,19 +1,16 @@
 (ns spacedoc.core
-  (:gen-class)
   (:require [spacedoc.io :as sio]
-            [spacedoc.util :as util]))
-
-
-(def ops
-  [["-i" "--input DIRECTORY" "Inpu directory"
-    :validate [sio/directory? "Input isn't a directory."]]
-   ["-h" "--help"]])
+            [spacedoc.args :as ag]
+            [cats.core :as m]
+            [spacedoc.util :as util])
+  (:gen-class))
 
 
 (defn -main [& args]
-  (when-let [c (->> args
-                    (sio/args->spacedocs-exc ops)
-                    (util/spacedocs-exc->spacedocs)
-                    (count))]
-    (println "Spacedocs successfully parsed and validated.")
-    (println "Total count:" c)))
+  (let [options (ag/args->options args)
+        s-exc (sio/input-dir->spacedocs-exc (:input options))
+        spacedocs (util/spacedocs-exc->spacedocs s-exc)]
+    (if (seq spacedocs)
+      (printf "%s Spacedocs successfully parsed and validated.\n"
+              (count spacedocs))
+      (println "Input folder doesn't contain SDN files."))))

@@ -10,10 +10,10 @@
             [clojure.core.reducers :as r]))
 
 
-(defn edn-file?
+(defn sdn-file?
   [file-path]
   (io! (and (.isFile (io/file file-path))
-            (re-matches #"(?i).*\.edn$" (str file-path)))))
+            (re-matches #"(?i).*\.sdn$" (str file-path)))))
 
 
 (defn directory?
@@ -42,7 +42,7 @@
    (System/getProperty "user.dir")))
 
 
-(defn default-input-dir-exc
+(defn- default-input-dir-exc*
   []
   (io!
    (exc/try-on
@@ -66,13 +66,16 @@
         (exc/failure (Exception. "Can't locate Spacedoc directory.")))))))
 
 
-(defn input-dir->edn-fps-exc
+(def default-input-dir-exc (memoize default-input-dir-exc*))
+
+
+(defn input-dir->sdn-fps-exc
   [input-dir-path]
   (io!
    (exc/try-on (eduction
                 (map #(.getCanonicalPath %))
                 (map str)
-                (filter edn-file?)
+                (filter sdn-file?)
                 (file-seq (io/file input-dir-path))))))
 
 
@@ -97,18 +100,15 @@
            obj)))))))
 
 
-(defn args->spacedocs-exc
-  [ops args]
+(defn input-dir->spacedocs-exc
+  [input-dir]
   (io!
    (exc/try-on
-    (let [{{:keys [input]} :options errors :errors} (parse-opts args ops)]
-      (if errors
-        (exc/failure (ex-info "Bad args" {:errors errors}))
-        (m/alet [input-dir (if input
-                             (exc/success input)
-                             (default-input-dir-exc))
-                 edn-fps (input-dir->edn-fps-exc input-dir)]
-                (eduction (map fp->spacedoc-exc) edn-fps)))))))
+    (m/alet [idir (if input-dir
+                    (exc/success input-dir)
+                    (default-input-dir-exc))
+             sdn-fps (input-dir->sdn-fps-exc idir)]
+            (eduction (map fp->spacedoc-exc) sdn-fps)))))
 
 
 (defn export-graph-svg

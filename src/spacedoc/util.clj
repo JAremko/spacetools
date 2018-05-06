@@ -11,7 +11,7 @@
   [err]
   (let [{:keys [cause data]} (Throwable->map err)]
     (println-str
-     (join "\n"
+     (join \newline
            (interleave
             (map #(apply str % ": " (repeat (- 78 (count %)) "="))
                  ["File" "Cause" "Data"])

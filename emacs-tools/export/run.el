@@ -190,7 +190,7 @@ See `spacemacs-export-docs-help-text' for description."
      (lambda (fps)
        (format
         "%S"
-        `(spacemacs/export-docs-to-edn
+        `(spacemacs/export-docs-to-sdn
           ,root-dir
           ,spacemacs-export-docs-target-dir
           ',fps)))

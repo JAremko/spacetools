@@ -48,99 +48,99 @@
   "URL of README.org template")
 
 (defvar spacemacs--org-export-define-backend-funcs-alist
-  '((bold . spacemacs//org-edn-bold)
-    (center-block . spacemacs//org-edn-center-block)
-    (clock . spacemacs//org-edn-clock)
-    (code . spacemacs//org-edn-code)
-    (drawer . spacemacs//org-edn-drawer)
-    (dynamic-block . spacemacs//org-edn-dynamic-block)
-    (entity . spacemacs//org-edn-entity)
-    (example-block . spacemacs//org-edn-example-block)
-    (export-block . spacemacs//org-edn-export-block)
-    (export-snippet . spacemacs//org-edn-export-snippet)
-    (fixed-width . spacemacs//org-edn-fixed-width)
-    (footnote-definition . spacemacs//org-edn-footnote-definition)
-    (footnote-reference . spacemacs//org-edn-footnote-reference)
-    (headline . spacemacs//org-edn-headline)
-    (horizontal-rule . spacemacs//org-edn-horizontal-rule)
-    (inline-src-block . spacemacs//org-edn-inline-src-block)
-    (inlinetask . spacemacs//org-edn-inlinetask)
-    (inner-template . spacemacs//org-edn-inner-template)
-    (italic . spacemacs//org-edn-italic)
-    (item . spacemacs//org-edn-item)
-    (keyword . spacemacs//org-edn-keyword)
-    (latex-environment . spacemacs//org-edn-latex-environment)
-    (latex-fragment . spacemacs//org-edn-latex-fragment)
-    (line-break . spacemacs//org-edn-line-break)
-    (link . spacemacs//org-edn-link)
-    (node-property . spacemacs//org-edn-node-property)
-    (paragraph . spacemacs//org-edn-paragraph)
-    (plain-list . spacemacs//org-edn-plain-list)
-    (plain-text . spacemacs//org-edn-plain-text)
-    (planning . spacemacs//org-edn-planning)
-    (property-drawer . spacemacs//org-edn-property-drawer)
-    (quote-block . spacemacs//org-edn-quote-block)
-    (radio-target . spacemacs//org-edn-radio-target)
-    (section . spacemacs//org-edn-section)
-    (special-block . spacemacs//org-edn-special-block)
-    (src-block . spacemacs//org-edn-src-block)
-    (statistics-cookie . spacemacs//org-edn-statistics-cookie)
-    (strike-through . spacemacs//org-edn-strike-through)
-    (subscript . spacemacs//org-edn-subscript)
-    (superscript . spacemacs//org-edn-superscript)
-    (table . spacemacs//org-edn-table)
-    (table-cell . spacemacs//org-edn-table-cell)
-    (table-row . spacemacs//org-edn-table-row)
-    (target . spacemacs//org-edn-target)
-    (template . spacemacs//org-edn-template)
-    (timestamp . spacemacs//org-edn-timestamp)
-    (underline . spacemacs//org-edn-underline)
-    (verbatim . spacemacs//org-edn-verbatim)
-    (verse-block . spacemacs//org-edn-verse-block))
-  "plist of transcode functions names for `spacemacs-edn' backend.")
+  '((bold . spacemacs//org-sdn-bold)
+    (center-block . spacemacs//org-sdn-center-block)
+    (clock . spacemacs//org-sdn-clock)
+    (code . spacemacs//org-sdn-code)
+    (drawer . spacemacs//org-sdn-drawer)
+    (dynamic-block . spacemacs//org-sdn-dynamic-block)
+    (entity . spacemacs//org-sdn-entity)
+    (example-block . spacemacs//org-sdn-example-block)
+    (export-block . spacemacs//org-sdn-export-block)
+    (export-snippet . spacemacs//org-sdn-export-snippet)
+    (fixed-width . spacemacs//org-sdn-fixed-width)
+    (footnote-definition . spacemacs//org-sdn-footnote-definition)
+    (footnote-reference . spacemacs//org-sdn-footnote-reference)
+    (headline . spacemacs//org-sdn-headline)
+    (horizontal-rule . spacemacs//org-sdn-horizontal-rule)
+    (inline-src-block . spacemacs//org-sdn-inline-src-block)
+    (inlinetask . spacemacs//org-sdn-inlinetask)
+    (inner-template . spacemacs//org-sdn-inner-template)
+    (italic . spacemacs//org-sdn-italic)
+    (item . spacemacs//org-sdn-item)
+    (keyword . spacemacs//org-sdn-keyword)
+    (latex-environment . spacemacs//org-sdn-latex-environment)
+    (latex-fragment . spacemacs//org-sdn-latex-fragment)
+    (line-break . spacemacs//org-sdn-line-break)
+    (link . spacemacs//org-sdn-link)
+    (node-property . spacemacs//org-sdn-node-property)
+    (paragraph . spacemacs//org-sdn-paragraph)
+    (plain-list . spacemacs//org-sdn-plain-list)
+    (plain-text . spacemacs//org-sdn-plain-text)
+    (planning . spacemacs//org-sdn-planning)
+    (property-drawer . spacemacs//org-sdn-property-drawer)
+    (quote-block . spacemacs//org-sdn-quote-block)
+    (radio-target . spacemacs//org-sdn-radio-target)
+    (section . spacemacs//org-sdn-section)
+    (special-block . spacemacs//org-sdn-special-block)
+    (src-block . spacemacs//org-sdn-src-block)
+    (statistics-cookie . spacemacs//org-sdn-statistics-cookie)
+    (strike-through . spacemacs//org-sdn-strike-through)
+    (subscript . spacemacs//org-sdn-subscript)
+    (superscript . spacemacs//org-sdn-superscript)
+    (table . spacemacs//org-sdn-table)
+    (table-cell . spacemacs//org-sdn-table-cell)
+    (table-row . spacemacs//org-sdn-table-row)
+    (target . spacemacs//org-sdn-target)
+    (template . spacemacs//org-sdn-template)
+    (timestamp . spacemacs//org-sdn-timestamp)
+    (underline . spacemacs//org-sdn-underline)
+    (verbatim . spacemacs//org-sdn-verbatim)
+    (verse-block . spacemacs//org-sdn-verse-block))
+  "plist of transcode functions names for `spacemacs-sdn' backend.")
 
-(org-export-define-backend 'spacemacs-edn
+(org-export-define-backend 'spacemacs-sdn
   spacemacs--org-export-define-backend-funcs-alist
   :filters-alist
-  '((:filter-final-output . spacemacs//org-edn-final-function)))
+  '((:filter-final-output . spacemacs//org-sdn-final-function)))
 
 
 ;;; Helper Functions
 
-(defsubst spacemacs//org-edn-format-payload (format-string args)
+(defsubst spacemacs//org-sdn-format-payload (format-string args)
   "Format payload for JSON."
   (replace-regexp-in-string
    "\n"
    "\r"
    (if args (apply 'format format-string args) format-string)))
 
-(defsubst spacemacs/org-edn-export-file (src-file file-path)
+(defsubst spacemacs/org-sdn-export-file (src-file file-path)
   "Emit request for copying file at FILE-PATH. SRC-FILE will
 be sent as the source of request (useful for debugging)"
   (message "{\"type\":\"export\",\"text\":%S,\"source\":%S}"
-           (spacemacs//org-edn-format-payload
+           (spacemacs//org-sdn-format-payload
             file-path)
-           (spacemacs//org-edn-format-payload
+           (spacemacs//org-sdn-format-payload
             src-file)))
 
-(defsubst spacemacs/org-edn-message (format-string &rest args)
+(defsubst spacemacs/org-sdn-message (format-string &rest args)
   "Emit specified message."
   (message "{\"type\":\"message\",\"text\":%S}"
-           (spacemacs//org-edn-format-payload
+           (spacemacs//org-sdn-format-payload
             format-string
             args)))
 
-(defsubst spacemacs/org-edn-warn (format-string &rest args)
+(defsubst spacemacs/org-sdn-warn (format-string &rest args)
   "Emit specified warning."
   (message "{\"type\":\"warning\",\"text\":%S}"
-           (spacemacs//org-edn-format-payload
+           (spacemacs//org-sdn-format-payload
             format-string
             args)))
 
-(defsubst spacemacs/org-edn-error (format-string &rest args)
+(defsubst spacemacs/org-sdn-error (format-string &rest args)
   "Emit specified error and exit with code 1."
   (message "{\"type\":\"error\",\"text\":%S}"
-           (spacemacs//org-edn-format-payload
+           (spacemacs//org-sdn-format-payload
             (concat (format "current-buffer: %s\n"
                             (buffer-name))
                     (format "current-file: %s\n"
@@ -150,21 +150,21 @@ be sent as the source of request (useful for debugging)"
             args))
   (kill-emacs 1))
 
-(defconst spacemacs-org-edn-special-chars '(("\\" . "\\\\")
+(defconst spacemacs-org-sdn-special-chars '(("\\" . "\\\\")
                                             ("\t" . "\\t")
                                             ("\r" . "\\r")
                                             ("\"" . "\\\"")
                                             ("\n" . "\\n")))
-(defsubst spacemacs/org-edn-escape-string (str)
+(defsubst spacemacs/org-sdn-escape-string (str)
   "Escape special characters in STR."
   (if str
       (with-temp-buffer
         (insert str)
-        (format-replace-strings spacemacs-org-edn-special-chars)
+        (format-replace-strings spacemacs-org-sdn-special-chars)
         (buffer-string))
     ""))
 
-(defsubst spacemacs/org-edn-headline-make-path-id (headline)
+(defsubst spacemacs/org-sdn-headline-make-path-id (headline)
   "Make id for org HEADLINE by chaining headlines from parent to
 child headline.
 NOTE: Each headline is converted with `toc-org-hrefify-gh' but
@@ -197,34 +197,34 @@ without unification and \"#\" prefix."
 
 ;;;; Bold
 
-(defun spacemacs//org-edn-bold (_bold contents _info)
-  "Transcode BOLD From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-bold (_bold contents _info)
+  "Transcode BOLD From Org to Spacemacs SDN.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
   (format "{:tag :bold :children [%s]}" contents))
 
 ;;;; Center Block
 
-(defun spacemacs//org-edn-center-block (_center-block contents _info)
-  "Transcode a CENTER-BLOCK element From Org to Spacemacs EDN.))
+(defun spacemacs//org-sdn-center-block (_center-block contents _info)
+  "Transcode a CENTER-BLOCK element From Org to Spacemacs SDN.))
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (format "{:tag :center :children [%s]}" contents))
 
 ;;;; Clock
 
-(defun spacemacs//org-edn-clock (_clock _contents _info)
-  "Transcode a CLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-clock (_clock _contents _info)
+  "Transcode a CLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-clock")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-clock")
   "")
 
 ;;;; Code
 
-(defun spacemacs//org-edn-code (code _contents _info)
-  "Transcode CODE From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-code (code _contents _info)
+  "Transcode CODE From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information.
 NOTE: In Spacemacs ~code blocks~ are key sequences."
@@ -232,7 +232,7 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
           (format "%S"
                   (vconcat
                    (mapcar
-                    'spacemacs/org-edn-escape-string
+                    'spacemacs/org-sdn-escape-string
                     (split-string
                      (org-element-property :value code)
                      " "
@@ -240,86 +240,86 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
 
 ;;;; Drawer
 
-(defun spacemacs//org-edn-drawer (_drawer _contents _info)
-  "Transcode a DRAWER element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-drawer (_drawer _contents _info)
+  "Transcode a DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-drawer")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-drawer")
   "")
 
 ;;;; Dynamic Block
 
-(defun spacemacs//org-edn-dynamic-block (_dynamic-block _contents _info)
-  "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-dynamic-block (_dynamic-block _contents _info)
+  "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-dynamic-block")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-dynamic-block")
   "")
 
 ;;;; Entity
 
-(defun spacemacs//org-edn-entity (_entity _contents _info)
-  "Transcode an ENTITY object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-entity (_entity _contents _info)
+  "Transcode an ENTITY object From Org to Spacemacs SDN.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-entity")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-entity")
   "")
 
 ;;;; Example Block
 
-(defun spacemacs//org-edn-example-block (example-block _contents _info)
-  "Transcode a EXAMPLE-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-example-block (example-block _contents _info)
+  "Transcode a EXAMPLE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :example :value \"%s\"}"
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :value example-block))))
 
 ;;;; Export Block
 
-(defun spacemacs//org-edn-export-block (_export-block _contents _info)
-  "Transcode a EXPORT-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-export-block (_export-block _contents _info)
+  "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-export-block")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-export-block")
   "")
 
 ;;;; Export Snippet
 
-(defun spacemacs//org-edn-export-snippet (_export-snippet _contents _info)
-  "Transcode a EXPORT-SNIPPET object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-export-snippet (_export-snippet _contents _info)
+  "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-export-snippet")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-export-snippet")
   "")
 
 ;;;; Fixed Width
 
-(defun spacemacs//org-edn-fixed-width (fixed-width _contents _info)
-  "Transcode a FIXED-WIDTH element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-fixed-width (fixed-width _contents _info)
+  "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "{:tag :fixed-width :value \"%s\"}"
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :value fixed-width))))
 
 ;;;; Footnote Reference
 
-(defun spacemacs//org-edn-footnote-reference
+(defun spacemacs//org-sdn-footnote-reference
     (_footnote-reference _contents _info)
-  "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs EDN.
+  "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-footnote-reference")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-footnote-reference")
   "")
 
 ;;;; Headline
 
-(defun spacemacs//org-edn-headline (headline contents info)
-  "Transcode a HEADLINE element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-headline (headline contents info)
+  "Transcode a HEADLINE element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((raw-value (org-element-property :raw-value headline))
@@ -332,25 +332,25 @@ holding contextual information."
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
          (path-id
-          (spacemacs/org-edn-headline-make-path-id headline))
+          (spacemacs/org-sdn-headline-make-path-id headline))
          (file (plist-get info :input-file))
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1)
                             (string= raw-value "Description"))))
     (unless (or todo? contents)
-      (spacemacs/org-edn-error
+      (spacemacs/org-sdn-error
        "File %S has headline %S without children or TODO marker"
        file
        raw-value))
     (when description?
       (if (plist-member info :file-has-description?)
-          (spacemacs/org-edn-error
+          (spacemacs/org-sdn-error
            (concat "File \"%s\" has multiply top level "
                    "\"Description\" headlines")
            file)
         (plist-put info :file-has-description? 'true)))
     (if (member path-id path-ids)
-        (spacemacs/org-edn-error
+        (spacemacs/org-sdn-error
          (concat "Multiply identical path IDs \"%s\" in %S file. "
                  "Usually it happens when headlines have child headlines "
                  "with similar names")
@@ -369,44 +369,44 @@ holding contextual information."
       (todo? :todo)
       (description? :description)
       (t (format "%s-level-%s" :headline level)))
-     (spacemacs/org-edn-escape-string raw-value)
-     (spacemacs/org-edn-escape-string (string-remove-prefix "#" gh-id))
-     (spacemacs/org-edn-escape-string path-id)
+     (spacemacs/org-sdn-escape-string raw-value)
+     (spacemacs/org-sdn-escape-string (string-remove-prefix "#" gh-id))
+     (spacemacs/org-sdn-escape-string path-id)
      level
      contents)))
 
 ;;;; Horizontal Rule
 
-(defun spacemacs//org-edn-horizontal-rule (_horizontal-rule _contents _info)
-  "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs EDN.)))))
+(defun spacemacs//org-sdn-horizontal-rule (_horizontal-rule _contents _info)
+  "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-horizontal-rule")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-horizontal-rule")
   "")
 
 ;;;; Inline Src Block
 
-(defun spacemacs//org-edn-inline-src-block (_inline-src-block _contents _info)
-  "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-inline-src-block (_inline-src-block _contents _info)
+  "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-inline-src-block")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-inline-src-block")
   "")
 
 ;;;; Inlinetask
 
-(defun spacemacs//org-edn-inlinetask (_inlinetask _contents _info)
-  "Transcode an INLINETASK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-inlinetask (_inlinetask _contents _info)
+  "Transcode an INLINETASK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-inlinetask")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-inlinetask")
   "")
 
 ;;;; Inner Template
 
-(defun spacemacs//org-edn-inner-template (contents _info)
+(defun spacemacs//org-sdn-inner-template (contents _info)
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
@@ -414,16 +414,16 @@ holding export options."
 
 ;;;; Italic
 
-(defun spacemacs//org-edn-italic (_italic contents _info)
-  "Transcode ITALIC From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-italic (_italic contents _info)
+  "Transcode ITALIC From Org to Spacemacs SDN.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
   (format "{:tag :italic :children [%s]}" contents))
 
 ;;;; Item
 
-(defun spacemacs//org-edn-item (item contents info)
-  "Transcode an ITEM element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-item (item contents info)
+  "Transcode an ITEM element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((type (org-element-property
@@ -435,9 +435,9 @@ contextual information."
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
-      (spacemacs/org-edn-error
+      (spacemacs/org-sdn-error
        (concat "File \"%s\" contains plain list item of type \"%s\" but "
-               "it isn't implemented in spacemacs//org-edn-item")
+               "it isn't implemented in spacemacs//org-sdn-item")
        (plist-get info :input-file)
        type))
     (format (concat "{:tag :list-item "
@@ -448,7 +448,7 @@ contextual information."
             type
             (format
              "\"%s\""
-             (spacemacs/org-edn-escape-string
+             (spacemacs/org-sdn-escape-string
               (org-element-property :bullet item)))
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
@@ -456,57 +456,57 @@ contextual information."
                  "%s {:tag :item-tag :value \"%s\"}"
                  children
                  (if (char-or-string-p item-tag)
-                     (spacemacs/org-edn-escape-string item-tag)
+                     (spacemacs/org-sdn-escape-string item-tag)
                    (org-export-data-with-backend item-tag
-                                                 'spacemacs-edn
+                                                 'spacemacs-sdn
                                                  info)))
               children))))
 
 ;;;; Keyword
 
-(defun spacemacs//org-edn-keyword (keyword _contents _info)
-  "Transcode a KEYWORD element From Org to Spacemacs EDN.)))))
+(defun spacemacs//org-sdn-keyword (keyword _contents _info)
+  "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "{:tag :keyword :key \"%s\" :value \"%s\"}"
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :key keyword))
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :value keyword))))
 
 ;;;; Latex Environment
 
-(defun spacemacs//org-edn-latex-environment (_latex-environment _contents _info)
-  "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-latex-environment (_latex-environment _contents _info)
+  "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-latex-environment")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-latex-environment")
   "")
 
 ;;;; Latex Fragment
 
-(defun spacemacs//org-edn-latex-fragment (_latex-fragment _contents _info)
-  "Transcode a LATEX-FRAGMENT object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-latex-fragment (_latex-fragment _contents _info)
+  "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-latex-fragment")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-latex-fragment")
   "")
 
 ;;;; Line Break
 
-(defun spacemacs//org-edn-line-break (_line-break _contents _info)
-  "Transcode a LINE-BREAK object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-line-break (_line-break _contents _info)
+  "Transcode a LINE-BREAK object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "{:tag :line-break}")
 
 ;;;; Link
 
-(defconst spacemacs--org-edn-git-url-root-regexp
+(defconst spacemacs--org-sdn-git-url-root-regexp
   (format (concat "\\/\\/github\\.com\\/%s\\/%s\\/blob"
                   "\\/[^/]+\\/\\(.*\\.org\\)\\(\\#.*\\)?")
           spacemacs-repository-owner
           spacemacs-repository))
 
-(defconst spacemacs--org-edn-embeddable-file-path-regexp
+(defconst spacemacs--org-sdn-embeddable-file-path-regexp
   (format
    "^.*\\.%s$"
    (regexp-opt
@@ -515,8 +515,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Regexp that matches file paths of files that can be
 embedded into a web page.")
 
-(defun spacemacs//org-edn-link (link desc info)
-  "Transcode a LINK object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-link (link desc info)
+  "Transcode a LINK object From Org to Spacemacs SDN.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
@@ -530,10 +530,10 @@ INFO is a plist holding contextual information.  See
                                 ".*\\.org\\(\\(::\\|#\\| \\).*\\)?$"
                                 raw-link)))
          (embeddable? (string-match-p
-                       spacemacs--org-edn-embeddable-file-path-regexp
+                       spacemacs--org-sdn-embeddable-file-path-regexp
                        path)))
     (when local-org-link?
-      (spacemacs/org-edn-error
+      (spacemacs/org-sdn-error
        (concat "Link \"%s\" "
                "in \"%s\" "
                "should target the org file at "
@@ -544,7 +544,7 @@ INFO is a plist holding contextual information.  See
        file
        spacemacs-readme-template-url))
     (cond
-     ((string-match spacemacs--org-edn-git-url-root-regexp
+     ((string-match spacemacs--org-sdn-git-url-root-regexp
                     raw-link)
       (let ((path (concat
                    spacemacs--root-dir
@@ -553,7 +553,7 @@ INFO is a plist holding contextual information.  See
                         "#"
                         (match-string 2 raw-link))))
         (unless (file-readable-p path)
-          (spacemacs/org-edn-error
+          (spacemacs/org-sdn-error
            (concat
             "File %S has a GitHub link to the file %S but "
             "it isn't readable locally.")
@@ -564,74 +564,74 @@ INFO is a plist holding contextual information.  See
                         ":raw-link \"%s\" "
                         ":target-headline-gh-id \"%s\" "
                         ":children [%s]}")
-                (spacemacs/org-edn-escape-string path)
-                (spacemacs/org-edn-escape-string raw-link)
-                (spacemacs/org-edn-escape-string (url-unhex-string
+                (spacemacs/org-sdn-escape-string path)
+                (spacemacs/org-sdn-escape-string raw-link)
+                (spacemacs/org-sdn-escape-string (url-unhex-string
                                                   target-id))
                 desc)))
      (local-link?
       (let ((path (url-unhex-string path)))
         (cond
          ((not (file-readable-p path))
-          (spacemacs/org-edn-error
+          (spacemacs/org-sdn-error
            "File %S has a link to file %S but it isn't readable"
            file
            (file-truename path)))
          ((not (string-prefix-p spacemacs--root-dir
                                 (file-truename path)))
-          (spacemacs/org-edn-error
+          (spacemacs/org-sdn-error
            "File %S has a link to file %S but it's outside repository"
            file
            (file-truename path))))
         (when (not local-org-link?)
-          (spacemacs/org-edn-export-file file (file-truename path)))
+          (spacemacs/org-sdn-export-file file (file-truename path)))
         (format "{:tag %s :value \"%s\" :children [%s]}"
                 (if embeddable? :embeddable-file-path :file-path)
-                (spacemacs/org-edn-escape-string path)
+                (spacemacs/org-sdn-escape-string path)
                 desc)))
      ((or (string= type "http")
           (string= type "https")
           (string= type "ftp"))
       (format "{:tag %s :value \"%s\" :children [%s]}"
               (if embeddable? :embeddable-web-link :web-link)
-              (spacemacs/org-edn-escape-string raw-link)
+              (spacemacs/org-sdn-escape-string raw-link)
               desc))
      ((string= type "custom-id")
       (format (concat "{:tag :headline-link "
                       ":target-headline-gh-id \"%s\" :children [%s]}")
-              (spacemacs/org-edn-escape-string raw-link)
+              (spacemacs/org-sdn-escape-string raw-link)
               desc))
-     (t (spacemacs/org-edn-error
+     (t (spacemacs/org-sdn-error
          (concat
           "Link \"%s\" in file \"%s\" "
           "has type \"%s\" "
-          "but the type isn't implemented in spacemacs//org-edn-link")
+          "but the type isn't implemented in spacemacs//org-sdn-link")
          raw-link
          file
          type)))))
 
 ;;;; Node Property
 
-(defun spacemacs//org-edn-node-property (_node-property _contents _info)
-  "Transcode a NODE-PROPERTY element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-node-property (_node-property _contents _info)
+  "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-node-property")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-node-property")
   "")
 
 ;;;; Paragraph
 
-(defun spacemacs//org-edn-paragraph (_paragraph contents _info)
-  "Transcode a PARAGRAPH element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-paragraph (_paragraph contents _info)
+  "Transcode a PARAGRAPH element From Org to Spacemacs SDN.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (format "{:tag :paragraph :children [%s]}" contents))
 
 ;;;; Plain List
 
-(defun spacemacs//org-edn-plain-list (plain-list contents info)
-  "Transcode a PLAIN-LIST element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-plain-list (plain-list contents info)
+  "Transcode a PLAIN-LIST element From Org to Spacemacs SDN.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
@@ -650,9 +650,9 @@ contextual information."
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
-      (spacemacs/org-edn-error
+      (spacemacs/org-sdn-error
        (concat "File \"%s\" contains plain list of type \"%s\" but "
-               "it isn't implemented in spacemacs//org-edn-node-property")
+               "it isn't implemented in spacemacs//org-sdn-node-property")
        (plist-get info :input-file)
        type))
     (if (and (not
@@ -680,7 +680,7 @@ contextual information."
                        parent-hl-parent-hl)
                       "Description"))
         (if (plist-member info :file-has-feature-list?)
-            (spacemacs/org-edn-error
+            (spacemacs/org-sdn-error
              (concat "File \"%s\" has multiply "
                      "\"Features:\" lists in the top "
                      "level \"Description\" headline")
@@ -695,123 +695,123 @@ contextual information."
 
 ;;;; Plain Text
 
-(defun spacemacs//org-edn-plain-text (text _info)
-  "Transcode a TEXT string From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-plain-text (text _info)
+  "Transcode a TEXT string From Org to Spacemacs SDN.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
   (format "{:tag :plain-text :value \"%s\"}"
-          (spacemacs/org-edn-escape-string text)))
+          (spacemacs/org-sdn-escape-string text)))
 
 ;;;; Planning
 
-(defun spacemacs//org-edn-planning (_planning _contents _info)
-  "Transcode a PLANNING element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-planning (_planning _contents _info)
+  "Transcode a PLANNING element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-planning")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-planning")
   "")
 
 ;;;; Property Drawer
 
-(defun spacemacs//org-edn-property-drawer (_property-drawer _contents _info)
-  "Transcode a PROPERTY-DRAWER element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-property-drawer (_property-drawer _contents _info)
+  "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-property-drawer")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-property-drawer")
   "")
 
 ;;;; Quote Block
 
-(defun spacemacs//org-edn-quote-block (_quote-block contents _info)
-  "Transcode a QUOTE-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-quote-block (_quote-block contents _info)
+  "Transcode a QUOTE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (format "{:tag :quote :children [%s]}" contents))
 
 ;;;; Radio Target
 
-(defun spacemacs//org-edn-radio-target (_radio-target _text _info)
-  "Transcode a RADIO-TARGET object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-radio-target (_radio-target _text _info)
+  "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-radio-target")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-radio-target")
   "")
 
 ;;;; Section
 
-(defun spacemacs//org-edn-section (_section contents _info)
-  "Transcode a SECTION element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-section (_section contents _info)
+  "Transcode a SECTION element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
   (format "{:tag :section :children [%s]}" contents))
 
 ;;;; Special Block
 
-(defun spacemacs//org-edn-special-block (_special-block _contents _info)
-  "Transcode a SPECIAL-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-special-block (_special-block _contents _info)
+  "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-special-block")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-special-block")
   "")
 
 ;;;; Src Block
 
-(defun spacemacs//org-edn-src-block (src-block _contents _info)
-  "Transcode a SRC-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-src-block (src-block _contents _info)
+  "Transcode a SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil. INFO is a plist holding contextual information."
   (format "{:tag :src :language \"%s\" :value \"%s\"}"
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :language src-block))
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :value src-block))))
 
 ;;;; Statistics Cookie
 
-(defun spacemacs//org-edn-statistics-cookie (_statistics-cookie _contents _info)
-  "Transcode a STATISTICS-COOKIE object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-statistics-cookie (_statistics-cookie _contents _info)
+  "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-statistics-cookie")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-statistics-cookie")
   "")
 
 ;;;; Strike-Through
 
-(defun spacemacs//org-edn-strike-through (_strike-through contents _info)
-  "Transcode STRIKE-THROUGH From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-strike-through (_strike-through contents _info)
+  "Transcode STRIKE-THROUGH From Org to Spacemacs SDN.
 CONTENTS is the text with strike-through markup.  INFO is a plist
 holding contextual information."
   (format "{:tag :strike-through :children [%s]}" contents))
 
 ;;;; Subscript
 
-(defun spacemacs//org-edn-subscript (_subscript contents _info)
-  "Transcode a SUBSCRIPT object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-subscript (_subscript contents _info)
+  "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "{:tag :subscript :children [%s]}" contents))
 
 ;;;; Superscript
 
-(defun spacemacs//org-edn-superscript (_superscript contents _info)
-  "Transcode a SUPERSCRIPT object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-superscript (_superscript contents _info)
+  "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "{:tag :superscript :children [%s]}" contents))
 
 ;;;; Table
 
-(defun spacemacs//org-edn-table (table contents _info)
-  "Transcode a TABLE element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-table (table contents _info)
+  "Transcode a TABLE element From Org to Spacemacs SDN.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (let ((type (org-element-property :type table)))
     (unless (eq type 'org)
-      (spacemacs/org-edn-error
-       "Table type \"%s\" isn't implemented in spacemacs//org-edn-table"
+      (spacemacs/org-sdn-error
+       "Table type \"%s\" isn't implemented in spacemacs//org-sdn-table"
        type))
     (format "{:tag :table :type :%s :children [%s]}"
             (org-element-property :type table)
@@ -819,33 +819,33 @@ contextual information."
 
 ;;;; Table Cell
 
-(defun spacemacs//org-edn-table-cell (_table-cell contents _info)
-  "Transcode a TABLE-CELL element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-table-cell (_table-cell contents _info)
+  "Transcode a TABLE-CELL element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (format "{:tag :table-cell :children [%s]}" contents))
 
 ;;;; Table Row
 
-(defun spacemacs//org-edn-table-row (_table-row contents _info)
-  "Transcode a TABLE-ROW element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-table-row (_table-row contents _info)
+  "Transcode a TABLE-ROW element From Org to Spacemacs SDN.
 CONTENTS is the contents of the row.  INFO is a plist used as a
 communication channel."
   (format "{:tag :table-row :children [%s]}" contents))
 
 ;;;; Target
 
-(defun spacemacs//org-edn-target (_target _contents _info)
-  "Transcode a TARGET object From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-target (_target _contents _info)
+  "Transcode a TARGET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-target")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-target")
   "")
 
 ;;;; Template
 
-(defun spacemacs//org-edn-template (contents info)
+(defun spacemacs//org-sdn-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
@@ -865,7 +865,7 @@ holding export options."
                                     file
                                     t))
           (unless has-description?
-            (spacemacs/org-edn-error
+            (spacemacs/org-sdn-error
              (concat
               "File \"%s\" "
               "doesn't have top level "
@@ -874,7 +874,7 @@ holding export options."
              file
              spacemacs-readme-template-url))
           (unless has-feature-list?
-            (spacemacs/org-edn-error
+            (spacemacs/org-sdn-error
              (concat "File \"%s\" "
                      "doesn't have \"Features:\"(With a colon) list in the "
                      "top level \"Description\" headline\n"
@@ -896,42 +896,42 @@ holding export options."
               'false)
             (map 'vector
                  (lambda (s)
-                   (format "\"%s\"" (spacemacs/org-edn-escape-string s)))
+                   (format "\"%s\"" (spacemacs/org-sdn-escape-string s)))
                  (plist-get info :path-ids))
             contents)))
 
 ;;;; Timestamp
 
-(defun spacemacs//org-edn-timestamp (_timestamp _contents _info)
-  "Transcode a TIMESTAMP object From Org to Spacemacs EDN.)))))))))
+(defun spacemacs//org-sdn-timestamp (_timestamp _contents _info)
+  "Transcode a TIMESTAMP object From Org to Spacemacs SDN.)))))))))
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-edn-error "\"%s\" not implemented"
-                           "spacemacs//org-edn-timestamp")
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-timestamp")
   "")
 
 ;;;; Underline
 
-(defun spacemacs//org-edn-underline (_underline contents _info)
-  "Transcode UNDERLINE From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-underline (_underline contents _info)
+  "Transcode UNDERLINE From Org to Spacemacs SDN.
 CONTENTS is the text with underline markup.  INFO is a plist
 holding contextual information."
   (format "{:tag :underline :children [%s]}" contents))
 
 ;;;; Verbatim
 
-(defun spacemacs//org-edn-verbatim (verbatim _contents _info)
-  "Transcode VERBATIM From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-verbatim (verbatim _contents _info)
+  "Transcode VERBATIM From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :verbatim :value \"%s\"}"
-          (spacemacs/org-edn-escape-string
+          (spacemacs/org-sdn-escape-string
            (org-element-property :value verbatim))))
 
 ;;;; Verse Block
 
-(defun spacemacs//org-edn-verse-block (_verse-block contents _info)
-  "Transcode a VERSE-BLOCK element From Org to Spacemacs EDN.
+(defun spacemacs//org-sdn-verse-block (_verse-block contents _info)
+  "Transcode a VERSE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
   (format "{:tag :verse :children [%s]}" contents))
@@ -939,33 +939,33 @@ contextual information."
 
 ;;; Filter Functions
 
-(defsubst spacemacs//org-edn-final-function-tidy (contents)
+(defsubst spacemacs//org-sdn-final-function-tidy (contents)
   "Filter to compact output by removing newline symbols.
 FIXME: Figure out where they come from :"
   (replace-regexp-in-string "\n" "" contents))
 
-(defsubst spacemacs//org-edn-final-function-fmt-vec-of-nil (str)
+(defsubst spacemacs//org-sdn-final-function-fmt-vec-of-nil (str)
   "Replace [nil] with []."
   (replace-regexp-in-string "\\[nil\\]" "[]" str nil t))
 
-(defsubst spacemacs//org-edn-final-function-lint (info)
+(defsubst spacemacs//org-sdn-final-function-lint (info)
   "Warn about potential errors."
-  (let ((warnings (plist-get info :spacemacs-edn-warnings)))
+  (let ((warnings (plist-get info :spacemacs-sdn-warnings)))
     (when (stringp warnings)
-      (spacemacs/org-edn-warn
+      (spacemacs/org-sdn-warn
        "%s"
        (string-remove-suffix "\n" warnings)))))
 
-(defun spacemacs//org-edn-final-function (contents _backend info)
-  "Call final functions for `space-edn' backend"
-  (spacemacs//org-edn-final-function-lint info)
-  (spacemacs//org-edn-final-function-fmt-vec-of-nil
-   (spacemacs//org-edn-final-function-tidy contents)))
+(defun spacemacs//org-sdn-final-function (contents _backend info)
+  "Call final functions for `space-sdn' backend"
+  (spacemacs//org-sdn-final-function-lint info)
+  (spacemacs//org-sdn-final-function-fmt-vec-of-nil
+   (spacemacs//org-sdn-final-function-tidy contents)))
 
 
 ;;; End-user functions
 
-(defun spacemacs/export-docs-to-edn (root-dir exp-dir file-list)
+(defun spacemacs/export-docs-to-sdn (root-dir exp-dir file-list)
   "Export org files in FILE-LIST into EXP-DIR.
 ROOT-DIR is original documentation root directory."
   (let* ((spacemacs--root-dir (file-truename root-dir))
@@ -978,7 +978,7 @@ ROOT-DIR is original documentation root directory."
                                  (string-remove-prefix
                                   spacemacs--root-dir
                                   (file-truename file)))
-                                ".edn"))
+                                ".sdn"))
              (target-file-dir
               (file-name-as-directory
                (file-name-directory target-file-name))))
@@ -987,24 +987,24 @@ ROOT-DIR is original documentation root directory."
         (while (not (file-accessible-directory-p target-file-dir))
           (condition-case err
               (make-directory target-file-dir t)
-            (error (spacemacs/org-edn-error
+            (error (spacemacs/org-sdn-error
                     "make-directory \"%s\" failed with \"%s\". Retrying..."
                     target-file-dir
                     err))))
-        (spacemacs/org-edn-message
+        (spacemacs/org-sdn-message
          "Exporting \"%s\" into \"%s\""
          file
          target-file-name)
         (with-temp-buffer
           (find-file file)
           (org-export-to-file
-              'spacemacs-edn
+              'spacemacs-sdn
               target-file-name))
         (if (and (file-readable-p target-file-name)
                  (> (nth 7 (file-attributes target-file-name)) 0))
-            (spacemacs/org-edn-message
+            (spacemacs/org-sdn-message
              "Successfully exported \"%s\""
              file)
-          (spacemacs/org-edn-error
+          (spacemacs/org-sdn-error
            "Export finished but \"%s\" doesn't exist or empty"
            target-file-name))))))
