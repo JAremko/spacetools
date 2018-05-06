@@ -26,18 +26,20 @@
 
 (defn-  uberjar-work-dir
   []
-  (-> (class *ns*)
-      .getProtectionDomain
-      .getCodeSource
-      .getLocation
-      .getPath
-      io/file
-      .getParent))
+  (io!
+   (-> (class *ns*)
+       .getProtectionDomain
+       .getCodeSource
+       .getLocation
+       .getPath
+       io/file
+       .getParent)))
 
 
 (defn- lein-work-dir
   []
-  (System/getProperty "user.dir"))
+  (io!
+   (System/getProperty "user.dir")))
 
 
 (defn default-input-dir-exc
@@ -91,7 +93,8 @@
                       [{} (Exception. "File should contain single root form.")]
                       (not (s/valid? root-node-spec obj))
                       [(data/explain-deepest obj) "Validation filed."])]
-           (apply exc/failure (assoc-in e [0 :file] file-path)) obj)))))))
+           (apply exc/failure (assoc-in e [0 :file] file-path))
+           obj)))))))
 
 
 (defn args->spacedocs-exc

@@ -2,7 +2,6 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.string :refer [join]]
-            [clojure.repl :refer [doc]]
             [clojure.spec.alpha :as s]))
 
 
