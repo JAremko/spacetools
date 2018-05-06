@@ -40,7 +40,7 @@
   (System/getProperty "user.dir"))
 
 
-(defn default-input-dir-m
+(defn default-input-dir-exc
   []
   (io!
    (exc/try-on
@@ -64,7 +64,7 @@
         (exc/failure (Exception. "Can't locate Spacedoc directory.")))))))
 
 
-(defn input-dir->edn-fps-m
+(defn input-dir->edn-fps-exc
   [input-dir-path]
   (io!
    (exc/try-on (eduction
@@ -74,10 +74,10 @@
                 (file-seq (io/file input-dir-path))))))
 
 
-(defn fp->spacedoc-m
+(defn fp->spacedoc-exc
   "Read and validate Spacedoc END file."
   ([file-path]
-   (fp->spacedoc-m :spacedoc.data/root file-path))
+   (fp->spacedoc-exc :spacedoc.data/root file-path))
   ([root-node-spec file-path]
    (io!
     (exc/try-on
@@ -88,14 +88,14 @@
        (let [[obj fin] (repeatedly 2 (partial edn/read {:eof :fin} input))]
          (if-let [e (cond
                       (not= :fin fin)
-                      [(Exception. "File should contain single root form")]
+                      [{} (Exception. "File should contain single root form.")]
                       (not (s/valid? root-node-spec obj))
-                      [(data/explain-deepest obj) "Validation filed"])]
-           (apply exc/failure e) obj)))))))
+                      [(data/explain-deepest obj) "Validation filed."])]
+           (apply exc/failure (assoc-in e [0 :file] file-path)) obj)))))))
 
 
-(defn args->spacedocs-m
-  [args ops]
+(defn args->spacedocs-exc
+  [ops args]
   (io!
    (exc/try-on
     (let [{{:keys [input]} :options errors :errors} (parse-opts args ops)]
@@ -103,11 +103,20 @@
         (exc/failure (ex-info "Bad args" {:errors errors}))
         (m/alet [input-dir (if input
                              (exc/success input)
-                             (default-input-dir-m))
-                 edn-fps (input-dir->edn-fps-m input-dir)]
-                (eduction (map fp->spacedoc-m) edn-fps)))))))
+                             (default-input-dir-exc))
+                 edn-fps (input-dir->edn-fps-exc input-dir)]
+                (eduction (map fp->spacedoc-exc) edn-fps)))))))
 
 
 (defn export-graph-svg
   [file-path graph]
   (io! (gv/export graph file-path :indent "yes")))
+
+
+(defn exit-err
+  "`println` ERR to STDERR and exit with code 2."
+  [err]
+  (io!
+   (binding [*out* *err*]
+     (println err)
+     (System/exit 2))))

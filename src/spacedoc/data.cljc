@@ -1,16 +1,31 @@
 (ns spacedoc.data
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
+            [clojure.string :refer [join]]
+            [clojure.repl :refer [doc]]
             [clojure.spec.alpha :as s]))
 
 
 (def ^:private doc-ns-str (str *ns*))
 
 
+(alias 'cs 'clojure.spec.alpha)
+
+
 (load "data_spec")
 
 
 (def all-tags (remove #{:default} (keys (methods node->spec-k))))
+
+
+(def children-tag-s (comp (partial into #{} (map :tag)) :children))
+
+
+(defn- fmt-problem
+  [node problem]
+  (join "\n" (assoc problem
+                    :node-tag (:tag node)
+                    :node-spec (s/describe (node->spec-k node)))))
 
 
 (defn explain-deepest
@@ -20,11 +35,8 @@
   The function returns `nil` If all nodes are valid."
   [node]
   (or (first (sequence (keep (partial explain-deepest)) (:children node)))
-      (when-not (s/valid? ::node node)
-        (s/explain-data (node->spec-k node) node))))
-
-
-(def children-tag-s (comp (partial into #{} (map :tag)) :children))
+      (when-let [p (::cs/problems (s/explain-data (node->spec-k node) node))]
+        {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
 (defn node-relations
