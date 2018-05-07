@@ -13,7 +13,8 @@
 (defn sdn-file?
   [file-path]
   (io! (and (.isFile (io/file file-path))
-            (re-matches #"(?i).*\.sdn$" (str file-path)))))
+            (re-matches #"(?i).*\.sdn$" (str file-path))
+            true)))
 
 
 (defn directory?
@@ -22,6 +23,16 @@
    (when-let [f (io/file file-path)]
      (and (.exists f)
           (.isDirectory f)))))
+
+
+(defn parent-dir-writable?
+  [file-path]
+  (io!
+   (and (not (directory? file-path))
+        (some-> file-path
+                (io/file)
+                (.getParentFile)
+                (.exists)))))
 
 
 (defn-  uberjar-work-dir
@@ -42,7 +53,7 @@
    (System/getProperty "user.dir")))
 
 
-(defn- default-input-dir-exc*
+(defn default-input-dir-exc
   []
   (io!
    (exc/try-on
@@ -66,13 +77,11 @@
         (exc/failure (Exception. "Can't locate Spacedoc directory.")))))))
 
 
-(def default-input-dir-exc (memoize default-input-dir-exc*))
-
-
 (defn input-dir->sdn-fps-exc
   [input-dir-path]
   (io!
    (exc/try-on (eduction
+                (map #(do (println "1") %))
                 (map #(.getCanonicalPath %))
                 (map str)
                 (filter sdn-file?)
@@ -100,15 +109,15 @@
            obj)))))))
 
 
-(defn input-dir->spacedocs-exc
-  [input-dir]
-  (io!
-   (exc/try-on
-    (m/alet [idir (if input-dir
-                    (exc/success input-dir)
-                    (default-input-dir-exc))
-             sdn-fps (input-dir->sdn-fps-exc idir)]
-            (eduction (map fp->spacedoc-exc) sdn-fps)))))
+;; (defn input-dir->spacedocs-exc
+;;   [input-dir]
+;;   (io!
+;;    (exc/try-on
+;;     (m/alet [idir (if input-dir
+;;                     (exc/success input-dir)
+;;                     (default-input-dir-exc))
+;;              sdn-fps (input-dir->sdn-fps-exc idir)]
+;;             (eduction (map fp->spacedoc-exc) sdn-fps)))))
 
 
 (defn export-graph-svg
