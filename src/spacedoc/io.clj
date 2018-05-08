@@ -77,15 +77,18 @@
         (exc/failure (Exception. "Can't locate Spacedoc directory.")))))))
 
 
-(defn input-dir->sdn-fps-exc
+(defn sdn-fps-in-dir-exc
   [input-dir-path]
   (io!
-   (exc/try-on (eduction
-                (map #(do (println "1") %))
-                (map #(.getCanonicalPath %))
-                (map str)
-                (filter sdn-file?)
-                (file-seq (io/file input-dir-path))))))
+   (exc/try-on (if-not (directory? input-dir-path)
+                 (exc/failure (ex-info "File isn't a directory"
+                                       {:file input-dir-path}))
+                 (into #{}
+                       (comp
+                        (map #(.getCanonicalPath %))
+                        (map str)
+                        (filter sdn-file?))
+                       (file-seq (io/file input-dir-path)))))))
 
 
 (defn fp->spacedoc-exc
@@ -107,17 +110,6 @@
                       [(data/explain-deepest obj) "Validation filed."])]
            (apply exc/failure (assoc-in e [0 :file] file-path))
            obj)))))))
-
-
-;; (defn input-dir->spacedocs-exc
-;;   [input-dir]
-;;   (io!
-;;    (exc/try-on
-;;     (m/alet [idir (if input-dir
-;;                     (exc/success input-dir)
-;;                     (default-input-dir-exc))
-;;              sdn-fps (input-dir->sdn-fps-exc idir)]
-;;             (eduction (map fp->spacedoc-exc) sdn-fps)))))
 
 
 (defn export-graph-svg

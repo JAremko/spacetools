@@ -1,41 +1,41 @@
 (ns spacedoc.args
   (:require [spacedoc.io :as sio]
-            [clojure.core.match :refer [match]]
+            [clojure.set :refer [union]]
             [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.tools.cli :refer [parse-opts]]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [clojure.core.reducers :as r]))
 
 
-(defn-  not-sdn
-  [files]
-  (remove sio/sdn-file? files))
+(defn- flatten-fps-exc
+  [pathes]
+  (r/reduce
+   (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
+   (r/map
+    #(do
+       (println % (sio/sdn-file? %) (sio/directory? %))
+       (cond
+         (sio/sdn-file? %) (exc/success %)
+         (sio/directory? %) (sio/sdn-fps-in-dir-exc %)
+         :else (exc/failure (ex-info "File isn't a .sdn file or a directory"
+                                     {:file %}))))
+    pathes)))
 
 
-(defn input->sdn-fps-exc
+(defn parse-input
   [input]
   (exc/try-on
    (if (not-empty input)
-     (let [[f & r :as in] input]
-       (match
-        [(sio/sdn-file? f) (sio/directory? f) (empty? r) (empty? (not-sdn in))]
-        [true false  true  _    ] (exc/success in)
-        [false true  true  _    ] (sio/input-dir->sdn-fps-exc f)
-        [_     _     false true ] (exc/success in)
-        [_     _     _     false] (exc/failure
-                                   (ex-info "Not .sdn or unreadable files."
-                                            {:files (not-sdn in)}))
-        :else (exc/failure (ex-info "Fail to interpret --input"
-                                    {:input input}))))
-     (m/fmap sio/input-dir->sdn-fps-exc (sio/default-input-dir-exc)))))
+     (flatten-fps-exc input)
+     (m/fmap sio/sdn-fps-in-dir-exc (sio/default-input-dir-exc)))))
 
 
 (defn parse
   "Parse ARGS with `parse-opts` using OPS and returns options"
   [args ops]
   (exc/try-on
-   (let [{:keys [options errors]} (parse-opts args ops)
-         {input :input} options]
+   (let [{:keys [options errors]} (parse-opts args ops)]
      (if errors
        (exc/failure (ex-info "Bad args:" {:errors errors}))
        (exc/success options)))))

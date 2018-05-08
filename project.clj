@@ -4,7 +4,6 @@
   :license {:name "GNU General Public License V3"
             :url "https://www.gnu.org/licenses/gpl.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/core.match "0.3.0-alpha5"]
                  [lacij/lacij "0.10.0"]
                  [funcool/cats "2.2.0"]
                  [org.clojure/tools.cli "0.3.7"]]

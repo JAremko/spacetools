@@ -10,9 +10,9 @@
   [["-i" "--input INPUT" "Input directory or file. Can be reused."
     :default-desc "<SPACEDOC_ROOT>/emacs-tools/export/target/"
     :parse-fn #(list (edn/read-string (str "\"" % "\"")))
-    :validate [(fn [[in]]
-                 (and (string? in) (or (sio/directory? in) (sio/sdn-file? in))))
-               "Input should be a directory or a .SDN file."]
+    ;; :validate [(fn [[in]]
+    ;;              (and (string? in) (or (sio/directory? in) (sio/sdn-file? in))))
+    ;;            "Input should be a directory or a .SDN file."]
     :assoc-fn (fn [m key val] (update m key (partial concat val)))]
    ["-r" "--relations FILE" "Draw SVG of node relations into FILE."
     :validate [sio/parent-dir-writable? "Parent directory isn't writable."]]
@@ -27,8 +27,8 @@
 (defn -main [& args]
   (println
    (m/mlet [{:keys [help input validate relations describe]} (a/parse args ops)]
-           {:h help :i input :v validate :r relations :d describe})))
-
+           {:h help :i input :pi (a/parse-input input) :v validate :r relations :d describe})))
+           #_ (cond->>)
 
            ;; spacedocs (m/fmap #(eduction sio/fp->spacedoc-exc %) (:files-exc options))]
            ;; (if (seq spacedocs)
