@@ -35,48 +35,6 @@
                 (.exists)))))
 
 
-(defn-  uberjar-work-dir
-  []
-  (io!
-   (-> (class *ns*)
-       .getProtectionDomain
-       .getCodeSource
-       .getLocation
-       .getPath
-       io/file
-       .getParent)))
-
-
-(defn- lein-work-dir
-  []
-  (io!
-   (System/getProperty "user.dir")))
-
-
-(defn default-input-dir-exc
-  []
-  (io!
-   (exc/try-on
-    (let [d (uberjar-work-dir)
-          lein (lein-work-dir)
-          etools "emacs-tools"
-          u-r (str d "/" etools)
-          u-t (str d "/../../" etools)
-          t-d "/emacs-tools/export/target"]
-      (if-let
-          [root-dir
-           (cond
-             (directory? u-r) d
-             (directory? u-t) (.getCanonicalPath (io/file (str d "/../../")))
-             (directory? (str lein "/" etools)) lein)]
-        (let [target-dir (str root-dir t-d)]
-          (if (directory? target-dir)
-            target-dir
-            (exc/failure (ex-info "Target isn't a directory."
-                                  {:target target-dir}))))
-        (exc/failure (Exception. "Can't locate Spacedoc directory.")))))))
-
-
 (defn sdn-fps-in-dir-exc
   [input-dir-path]
   (io!
