@@ -33,7 +33,9 @@
   "Draw SVG of nodes relations."
   [svg-file-path sdn-file-paths]
   (exc/try-on
-   (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc-exc sdn-file-paths))]
+   (m/alet [spacedocs (m/sequence (pmap
+                                   (partial sio/fp->spacedoc-exc :spacedoc.data/any)
+                                   sdn-file-paths))]
            (cond
              (sio/directory? svg-file-path)
              (exc/failure (ex-info "Output file path is a directory."

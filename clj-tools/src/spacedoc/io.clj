@@ -79,9 +79,17 @@
 
 
 (defn exit-err
-  "`println` ERR to STDERR and exit with code 2."
-  [err]
+  "`println` MSG to STDERR and exit with code 2."
+  [msg]
   (io!
    (binding [*out* *err*]
-     (println err)
+     (println msg)
      (System/exit 2))))
+
+
+(defn exit-success
+  "`println` MSG to STDOUT and exit with code 0."
+  [msg]
+  (io!
+   (println msg)
+   (System/exit 0)))

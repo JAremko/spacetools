@@ -2,11 +2,12 @@
   (:require [spacedoc.io :as sio]
             [spacedoc.args :refer [parse-exc parse-input-exc]]
             [spacedoc.actions :as ac]
+            [spacedoc.util :as util]
+            [cats.core :as m]
+            [cats.monad.exception :as exc]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]]
-            [clojure.edn :as edn]
-            [cats.core :as m]
-            [cats.monad.exception :as exc])
+            [clojure.edn :as edn])
   (:gen-class))
 
 
@@ -44,7 +45,7 @@
 
 (defn -main [& args]
   (let
-      [output
+      [output-exc
        (m/alet
         [{:keys [help input summary action a-args]} (parse-exc args ops)]
         (if help
@@ -67,6 +68,8 @@
            (fail "Validate doesn't take args." {:args a-args})
            [nil         _]
            (fail "No action specified." {:action action})
-           :else (ex-info "Invalid action" {:action action}))))]
-    (println output)
-    (System/exit 0)))
+           :else (ex-info "Invalid action" {:action action}))))
+       output (m/extract output-exc)]
+    (if (exc/failure? output-exc)
+      (sio/exit-err (util/err->msg output))
+      (sio/exit-success output))))

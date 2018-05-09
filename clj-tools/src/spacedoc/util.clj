@@ -7,7 +7,7 @@
             [clojure.core.reducers :as r]))
 
 
-(defn fmt-err
+(defn err->msg
   [err]
   (let [{:keys [cause data]} (Throwable->map err)]
     (println-str
@@ -16,14 +16,3 @@
             (map #(apply str % ": " (repeat (- 78 (count %)) "="))
                  ["File" "Cause" "Data"])
             [(or (:file data) "<none>") cause (or (:problems data) data)])))))
-
-
-(defn spacedocs-exc->spacedocs
-  "Unwraps spacedocs from `cats.monad.exception` and returns it.
-  If error has occurred it will be outputted with `sio/exit-err`"
-  [spacedocs-exc]
-  (let [out-exc (m/bind spacedocs-exc m/sequence)
-        out (m/extract out-exc)]
-    (when (exc/failure? out-exc)
-      (sio/exit-err (fmt-err out)))
-    out))
