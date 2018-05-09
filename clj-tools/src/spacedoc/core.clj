@@ -2,7 +2,6 @@
   (:require [spacedoc.io :as sio]
             [spacedoc.args :refer [parse-exc parse-input-exc]]
             [spacedoc.actions :as ac]
-            [spacedoc.util :refer [fail]]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]]
             [clojure.edn :as edn]
@@ -16,14 +15,14 @@
    \newline
    ["Spacemacs documentation tools."
     ""
-    "Usage: spacedoc [OPTIONS]... [ACTION]"
+    "Usage: spacedoc [OPTIONS]... ACTION"
     ""
     "Options:"
     options-summary
     ""
     "Actions:"
     "  validate           Validate Spacedoc(SDN) input files."
-    "  describe  SPEC     Describe spec by keyword."
+    "  describe  SPEC     Describe spec by keyword like :spacedoc.data/root."
     "  rel-graph OUT_FILE Draw SVG of node relations in input Spacedoc(SDN) fs."
     ""]))
 
@@ -35,14 +34,12 @@
                  (and (string? in) (or (sio/directory? in) (sio/sdn-file? in))))
                "Input should be a directory or a .SDN file."]
     :assoc-fn (fn [m key val] (update m key (partial concat (list val))))]
-   ["-r" "--relations OUT_FILE" "Draw SVG of node relations in input SND files."
-    :validate [sio/parent-dir-writable? "Parent directory isn't writable."]]
-   ["-d" "--describe SPEC" "Describe spec by keyword."
-    :parse-fn edn/read-string
-    :validate [keyword? "Specs should be specified by keyword."
-               qualified-keyword? "Spec should be qualified keyword."]]
-   ["-v" "--validate" "Validate Spacedoc(SDN) input files while reading."]
    ["-h" "--help" "Show help message."]])
+
+
+(defn fail
+  [msg dat]
+  (exc/failure (ex-info msg dat)))
 
 
 (defn -main [& args]
@@ -56,7 +53,7 @@
            ;; Handlers
            [action      a-args]
            ["describe"  [key]]
-           (m/fmap ac/describe-spec-exc key)
+           (ac/describe-spec-exc key)
            ["rel-graph" [path]]
            (m/fmap (partial ac/draw-relations-graph-exc path) (parse-input-exc input))
            ["validate"  []]
@@ -68,13 +65,8 @@
            (fail "rel-graph requires file name as a single arg." {:args a-args})
            ["validate"  _]
            (fail "Validate doesn't take args." {:args a-args})
+           [nil         _]
+           (fail "No action specified." {:action action})
            :else (ex-info "Invalid action" {:action action}))))]
-    (println output)))
-
-
-
-;; spacedocs (m/fmap #(eduction sio/fp->spacedoc-exc %) (:files-exc options))]
-;; (if (seq spacedocs)
-;;   (printf "%s Spacedocs successfully parsed and validated.\n"
-;;           (count spacedocs))
-;;   (println "Input folder doesn't contain SDN files.")))))
+    (println output)
+    (System/exit 0)))

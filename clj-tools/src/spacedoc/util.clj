@@ -27,8 +27,3 @@
     (when (exc/failure? out-exc)
       (sio/exit-err (fmt-err out)))
     out))
-
-
-(defn fail
-  [msg dat]
-  (exc/failure (ex-info msg dat)))

@@ -28,11 +28,12 @@
 (defn parent-dir-writable?
   [file-path]
   (io!
-   (and (not (directory? file-path))
-        (some-> file-path
-                (io/file)
-                (.getParentFile)
-                (.exists)))))
+   (some-> file-path
+           (io/file)
+           (.getCanonicalPath)
+           (io/file)
+           (.getParentFile)
+           (.exists))))
 
 
 (defn sdn-fps-in-dir-exc
@@ -70,9 +71,11 @@
            obj)))))))
 
 
-(defn export-graph-svg
+(defn export-graph-svg-exc
   [file-path graph]
-  (io! (gv/export graph file-path :indent "yes")))
+  (exc/try-on
+   (io!  (gv/export graph file-path :indent "yes")
+         (exc/success (format "Successfully exported: \"%s\"" file-path)))))
 
 
 (defn exit-err

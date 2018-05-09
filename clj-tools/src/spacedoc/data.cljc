@@ -43,7 +43,11 @@
   ([root]
    (r/reduce
     (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
-    (tree-seq :children :children root)))
-  ([root & roots]
-   (r/fold (r/monoid (partial merge-with union) hash-map)
-           (r/map node-relations (list* root roots)))))
+    (tree-seq :children :children root))))
+
+
+(defn node-relations-aggregate
+  "Apply `node-relations` to ROOTS and union the outputs.."
+  [roots]
+  (r/fold (r/monoid (partial merge-with union) hash-map)
+          (r/map node-relations roots)))
