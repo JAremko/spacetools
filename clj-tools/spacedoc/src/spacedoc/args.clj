@@ -9,29 +9,31 @@
             [clojure.core.reducers :as r]))
 
 
-(defn- flatten-fps-exc
+(defn- flatten-fps
   [pathes]
   (r/fold
    (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
    (r/map
     #(cond
        (sio/sdn-file? %) (exc/success %)
-       (sio/directory? %) (sio/sdn-fps-in-dir-exc %)
+       (sio/directory? %) (sio/sdn-fps-in-dir %)
        :else (exc/failure (ex-info "File isn't a .sdn file or a directory"
                                    {:file %})))
     pathes)))
 
 
-(defn parse-input-exc
+(defn parse-input
   [input]
   (exc/try-on
    (if (not-empty input)
-     (flatten-fps-exc input)
+     (flatten-fps input)
      (exc/failure
-      (Exception. "At least one input must be specified for this action.")))))
+      (ex-info
+       "At least one input must be specified for this action."
+       {:input input})))))
 
 
-(defn parse-exc
+(defn parse
   "Parse ARGS with `parse-opts` using OPS.
   Returns options wrapped in exception monad."
   [args ops]

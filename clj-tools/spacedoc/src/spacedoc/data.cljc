@@ -22,9 +22,10 @@
 
 (defn- fmt-problem
   [node problem]
-  (join "\n" (assoc problem
-                    :node-tag (:tag node)
-                    :node-spec (s/describe (node->spec-k node)))))
+  (join \newline
+        (assoc problem
+               :node-tag (:tag node)
+               :node-spec (s/describe (node->spec-k node)))))
 
 
 (defn explain-deepest

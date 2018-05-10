@@ -3,7 +3,7 @@
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [cats.monad.exception :as exc]
-            [lacij.view.graphview :as gv]
+            #_ [lacij.view.graphview :as gv]
             [clojure.tools.cli :refer [parse-opts]]
             [spacedoc.data :as data]
             [cats.core :as m]
@@ -36,7 +36,7 @@
            (.exists))))
 
 
-(defn sdn-fps-in-dir-exc
+(defn sdn-fps-in-dir
   [input-dir-path]
   (io!
    (exc/try-on (if-not (directory? input-dir-path)
@@ -44,16 +44,16 @@
                                        {:file input-dir-path}))
                  (into #{}
                        (comp
-                        (map #(.getCanonicalPath %))
+                        (map #(.getCanonicalPath (io/file %)))
                         (map str)
                         (filter sdn-file?))
                        (file-seq (io/file input-dir-path)))))))
 
 
-(defn fp->spacedoc-exc
+(defn fp->spacedoc
   "Read and validate Spacedoc END file."
   ([file-path]
-   (fp->spacedoc-exc :spacedoc.data/root file-path))
+   (fp->spacedoc :spacedoc.data/root file-path))
   ([root-node-spec file-path]
    (io!
     (exc/try-on
@@ -71,11 +71,11 @@
            obj)))))))
 
 
-(defn export-graph-svg-exc
-  [file-path graph]
-  (exc/try-on
-   (io!  (gv/export graph file-path :indent "yes")
-         (exc/success (format "Successfully exported: \"%s\"" file-path)))))
+#_ (defn export-graph-svg
+     [file-path graph]
+     (exc/try-on
+      (io!  (gv/export graph file-path :indent "yes")
+            (exc/success (format "Successfully exported: \"%s\"" file-path)))))
 
 
 (defn exit-err
