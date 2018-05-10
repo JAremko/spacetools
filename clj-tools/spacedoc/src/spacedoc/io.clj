@@ -75,7 +75,7 @@
      [file-path graph]
      (exc/try-on
       (io!  (gv/export graph file-path :indent "yes")
-            (exc/success (format "Successfully exported: \"%s\"" file-path)))))
+            (format "Successfully exported: \"%s\"" file-path))))
 
 
 (defn exit-err

@@ -50,7 +50,7 @@
        (m/alet
         [{:keys [help input summary action a-args]} (parse args ops)]
         (if help
-          (exc/success (usage summary))
+          (usage summary)
           (match
            ;; Handlers
            [action      a-args]

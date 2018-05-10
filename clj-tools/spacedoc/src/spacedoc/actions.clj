@@ -15,8 +15,8 @@
   [sdn-file-paths]
   (exc/try-on
    (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
-           (exc/success (format "%s spacedoc files successfully validated."
-                                (count spacedocs))))))
+           (format "%s spacedoc files successfully validated."
+                   (count spacedocs)))))
 
 
 (defn describe-spec
@@ -25,7 +25,7 @@
   (exc/try-on
    (let [key (edn/read-string spec-key)]
      (if (qualified-keyword? key)
-       (exc/success (s/describe key))
+       (s/describe key)
        (exc/failure (ex-info "Spec key must be a qualified keyword"
                              {:keyword key}))))))
 

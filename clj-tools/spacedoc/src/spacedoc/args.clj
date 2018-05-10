@@ -15,7 +15,7 @@
    (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
    (r/map
     #(cond
-       (sio/sdn-file? %) (exc/success %)
+       (sio/sdn-file? %) %
        (sio/directory? %) (sio/sdn-fps-in-dir %)
        :else (exc/failure (ex-info "File isn't a .sdn file or a directory"
                                    {:file %})))
@@ -41,7 +41,7 @@
    (let [{:keys [options summary arguments errors]} (parse-opts args ops)]
      (if errors
        (exc/failure (ex-info "Bad args:" {:errors errors}))
-       (exc/success (assoc options
-                           :summary summary
-                           :action (first arguments)
-                           :a-args (vec (rest arguments))))))))
+       (assoc options
+              :summary summary
+              :action (first arguments)
+              :a-args (vec (rest arguments)))))))
