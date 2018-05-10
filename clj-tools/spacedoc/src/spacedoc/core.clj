@@ -76,7 +76,7 @@
            (fail "\"relations\" doesn't take args."
                  {:args a-args})
            [nil         _]
-           (fail "No action specified."
+           (fail "No action specified. Run with \"--help\" for usage."
                  {:action action})
            :else (ex-info "Invalid action" {:action action}))))
        output (m/extract output-m)]
