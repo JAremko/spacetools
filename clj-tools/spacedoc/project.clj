@@ -11,5 +11,5 @@
   :main spacedoc.core
   :global-vars {*warn-on-reflection* true}
   :target-path "target/%s"
-  :uberjar-name "spacedoc.jar"
+  :uberjar-name "sdn.jar"
   :profiles {:uberjar {:aot :all}})

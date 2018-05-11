@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$0")"
+
+action="$1"
+shift
+
+print_help () {
+read -d '' help <<- EOF
+  usage: ..
+  
+  extra ...
+
+EOF
+echo "$help"
+}
+
+case $action in
+"")
+    print_help
+    exit 2
+    ;;
+-h|--help)
+    print_help
+    exit 0
+    ;;
+esac
+
+case $@ in
+"")
+    print_help
+    exit 2
+    ;;
+-h|--help)
+    print_help
+    exit 0
+    ;;
+esac
+
+case $action in
+export)
+    exec emacs -batch -l ./emacs-tools/export/run.el -no-site-file -q "$@"
+    ;;
+format)
+    exec emacs -batch -l ./emacs-tools/docfmt/run.el -no-site-file -q "$@"
+    ;;
+describe|rel-graph|validate|relations)
+    exec sdn $action "$@"
+    ;;
+*)
+   print_help
+   exit 2
+  ;;
+esac

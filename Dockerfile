@@ -11,16 +11,27 @@ ENV GRAALVM_V=1.0.0-rc1
 
 WORKDIR /tmp
 
-COPY --from=clojure /usr/src/app/target/uberjar/spacedoc.jar ./
+COPY --from=clojure /usr/src/app/target/uberjar/sdn.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
 RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz \
     && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
-RUN graalvm-${GRAALVM_V}/bin/native-image -H:+ReportUnsupportedElementsAtRuntime -jar /tmp/spacedoc.jar
+RUN graalvm-${GRAALVM_V}/bin/native-image -H:+ReportUnsupportedElementsAtRuntime -jar /tmp/sdn.jar
 
 
-FROM ubuntu:latest
+FROM jare/emacs:latest
 
-COPY --from=graalvm /tmp/spacedoc /usr/local/bin
+COPY --from=graalvm /tmp/sdn /usr/local/bin
+
+COPY . /opt/spacedoc
+
+RUN chmod 775 /usr/local/bin/sdn \
+              /opt/spacedoc/run \
+              /opt/spacedoc/emacs-tools/docfmt/run.el \
+              /opt/spacedoc/emacs-tools/export/run.el
+
+ENTRYPOINT ["/opt/spacedoc/run"]
+
+CMD ["--help"]
