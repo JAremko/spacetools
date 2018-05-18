@@ -14,18 +14,20 @@
 (defn usage [options-summary]
   (join
    \newline
-   ["Spacemacs documentation tools."
+   ["Spacemacs documentation tools"
     ""
-    "Usage: spacedoc [OPTIONS]... ACTION"
+    "Usage: spacedoc ACTION [OPTIONS]... [ARGS]..."
     ""
     "Options:"
     options-summary
     ""
     "Actions:"
-    "  validate           Validate Spacedoc(SDN) input files."
-    "  describe  SPEC     Describe spec by keyword like :spacedoc.data/root."
-    "  relations          print node relations in input Spacedoc(SDN) fs."
-    "  rel-graph OUT_FILE Draw SVG of node relations in input Spacedoc(SDN) fs."
+    "  validate  [-i INPUT]+ Validate input spacedoc(.SDN) files."
+    "  describe  SPEC        Describe spec by keyword like :spacedoc.data/root."
+    "  relations [-i INPUT]+ Print node relations in the input"
+    "                        Spacedoc(.SDN) files."
+    "  rel-graph [-i INPUT]+ OUT_FILE Draw SVG of node relations in the input."
+    "                                 spacedoc(.SDN) files."
     ""]))
 
 
