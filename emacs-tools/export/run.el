@@ -167,8 +167,10 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
 (defun spacemacs//export-docs-run (arg-list)
   "Main function for running as a script. ARG-LIST is an argument list.
 See `spacemacs-export-docs-help-text' for description."
-  (unless (and arg-list (file-directory-p (car arg-list)))
+  (unless arg-list
     (error spacemacs-export-docs-help-text))
+  (unless (file-directory-p (car arg-list))
+    (error "The first argument must be a readable directory."))
   (setq spacemacs--export-docs-workers-fin 0
         spacemacs--export-docs-stop-waiting nil)
   (let* ((default-directory spacemacs-export-docs-run-file-dir)

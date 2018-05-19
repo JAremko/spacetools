@@ -135,6 +135,7 @@
 
 (s/def :spacedoc.data.link/tag #{:file-path
                                  :org-file-path
+                                 :local-org-web-link
                                  :embeddable-file-path
                                  :web-link
                                  :embeddable-web-link
@@ -152,7 +153,7 @@
 (s/def :spacedoc.data.org-file-path/tag #{:org-file-path})
 (s/def :spacedoc.data.org-file-path/value ::non-empty-string)
 (s/def :spacedoc.data.org-file-path/raw-link ::non-empty-string)
-(s/def :spacedoc.data.org-file-path/target-headline-gh-id string?)
+(s/def :spacedoc.data.org-file-path/target-headline-gh-id nil?)
 (s/def :spacedoc.data.org-file-path/children ::link-children)
 (defnode ::org-file-path
   (s/keys :req-un [:spacedoc.data.org-file-path/tag
@@ -160,6 +161,21 @@
                    :spacedoc.data.org-file-path/raw-link
                    :spacedoc.data.org-file-path/target-headline-gh-id
                    :spacedoc.data.org-file-path/children]))
+
+
+;;;; local-org-web-link node
+
+(s/def :spacedoc.data.local-org-web-link/tag #{:local-org-web-link})
+(s/def :spacedoc.data.local-org-web-link/value ::non-empty-string)
+(s/def :spacedoc.data.local-org-web-link/raw-link ::non-empty-string)
+(s/def :spacedoc.data.local-org-web-link/target-headline-gh-id string?)
+(s/def :spacedoc.data.local-org-web-link/children ::link-children)
+(defnode ::local-org-web-link
+  (s/keys :req-un [:spacedoc.data.local-org-web-link/tag
+                   :spacedoc.data.local-org-web-link/value
+                   :spacedoc.data.local-org-web-link/raw-link
+                   :spacedoc.data.local-org-web-link/target-headline-gh-id
+                   :spacedoc.data.local-org-web-link/children]))
 
 
 ;;;; embeddable-file-path node
@@ -235,6 +251,7 @@
 (defmethod inline-container :bold [_] ::bold)
 (defmethod inline-container :italic [_] ::italic)
 (defmethod inline-container :org-file-path [_] ::org-file-path)
+(defmethod inline-container :local-org-web-link [_] ::local-org-web-link)
 (defmethod inline-container :embeddable-file-path [_] ::embeddable-file-path)
 (defmethod inline-container :file-path [_] ::file-path)
 (defmethod inline-container :embeddable-web-link [_] ::embeddable-web-link)
