@@ -186,7 +186,7 @@ See `spacemacs-export-docs-help-text' for description."
           ;; FIXME: With 1-2  workers it gets extremely slow.
           ;; Find the bottleneck.
           ;;(min (spacemacs//spacetools-get-cpu-count) f-length)
-          16))
+          (min 16 f-length)))
     (setq spacemacs--export-docs-worker-count w-count
           spacemacs--export-docs-root-dir root-dir)
     (spacemacs//spacetools-do-concurrently
