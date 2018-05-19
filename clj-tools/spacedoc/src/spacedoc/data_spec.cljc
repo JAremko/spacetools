@@ -485,51 +485,51 @@
 
 
 ;; Headline until
+
 (defmacro ^:private gen-headlines
   [max-level]
-  (cons
+  (list*
    'do
-   (cons
-    `(defnode ~(keyword (str doc-ns-str "/headline-level-" (inc max-level)))
-       #{"Avoid deep headline nesting."})
-    (->> (range 1 (inc max-level))
-         (map (fn [n]
-                (let [[child hl]
-                      (mapv #(keyword
-                              (str *ns*)
-                              (format %1 n))
-                            ["headline-level-%s-child"
-                             "headline-level-%s"])
-                      child-mm (symbol (format "headline-level-%s-child" n))
-                      [tag level children]
-                      (mapv #(keyword
-                              (format %1 n))
-                            ["spacedoc.data.headline-level-%s/tag"
-                             "spacedoc.data.headline-level-%s/level"
-                             "spacedoc.data.headline-level-%s/children"])
-                      next-hl (keyword doc-ns-str
-                                       (str "headline-level-" (inc n)))]
-                  `(do
-                     (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
-                     (s/def ~level #{~n})
-                     (defmulti ^:private  ~child-mm :tag)
-                     (defmethod ~child-mm
-                       ~(keyword (format "headline-level-%s" (inc n)))
-                       [_#] ~next-hl)
-                     (defmethod ~child-mm :todo [_#] ::todo)
-                     (defmethod ~child-mm :section [_#] ::section)
-                     (s/def ~child (s/multi-spec ~child-mm :tag))
-                     (s/def ~children (s/coll-of ~child
-                                                 :kind vector?
-                                                 :min-count 1
-                                                 :distinct true
-                                                 :into []))
-                     (defnode ~hl
-                       (s/merge
-                        ::headline
-                        (s/keys :req-un [~tag
-                                         ~level
-                                         ~children])))))))))))
+   `(defnode ~(keyword (str doc-ns-str "/headline-level-" (inc max-level)))
+      #{"Avoid deep headline nesting."})
+   (map (fn [n]
+          (let [[child hl]
+                (mapv #(keyword
+                        (str *ns*)
+                        (format %1 n))
+                      ["headline-level-%s-child"
+                       "headline-level-%s"])
+                child-mm (symbol (format "headline-level-%s-child" n))
+                [tag level children]
+                (mapv #(keyword
+                        (format %1 n))
+                      ["spacedoc.data.headline-level-%s/tag"
+                       "spacedoc.data.headline-level-%s/level"
+                       "spacedoc.data.headline-level-%s/children"])
+                next-hl (keyword doc-ns-str
+                                 (str "headline-level-" (inc n)))]
+            `(do
+               (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
+               (s/def ~level #{~n})
+               (defmulti ^:private  ~child-mm :tag)
+               (defmethod ~child-mm
+                 ~(keyword (format "headline-level-%s" (inc n)))
+                 [_#] ~next-hl)
+               (defmethod ~child-mm :todo [_#] ::todo)
+               (defmethod ~child-mm :section [_#] ::section)
+               (s/def ~child (s/multi-spec ~child-mm :tag))
+               (s/def ~children (s/coll-of ~child
+                                           :kind vector?
+                                           :min-count 1
+                                           :distinct true
+                                           :into []))
+               (defnode ~hl
+                 (s/merge
+                  ::headline
+                  (s/keys :req-un [~tag
+                                   ~level
+                                   ~children]))))))
+        (range 1 (inc max-level)))))
 
 
 ;;;; Generate 5 levels of headline nodes
