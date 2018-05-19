@@ -10,3 +10,5 @@
  - docfmt    [FILES/DIRS]...             Format .ORG files Specified directly or by parent directory.
   - export    DOCS_ROOT   [FILES/DIRS]... Export .ORG files to SDN format. Export directory is "spacedoc/emacs-tools/export/target/". DOCS_ROOT is a root directory of Spacemacs documentation (usually "~/.emacs.d/"). If an argument is a directory it will be scaned for .ORG files and they will be exported. If only the first argument is supplied a default list of Spacemacs documentation files will be used.
 EOF
+
+**Available at DockerHub as `jare/spacedoc:latest`**

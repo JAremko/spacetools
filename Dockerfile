@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y wget gcc libz-dev
 RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz \
     && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
-RUN graalvm-${GRAALVM_V}/bin/native-image -H:+ReportUnsupportedElementsAtRuntime -jar /tmp/sdn.jar
+RUN graalvm-${GRAALVM_V}/bin/native-image --no-server -H:+ReportUnsupportedElementsAtRuntime -jar /tmp/sdn.jar
 
 
 FROM jare/emacs:latest
@@ -31,6 +31,8 @@ RUN chmod 775 /usr/local/bin/sdn \
               /opt/spacedoc/run \
               /opt/spacedoc/emacs-tools/docfmt/run.el \
               /opt/spacedoc/emacs-tools/export/run.el
+
+RUN ln -s /opt/spacedoc/emacs-tools/export/target/ /tmp/export
 
 ENTRYPOINT ["/opt/spacedoc/run"]
 
