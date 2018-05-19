@@ -182,7 +182,11 @@ See `spacemacs-export-docs-help-text' for description."
                    (or arg-list
                        (spacemacs//export-docs-build-default-list root-dir)))))
          (f-length (length files))
-         (w-count (min (spacemacs//spacetools-get-cpu-count) f-length)))
+         (w-count
+          ;; FIXME: With 1-2  workers it gets extremely slow.
+          ;; Find the bottleneck.
+          ;;(min (spacemacs//spacetools-get-cpu-count) f-length)
+          16))
     (setq spacemacs--export-docs-worker-count w-count
           spacemacs--export-docs-root-dir root-dir)
     (spacemacs//spacetools-do-concurrently
