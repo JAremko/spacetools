@@ -15,5 +15,5 @@
 ``` sh
 docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc/ format /tmp/docs/
 docker run --rm -v <docs_dir>:/tmp/docs/ -v <output_dir>:/tmp/export jare/spacedoc export /tmp/docs/
-docker run --rm -v <output_dir>:/tmp/docs/ jare/spacedoc validate /tmp/docs/layers
+docker run --rm -v <output_dir>:/tmp/docs/ jare/spacedoc validate -i /tmp/docs/layers/ -i /tmp/docs/doc/FAQ.sdn
 ```

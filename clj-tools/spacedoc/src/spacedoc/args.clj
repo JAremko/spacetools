@@ -10,16 +10,18 @@
 
 
 (defn- flatten-fps
-  [pathes]
-  (r/fold
-   (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
-   (r/map
-    #(cond
-       (sio/sdn-file? %) %
-       (sio/directory? %) (sio/sdn-fps-in-dir %)
-       :else (exc/failure (ex-info "File isn't a .sdn file or a directory"
-                                   {:file %})))
-    pathes)))
+  [paths]
+  (exc/try-on
+   (r/fold
+    (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
+    (r/map
+     #(cond
+        (sio/sdn-file? %) (exc/success (hash-set %))
+        (sio/directory? %) (sio/sdn-fps-in-dir %)
+        :else (exc/failure (ex-info
+                            "File isn't a .sdn file or a readable directory."
+                            {:file %})))
+     paths))))
 
 
 (defn parse-input

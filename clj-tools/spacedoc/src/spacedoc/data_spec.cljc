@@ -152,14 +152,10 @@
 
 (s/def :spacedoc.data.org-file-path/tag #{:org-file-path})
 (s/def :spacedoc.data.org-file-path/value ::non-empty-string)
-(s/def :spacedoc.data.org-file-path/raw-link ::non-empty-string)
-(s/def :spacedoc.data.org-file-path/target-headline-gh-id nil?)
 (s/def :spacedoc.data.org-file-path/children ::link-children)
 (defnode ::org-file-path
   (s/keys :req-un [:spacedoc.data.org-file-path/tag
                    :spacedoc.data.org-file-path/value
-                   :spacedoc.data.org-file-path/raw-link
-                   :spacedoc.data.org-file-path/target-headline-gh-id
                    :spacedoc.data.org-file-path/children]))
 
 
