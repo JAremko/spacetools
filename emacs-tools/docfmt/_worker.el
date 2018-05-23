@@ -214,4 +214,4 @@ Returns nil if no more tables left."
       (insert-file-contents file)
       (set-visited-file-name file t t)
       (spacemacs/docfmt-apply-all)))
-  (message "Done!"))
+  (message "Done."))

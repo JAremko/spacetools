@@ -21,8 +21,7 @@
   [file-path]
   (io!
    (when-let [f (io/file file-path)]
-     (and (.exists f)
-          (.isDirectory f)))))
+     (.isDirectory f))))
 
 
 (defn parent-dir-writable?

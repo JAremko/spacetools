@@ -26,13 +26,19 @@
 
 (defn parse-input
   [input]
-  (exc/try-on
-   (if (not-empty input)
-     (flatten-fps input)
-     (exc/failure
-      (ex-info
-       "At least one input must be specified for this action."
-       {:input input})))))
+  (io! ;; That's because we use `println` below.
+   (exc/try-on
+    (if (empty? input)
+      (exc/failure
+       (ex-info
+        "At least one input must be specified for this action."
+        {:input input}))
+      (let [flat-input (flatten-fps input)]
+        ;;FIXME: Kinda not cool that we "sideeffecting" here.
+        ;;       But then wrapping it into \"writer\" will
+        ;;       increase complexity for questionable benefits.
+        (println (interpose \newline (list* "Inputs:" (m/extract flat-input))))
+        flat-input)))))
 
 
 (defn parse

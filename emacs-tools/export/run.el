@@ -100,7 +100,7 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
           (kill-buffer buff))
         (if (string-match-p "finished" e)
             (progn
-              (message "Process %s has finished\n" p)
+              (message "Process %s has finished.\n" p)
               (when (= (cl-incf spacemacs--export-docs-workers-fin)
                        spacemacs--export-docs-worker-count)
                 (setq spacemacs--export-docs-stop-waiting t)))
@@ -202,7 +202,8 @@ See `spacemacs-export-docs-help-text' for description."
           ',fps)))
      'spacemacs//export-docs-sentinel)
     (while (not spacemacs--export-docs-stop-waiting)
-      (accept-process-output))))
+      (accept-process-output)))
+  (message "Done."))
 
 ;; Script entry point.
 (when (and load-file-name noninteractive)
