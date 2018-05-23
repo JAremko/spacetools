@@ -1,10 +1,6 @@
 (ns spacedoc.util
   (:gen-class)
-  (:require [cats.core :as m]
-            [clojure.string :refer [join]]
-            [cats.monad.exception :as exc]
-            [spacedoc.io :as sio]
-            [clojure.core.reducers :as r]))
+  (:require [clojure.string :refer [join]]))
 
 
 (defn err->msg
@@ -16,3 +12,10 @@
             (map #(apply str % ": " (repeat (- 78 (count %)) "="))
                  ["File" "Cause" "Data"])
             [(or (:file data) "<none>") cause (or (:problems data) data)])))))
+
+
+(defn foldable?
+  [col]
+  (or (vector? col)
+      (map? col)
+      (set? col)))

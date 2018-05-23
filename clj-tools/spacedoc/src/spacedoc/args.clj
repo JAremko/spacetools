@@ -1,5 +1,6 @@
 (ns spacedoc.args
   (:require [spacedoc.io :as sio]
+            [spacedoc.util :as util]
             [clojure.set :refer [union]]
             [cats.core :as m]
             [clojure.core.match :refer [match]]
@@ -11,6 +12,7 @@
 
 (defn- flatten-fps
   [paths]
+  {:pre [(util/foldable? paths)]}
   (exc/try-on
    (r/fold
     (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
@@ -26,19 +28,24 @@
 
 (defn parse-input
   [input]
-  (io! ;; That's because we use `println` below.
-   (exc/try-on
-    (if (empty? input)
-      (exc/failure
-       (ex-info
-        "At least one input must be specified for this action."
-        {:input input}))
-      (let [flat-input (flatten-fps input)]
-        ;;FIXME: Kinda not cool that we "sideeffecting" here.
-        ;;       But then wrapping it into \"writer\" will
-        ;;       increase complexity for questionable benefits.
-        (println (interpose \newline (list* "Inputs:" (m/extract flat-input))))
-        flat-input)))))
+  (exc/try-on
+   (cond (empty? input)
+         (exc/failure
+          (ex-info "At least one input must be specified for this action."
+                   {:input input}))
+         (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input))
+         (exc/failure
+          (ex-info "all inputs must be .SDN files or readable directories."
+                   {:input input}))
+         :else
+         (let [flat-input (flatten-fps (set input))]
+           (io! ;; FIXME: Mb use "writer M" instead of "sideeffecting"?
+            (->> flat-input
+                 (m/extract)
+                 (list* "Inputs:")
+                 (interpose \newline)
+                 (println)))
+           flat-input))))
 
 
 (defn parse

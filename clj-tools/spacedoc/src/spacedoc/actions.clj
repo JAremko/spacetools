@@ -1,6 +1,5 @@
 (ns spacedoc.actions
   (:require [spacedoc.io :as sio]
-            [spacedoc.util :as util]
             [clojure.string :refer [join]]
             [spacedoc.data :as data]
             [cats.core :as m]
@@ -36,4 +35,4 @@
    (m/alet [spacedocs (m/sequence (pmap
                                    (partial sio/fp->spacedoc :spacedoc.data/any)
                                    sdn-file-paths))]
-           (join \newline (data/node-relations-aggregate spacedocs)))))
+           (join \newline (data/node-relations-aggregate (vec spacedocs))))))

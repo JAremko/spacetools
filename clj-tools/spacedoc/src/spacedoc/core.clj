@@ -6,15 +6,16 @@
             [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.match :refer [match]]
-            [clojure.string :refer [join]]
-            [clojure.edn :as edn])
+            [clojure.string :refer [join]])
   (:gen-class))
 
 
 (defn usage [options-summary]
   (join
    \newline
-   ["Spacemacs documentation tools"
+   ["Spacemacs documentation tools for .SDN files."
+    ""
+    "NOTE: .SDN files are produced by \"spacedoc/emacs-tools/export/\"."
     ""
     "Usage: spacedoc ACTION [OPTIONS]... [ARGS]..."
     ""
@@ -22,21 +23,13 @@
     options-summary
     ""
     "Actions:"
-    "  validate  [-i INPUT]+ Validate input spacedoc(.SDN) files."
-    "  describe  SPEC        Describe spec by keyword like :spacedoc.data/root."
-    "  relations [-i INPUT]+ Print node relations in the input"
-    "                        Spacedoc(.SDN) files."
+    "  validate  INPUTS... Validate input .SDN files."
+    "  relations INPUTS... Print node relations in the input .SDN files."
+    "  describe  SPEC      Describe spec by keyword(like :spacedoc.data/root)."
     ""]))
 
 
-(def ops
-  [["-i" "--input INPUT" "Input directory or Spacedoc(SDN) file. Can be reused."
-    :parse-fn #(edn/read-string (str "\"" % "\""))
-    :validate [(fn [in]
-                 (and (string? in) (or (sio/directory? in) (sio/sdn-file? in))))
-               "Input should be a directory or a .SDN file."]
-    :assoc-fn (fn [m key val] (update m key (partial concat (list val))))]
-   ["-h" "--help" "Show help message."]])
+(def ops [["-h" "--help" "Show help message."]])
 
 
 (defn fail
@@ -48,31 +41,28 @@
   (let
       [output-m
        (m/alet
-        [{:keys [help input summary action a-args]} (parse args ops)]
+        [{:keys [help summary action a-args]} (parse args ops)]
         (if help
           (usage summary)
           (match
            ;; Handlers
            [action      a-args]
-           ["describe"  [key]]
-           (ac/describe-spec key)
-           ["validate"  []]
-           (m/fmap ac/validate (parse-input input))
-           ["relations" []]
-           (m/fmap ac/relations (parse-input input))
+           ["describe"  [key    ]] (ac/describe-spec key)
+           ["validate"  [_   & _]] (m/fmap ac/validate (parse-input a-args))
+           ["relations" [_   & _]] (m/fmap ac/relations (parse-input a-args))
            ;; Errors
-           ["describe"  _]
-           (fail "\"describe\" requires keyword as a single arg."
-                 {:args a-args})
-           ["validate"  _]
-           (fail "\"validate\" doesn't take args."
-                 {:args a-args})
-           ["relations" _]
-           (fail "\"relations\" doesn't take args."
-                 {:args a-args})
-           [nil         _]
-           (fail "No action specified. Run with \"--help\" for usage."
-                 {:action action})
+           ["describe"  _] (fail
+                            "\"describe\" requires keyword as a single argument"
+                            {:args a-args})
+           ["validate"  _] (fail
+                            "\"validate\" requires one or more input argument"
+                            {:args a-args})
+           ["relations" _] (fail
+                            "\"relations\" requires one or more input argument"
+                            {:args a-args})
+           [nil         _] (fail
+                            "No action specified. Run with \"--help\" for usage"
+                            {:action action})
            :else (ex-info "Invalid action" {:action action}))))
        output (m/extract output-m)]
     (if (exc/failure? output-m)
