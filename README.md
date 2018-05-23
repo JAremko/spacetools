@@ -18,8 +18,8 @@
 
 **Usage example:**
 ``` sh
-docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc/ format /tmp/docs/
-docker run --rm -v <docs_dir>:/tmp/docs/ -v <output_dir>:/tmp/export jare/spacedoc export /tmp/docs/
-docker run --rm -v <output_dir>:/tmp/docs/ jare/spacedoc relations /tmp/docs/
-docker run --rm -v <output_dir>:/tmp/docs/ jare/spacedoc validate /tmp/docs/layers/ /tmp/docs/doc/FAQ.sdn
+docker run --rm -v <docs_dir>:/tmp/sd/ jare/spacedoc/ format /tmp/sd/
+docker run --rm -v <docs_dir>:/tmp/sd/ -v <out_dir>:/tmp/export jare/spacedoc export /tmp/sd/
+docker run --rm -v <out_dir>:/tmp/sd/ jare/spacedoc relations /tmp/sd/
+docker run --rm -v <out_dir>:/tmp/sd/ jare/spacedoc validate /tmp/sd/layers/ /tmp/sd/doc/FAQ.sdn
 ```
