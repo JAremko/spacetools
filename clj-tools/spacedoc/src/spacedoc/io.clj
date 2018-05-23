@@ -3,7 +3,6 @@
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [cats.monad.exception :as exc]
-            #_ [lacij.view.graphview :as gv]
             [clojure.tools.cli :refer [parse-opts]]
             [spacedoc.data :as data]
             [cats.core :as m]
@@ -22,17 +21,6 @@
   (io!
    (when-let [f (io/file file-path)]
      (.isDirectory f))))
-
-
-(defn parent-dir-writable?
-  [file-path]
-  (io!
-   (some-> file-path
-           (io/file)
-           (.getCanonicalPath)
-           (io/file)
-           (.getParentFile)
-           (.exists))))
 
 
 (defn sdn-fps-in-dir
@@ -68,13 +56,6 @@
                       [(data/explain-deepest obj) "Validation filed."])]
            (apply exc/failure (assoc-in e [0 :file] file-path))
            obj)))))))
-
-
-#_ (defn export-graph-svg
-     [file-path graph]
-     (exc/try-on
-      (io!  (gv/export graph file-path :indent "yes")
-            (format "Successfully exported: \"%s\"" file-path))))
 
 
 (defn exit-err

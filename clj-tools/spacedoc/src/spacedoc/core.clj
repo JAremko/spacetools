@@ -26,8 +26,6 @@
     "  describe  SPEC        Describe spec by keyword like :spacedoc.data/root."
     "  relations [-i INPUT]+ Print node relations in the input"
     "                        Spacedoc(.SDN) files."
-    "  rel-graph [-i INPUT]+ OUT_FILE Draw SVG of node relations in the input."
-    "                                 spacedoc(.SDN) files."
     ""]))
 
 
@@ -58,8 +56,6 @@
            [action      a-args]
            ["describe"  [key]]
            (ac/describe-spec key)
-           ["rel-graph" [path]]
-           (m/fmap (partial ac/draw-relations-graph path) (parse-input input))
            ["validate"  []]
            (m/fmap ac/validate (parse-input input))
            ["relations" []]
@@ -67,9 +63,6 @@
            ;; Errors
            ["describe"  _]
            (fail "\"describe\" requires keyword as a single arg."
-                 {:args a-args})
-           ["rel-graph" _]
-           (fail "\"rel-graph\" requires file name as a single arg."
                  {:args a-args})
            ["validate"  _]
            (fail "\"validate\" doesn't take args."
