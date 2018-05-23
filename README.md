@@ -18,7 +18,7 @@
 ``` sh
 docker run --rm \
   -v <docs_dir>:/tmp/sd/ \
-  jare/spacedoc/ \
+  jare/spacedoc \
   format /tmp/sd/
 
 docker run --rm \
