@@ -1,5 +1,4 @@
 (ns spacedoc.util
-  (:gen-class)
   (:require [clojure.string :refer [join]]))
 
 

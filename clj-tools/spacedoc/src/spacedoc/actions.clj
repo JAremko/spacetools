@@ -1,10 +1,11 @@
 (ns spacedoc.actions
   (:require [spacedoc.io :as sio]
-            [clojure.string :refer [join]]
             [spacedoc.data :as data]
+            [spec-tools.parse :as sp]
             [cats.core :as m]
-            [clojure.edn :as edn]
             [cats.monad.exception :as exc]
+            [clojure.string :refer [join]]
+            [clojure.edn :as edn]
             [clojure.spec.alpha :as s]))
 
 
@@ -23,7 +24,13 @@
   (exc/try-on
    (let [key (edn/read-string spec-key)]
      (if (qualified-keyword? key)
-       (s/describe key)
+       (let [{:keys [type keys]}(sp/parse-spec key)]
+         (str "Type: " (name type)
+              \newline
+              "Keys: " keys
+              \newline
+              "Spec: " (s/form key)
+              \newline))
        (exc/failure (ex-info "Spec key must be a qualified keyword"
                              {:keyword key}))))))
 

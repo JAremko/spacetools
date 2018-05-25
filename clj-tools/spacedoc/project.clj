@@ -5,6 +5,7 @@
             :url "https://www.gnu.org/licenses/gpl.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
+                 [metosin/spec-tools "0.7.0"]
                  [funcool/cats "2.2.0"]
                  [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
