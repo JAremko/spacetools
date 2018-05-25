@@ -363,7 +363,6 @@ holding contextual information."
              ":value \"%s\" "
              ":gh-id \"%s\" "
              ":path-id \"%s\" "
-             ":level %s "
              ":children [%s]}")
      (cond
       (todo? :todo)
@@ -372,7 +371,6 @@ holding contextual information."
      (spacemacs/org-sdn-escape-string raw-value)
      (spacemacs/org-sdn-escape-string (string-remove-prefix "#" gh-id))
      (spacemacs/org-sdn-escape-string path-id)
-     level
      contents)))
 
 ;;;; Horizontal Rule

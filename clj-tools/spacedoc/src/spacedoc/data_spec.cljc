@@ -471,7 +471,6 @@
                                               #(re-matches
                                                 #"^[\pL\pN\p{Pc}/-]+$"
                                                 %)))
-(s/def :spacedoc.data.headline/level nat-int?)
 (s/def :spacedoc.data.headline/tag keyword?)
 (s/def :spacedoc.data.headline/children (s/nilable vector?))
 
@@ -480,7 +479,6 @@
                    :spacedoc.data.headline/value
                    :spacedoc.data.headline/gh-id
                    :spacedoc.data.headline/path-id
-                   :spacedoc.data.headline/level
                    :spacedoc.data.headline/children]))
 
 
@@ -500,17 +498,15 @@
                       ["headline-level-%s-child"
                        "headline-level-%s"])
                 child-mm (symbol (format "headline-level-%s-child" n))
-                [tag level children]
+                [tag children]
                 (mapv #(keyword
                         (format %1 n))
                       ["spacedoc.data.headline-level-%s/tag"
-                       "spacedoc.data.headline-level-%s/level"
                        "spacedoc.data.headline-level-%s/children"])
                 next-hl (keyword doc-ns-str
                                  (str "headline-level-" (inc n)))]
             `(do
                (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
-               (s/def ~level #{~n})
                (defmulti ^:private  ~child-mm :tag)
                (defmethod ~child-mm
                  ~(keyword (format "headline-level-%s" (inc n)))
@@ -527,7 +523,6 @@
                  (s/merge
                   ::headline
                   (s/keys :req-un [~tag
-                                   ~level
                                    ~children]))))))
         (range 1 (inc max-level)))))
 
@@ -541,7 +536,6 @@
 
 (s/def :spacedoc.data.description/tag #{:description})
 (s/def :spacedoc.data.description/value #{"Description"})
-(s/def :spacedoc.data.description/level #{1})
 (s/def :spacedoc.data.description/children (s/coll-of ::headline-level-1-child
                                                       :kind vector?
                                                       :min-count 1
@@ -552,7 +546,6 @@
    ::headline
    (s/keys :req-un [:spacedoc.data.description/tag
                     :spacedoc.data.description/value
-                    :spacedoc.data.description/level
                     :spacedoc.data.description/children])))
 
 
