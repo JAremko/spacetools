@@ -42,6 +42,9 @@
 (defconst spacemacs-repository-owner "syl20bnr"
   "Name of the Spacemacs remote repository owner.")
 
+(defconst spacemacs-max-headline-level 5
+  "Max level of headline nesting.")
+
 (defconst spacemacs-readme-template-url
   (concat "https://github.com/syl20bnr/spacemacs/"
           "blob/develop/core/templates/README.org.template")
@@ -337,6 +340,12 @@ holding contextual information."
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1)
                             (string= raw-value "Description"))))
+    (unless (<= level spacemacs-max-headline-level)
+      (spacemacs/org-sdn-error
+       "File %S has headline %S with the nesting level %S - that's way too deep"
+       file
+       raw-value
+       level))
     (unless (or todo? contents)
       (spacemacs/org-sdn-error
        "File %S has headline %S without children or TODO marker"
