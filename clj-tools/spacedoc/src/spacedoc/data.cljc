@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]))
 
 
-(def ^:private doc-ns-str (str *ns*))
+(def doc-ns-str (str *ns*))
 
 
 (alias 'cs 'clojure.spec.alpha)
