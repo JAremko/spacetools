@@ -144,8 +144,8 @@
                                   :kind vector?
                                   :into []))
 (s/def :spacedoc.data.link/children ::link-children)
-(defnode ::link (s/keys :req-un [:spacedoc.data.link/tag
-                                 :spacedoc.data.link/children]))
+(s/def ::link (s/keys :req-un [:spacedoc.data.link/tag
+                               :spacedoc.data.link/children]))
 
 
 ;;;; org-file-path node
