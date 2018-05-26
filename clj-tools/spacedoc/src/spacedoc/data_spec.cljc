@@ -471,7 +471,6 @@
                                               #(re-matches
                                                 #"^[\pL\pN\p{Pc}/-]+$"
                                                 %)))
-(s/def :spacedoc.data.headline/tag keyword?)
 (s/def :spacedoc.data.headline/children (s/nilable vector?))
 
 (s/def ::headline
@@ -481,45 +480,73 @@
                    :spacedoc.data.headline/path-id
                    :spacedoc.data.headline/children]))
 
+
+;;;; Generate `max-headline-depth` levels of headline nodes.
 (def max-headline-depth 5)
 
-;; Generate `max-headline-depth` levels of headline nodes.
+(doall
+ (for [n (range 1 (inc max-headline-depth))
+       :let [[child hl]
+             (mapv #(keyword
+                     (str *ns*)
+                     (format %1 n))
+                   ["headline-level-%s-child"
+                    "headline-level-%s"])
+             child-mm (symbol (format "headline-level-%s-child" n))
+             [tag children]
+             (mapv #(keyword
+                     (format %1 n))
+                   ["spacedoc.data.headline-level-%s/tag"
+                    "spacedoc.data.headline-level-%s/children"])
+             next-hl (keyword doc-ns-str
+                              (str "headline-level-" (inc n)))]]
+   (eval
+    `(do
+       (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
+       (defmulti ^:private  ~child-mm :tag)
+       (defmethod ~child-mm
+         ~(keyword (format "headline-level-%s" (inc n)))
+         [_#] ~next-hl)
+       (defmethod ~child-mm :todo [_#] ::todo)
+       (defmethod ~child-mm :section [_#] ::section)
+       (defmethod ~child-mm :virtual-headline [_#] ::virtual-headline)
+       (s/def ~child (s/multi-spec ~child-mm :tag))
+       (s/def ~children (s/coll-of ~child
+                                   :kind vector?
+                                   :min-count 1
+                                   :distinct true
+                                   :into []))
 
-(mapv (fn [n]
-        (let [[child hl]
-              (mapv #(keyword
-                      (str *ns*)
-                      (format %1 n))
-                    ["headline-level-%s-child"
-                     "headline-level-%s"])
-              child-mm (symbol (format "headline-level-%s-child" n))
-              [tag children]
-              (mapv #(keyword
-                      (format %1 n))
-                    ["spacedoc.data.headline-level-%s/tag"
-                     "spacedoc.data.headline-level-%s/children"])
-              next-hl (keyword doc-ns-str
-                               (str "headline-level-" (inc n)))]
-          (eval `(do
-                   (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
-                   (defmulti ^:private  ~child-mm :tag)
-                   (defmethod ~child-mm
-                     ~(keyword (format "headline-level-%s" (inc n)))
-                     [_#] ~next-hl)
-                   (defmethod ~child-mm :todo [_#] ::todo)
-                   (defmethod ~child-mm :section [_#] ::section)
-                   (s/def ~child (s/multi-spec ~child-mm :tag))
-                   (s/def ~children (s/coll-of ~child
-                                               :kind vector?
-                                               :min-count 1
-                                               :distinct true
-                                               :into []))
-                   (defnode ~hl
-                     (s/merge
-                      ::headline
-                      (s/keys :req-un [~tag
-                                       ~children])))))))
-      (range 1 (inc max-headline-depth)))
+       (defnode ~hl
+         (s/merge
+          ::headline
+          (s/keys :req-un [~tag
+                           ~children])))))))
+
+
+;;;; Virtual headline
+;; NOTE: It is used for "hand crafting" SDN structures and
+;; should never occur in the import from  .ORG files.
+
+(s/def :spacedoc.data.virtual-headline/tag #{:virtual-headline})
+(s/def :spacedoc.data.virtual-headline/value ::non-empty-string)
+(defmulti ^:private virtual-headline-child :tag)
+(defmethod virtual-headline-child :section [_] ::section)
+(defmethod virtual-headline-child :todo [_] ::todo)
+(defmethod virtual-headline-child :description [_] ::description)
+(doall
+ (for [n (range 1 (inc max-headline-depth))
+       :let [key-name (str "headline-level-" n)
+             ukey (keyword key-name)
+             skey (keyword doc-ns-str key-name)]]
+   `(defmethod virtual-headline-child ~ukey [_#] ~skey)))
+(s/def :spacedoc.data.virtual-headline/children
+  (s/multi-spec virtual-headline-child :tag))
+
+(defnode ::virtual-headline
+  (s/keys :req-un [:spacedoc.data.virtual-headline/tag
+                   :spacedoc.data.virtual-headline/value
+                   :spacedoc.data.virtual-headline/children]))
 
 
 ;;;; description node
@@ -576,6 +603,7 @@
 (defmulti ^:private  body-child :tag)
 (defmethod body-child :headline-level-1 [_] ::headline-level-1)
 (defmethod body-child :description [_] ::description)
+(defmethod body-child :virtual-headline [_#] ::virtual-headline)
 (defmethod body-child :todo [_] ::todo)
 (defmethod body-child :section [_] ::section)
 (s/def ::body-child (s/multi-spec body-child :tag))
