@@ -9,8 +9,8 @@
      (join \newline
            (interleave
             (map #(apply str % ": " (repeat (- 78 (count %)) "="))
-                 ["File" "Cause" "Data"])
-            [(or (:file data) "<none>") cause (or (:problems data) data)])))))
+                 ["Cause" "File" "Data"])
+            [cause (or (:file data) "<none>") (or (:problems data) data)])))))
 
 
 (defn foldable?

@@ -43,19 +43,22 @@
    (fp->spacedoc :spacedoc.data/root file-path))
   ([root-node-spec file-path]
    (io!
-    (exc/try-on
+    (exc/try-or-recover
      (with-open [input (->> file-path
                             (io/file)
                             (io/reader)
                             (java.io.PushbackReader.))]
        (let [[obj fin] (repeatedly 2 (partial edn/read {:eof :fin} input))]
-         (if-let [e (cond
-                      (not= :fin fin)
-                      [{} (Exception. "File should contain single root form.")]
-                      (not (s/valid? root-node-spec obj))
-                      [(data/explain-deepest obj) "Validation filed."])]
-           (apply exc/failure (assoc-in e [0 :file] file-path))
-           obj)))))))
+         (cond
+           (not= :fin fin)
+           (throw (Exception. ".SDN file should contain single root form."))
+           (not (s/valid? root-node-spec obj))
+           (throw (ex-info "Validation filed." (data/explain-deepest obj)))
+           :else obj)))
+     #(exc/failure
+       (ex-info (.getMessage %) (if-let [ed (ex-data %)]
+                                  (assoc ed :file file-path)
+                                  {:file file-path})))))))
 
 
 (defn exit-err

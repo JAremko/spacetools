@@ -12,9 +12,7 @@
   [k spec-form]
   `(do
      (defmethod node->spec-k ~(keyword (name k)) [_#] ~k)
-     (s/def ~k (st/spec {:name ~(format "\"%s\" Spacedoc node spec." (name k))
-                         :description "Spec for Spacedoc(SDN) node validation."
-                         :spec ~spec-form}))))
+     (s/def ~k  ~spec-form)))
 
 
 ;;;; anything

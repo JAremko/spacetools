@@ -27,11 +27,7 @@
   (join \newline
         (assoc problem
                :node-tag (:tag node)
-               :spec-name (->> node
-                               node->spec-k
-                               st/get-spec
-                               st/spec-name)
-               :spec-form (:form (st/get-spec (node->spec-k node))))))
+               :spec-form (s/form (st/get-spec (node->spec-k node))))))
 
 
 (defn explain-deepest
@@ -41,7 +37,7 @@
   The function returns `nil` If all nodes are valid."
   [node]
   (or (first (sequence (keep (partial explain-deepest)) (:children node)))
-      (when-let [p (::cs/problems (st/explain-data (node->spec-k node) node))]
+      (when-let [p (::cs/problems (s/explain-data (node->spec-k node) node))]
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
