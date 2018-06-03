@@ -3,8 +3,7 @@
             [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.string :refer [join]]
-            [clojure.spec.alpha :as s]
-            [spec-tools.core :as st]))
+            [clojure.spec.alpha :as s]))
 
 
 (def doc-ns-str (str *ns*))
@@ -27,7 +26,7 @@
   (join \newline
         (assoc problem
                :node-tag (:tag node)
-               :spec-form (s/form (st/get-spec (node->spec-k node))))))
+               :spec-form (s/form (node->spec-k node)))))
 
 
 (defn explain-deepest
