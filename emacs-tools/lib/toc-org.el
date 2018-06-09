@@ -58,8 +58,8 @@ files on GitHub)"
   "Regexp to find the extended version of :noexport: tag")
 (defconst toc-org-tags-regexp "\s*:[[:word:]:@_]*:\s*$"
   "Regexp to find tags on the line")
-(defconst toc-org-states-regexp "^*+\s+\\(TODO\s+\\|DONE\s+\\)"
-  "Regexp to find states on the line")
+(defconst toc-org-todo-custom-keywords-regexp "^#\\+\\(TODO\\|SEQ_TODO\\|TYP_TODO\\):\\(.*\\)$"
+  "Regexp to find custom TODO keywords")
 (defconst toc-org-COMMENT-regexp "\\(^*+\\)\s+\\(COMMENT\s+\\)"
   "Regexp to find COMMENT headlines")
 (defconst toc-org-priorities-regexp "^*+\s+\\(\\[#.\\]\s+\\)"
@@ -83,15 +83,18 @@ between the colons. So, the value here is set explicitly.")
   "Maximum depth of the headings to use in the table of
 contents. The default of 2 uses only the highest level headings
 and their subheadings (one and two stars)."
+  :type 'integer
   :group 'toc-org)
 
 (defcustom toc-org-hrefify-default "gh"
   "Default hrefify function to use."
+  :type 'string
   :group 'toc-org)
 
 (defcustom toc-org-enable-links-opening t
   "With this option, org-open-at-point (C-c C-o) should work on
 the TOC links (even if the style is different from org)."
+  :type 'boolean
   :group 'toc-org)
 
 (defvar-local toc-org-hrefify-hash nil
@@ -105,7 +108,9 @@ i.e. simply flush everything that's not a heading and strip
 auxiliary text."
   (let ((content (buffer-substring-no-properties
                   (point-min) (point-max)))
-        (leave-states-p nil))
+        (leave-states-p nil)
+        (custom-keywords nil)
+        (toc-org-states-regexp ""))
     (with-temp-buffer
       (insert content)
 
@@ -113,6 +118,15 @@ auxiliary text."
       (goto-char (point-min))
       (when (re-search-forward toc-org-leave-todo-regexp nil t)
         (setq leave-states-p t))
+
+      ;; set toc-org-states-regexp (after collecting custom keywords)
+      (goto-char (point-min))
+      (while (re-search-forward toc-org-todo-custom-keywords-regexp nil t)
+        (setq custom-keywords (append custom-keywords (split-string (match-string 2) "[ \f\t\n\r\v|]+" t))))
+      (if custom-keywords
+          (setq toc-org-states-regexp
+                (concat "^*+\s+\\(" (mapconcat 'identity custom-keywords "\s+\\|") "\s+\\)"))
+        (setq toc-org-states-regexp "^*+\s+\\(TODO\s+\\|DONE\s+\\)"))
 
       ;; keep only lines starting with *s
       (goto-char (point-min))
@@ -323,7 +337,7 @@ Note that :noexport: is also used by Org-mode's exporter, but
 not :noexport_#:."
 
   (interactive)
-  (when (eq major-mode 'org-mode)
+  (when (derived-mode-p major-mode 'org-mode)
     (save-excursion
       (goto-char (point-min))
       (let ((case-fold-search t))

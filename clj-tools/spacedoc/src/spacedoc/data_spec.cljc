@@ -483,9 +483,6 @@
                    :spacedoc.data.headline-base/children]))
 
 
-;;;; Generate `max-headline-depth` levels of headline nodes.
-(def max-headline-depth 5)
-
 (doall
  (for [n (range 1 (inc max-headline-depth))
        :let [[child hl]

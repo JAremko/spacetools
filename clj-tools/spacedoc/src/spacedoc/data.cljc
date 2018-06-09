@@ -9,7 +9,8 @@
 (def doc-ns-str (str *ns*))
 
 
-(alias 'cs 'clojure.spec.alpha)
+;;;; Generate `max-headline-depth` levels of headline nodes.
+(def max-headline-depth 5)
 
 
 (load "data_spec")
@@ -36,7 +37,8 @@
   The function returns `nil` If all nodes are valid."
   [node]
   (or (first (sequence (keep (partial explain-deepest)) (:children node)))
-      (when-let [p (::cs/problems (s/explain-data (node->spec-k node) node))]
+      (when-let [p (:clojure.spec.alpha/problems
+                    (s/explain-data (node->spec-k node) node))]
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
