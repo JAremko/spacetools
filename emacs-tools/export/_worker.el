@@ -370,6 +370,7 @@ holding contextual information."
     (format
      (concat "{:tag %s "
              ":value \"%s\" "
+             ":level %s "
              ":gh-id \"%s\" "
              ":path-id \"%s\" "
              ":children [%s]}")
@@ -378,6 +379,7 @@ holding contextual information."
       (description? :description)
       (t (format "%s-level-%s" :headline level)))
      (spacemacs/org-sdn-escape-string raw-value)
+     level
      (spacemacs/org-sdn-escape-string (string-remove-prefix "#" gh-id))
      (spacemacs/org-sdn-escape-string path-id)
      contents)))

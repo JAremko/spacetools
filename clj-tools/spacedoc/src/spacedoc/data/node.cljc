@@ -16,6 +16,11 @@
   [items])
 
 
+(defn link
+  "ordered \"plain-list\" node constructor."
+  [items])
+
+
 ;;;; Generate rest of the node constructors
 
 (doall
