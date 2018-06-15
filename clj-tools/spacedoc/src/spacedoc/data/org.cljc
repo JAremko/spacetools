@@ -29,18 +29,17 @@
 (defmulti ^:private sdn-node->org-string
   (fn [{tag :tag}]
     (cond
-
-      ;; Headline node family.
+      ;; Headline node group.
       (or (#{:description :todo} tag)
           (re-matches #"^headline-level-.*$" (name tag))) :headline
 
-      ;; List node family.
+      ;; List node group.
       (#{:feature-list :plain-list} tag) :list
 
-      ;; Emphasis node family.
+      ;; Emphasis node group.
       ((set (keys emphasis-tokens)) tag) :emphasis
 
-      ;; Block-container node family.
+      ;; Block-container node group.
       ((set (keys block-container-delims)) tag) :block-container
 
       ;; Everything else.
@@ -59,122 +58,89 @@
 (def ^:private conv-all (partial mapv sdn-node->org-string))
 
 
+;;;; Groups of nodes (many to one).
+
+
+(defmethod sdn-node->org-string :link
+  [{:keys [raw-link children]}]
+  (format "[[%s]%s]"
+          raw-link
+          (if (seq children)
+            (format "[%s]" (apply str (conv-all children)))
+            "")))
+
+
+(defmethod sdn-node->org-string :list
+  [{:keys [tag type children]}])
+
+
 (defmethod sdn-node->org-string :emphasis
   [{:keys [tag value children]}]
   (let [token (emphasis-tokens tag)]
-    (str token (apply str (or value (conv-all children))) token)))
-
-
-(defmethod sdn-node->org-string :superscript
-  [{children :children}]
-  (apply str "^" (conv-all children)))
-
-
-(defmethod sdn-node->org-string :line-break
-  [_]
-  "\n")
+    (str token (apply str (or value (conv-all children))) token " ")))
 
 
 (defmethod sdn-node->org-string :block-container
   [{:keys [tag children]}]
   (let [{[begin-token end-token] tag} block-container-delims]
-    (str begin-token (apply str (conv-all children)) end-token)))
+    (str "\n" begin-token (apply str (conv-all children)) end-token "\n")))
 
 
-(defmethod sdn-node->org-string :org-file-path
-  [{:keys [tag value children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :src
-  [{:keys [tag language value]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :embeddable-web-link
-  [{:keys [tag value children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :subscript
-  [{:keys [tag children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :plain-text
-  [{:keys [tag value]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :keyword
-  [{:keys [key value]}]
-  (format "#+%s: %s\n" key value))
-
-
-(defmethod sdn-node->org-string :embeddable-file-path
-  [{:keys [tag value children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :fixed-width
-  [{:keys [tag value]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :file-path
-  [{:keys [tag value children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :example
-  [{:keys [tag value]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :paragraph
-  [{children :children}]
-  (format "%s\n" (apply str (conv-all children))))
-
-
-(defmethod sdn-node->org-string :web-link
-  [{:keys [tag value children]}]
-
-  )
-
-
-(defmethod sdn-node->org-string :local-org-web-link
-  [{:keys [tag value raw-link target-headline-gh-id children]}])
-
-
-(defmethod sdn-node->org-string :headline-link
-  [{:keys [tag target-headline-gh-id children]}]
-
-  )
+;;;; Individual nodes (one to one).
 
 
 (defmethod sdn-node->org-string :table
   [{:keys [tag children]}])
 
 
+(defmethod sdn-node->org-string :example
+  [{value :value}]
+  (format "\n#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n\n" value))
+
+
+(defmethod sdn-node->org-string :src
+[{:keys [language value]}]
+(format "\n#+BEGIN_SRC %s\n%s#+END_SRC\n\n" language value))
+
+
+(defmethod sdn-node->org-string :plain-text
+  [{value :value}]
+  value)
+
+
+(defmethod sdn-node->org-string :superscript
+[{children :children}]
+(apply str "^" (conv-all children)))
+
+
+(defmethod sdn-node->org-string :subscript
+[{children :children}]
+(apply str "_" (conv-all children)))
+
+
+(defmethod sdn-node->org-string :line-break
+[_]
+"\n")
+
+
+(defmethod sdn-node->org-string :keyword
+[{:keys [key value]}]
+(format "#+%s: %s\n" key value))
+
+
+(defmethod sdn-node->org-string :paragraph
+  [{children :children}]
+  (apply str (conv-all children)))
+
+
 (defmethod sdn-node->org-string :headline
   [{:keys [value level children]}]
-  (format "%s\n"
-          (apply str
-                 (format "%s %s\n" (apply str (repeat level "*")) value)
-                 (conv-all children))))
-
-
-(defmethod sdn-node->org-string :list
-  [{:keys [tag type children]}])
+  (apply str
+         "\n"
+         (apply str (repeat level "*"))
+         " "
+         value
+         (conv-all children)))
 
 
 (defmethod sdn-node->org-string :root
@@ -183,13 +149,13 @@
 
 
 (defmethod sdn-node->org-string :body
-  [{children :children}]
-  (apply str (conv-all children)))
+[{children :children}]
+(apply str (conv-all children)))
 
 
 (defn orgify
-  [sdn]
-  (sdn-node->org-string sdn))
+[sdn]
+(sdn-node->org-string sdn))
 
 
 (spit "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org" (orgify nim-body))

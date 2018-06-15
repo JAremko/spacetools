@@ -133,100 +133,18 @@
 
 ;;;; link
 
-(s/def :spacedoc.data.link/tag #{:file-path
-                                 :org-file-path
-                                 :local-org-web-link
-                                 :embeddable-file-path
-                                 :web-link
-                                 :embeddable-web-link
-                                 :headline-link})
-(s/def ::link-children (s/coll-of ::inline-element
-                                  :kind vector?
-                                  :into []))
-(s/def :spacedoc.data.link/children ::link-children)
+(s/def :spacedoc.data.link/tag #{:link})
+(s/def :spacedoc.data.link/path ::non-empty-string)
+(s/def :spacedoc.data.link/type #{:file :http :https :custom-id :ftp})
+(s/def :spacedoc.data.link/raw-link ::non-empty-string)
+(s/def :spacedoc.data.link/children (s/coll-of ::inline-element
+                                               :kind vector?
+                                               :into []))
 (s/def ::link (s/keys :req-un [:spacedoc.data.link/tag
+                               :spacedoc.data.link/path
+                               :spacedoc.data.link/type
+                               :spacedoc.data.link/raw-link
                                :spacedoc.data.link/children]))
-
-
-;;;; org-file-path node
-
-(s/def :spacedoc.data.org-file-path/tag #{:org-file-path})
-(s/def :spacedoc.data.org-file-path/value ::non-empty-string)
-(s/def :spacedoc.data.org-file-path/children ::link-children)
-(defnode ::org-file-path
-  (s/keys :req-un [:spacedoc.data.org-file-path/tag
-                   :spacedoc.data.org-file-path/value
-                   :spacedoc.data.org-file-path/children]))
-
-
-;;;; local-org-web-link node
-
-(s/def :spacedoc.data.local-org-web-link/tag #{:local-org-web-link})
-(s/def :spacedoc.data.local-org-web-link/value ::non-empty-string)
-(s/def :spacedoc.data.local-org-web-link/raw-link ::non-empty-string)
-(s/def :spacedoc.data.local-org-web-link/target-headline-gh-id string?)
-(s/def :spacedoc.data.local-org-web-link/children ::link-children)
-(defnode ::local-org-web-link
-  (s/keys :req-un [:spacedoc.data.local-org-web-link/tag
-                   :spacedoc.data.local-org-web-link/value
-                   :spacedoc.data.local-org-web-link/raw-link
-                   :spacedoc.data.local-org-web-link/target-headline-gh-id
-                   :spacedoc.data.local-org-web-link/children]))
-
-
-;;;; embeddable-file-path node
-
-(s/def :spacedoc.data.embeddable-file-path/tag #{:embeddable-file-path})
-(s/def :spacedoc.data.embeddable-file-path/value ::non-empty-string)
-(s/def :spacedoc.data.embeddable-file-path/children ::link-children)
-(defnode ::embeddable-file-path
-  (s/keys :req-un [:spacedoc.data.embeddable-file-path/tag
-                   :spacedoc.data.embeddable-file-path/value
-                   :spacedoc.data.embeddable-file-path/children]))
-
-
-;;;; file-path node
-
-(s/def :spacedoc.data.file-path/tag #{:file-path})
-(s/def :spacedoc.data.file-path/value ::non-empty-string)
-(s/def :spacedoc.data.file-path/children ::link-children)
-(defnode ::file-path
-  (s/keys :req-un [:spacedoc.data.file-path/tag
-                   :spacedoc.data.file-path/value
-                   :spacedoc.data.file-path/children]))
-
-
-;;;; embeddable-web-link node
-
-(s/def :spacedoc.data.embeddable-web-link/tag #{:embeddable-web-link})
-(s/def :spacedoc.data.embeddable-web-link/value ::non-empty-string)
-(s/def :spacedoc.data.embeddable-web-link/children ::link-children)
-(defnode ::embeddable-web-link
-  (s/keys :req-un [:spacedoc.data.embeddable-web-link/tag
-                   :spacedoc.data.embeddable-web-link/value
-                   :spacedoc.data.embeddable-web-link/children]))
-
-
-;;;; web-link node
-
-(s/def :spacedoc.data.web-link/tag #{:web-link})
-(s/def :spacedoc.data.web-link/value ::non-empty-string)
-(s/def :spacedoc.data.web-link/children ::link-children)
-(defnode ::web-link
-  (s/keys :req-un [:spacedoc.data.web-link/tag
-                   :spacedoc.data.web-link/value
-                   :spacedoc.data.web-link/children]))
-
-
-;;;; headline-link node
-
-(s/def :spacedoc.data.headline-link/tag #{:headline-link})
-(s/def :spacedoc.data.headline-link/target-headline-gh-id ::non-empty-string)
-(s/def :spacedoc.data.headline-link/children ::link-children)
-(defnode ::headline-link
-  (s/keys :req-un [:spacedoc.data.headline-link/tag
-                   :spacedoc.data.headline-link/target-headline-gh-id
-                   :spacedoc.data.headline-link/children]))
 
 
 ;;;; paragraph node
@@ -246,13 +164,7 @@
 (defmulti ^:private  inline-container :tag)
 (defmethod inline-container :bold [_] ::bold)
 (defmethod inline-container :italic [_] ::italic)
-(defmethod inline-container :org-file-path [_] ::org-file-path)
-(defmethod inline-container :local-org-web-link [_] ::local-org-web-link)
-(defmethod inline-container :embeddable-file-path [_] ::embeddable-file-path)
-(defmethod inline-container :file-path [_] ::file-path)
-(defmethod inline-container :embeddable-web-link [_] ::embeddable-web-link)
-(defmethod inline-container :web-link [_] ::web-link)
-(defmethod inline-container :headline-link [_] ::headline-link)
+(defmethod inline-container :link [_] ::link)
 (defmethod inline-container :strike-through [_] ::strike-through)
 (defmethod inline-container :subscript [_] ::subscript)
 (defmethod inline-container :superscript [_] ::superscript)
@@ -415,14 +327,6 @@
                                   :spacedoc.data.verse/children]))
 
 
-;;;; fixed-width node
-
-(s/def :spacedoc.data.fixed-width/tag #{:fixed-width})
-(s/def :spacedoc.data.fixed-width/value ::non-empty-string)
-(defnode ::fixed-width (s/keys :req-un [:spacedoc.data.fixed-width/tag
-                                        :spacedoc.data.fixed-width/value]))
-
-
 ;;;; keyword node
 
 (s/def :spacedoc.data.keyword/tag #{:keyword})
@@ -446,7 +350,6 @@
 (defmethod block-element :table [_] ::table)
 (defmethod block-element :verse [_] ::verse)
 (defmethod block-element :keyword [_] ::keyword)
-(defmethod block-element :fixed-width [_] ::fixed-width)
 (s/def ::block-element (s/multi-spec block-element :tag))
 
 

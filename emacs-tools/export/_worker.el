@@ -302,12 +302,12 @@ information."
 
 ;;;; Fixed Width
 
-(defun spacemacs//org-sdn-fixed-width (fixed-width _contents _info)
+(defun spacemacs//org-sdn-fixed-width (_fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format "{:tag :fixed-width :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string
-           (org-element-property :value fixed-width))))
+  (spacemacs/org-sdn-error "\"%s\" not implemented"
+                           "spacemacs//org-sdn-fixed-width")
+  "")
 
 ;;;; Footnote Reference
 
@@ -462,10 +462,11 @@ contextual information."
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
                 (format
-                 "%s {:tag :item-tag :value \"%s\"}"
+                 "%s {:tag :item-tag :value %s}"
                  children
                  (if (char-or-string-p item-tag)
-                     (spacemacs/org-sdn-escape-string item-tag)
+                     (format "\"%s\""
+                             (spacemacs/org-sdn-escape-string item-tag))
                    (org-export-data-with-backend item-tag
                                                  'spacemacs-sdn
                                                  info)))
@@ -515,42 +516,20 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
           spacemacs-repository-owner
           spacemacs-repository))
 
-(defconst spacemacs--org-sdn-embeddable-file-path-regexp
-  (format
-   "^.*\\.%s$"
-   (regexp-opt
-    '("gif" "gifv" "png" "jpg" "jpeg" "webp" "pdf" "svg" "webm" "mp4")
-    t))
-  "Regexp that matches file paths of files that can be
-embedded into a web page.")
-
-(defsubst spacemacs--org-sdn-embeddable-link-p (raw-link)
-  (string-match-p
-   spacemacs--org-sdn-embeddable-file-path-regexp
-   raw-link))
 
 (defconst spacemacs--org-sdn-org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
 
-(defsubst spacemacs//org-snd-local-org-web-link (file raw-link path target desc)
-  (if (file-readable-p path)
-      (format (concat "{:tag :local-org-web-link "
-                      ":value \"%s\" "
-                      ":raw-link \"%s\" "
-                      ":target-headline-gh-id \"%s\" "
-                      ":children [%s]}")
-              (spacemacs/org-sdn-escape-string path)
-              (spacemacs/org-sdn-escape-string raw-link)
-              (spacemacs/org-sdn-escape-string (url-unhex-string
-                                                target))
-              desc)
-    (spacemacs/org-sdn-error
-     (concat
-      "File %S has a GitHub link to a documentation file %S but "
-      "it isn't readable locally.")
-     file
-     (file-truename path))))
 
-(defsubst spacemacs//org-snd-file-link (file raw-link path desc)
+(defsubst spacemacs//org-snd-fmt-output (path type raw-link desc)
+  (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
+          (spacemacs/org-sdn-escape-string path)
+          (spacemacs/org-sdn-escape-string type)
+          (spacemacs/org-sdn-escape-string raw-link)
+          desc))
+
+
+(defsubst spacemacs//org-snd-copy-if-asset (file raw-link path)
+  ;; Errors:
   (cond
    ;; Missing target file.
    ((not (file-readable-p path))
@@ -565,21 +544,11 @@ embedded into a web page.")
      (concat "File %S has a link to file %S "
              "but it's outside of the documentation root directory.")
      file
-     (file-truename path)))
-   ;; .org file.
-   ((string-match-p spacemacs--org-sdn-org-link-re raw-link)
-    (format "{:tag :org-file-path :value \"%s\" :children [%s]}"
-            (spacemacs/org-sdn-escape-string path)
-            desc))
-   ;; asset file.
-   (t
-    (spacemacs/org-sdn-export-file file (file-truename path))
-    (format "{:tag %s :value \"%s\" :children [%s]}"
-            (if (spacemacs--org-sdn-embeddable-link-p raw-link)
-                :embeddable-file-path
-              :file-path)
-            (spacemacs/org-sdn-escape-string path)
-            desc))))
+     (file-truename path))))
+  ;; Copy assets.
+  (unless (string-match-p spacemacs--org-sdn-org-link-re raw-link)
+    (spacemacs/org-sdn-export-file file (file-truename path))))
+
 
 (defun spacemacs//org-sdn-link (link desc info)
   "Transcode a LINK object From Org to Spacemacs SDN.
@@ -590,15 +559,16 @@ INFO is a plist holding contextual information.  See
          (path (org-element-property :path link))
          (file (plist-get info :input-file))
          (raw-link (org-element-property :raw-link link))
-         (local-link? (string= type "file"))
+         (file-path? (string= type "file"))
          (org-link-with-target? (and
                                  (string-match
                                   spacemacs--org-sdn-org-link-re
                                   raw-link)
                                  (match-string 1 raw-link))))
     (cond
+
      ;; Local .org file link with target(anchor).
-     ((and local-link? org-link-with-target?)
+     ((and file-path? org-link-with-target?)
       (spacemacs/org-sdn-error
        (concat "Link \"%s\" "
                "in \"%s\" "
@@ -610,37 +580,30 @@ INFO is a plist holding contextual information.  See
        raw-link
        file
        spacemacs-readme-template-url))
-     ;; Web link to .org file inside Spacemacs GitHub repository.
+
+     ;; Web link to org file inside Spacemacs GitHub repository.
      ((string-match spacemacs--org-sdn-spacemacs-git-org-link-regexp raw-link)
-      (spacemacs//org-snd-local-org-web-link file
-                                             raw-link
-                                             (concat
-                                              spacemacs--root-dir
-                                              (url-unhex-string
-                                               (match-string 1 raw-link)))
-                                             (string-remove-prefix
-                                              "#"
-                                              (match-string 2 raw-link))
-                                             desc))
+      (let ((target-file (concat
+                          spacemacs--root-dir
+                          (url-unhex-string (match-string 1 raw-link)))))
+        (unless (file-readable-p target-file)
+          (spacemacs/org-sdn-error
+           (concat
+            "File %S has a GitHub link to a documentation file %S but "
+            "it isn't readable locally.")
+           file
+           (file-truename target-file)))))
+
      ;; Link to a file.
-     (local-link?
-      (spacemacs//org-snd-file-link file raw-link (url-unhex-string path) desc))
-     ;; Web link.
-     ((or (string= type "http")
-          (string= type "https")
-          (string= type "ftp"))
-      (format "{:tag %s :value \"%s\" :children [%s]}"
-              (if (spacemacs--org-sdn-embeddable-link-p raw-link)
-                  :embeddable-web-link
-                :web-link)
-              (spacemacs/org-sdn-escape-string raw-link)
-              desc))
-     ;; Link to a headline inside of the document that contains the link.
-     ((string= type "custom-id")
-      (format (concat "{:tag :headline-link "
-                      ":target-headline-gh-id \"%s\" :children [%s]}")
-              (spacemacs/org-sdn-escape-string raw-link)
-              desc))
+     (file-path?
+      (spacemacs//org-snd-copy-if-asset
+       file
+       raw-link
+       (url-unhex-string path)))
+
+     ;; Catch the rest of known types.
+     ((member type '("http" "https" "custom-id" "ftp")))
+
      ;; Anything else is an error.
      (t (spacemacs/org-sdn-error
          (concat
@@ -649,7 +612,8 @@ INFO is a plist holding contextual information.  See
           "but the type isn't implemented in spacemacs//org-sdn-link")
          raw-link
          file
-         type)))))
+         type)))
+    (spacemacs//org-snd-fmt-output path type raw-link desc)))
 
 ;;;; Node Property
 
