@@ -140,11 +140,11 @@
 (s/def :spacedoc.data.link/children (s/coll-of ::inline-element
                                                :kind vector?
                                                :into []))
-(s/def ::link (s/keys :req-un [:spacedoc.data.link/tag
-                               :spacedoc.data.link/path
-                               :spacedoc.data.link/type
-                               :spacedoc.data.link/raw-link
-                               :spacedoc.data.link/children]))
+(defnode ::link (s/keys :req-un [:spacedoc.data.link/tag
+                                 :spacedoc.data.link/path
+                                 :spacedoc.data.link/type
+                                 :spacedoc.data.link/raw-link
+                                 :spacedoc.data.link/children]))
 
 
 ;;;; paragraph node
@@ -237,7 +237,7 @@
 ;;;; feature-list node
 
 (s/def :spacedoc.data.feature-list/tag #{:feature-list})
-(s/def :spacedoc.data.feature-list/type #{:ordered :unordered})
+(s/def :spacedoc.data.feature-list/type #{:ordered :unordered :descriptive})
 (s/def :spacedoc.data.feature-list/children (s/coll-of ::list-item
                                                        :kind vector?
                                                        :min-count 1
