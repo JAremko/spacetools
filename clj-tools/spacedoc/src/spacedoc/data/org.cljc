@@ -1,12 +1,7 @@
 (ns spacedoc.data.org
-  (:require [spacedoc.util :as util]
-
-            [spacedoc.data.nim :refer [nim-body]]
-
-            [clojure.core.reducers :as r]
-            [clojure.set :refer [union]]
-            [clojure.string :refer [join]]
-            [clojure.spec.alpha :as s]))
+  (:require [spacedoc.data.helpers :as h]
+            [clojure.string :refer [split-lines join]]
+            [spacedoc.data.nim :refer [nim-body]]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -22,7 +17,7 @@
                                        :quote ["#+BEGIN_QUOTE\n"
                                                "#+END_QUOTE\n"]
                                        :center ["#+BEGIN_CENTER\n"
-                                                "#+BEGIN_CENTER\n"]
+                                                "#+END_CENTER\n"]
                                        :section ["" ""]})
 
 
@@ -48,7 +43,7 @@
               (throw
                (Exception.
                 "Meta headline must be converted into concrete node"))
-              (:list-item :item-children :item-tag :table-row :table-cell)
+              (:item-children :item-tag :table-row :table-cell)
               (throw
                (Exception.
                 (format "\"%s\" node can't be converted directly" (name tag))))
@@ -56,6 +51,11 @@
 
 
 (def ^:private conv-all (partial mapv sdn-node->org-string))
+
+
+(defn- nodes->str
+  [node-seq]
+  (apply str (conv-all node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
@@ -66,24 +66,25 @@
   (format "[[%s]%s]"
           raw-link
           (if (seq children)
-            (format "[%s]" (apply str (conv-all children)))
+            (format "[%s]" (nodes->str children))
             "")))
 
 
 (defmethod sdn-node->org-string :list
-  [{:keys [tag type children]}])
+  [{children :children}]
+  (str (nodes->str children) "\n"))
 
 
 (defmethod sdn-node->org-string :emphasis
-  [{:keys [tag value children]}]
-  (let [token (emphasis-tokens tag)]
-    (str token (apply str (or value (conv-all children))) token " ")))
+[{:keys [tag value children]}]
+(let [token (emphasis-tokens tag)]
+  (str token (apply str (or value (conv-all children))) token " ")))
 
 
 (defmethod sdn-node->org-string :block-container
   [{:keys [tag children]}]
   (let [{[begin-token end-token] tag} block-container-delims]
-    (str "\n" begin-token (apply str (conv-all children)) end-token "\n")))
+    (str begin-token (nodes->str children) end-token)))
 
 
 ;;;; Individual nodes (one to one).
@@ -93,14 +94,32 @@
   [{:keys [tag children]}])
 
 
+(defmethod sdn-node->org-string :list-item
+  [{b :bullet c :checkbox [{children :children} item-tag] :children}]
+  (let [itag (cond
+               (string? item-tag) (item-tag)
+               (map? item-tag) (sdn-node->org-string (:value item-tag))
+               :else nil)]
+    (apply
+     str
+     "\n"
+     b
+     (if itag (format "%s :: " itag) "")
+     (->> children
+          (nodes->str)
+          (split-lines)
+          (remove empty?)
+          (join "\n")))))
+
+
 (defmethod sdn-node->org-string :example
   [{value :value}]
-  (format "\n#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n\n" value))
+  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n" value))
 
 
 (defmethod sdn-node->org-string :src
-[{:keys [language value]}]
-(format "\n#+BEGIN_SRC %s\n%s#+END_SRC\n\n" language value))
+  [{:keys [language value]}]
+  (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" language value))
 
 
 (defmethod sdn-node->org-string :plain-text
@@ -109,28 +128,28 @@
 
 
 (defmethod sdn-node->org-string :superscript
-[{children :children}]
-(apply str "^" (conv-all children)))
+  [{children :children}]
+  (apply str "^" (conv-all children)))
 
 
 (defmethod sdn-node->org-string :subscript
-[{children :children}]
-(apply str "_" (conv-all children)))
+  [{children :children}]
+  (apply str "_" (conv-all children)))
 
 
 (defmethod sdn-node->org-string :line-break
-[_]
-"\n")
+  [_]
+  "\n")
 
 
 (defmethod sdn-node->org-string :keyword
-[{:keys [key value]}]
-(format "#+%s: %s\n" key value))
+  [{:keys [key value]}]
+  (format "#+%s: %s\n" key value))
 
 
 (defmethod sdn-node->org-string :paragraph
   [{children :children}]
-  (apply str (conv-all children)))
+  (format "\n%s\n" (nodes->str children)))
 
 
 (defmethod sdn-node->org-string :headline
@@ -149,13 +168,13 @@
 
 
 (defmethod sdn-node->org-string :body
-[{children :children}]
-(apply str (conv-all children)))
+  [{children :children}]
+  (nodes->str children))
 
 
 (defn orgify
-[sdn]
-(sdn-node->org-string sdn))
+  [sdn]
+  (sdn-node->org-string sdn))
 
 
 (spit "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org" (orgify nim-body))
