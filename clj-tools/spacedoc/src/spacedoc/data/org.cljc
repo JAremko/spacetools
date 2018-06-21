@@ -43,7 +43,7 @@
               (throw
                (Exception.
                 "Meta headline must be converted into concrete node"))
-              (:item-children :item-tag :table-row :table-cell)
+              (:item-children :item-tag)
               (throw
                (Exception.
                 (format "\"%s\" node can't be converted directly" (name tag))))
@@ -59,15 +59,6 @@
 
 
 ;;;; Groups of nodes (many to one).
-
-
-(defmethod sdn-node->org-string :link
-  [{:keys [raw-link children]}]
-  (format "[[%s]%s]"
-          raw-link
-          (if (seq children)
-            (format "[%s]" (nodes->str children))
-            "")))
 
 
 (defmethod sdn-node->org-string :list
@@ -91,7 +82,32 @@
 
 
 (defmethod sdn-node->org-string :table
-  [{:keys [tag children]}])
+  [{rows :children}]
+  (str
+   "\n\n"
+   (join "\n" (conv-all rows))
+   "\n"))
+
+
+(defmethod sdn-node->org-string :table-cell
+  [{children :children}]
+  (nodes->str children))
+
+
+(defmethod sdn-node->org-string :table-row
+  [{:keys [type children]}]
+  (if (= type :standard)
+    (str "| " (join " | " (conv-all children)) " |")
+    "|-"))
+
+
+(defmethod sdn-node->org-string :link
+  [{:keys [raw-link children]}]
+  (format "[[%s]%s]"
+          raw-link
+          (if (seq children)
+            (format "[%s]" (nodes->str children))
+            "")))
 
 
 (defmethod sdn-node->org-string :list-item
@@ -172,9 +188,16 @@
   (nodes->str children))
 
 
+(defn- remove-spaces-before-seps
+  [org-string]
+  org-string)
+
+
 (defn orgify
   [sdn]
-  (sdn-node->org-string sdn))
+  (->> sdn
+       (remove-spaces-before-seps)
+       (sdn-node->org-string)))
 
 
 (spit "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org" (orgify nim-body))

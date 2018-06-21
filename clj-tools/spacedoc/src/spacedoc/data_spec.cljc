@@ -284,11 +284,13 @@
 ;;;; table-row node
 
 (s/def :spacedoc.data.table-row/tag #{:table-row})
+(s/def :spacedoc.data.table-row/type #{:rule :standard})
 (s/def :spacedoc.data.table-row/children (s/coll-of ::table-cell
                                                     :kind vector?
                                                     :min-count 0
                                                     :into []))
 (defnode ::table-row (s/keys :req-un [:spacedoc.data.table-row/tag
+                                      :spacedoc.data.table-row/type
                                       :spacedoc.data.table-row/children]))
 
 

@@ -832,11 +832,13 @@ channel."
 
 ;;;; Table Row
 
-(defun spacemacs//org-sdn-table-row (_table-row contents _info)
+(defun spacemacs//org-sdn-table-row (table-row contents _info)
   "Transcode a TABLE-ROW element From Org to Spacemacs SDN.
 CONTENTS is the contents of the row.  INFO is a plist used as a
 communication channel."
-  (format "{:tag :table-row :children [%s]}" contents))
+  (format "{:tag :table-row :type :%s :children [%s]}"
+          (org-element-property :type table-row)
+          contents))
 
 ;;;; Target
 
