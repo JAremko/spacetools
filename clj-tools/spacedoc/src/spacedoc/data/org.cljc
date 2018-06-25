@@ -12,12 +12,12 @@
                                 :strike-through "+"})
 
 
-(def ^:private block-container-delims {:verse ["#+BEGIN_VERSE\n"
-                                               "#+END_VERSE\n"]
-                                       :quote ["#+BEGIN_QUOTE\n"
-                                               "#+END_QUOTE\n"]
-                                       :center ["#+BEGIN_CENTER\n"
-                                                "#+END_CENTER\n"]
+(def ^:private block-container-delims {:verse ["\n#+BEGIN_VERSE\n"
+                                               "#+END_VERSE\n\n"]
+                                       :quote ["\n#+BEGIN_QUOTE\n"
+                                               "#+END_QUOTE\n\n"]
+                                       :center ["\n#+BEGIN_CENTER\n"
+                                                "#+END_CENTER\n\n"]
                                        :section ["" ""]})
 
 
@@ -134,12 +134,12 @@
 
 (defmethod sdn-node->org-string :example
   [{value :value}]
-  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n" value))
+  (format "\n#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n\n" value))
 
 
 (defmethod sdn-node->org-string :src
   [{:keys [language value]}]
-  (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" language value))
+  (format "\n#+BEGIN_SRC %s\n%s#+END_SRC\n\n" language value))
 
 
 (defmethod sdn-node->org-string :plain-text
@@ -164,21 +164,18 @@
 
 (defmethod sdn-node->org-string :keyword
   [{:keys [key value]}]
-  (format "#+%s: %s\n" key value))
+  (format "#+%s: %s\n\n" key value))
 
 
 (defmethod sdn-node->org-string :paragraph
   [{children :children}]
-  (let [text (nodes->str children)]
-    (str
-     (if (re-matches #"^\n.*" text) "" "\n")
-     text
-     (if (re-matches #".*\n$" text) "" "\n"))))
+  (nodes->str children))
 
 
 (defmethod sdn-node->org-string :headline
   [{:keys [value level children]}]
   (apply str
+         "\n"
          (apply str (repeat level "*"))
          " "
          value
