@@ -111,7 +111,10 @@ the rest elements are file paths (absolute or relative to Spacemacs root dir)."
          (toc-org-fp-pref (expand-file-name
                            "../lib/toc-org"
                            spacemacs-docfmt-run-file-dir)))
-    (when (> f-length 0)
+    (if (= f-length 0)
+        (progn
+          (message "No files to format.")
+          (kill-emacs 0))
       (byte-compile-file (concat toc-org-fp-pref ".el"))
       ;; We doing it this way to suppress "Loading" message.
       (load (concat toc-org-fp-pref ".elc") nil t)

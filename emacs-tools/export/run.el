@@ -187,23 +187,26 @@ See `spacemacs-export-docs-help-text' for description."
           ;; Find the bottleneck.
           ;;(min (spacemacs//spacetools-get-cpu-count) f-length)
           (min 16 f-length)))
-    (setq spacemacs--export-docs-worker-count w-count
-          spacemacs--export-docs-root-dir root-dir)
-    (spacemacs//spacetools-do-concurrently
-     files
-     w-count
-     w-path
-     (lambda (fps)
-       (format
-        "%S"
-        `(spacemacs/export-docs-to-sdn
-          ,root-dir
-          ,spacemacs-export-docs-target-dir
-          ',fps)))
-     'spacemacs//export-docs-sentinel)
-    (while (not spacemacs--export-docs-stop-waiting)
-      (accept-process-output)))
-  (message "Done."))
+    (if (= f-length 0)
+        (progn (message "No files to export.")
+               (kill-emacs 0))
+      (setq spacemacs--export-docs-worker-count w-count
+            spacemacs--export-docs-root-dir root-dir)
+      (spacemacs//spacetools-do-concurrently
+       files
+       w-count
+       w-path
+       (lambda (fps)
+         (format
+          "%S"
+          `(spacemacs/export-docs-to-sdn
+            ,root-dir
+            ,spacemacs-export-docs-target-dir
+            ',fps)))
+       'spacemacs//export-docs-sentinel)
+      (while (not spacemacs--export-docs-stop-waiting)
+        (accept-process-output))
+      (message "Done."))))
 
 ;; Script entry point.
 (when (and load-file-name noninteractive)
