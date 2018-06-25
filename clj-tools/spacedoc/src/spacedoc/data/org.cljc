@@ -1,6 +1,5 @@
 (ns spacedoc.data.org
-  (:require [spacedoc.data.helpers :as h]
-            [clojure.string :refer [split-lines join]]
+  (:require [clojure.string :refer [split-lines join]]
             [spacedoc.data.nim :refer [nim-body]]))
 
 
