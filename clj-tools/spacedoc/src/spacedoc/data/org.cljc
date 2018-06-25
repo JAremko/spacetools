@@ -21,6 +21,9 @@
                                        :section ["" ""]})
 
 
+(def list-identation 2)
+
+
 (defmulti ^:private sdn-node->org-string
   (fn [{tag :tag}]
     (cond
@@ -67,9 +70,9 @@
 
 
 (defmethod sdn-node->org-string :emphasis
-[{:keys [tag value children]}]
-(let [token (emphasis-tokens tag)]
-  (str token (apply str (or value (conv-all children))) token " ")))
+  [{:keys [tag value children]}]
+  (let [token (emphasis-tokens tag)]
+    (str token (apply str (or value (conv-all children))) token " ")))
 
 
 (defmethod sdn-node->org-string :block-container
@@ -116,16 +119,17 @@
                (string? item-tag) (item-tag)
                (map? item-tag) (sdn-node->org-string (:value item-tag))
                :else nil)]
-    (apply
-     str
-     "\n"
-     b
-     (if itag (format "%s :: " itag) "")
-     (->> children
-          (nodes->str)
-          (split-lines)
-          (remove empty?)
-          (join "\n")))))
+    (str
+     (apply
+      str
+      b
+      (if itag (format "%s :: " itag) "")
+      (->> children
+           (nodes->str)
+           (split-lines)
+           (remove empty?)
+           (join (apply str "\n" (repeat list-identation " ")))))
+     "\n")))
 
 
 (defmethod sdn-node->org-string :example
@@ -165,16 +169,20 @@
 
 (defmethod sdn-node->org-string :paragraph
   [{children :children}]
-  (format "\n%s\n" (nodes->str children)))
+  (let [text (nodes->str children)]
+    (str
+     (if (re-matches #"^\n.*" text) "" "\n")
+     text
+     (if (re-matches #".*\n$" text) "" "\n"))))
 
 
 (defmethod sdn-node->org-string :headline
   [{:keys [value level children]}]
   (apply str
-         "\n"
          (apply str (repeat level "*"))
          " "
          value
+         "\n"
          (conv-all children)))
 
 
