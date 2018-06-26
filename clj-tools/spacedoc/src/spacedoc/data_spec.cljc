@@ -1,6 +1,5 @@
 (in-ns 'spacedoc.data)
 
-
 ;;;; Helpers
 
 (defmulti node->spec-k :tag)
@@ -33,6 +32,8 @@
 (defmethod inline-leaf :plain-text [_] ::plain-text)
 (defmethod inline-leaf :verbatim [_] ::verbatim)
 (s/def ::inline-leaf (s/multi-spec inline-leaf :tag))
+
+(def inline-leaf-tags (keys (methods inline-leaf)))
 
 
 ;;;; kbd node
@@ -171,6 +172,9 @@
 (defmethod inline-container :paragraph [_] ::paragraph)
 (defmethod inline-container :underline [_] ::underline)
 (s/def ::inline-container (s/multi-spec inline-container :tag))
+
+(def inline-container-tags (keys (methods inline-container)))
+(def inline-tags (concat inline-leaf-tags inline-container-tags))
 
 
 ;;;; center node
@@ -353,6 +357,8 @@
 (defmethod block-element :verse [_] ::verse)
 (defmethod block-element :keyword [_] ::keyword)
 (s/def ::block-element (s/multi-spec block-element :tag))
+
+(def block-tags (keys (methods block-element)))
 
 
 ;;;; section node

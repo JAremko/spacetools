@@ -1,6 +1,17 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
+            [spacedoc.data :as data]
             [spacedoc.data.nim :refer [nim-body]]))
+
+
+;; FIXME: We cut some corners here.. For example, we export tables without
+;;        properly aligning them, producing stacks of empty lines. Then we use
+;;        spacefmt (format from "emacs-tools" dir) to fix it. This way
+;;        we can reuse code from the tool and org-mode package itself.
+;;        But it will be much clearer (and correct) if each element will be
+;;        responsible only for rendering it's children and not how to pad
+;;        itself (when needed) with spaces, empty-lines etc. in the parent
+;;        container.
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -81,6 +92,11 @@
 
 
 ;;;; Individual nodes (one to one).
+
+
+(defmethod sdn-node->org-string :paragraph
+  [{children :children}]
+  (nodes->str children))
 
 
 (defmethod sdn-node->org-string :table
@@ -164,11 +180,6 @@
 (defmethod sdn-node->org-string :keyword
   [{:keys [key value]}]
   (format "#+%s: %s\n\n" key value))
-
-
-(defmethod sdn-node->org-string :paragraph
-  [{children :children}]
-  (nodes->str children))
 
 
 (defmethod sdn-node->org-string :headline
