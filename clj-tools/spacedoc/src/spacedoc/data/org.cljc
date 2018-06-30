@@ -6,16 +6,6 @@
             [spacedoc.data.nim :refer [nim-body]]))
 
 
-;; FIXME: We cut some corners here.. For example, we export tables without
-;;        properly aligning them, producing stacks of empty lines. Then we use
-;;        spacefmt (format from "emacs-tools" dir) to fix it. This way
-;;        we can reuse code from the tool and org-mode package itself.
-;;        But it will be much clearer (and correct) if each element will be
-;;        responsible only for rendering it's children and not how to pad
-;;        itself (when needed) with spaces, empty-lines etc. in the parent
-;;        container.
-
-
 (def ^:private emphasis-tokens {:bold "*"
                                 :italic "/"
                                 :verbatim "="
@@ -71,10 +61,13 @@
 (def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-(defn- node->delimited-str
-  [prev-node next-node]
-  ;; (match)
-  (sdn->org next-node))
+(defn- make-delimited-str
+  [{p-tag :tag :as p-node} {n-tag :tag :as n-node}]
+  (let [delim
+        (match [p-tag n-tag]
+               [:foo :bar] ""
+               :else "")]
+    (str delim (sdn->org n-node))))
 
 
 (defn- conv*
@@ -82,7 +75,7 @@
   (r/fold
    (r/monoid #(vec (concat %)) vector)
    (fn [acc next-child]
-     (conj acc (node->delimited-str (last acc) next-child)))
+     (conj acc (make-delimited-str (last acc) next-child)))
    children))
 
 
