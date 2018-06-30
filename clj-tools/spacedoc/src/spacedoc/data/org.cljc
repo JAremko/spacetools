@@ -22,19 +22,19 @@
                                 :strike-through "+"})
 
 
-(def ^:private block-container-delims {:verse ["\n#+BEGIN_VERSE\n"
-                                               "#+END_VERSE\n\n"]
-                                       :quote ["\n#+BEGIN_QUOTE\n"
-                                               "#+END_QUOTE\n\n"]
-                                       :center ["\n#+BEGIN_CENTER\n"
-                                                "#+END_CENTER\n\n"]
+(def ^:private block-container-delims {:verse ["#+BEGIN_VERSE\n"
+                                               "#+END_VERSE"]
+                                       :quote ["#+BEGIN_QUOTE\n"
+                                               "#+END_QUOTE"]
+                                       :center ["#+BEGIN_CENTER\n"
+                                                "#+END_CENTER"]
                                        :section ["" ""]})
 
 
 (def list-identation 2)
 
 
-(defmulti ^:private sdn-node->org-string
+(defmulti sdn->org
   (fn [{tag :tag}]
     (cond
       ;; Headline node group.
@@ -63,76 +63,78 @@
               tag))))
 
 
-(def ^:private conv-all (partial mapv sdn-node->org-string))
+;;;; Helpers
+
+(def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-(defn- nodes->str
+(def ^:private conv-all (partial mapv sdn->org))
+
+
+(defn- conv
   [node-seq]
-  (apply str (conv-all node-seq)))
+  (join (conv-all node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
 
 
-(defmethod sdn-node->org-string :list
+(defmethod sdn->org :list
   [{children :children}]
-  (str (nodes->str children) "\n"))
+  (conv children))
 
 
-(defmethod sdn-node->org-string :emphasis
+(defmethod sdn->org :emphasis
   [{:keys [tag value children]}]
   (let [token (emphasis-tokens tag)]
-    (str token (apply str (or value (conv-all children))) token " ")))
+    (str token (or (join value) (conv children)) token)))
 
 
-(defmethod sdn-node->org-string :block-container
+(defmethod sdn->org :block-container
   [{:keys [tag children]}]
   (let [{[begin-token end-token] tag} block-container-delims]
-    (str begin-token (nodes->str children) end-token)))
+    (str begin-token (conv children) end-token)))
 
 
 ;;;; Individual nodes (one to one).
 
 
-(defmethod sdn-node->org-string :paragraph
+(defmethod sdn->org :paragraph
   [{children :children}]
-  (nodes->str children))
+  (conv children))
 
 
-(defmethod sdn-node->org-string :table
+(defmethod sdn->org :table
   [{rows :children}]
-  (str
-   "\n\n"
-   (join "\n" (conv-all rows))
-   "\n"))
+  (join "\n" (conv-all rows)))
 
 
-(defmethod sdn-node->org-string :table-cell
+(defmethod sdn->org :table-cell
   [{children :children}]
-  (nodes->str children))
+  (conv children))
 
 
-(defmethod sdn-node->org-string :table-row
+(defmethod sdn->org :table-row
   [{:keys [type children]}]
   (if (= type :standard)
     (str "| " (join " | " (conv-all children)) " |")
     "|-"))
 
 
-(defmethod sdn-node->org-string :link
+(defmethod sdn->org :link
   [{:keys [raw-link children]}]
   (format "[[%s]%s]"
           raw-link
           (if (seq children)
-            (format "[%s]" (nodes->str children))
+            (format "[%s]" (conv children))
             "")))
 
 
-(defmethod sdn-node->org-string :list-item
+(defmethod sdn->org :list-item
   [{b :bullet c :checkbox [{children :children} item-tag] :children}]
   (let [itag (cond
                (string? item-tag) (item-tag)
-               (map? item-tag) (sdn-node->org-string (:value item-tag))
+               (map? item-tag) (sdn->org (:value item-tag))
                :else nil)]
     (str
      (apply
@@ -140,79 +142,68 @@
       b
       (if itag (format "%s :: " itag) "")
       (->> children
-           (nodes->str)
+           (conv)
            (split-lines)
            (remove empty?)
            (join (apply str "\n" (repeat list-identation " ")))))
      "\n")))
 
 
-(defmethod sdn-node->org-string :example
+(defmethod sdn->org :example
   [{value :value}]
-  (format "\n#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n\n" value))
+  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE" value))
 
 
-(defmethod sdn-node->org-string :src
+(defmethod sdn->org :src
   [{:keys [language value]}]
-  (format "\n#+BEGIN_SRC %s\n%s#+END_SRC\n\n" language value))
+  (format "#+BEGIN_SRC %s\n%s#+END_SRC" language value))
 
 
-(defmethod sdn-node->org-string :plain-text
+(defmethod sdn->org :plain-text
   [{value :value}]
   value)
 
 
-(defmethod sdn-node->org-string :superscript
+(defmethod sdn->org :superscript
   [{children :children}]
   (apply str "^" (conv-all children)))
 
 
-(defmethod sdn-node->org-string :subscript
+(defmethod sdn->org :subscript
   [{children :children}]
   (apply str "_" (conv-all children)))
 
 
-(defmethod sdn-node->org-string :line-break
+(defmethod sdn->org :line-break
   [_]
   "\n")
 
 
-(defmethod sdn-node->org-string :keyword
+(defmethod sdn->org :keyword
   [{:keys [key value]}]
-  (format "#+%s: %s\n\n" key value))
+  (format "#+%s: %s\n" key value))
 
 
-(defmethod sdn-node->org-string :headline
+(defmethod sdn->org :headline
   [{:keys [value level children]}]
-  (apply str
-         "\n"
-         (apply str (repeat level "*"))
-         " "
-         value
-         "\n"
-         (conv-all children)))
+  (str
+   (apply str (repeat level "*"))
+   " "
+   value
+   "\n"
+   (conv children)))
 
 
-(defmethod sdn-node->org-string :root
+(defmethod sdn->org :root
   [{[body] :children}]
-  (sdn-node->org-string body))
+  (sdn->org body))
 
 
-(defmethod sdn-node->org-string :body
+(defmethod sdn->org :body
   [{children :children}]
-  (nodes->str children))
+  (conv children))
 
 
-(defn- remove-spaces-before-seps
-  [org-string]
-  org-string)
-
-
-(defn orgify
-  [sdn]
-  (->> sdn
-       (remove-spaces-before-seps)
-       (sdn-node->org-string)))
-
-
-(spit "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org" (orgify nim-body))
+(spit
+ "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org"
+ (sdn->org nim-body))
