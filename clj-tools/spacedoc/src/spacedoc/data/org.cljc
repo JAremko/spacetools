@@ -1,5 +1,7 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
+            [clojure.core.reducers :as r]
+            [clojure.core.match :refer [match]]
             [spacedoc.data :as data]
             [spacedoc.data.nim :refer [nim-body]]))
 
@@ -65,15 +67,28 @@
 
 ;;;; Helpers
 
+
 (def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-(def ^:private conv-all (partial mapv sdn->org))
+(defn- node->delimited-str
+  [prev-node next-node]
+  ;; (match)
+  (sdn->org next-node))
+
+
+(defn- conv*
+  [children]
+  (r/fold
+   (r/monoid #(vec (concat %)) vector)
+   (fn [acc next-child]
+     (conj acc (node->delimited-str (last acc) next-child)))
+   children))
 
 
 (defn- conv
   [node-seq]
-  (join (conv-all node-seq)))
+  (join (conv* node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
@@ -106,7 +121,7 @@
 
 (defmethod sdn->org :table
   [{rows :children}]
-  (join "\n" (conv-all rows)))
+  (join "\n" (conv* rows)))
 
 
 (defmethod sdn->org :table-cell
@@ -117,7 +132,7 @@
 (defmethod sdn->org :table-row
   [{:keys [type children]}]
   (if (= type :standard)
-    (str "| " (join " | " (conv-all children)) " |")
+    (str "| " (join " | " (conv* children)) " |")
     "|-"))
 
 
@@ -166,12 +181,12 @@
 
 (defmethod sdn->org :superscript
   [{children :children}]
-  (apply str "^" (conv-all children)))
+  (apply str "^" (conv* children)))
 
 
 (defmethod sdn->org :subscript
   [{children :children}]
-  (apply str "_" (conv-all children)))
+  (apply str "_" (conv* children)))
 
 
 (defmethod sdn->org :line-break
