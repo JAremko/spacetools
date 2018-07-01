@@ -33,7 +33,7 @@
 (defmethod inline-leaf :verbatim [_] ::verbatim)
 (s/def ::inline-leaf (s/multi-spec inline-leaf :tag))
 
-(def inline-leaf-tags (keys (methods inline-leaf)))
+(def inline-leaf-tags (set (keys (methods inline-leaf))))
 
 
 ;;;; kbd node
@@ -173,8 +173,8 @@
 (defmethod inline-container :underline [_] ::underline)
 (s/def ::inline-container (s/multi-spec inline-container :tag))
 
-(def inline-container-tags (keys (methods inline-container)))
-(def inline-tags (concat inline-leaf-tags inline-container-tags))
+(def inline-container-tags (set (keys (methods inline-container))))
+(def inline-tags (set (union inline-leaf-tags inline-container-tags)))
 
 
 ;;;; center node
@@ -358,7 +358,7 @@
 (defmethod block-element :keyword [_] ::keyword)
 (s/def ::block-element (s/multi-spec block-element :tag))
 
-(def block-tags (keys (methods block-element)))
+(def block-tags (set (keys (methods block-element))))
 
 
 ;;;; section node
@@ -494,6 +494,14 @@
   (s/merge
    ::headline-base
    (s/keys :req-un [:spacedoc.data.todo/tag])))
+
+
+(def headline-tags (->> node->spec-k
+                        (methods)
+                        (keys)
+                        (filter #(re-matches #"^headline-level-.*$" (name %)))
+                        (set)
+                        (union #{:description :todo :headline})))
 
 
 ;;;; root node

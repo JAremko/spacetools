@@ -2,7 +2,7 @@
   (:require [clojure.string :refer [split-lines join]]
             [clojure.core.reducers :as r]
             [clojure.core.match :refer [match]]
-            [spacedoc.data :as data]
+            [spacedoc.data :refer [headline-tags tag->kind]]
             [spacedoc.data.nim :refer [nim-body]]))
 
 
@@ -30,8 +30,7 @@
   (fn [{tag :tag}]
     (cond
       ;; Headline node group.
-      (or (#{:description :todo} tag)
-          (re-matches #"^headline-level-.*$" (name tag))) :headline
+      (headline-tags tag) :headline
 
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
@@ -61,22 +60,27 @@
 (def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-(defn- make-delimited-str
+(defn- make-delim
   [{p-tag :tag :as p-node} {n-tag :tag :as n-node}]
-  (let [delim
-        (match [p-tag n-tag]
-               [:foo :bar] ""
-               :else "")]
-    (str delim (sdn->org n-node))))
+  (let [sp {:tag :plain-text :value " "}
+        nl {:tag :line-break}
+        none {:tag :plain-text :value ""}]
+    (conj
+     (match [p-tag (tag->kind p-tag) n-tag (tag->kind n-tag)]
+            [_ _ _ _] sp
+            :else none))))
 
 
 (defn- conv*
   [children]
-  (r/fold
-   (r/monoid #(vec (concat %)) vector)
-   (fn [acc next-child]
-     (conj acc (make-delimited-str (last acc) next-child)))
-   children))
+  (map sdn->org
+       (r/fold
+        (r/monoid #(vec (concat %)) vector)
+        (fn [acc next-child]
+          (conj acc
+                (make-delim (last acc) next-child)
+                next-child))
+        children)))
 
 
 (defn- conv

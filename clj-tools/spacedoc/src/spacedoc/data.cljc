@@ -16,6 +16,20 @@
 (load "data_spec")
 
 
+(def kinds {inline-container-tags :inline-container
+            inline-leaf-tags :inline-leaf
+            block-tags :block
+            headline-tags :headline})
+
+
+(defn tag->kind
+  [tag]
+  (some->> kinds
+           (filter #((key %) tag))
+           (first)
+           (val)))
+
+
 (def all-tags (remove #{:default} (keys (methods node->spec-k))))
 
 
