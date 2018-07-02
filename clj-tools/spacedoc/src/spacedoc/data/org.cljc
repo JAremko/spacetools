@@ -60,37 +60,23 @@
 (def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-;; (defn- make-delim
-;;   [{p-tag :tag :as p-node} {n-tag :tag :as n-node}]
-;;   (let [sp {:tag :plain-text :value " "}
-;;         nl {:tag :line-break}
-;;         none {:tag :plain-text :value ""}]
-;;     (conj
-;;      (match [p-tag (tag->kind p-tag) n-tag (tag->kind n-tag)]
-;;             [_ _ _ _] sp
-;;             :else none))))
-
-
-(defn- ensure-sep
-  [before after]
-  (println (last before) (first after))
-  (if (and
-       before
-       after
-       (not (or (seps (last before))
-                (seps (first after)))))
-    " " ""))
+(defn- chain
+  [acc next-str]
+  (conj acc
+        (let [before-str (last acc)]
+          (str (if (and before-str
+                        next-str
+                        (not (or (seps (last before-str))
+                                 (seps (first next-str)))))
+                 " " "")
+               next-str))))
 
 
 (defn- conv*
   [children]
   (r/fold
    (r/monoid #(vec (concat %)) vector)
-   (fn [acc next-child]
-     (let [next-str (sdn->org next-child)]
-       (conj acc
-             (str (ensure-sep (last acc) next-str)
-                  next-str))))
+   #(chain %1 (sdn->org %2))
    children))
 
 
