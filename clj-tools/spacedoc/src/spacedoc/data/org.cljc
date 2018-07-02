@@ -61,23 +61,28 @@
 
 
 (defn- chain
-  [acc next-str]
-  (conj acc
-        (let [before-str (last acc)]
-          (str (if (and before-str
-                        next-str
-                        (not (or (seps (last before-str))
-                                 (seps (first next-str)))))
-                 " " "")
-               next-str))))
+  [acc next]
+  (conj
+   acc
+   {:head-tag (:tag next)
+    :str (let [acc-str (:str acc)
+               before-str (last acc-str)
+               next-str (sdn->org next)]
+           (str (if (and before-str
+                         next-str
+                         (not (or (seps (last before-str))
+                                  (seps (first next-str)))))
+                  " " "")
+                next-str))}))
 
 
 (defn- conv*
   [children]
-  (r/fold
-   (r/monoid #(vec (concat %)) vector)
-   #(chain %1 (sdn->org %2))
-   children))
+  (mapv :str
+        (r/fold
+         (r/monoid vec vector)
+         #(chain %1 %2)
+         children)))
 
 
 (defn- conv
