@@ -1,6 +1,7 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
-            [spacedoc.data :refer [headline-tags tag->kind]]
+            [clojure.set :refer [intersection]]
+            [spacedoc.data :refer [seps headline-tags tag->kind]]
             [spacedoc.data.nim :refer [nim-body]]))
 
 
@@ -13,15 +14,15 @@
 
 
 (def ^:private block-container-delims {:verse ["#+BEGIN_VERSE\n"
-                                               "#+END_VERSE"]
+                                               "#+END_VERSE\n"]
                                        :quote ["#+BEGIN_QUOTE\n"
-                                               "#+END_QUOTE"]
+                                               "#+END_QUOTE\n"]
                                        :center ["#+BEGIN_CENTER\n"
-                                                "#+END_CENTER"]
+                                                "#+END_CENTER\n"]
                                        :section ["" ""]})
 
 
-(def list-identation 2)
+(def ^:private list-identation 2)
 
 
 (defmulti sdn->org
@@ -55,23 +56,32 @@
 ;;;; Helpers
 
 
-(def ^:private seps  #{\! \? \: \; \) \} \, \. \- \\ \newline \space \tab})
-
-(defn- conv*
-  [children]
-  (reduce
-   (fn [acc next]
-     (let [before-str (last acc)
-           blc (last before-str)
-           next-str (sdn->org next)
-           nfc (first next-str)
-           edge? (not (and before-str next-str))
-           separated? (or (seps blc) (seps nfc))]
-       (conj acc
-             (str (when-not (or edge? separated?) " ")
-                  next-str))))
-   []
-   children))
+(def ^:private conv*
+  (partial reduce
+     (fn [acc next]
+       (let [head-kind (tag->kind (:head-tag (meta acc)))
+             before-str (last acc)
+             next-str (sdn->org next)
+             next-kind (tag->kind (:tag next))
+             edge? (not (and before-str next-str))
+             separated? (or (seps (last before-str))
+                            (seps (first next-str)))]
+         (println "!!! " (:head-tag (meta acc)) " " (:tag next) " " (intersection
+                                                                     #{:block :headline}
+                                                                     (hash-set head-kind next-kind)) " !!!!")
+         (with-meta
+           (conj acc
+                 (str (cond (seq
+                             (intersection
+                              #{:block :headline}
+                              (hash-set head-kind next-kind)))
+                            "\n"
+                            (not (or edge? separated?))
+                            " "
+                            :else "")
+                      next-str))
+           {:head-tag (:tag next)})))
+     []))
 
 
 (defn- conv
@@ -109,7 +119,7 @@
 
 (defmethod sdn->org :table
   [{rows :children}]
-  (join "\n" (map sdn->org rows)))
+  (str (join "\n" (map sdn->org rows)) "\n"))
 
 
 (defmethod sdn->org :table-cell
@@ -154,12 +164,12 @@
 
 (defmethod sdn->org :example
   [{value :value}]
-  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE" value))
+  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n" value))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
-  (format "#+BEGIN_SRC %s\n%s#+END_SRC" language value))
+  (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" language value))
 
 
 (defmethod sdn->org :plain-text
