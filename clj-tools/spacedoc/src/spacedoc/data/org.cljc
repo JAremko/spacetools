@@ -60,27 +60,38 @@
 (def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
 
 
-(defn- make-delim
-  [{p-tag :tag :as p-node} {n-tag :tag :as n-node}]
-  (let [sp {:tag :plain-text :value " "}
-        nl {:tag :line-break}
-        none {:tag :plain-text :value ""}]
-    (conj
-     (match [p-tag (tag->kind p-tag) n-tag (tag->kind n-tag)]
-            [_ _ _ _] sp
-            :else none))))
+;; (defn- make-delim
+;;   [{p-tag :tag :as p-node} {n-tag :tag :as n-node}]
+;;   (let [sp {:tag :plain-text :value " "}
+;;         nl {:tag :line-break}
+;;         none {:tag :plain-text :value ""}]
+;;     (conj
+;;      (match [p-tag (tag->kind p-tag) n-tag (tag->kind n-tag)]
+;;             [_ _ _ _] sp
+;;             :else none))))
+
+
+(defn- ensure-sep
+  [before after]
+  (println (last before) (first after))
+  (if (and
+       before
+       after
+       (not (or (seps (last before))
+                (seps (first after)))))
+    " " ""))
 
 
 (defn- conv*
   [children]
-  (map sdn->org
-       (r/fold
-        (r/monoid #(vec (concat %)) vector)
-        (fn [acc next-child]
-          (conj acc
-                (make-delim (last acc) next-child)
-                next-child))
-        children)))
+  (r/fold
+   (r/monoid #(vec (concat %)) vector)
+   (fn [acc next-child]
+     (let [next-str (sdn->org next-child)]
+       (conj acc
+             (str (ensure-sep (last acc) next-str)
+                  next-str))))
+   children))
 
 
 (defn- conv
@@ -118,7 +129,7 @@
 
 (defmethod sdn->org :table
   [{rows :children}]
-  (join "\n" (conv* rows)))
+  (join "\n" (map sdn->org rows)))
 
 
 (defmethod sdn->org :table-cell
