@@ -1,7 +1,5 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
-            [clojure.core.reducers :as r]
-            [clojure.core.match :refer [match]]
             [spacedoc.data :refer [headline-tags tag->kind]]
             [spacedoc.data.nim :refer [nim-body]]))
 
@@ -57,32 +55,23 @@
 ;;;; Helpers
 
 
-(def ^:private seps  #{\! \? \: \; \) \, \. \- \\ \newline \space \tab})
-
-
-(defn- chain
-  [acc next]
-  (conj
-   acc
-   {:head-tag (:tag next)
-    :str (let [acc-str (:str acc)
-               before-str (last acc-str)
-               next-str (sdn->org next)]
-           (str (if (and before-str
-                         next-str
-                         (not (or (seps (last before-str))
-                                  (seps (first next-str)))))
-                  " " "")
-                next-str))}))
-
+(def ^:private seps  #{\! \? \: \; \) \} \, \. \- \\ \newline \space \tab})
 
 (defn- conv*
   [children]
-  (mapv :str
-        (r/fold
-         (r/monoid vec vector)
-         #(chain %1 %2)
-         children)))
+  (reduce
+   (fn [acc next]
+     (let [before-str (last acc)
+           blc (last before-str)
+           next-str (sdn->org next)
+           nfc (first next-str)
+           edge? (not (and before-str next-str))
+           separated? (or (seps blc) (seps nfc))]
+       (conj acc
+             (str (when-not (or edge? separated?) " ")
+                  next-str))))
+   []
+   children))
 
 
 (defn- conv
@@ -131,7 +120,7 @@
 (defmethod sdn->org :table-row
   [{:keys [type children]}]
   (if (= type :standard)
-    (str "| " (join " | " (conv* children)) " |")
+    (str "| " (join " |" (conv* children)) " |")
     "|-"))
 
 
