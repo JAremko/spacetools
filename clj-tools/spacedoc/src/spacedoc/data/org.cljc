@@ -56,31 +56,33 @@
 ;;;; Helpers
 
 
+(defn- nl-wrap?
+  [node-tag]
+  (and
+   (not (#{:plain-list :feature-list} node-tag))
+   (#{:block :headline} (tag->kind node-tag))))
+
+
+(defn- nl-after?
+  [node-tag]
+  (#{:block :headline} (tag->kind node-tag)))
+
+
 (def ^:private conv*
   (partial reduce
      (fn [acc next]
-       (let [head-kind (tag->kind (:head-tag (meta acc)))
-             before-str (last acc)
-             next-str (sdn->org next)
-             next-kind (tag->kind (:tag next))
-             edge? (not (and before-str next-str))
-             separated? (or (seps (last before-str))
-                            (seps (first next-str)))]
-         (println "!!! " (:head-tag (meta acc)) " " (:tag next) " " (intersection
-                                                                     #{:block :headline}
-                                                                     (hash-set head-kind next-kind)) " !!!!")
+       (let [h-t (:h-t (meta acc))
+             b-s (last acc)
+             n-s (sdn->org next)]
          (with-meta
            (conj acc
-                 (str (cond (seq
-                             (intersection
-                              #{:block :headline}
-                              (hash-set head-kind next-kind)))
-                            "\n"
-                            (not (or edge? separated?))
-                            " "
-                            :else "")
-                      next-str))
-           {:head-tag (:tag next)})))
+                 (str (cond
+                        (not (and b-s n-s)) ""
+                        (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
+                        (not (or (seps (last b-s)) (seps (first n-s)))) " "
+                        :else "")
+                      n-s))
+           {:h-t (:tag next)})))
      []))
 
 
@@ -119,7 +121,7 @@
 
 (defmethod sdn->org :table
   [{rows :children}]
-  (str (join "\n" (map sdn->org rows)) "\n"))
+  (str "\n" (join "\n" (map sdn->org rows)) "\n"))
 
 
 (defmethod sdn->org :table-cell
