@@ -46,7 +46,7 @@
               (throw
                (Exception.
                 "Meta headline must be converted into concrete node"))
-              (:item-children :item-tag)
+              (:item-children :item-tag :table-row :table-cell)
               (throw
                (Exception.
                 (format "\"%s\" node can't be converted directly" (name tag))))
@@ -71,7 +71,7 @@
 (def ^:private conv*
   (partial reduce
      (fn [acc next]
-       (let [h-t (:h-t (meta acc))
+       (let [h-t (:head-tag (meta acc))
              b-s (last acc)
              n-s (sdn->org next)]
          (with-meta
@@ -82,7 +82,7 @@
                         (not (or (seps (last b-s)) (seps (first n-s)))) " "
                         :else "")
                       n-s))
-           {:h-t (:tag next)})))
+           {:head-tag (:tag next)})))
      []))
 
 
@@ -119,9 +119,51 @@
   (conv children))
 
 
-(defmethod sdn->org :table
+(defn- table->vec-rep
   [{rows :children}]
-  (str "\n" (join "\n" (map sdn->org rows)) "\n"))
+  (let [vec-tab (mapv
+                 (fn [{type :type cells :children}]
+                   (if (= type :standard)
+                     (mapv #(str " " (conv (:children %)) " ") cells)
+                     []))
+                 rows)
+        cols-w (apply mapv
+                      (fn [& cols]
+                        (apply max (map count cols)))
+                      (remove empty? vec-tab))]
+    (vec (concat [cols-w] vec-tab))))
+
+
+(defn- make-table-rule-str
+  [cols-w]
+  (join "+" (map #(join (repeat % "-")) cols-w)))
+
+
+(defn- make-table-row-str
+  [row cols-w]
+  (join "|"
+        (map (fn [column-width cell-s]
+               (str cell-s
+                    (join (repeat (- column-width
+                                     (count cell-s))
+                                  " "))))
+             cols-w
+             row)))
+
+
+(defmethod sdn->org :table
+  [table]
+  (let [[cols-w & vrep] (table->vec-rep table)]
+    (str "\n"
+         (join "\n"
+               (map (fn [row]
+                      (str "|"
+                           (if (empty? row)
+                             (make-table-rule-str cols-w)
+                             (make-table-row-str row cols-w))
+                           "|"))
+                    vrep))
+         "\n")))
 
 
 (defmethod sdn->org :table-cell
