@@ -29,6 +29,9 @@
 
 (load (concat spacemacs--docfmt-lib-dir "toc-org.elc")  nil t)
 
+(defconst spacemacs--docfmt-title-regexp "^#\\+TITLE:.*$")
+(defconst spacemacs--docfmt-begin-block-regexp "^#\\+BEGIN.*$")
+(defconst spacemacs--docfmt-end-block-regexp "^#\\+END.*$")
 (defconst spacemacs--docfmt-empty-line-regexp "^[ \t]*$")
 (defconst spacemacs--docfmt-tree-trunk-regexp "^[ 	]*|_")
 (defconst spacemacs--docfmt-toc-heading-head "* Table of Contents")
@@ -99,7 +102,33 @@ Returns nil if no more tables left."
   (while (looking-at-p spacemacs--docfmt-empty-line-regexp)
     (delete-blank-lines)))
 
-(defsubst spacemacs//docfmt-insert-empoty-line-at-the-end ()
+(defsubst spacemacs//docfmt-insert-empty-line-after-title ()
+  "Insert an empty line after title."
+  (goto-char (point-min))
+  (when (looking-at-p spacemacs--docfmt-title-regexp)
+    (forward-line 1)
+    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+      (open-line 1))))
+
+(defsubst spacemacs//docfmt-insert-empty-line-before-begin-block ()
+  "Insert an empty line before begins of blocks."
+  (goto-char (point-max))
+  (while (re-search-backward spacemacs--docfmt-begin-block-regexp nil t)
+    (goto-char (point-at-bol))
+    (forward-line -1)
+    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+      (forward-line 1)
+      (open-line 1))))
+
+(defsubst spacemacs//docfmt-insert-empty-line-after-end-block ()
+  "Insert an empty line after ends of blocks."
+  (goto-char (point-min))
+  (while (re-search-forward spacemacs--docfmt-end-block-regexp nil t)
+    (forward-line 1)
+    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+      (open-line 1))))
+
+(defsubst spacemacs//docfmt-insert-empty-line-at-the-end ()
   "Insert an empty line at the end of the buffer."
   (goto-char (point-max))
   (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
@@ -108,7 +137,7 @@ Returns nil if no more tables left."
 (defsubst spacemacs//docfmt-insert-title ()
   "Insert #TITLE:{DIR_NAME} if the buffer doesn't have one."
   (goto-char (point-min))
-  (unless (looking-at-p "^#\\+TITLE:.*$")
+  (unless (looking-at-p spacemacs--docfmt-title-regexp)
     (insert (format "#+TITLE:%s\n"
                     (file-name-base
                      (directory-file-name
@@ -134,7 +163,7 @@ Returns nil if no more tables left."
       (while (looking-at-p spacemacs--docfmt-empty-line-regexp)
         (delete-blank-lines)))))
 
-(defsubst spacemacs//docfmt-insert-empoty-line-before-tables ()
+(defsubst spacemacs//docfmt-insert-empty-line-before-tables ()
   "Insert an empty line before each org table."
   (goto-char (point-min))
   (while (spacemacs//docfmt-goto-next-table)
@@ -144,7 +173,7 @@ Returns nil if no more tables left."
       (open-line 1))
     (forward-line 1)))
 
-(defsubst spacemacs//docfmt-insert-empoty-line-after-sections ()
+(defsubst spacemacs//docfmt-insert-empty-line-after-sections ()
   "Insert an empty line after each section."
   (goto-char (point-min))
   (while (re-search-forward org-heading-regexp nil t)
@@ -155,7 +184,7 @@ Returns nil if no more tables left."
       (open-line 1))
     (forward-line 2)))
 
-(defsubst spacemacs//docfmt-insert-empoty-line-after-tables ()
+(defsubst spacemacs//docfmt-insert-empty-line-after-tables ()
   "Insert an empty line after each table."
   (goto-char (point-min))
   (while (spacemacs//docfmt-goto-next-table)
@@ -196,10 +225,13 @@ Returns nil if no more tables left."
      (spacemacs//docfmt-insert-toc)
      (spacemacs//docfmt-apply-toc)
      (spacemacs//docfmt-remove-empty-lines-after-headlines)
-     (spacemacs//docfmt-insert-empoty-line-before-tables)
-     (spacemacs//docfmt-insert-empoty-line-after-tables)
-     (spacemacs//docfmt-insert-empoty-line-after-sections)
-     (spacemacs//docfmt-insert-empoty-line-at-the-end)
+     (spacemacs//docfmt-insert-empty-line-before-tables)
+     (spacemacs//docfmt-insert-empty-line-after-title)
+     (spacemacs//docfmt-insert-empty-line-after-tables)
+     (spacemacs//docfmt-insert-empty-line-after-sections)
+     (spacemacs//docfmt-insert-empty-line-before-begin-block)
+     (spacemacs//docfmt-insert-empty-line-after-end-block)
+     (spacemacs//docfmt-insert-empty-line-at-the-end)
      (spacemacs//docfmt-align-tables)
      (setq new-buff-str (buffer-string))
      (if (string= old-buff-str new-buff-str)
