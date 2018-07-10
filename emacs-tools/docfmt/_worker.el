@@ -116,7 +116,8 @@ Returns nil if no more tables left."
   (while (re-search-backward spacemacs--docfmt-begin-block-regexp nil t)
     (goto-char (point-at-bol))
     (forward-line -1)
-    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (or (looking-at-p spacemacs--docfmt-empty-line-regexp)
+                (looking-at-p org-heading-regexp))
       (forward-line 1)
       (open-line 1))))
 
