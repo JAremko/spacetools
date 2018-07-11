@@ -259,8 +259,3 @@
 (defmethod sdn->org :body
   [{children :children}]
   (conv children))
-
-
-(spit
- "/mnt/workspace/test/spacedoc/clj-tools/spacedoc/src/spacedoc/data/test.org"
- (sdn->org nim-body))

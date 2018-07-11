@@ -25,6 +25,7 @@
     "Actions:"
     "  validate  INPUTS... Validate input .SDN files."
     "  relations INPUTS... Print node relations in the input .SDN files."
+    "  orgify    INPUTS... Export .SDN files into \"target/orgify/\"."
     "  describe  SPEC      Describe spec by keyword(like :spacedoc.data/root)."
     ""]))
 
@@ -49,6 +50,7 @@
            [action      a-args]
            ["describe"  [key    ]] (ac/describe-spec key)
            ["validate"  [_   & _]] (m/fmap ac/validate (parse-input a-args))
+           ["orgify"    [_   & _]] (m/fmap ac/orgify (parse-input a-args))
            ["relations" [_   & _]] (m/fmap ac/relations (parse-input a-args))
            ;; Errors
            ["describe"  _] (fail
@@ -56,6 +58,9 @@
                             {:args a-args})
            ["validate"  _] (fail
                             "\"validate\" requires one or more input argument"
+                            {:args a-args})
+           ["orgify"    _] (fail
+                            "\"orgify\" requires one or more input argument"
                             {:args a-args})
            ["relations" _] (fail
                             "\"relations\" requires one or more input argument"

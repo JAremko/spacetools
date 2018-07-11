@@ -4,11 +4,12 @@
 **usage:** `run ACTION [ARGS]...`
 
 **Actions:**
-1. `validate  INPUTS...`             Validate input spacedoc(.SDN) files.
-2. `describe  SPEC`                  Describe spec by keyword. Example: ":spacedoc.data/root".
-3. `relations INPUTS...`             Print node relations in the input Spacedoc(.SDN) files.
-4. `format    INPUTS...`             Format .ORG files Specified directly or by parent directory.
+1. `validate  INPUTS...`             Validate input spacedoc(.SDN) files
+2. `describe  SPEC`                  Describe spec by keyword. Example: ":spacedoc.data/root"
+3. `relations INPUTS...`             Print node relations in the input Spacedoc(.SDN) files
+4. `format    INPUTS...`             Format .ORG files Specified directly or by parent directory
 5. `export    DOCS_ROOT [INPUTS]...` Export .ORG files to "spacedoc/emacs-tools/export/target/"
+6. `orgify    INPUTS...`             Export .SDN files into "spacedoc/clj-tools/target/orgify/"
 
 *``DOCS_ROOT`` is a root directory of Spacemacs documentation (usually "~/.emacs.d/").*
 *If one of`INPUTS` arguments is a directory it will be scanned for .ORG files.*
