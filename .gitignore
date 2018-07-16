@@ -9,3 +9,4 @@ nbproject/private/
 maven-classpath
 maven-classpath.properties
 *.svg
+*.elc
