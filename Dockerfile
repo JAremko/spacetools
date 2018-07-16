@@ -1,6 +1,6 @@
 FROM clojure as clojure
 
-COPY clj-tools/spacedoc /usr/src/app
+COPY clj_tools/spacedoc /usr/src/app
 
 RUN cd /usr/src/app && lein uberjar
 
@@ -29,10 +29,10 @@ COPY . /opt/spacedoc
 
 RUN chmod 775 /usr/local/bin/sdn \
               /opt/spacedoc/run \
-              /opt/spacedoc/emacs-tools/docfmt/run.el \
-              /opt/spacedoc/emacs-tools/export/run.el
+              /opt/spacedoc/emacs_tools/docfmt/run.el \
+              /opt/spacedoc/emacs_tools/export/run.el
 
-RUN ln -s /opt/spacedoc/emacs-tools/export/target/ /tmp/export
+RUN ln -s /opt/spacedoc/emacs_tools/export/target/ /tmp/export
 
 ENTRYPOINT ["/opt/spacedoc/run"]
 

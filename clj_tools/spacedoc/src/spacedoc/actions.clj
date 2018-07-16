@@ -22,10 +22,10 @@
 (defn orgify
   "Export Spacedoc files into \"target/orgify/\" directory as .org files."
   [sdn-file-paths]
-  (exc/try-on
-   (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
-           (format "%s spacedoc files successfully validated."
-                   (count spacedocs)))))
+  #_ (exc/try-on
+      (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
+              (format "%s spacedoc files successfully validated."
+                      (count spacedocs)))))
 
 
 (defn describe-spec

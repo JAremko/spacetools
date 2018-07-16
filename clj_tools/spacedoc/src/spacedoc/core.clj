@@ -23,10 +23,10 @@
     options-summary
     ""
     "Actions:"
-    "  validate  INPUTS... Validate input .SDN files."
-    "  relations INPUTS... Print node relations in the input .SDN files."
-    "  orgify    INPUTS... Export .SDN files into \"target/orgify/\"."
-    "  describe  SPEC      Describe spec by keyword(like :spacedoc.data/root)."
+    "  validate  INS...   Validate input .SDN files."
+    "  relations INS...   Print node relations in the input .SDN files."
+    "  orgify    SDN_ROOT Export .SDN -> .ORG files into \"target/orgify/\"."
+    "  describe  SPEC     Describe spec by keyword(like :spacedoc.data/root)."
     ""]))
 
 
@@ -50,7 +50,7 @@
            [action      a-args]
            ["describe"  [key    ]] (ac/describe-spec key)
            ["validate"  [_   & _]] (m/fmap ac/validate (parse-input a-args))
-           ["orgify"    [_   & _]] (m/fmap ac/orgify (parse-input a-args))
+           #_ ["orgify"    [_   & _]] #_ (m/fmap ac/orgify (parse-input a-args))
            ["relations" [_   & _]] (m/fmap ac/relations (parse-input a-args))
            ;; Errors
            ["describe"  _] (fail
@@ -59,9 +59,9 @@
            ["validate"  _] (fail
                             "\"validate\" requires one or more input argument"
                             {:args a-args})
-           ["orgify"    _] (fail
-                            "\"orgify\" requires one or more input argument"
-                            {:args a-args})
+           #_  ["orgify"    _] #_ (fail
+                                   "\"orgify\" requires one or more input argument"
+                                   {:args a-args})
            ["relations" _] (fail
                             "\"relations\" requires one or more input argument"
                             {:args a-args})

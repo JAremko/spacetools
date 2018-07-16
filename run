@@ -13,12 +13,12 @@ read -d '' help <<- EOF
 
   Actions:
     validate  INPUTS...             Validate input spacedoc(.SDN) files.
-    orgify    INPUTS...             Export .SDN files into "spacedoc/clj-tools/target/orgify/".
     describe  SPEC                  Describe spec by keyword. Example: ":spacedoc.data/root".
     relations INPUTS...             Print node relations in the input Spacedoc(.SDN) files.
     format    INPUTS...             Format .ORG files Specified directly or by parent directory.
+    orgify    SDN_ROOT              Export .SDN docs as .ORG files into "target/orgify/" directory.
     export    DOCS_ROOT [INPUTS]... Export .ORG files to SDN format.
-                                    Export directory is "spacedoc/emacs-tools/export/target/".
+                                    Export directory is "spacedoc/emacs_tools/export/target/".
                                     DOCS_ROOT is a root directory of Spacemacs documentation
                                     (usually "~/.emacs.d/").  If an argument is a directory
                                     it will be scaned for .ORG files and they will be exported.
@@ -52,10 +52,10 @@ esac
 
 case $action in
 export)
-    exec emacs -batch -l ./emacs-tools/export/run.el -no-site-file -q "$@"
+    exec emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     ;;
 format)
-    exec emacs -batch -l ./emacs-tools/docfmt/run.el -no-site-file -q "$@"
+    exec emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
     ;;
 describe|validate|relations|orgify)
     exec sdn $action "$@"

@@ -1,8 +1,7 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
             [clojure.set :refer [intersection]]
-            [spacedoc.data :refer [seps headline-tags tag->kind]]
-            [spacedoc.data.nim :refer [nim-body]]))
+            [spacedoc.data :refer [seps headline-tags tag->kind]]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -259,3 +258,8 @@
 (defmethod sdn->org :body
   [{children :children}]
   (conv children))
+
+
+#_ (defn add-toc
+     [root-node]
+     )
