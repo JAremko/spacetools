@@ -333,14 +333,14 @@
                                   :spacedoc.data.verse/children]))
 
 
-;;;; keyword node
+;;;; key-word node
 
-(s/def :spacedoc.data.keyword/tag #{:keyword})
-(s/def :spacedoc.data.keyword/key ::non-empty-string)
-(s/def :spacedoc.data.keyword/value ::non-empty-string)
-(defnode ::keyword (s/keys :req-un [:spacedoc.data.keyword/tag
-                                    :spacedoc.data.keyword/key
-                                    :spacedoc.data.keyword/value]))
+(s/def :spacedoc.data.key-word/tag #{:key-word})
+(s/def :spacedoc.data.key-word/key ::non-empty-string)
+(s/def :spacedoc.data.key-word/value ::non-empty-string)
+(defnode ::key-word (s/keys :req-un [:spacedoc.data.key-word/tag
+                                     :spacedoc.data.key-word/key
+                                     :spacedoc.data.key-word/value]))
 
 
 ;; block group
@@ -355,7 +355,7 @@
 (defmethod block-element :src [_] ::src)
 (defmethod block-element :table [_] ::table)
 (defmethod block-element :verse [_] ::verse)
-(defmethod block-element :keyword [_] ::keyword)
+(defmethod block-element :key-word [_] ::key-word)
 (s/def ::block-element (s/multi-spec block-element :tag))
 
 (def block-tags (set (keys (methods block-element))))

@@ -477,7 +477,7 @@ contextual information."
 (defun spacemacs//org-sdn-keyword (keyword _contents _info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format "{:tag :keyword :key \"%s\" :value \"%s\"}"
+  (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
           (spacemacs/org-sdn-escape-string
            (org-element-property :key keyword))
           (spacemacs/org-sdn-escape-string
