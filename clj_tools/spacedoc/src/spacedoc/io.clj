@@ -55,10 +55,10 @@
            (not (s/valid? root-node-spec obj))
            (throw (ex-info "Validation filed." (data/explain-deepest obj)))
            :else obj)))
-     #(exc/failure
-       (ex-info (.getMessage %) (if-let [ed (ex-data %)]
-                                  (assoc ed :file file-path)
-                                  {:file file-path})))))))
+     (fn [^Exception err] exc/failure
+       (ex-info (.getMessage err) (if-let [ed (ex-data err)]
+                                    (assoc ed :file file-path)
+                                    {:file file-path})))))))
 
 
 (defn exit-err

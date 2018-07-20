@@ -258,8 +258,3 @@
 (defmethod sdn->org :body
   [{children :children}]
   (conv children))
-
-
-#_ (defn add-toc
-     [root-node]
-     )
