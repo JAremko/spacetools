@@ -10,6 +10,7 @@
                  [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
   :global-vars {*warn-on-reflection* true}
+  :javac-options ["-XX:+AlwaysActAsServerClassMachine"]
   :target-path "target/%s"
   :uberjar-name "sdn.jar"
   :profiles {:uberjar {:aot :all}})

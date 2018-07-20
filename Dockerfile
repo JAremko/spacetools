@@ -20,8 +20,6 @@ RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_
 
 RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
     --no-server \
-    -XX:+UseParallelGC \
-    -XX:ParallelGCThreads=1 \
     -H:+ReportUnsupportedElementsAtRuntime \
     -jar /tmp/sdn.jar
 
