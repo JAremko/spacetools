@@ -18,8 +18,12 @@ RUN apt-get update && apt-get install -y wget gcc libz-dev
 RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz \
     && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
-RUN graalvm-ce-${GRAALVM_V}/bin/native-image --no-server -H:+ReportUnsupportedElementsAtRuntime -jar /tmp/sdn.jar
-
+RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
+    --no-server \
+    -XX:+UseParallelGC \
+    -XX:ParallelGCThreads=1 \
+    -H:+ReportUnsupportedElementsAtRuntime \
+    -jar /tmp/sdn.jar
 
 FROM jare/emacs
 
