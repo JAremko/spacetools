@@ -114,7 +114,7 @@
   "Format payload for JSON."
   (replace-regexp-in-string
    "\n"
-   "\r"
+   "{{newline}}"
    (if args (apply 'format format-string args) format-string)))
 
 (defsubst spacemacs/org-sdn-export-file (src-file file-path)
@@ -576,7 +576,7 @@ INFO is a plist holding contextual information.  See
                "because it has target(anchors) and GitHub doesn't "
                "support them in ORG links :(\n"
                "(GitHub style anchors are supported)\n"
-               "See footnote of %S for details.\n")
+               "See footnote of %S for details.")
        raw-link
        file
        spacemacs-readme-template-url))
@@ -877,7 +877,7 @@ holding export options."
               "File \"%s\" "
               "doesn't have top level "
               "\"Description\" headline\n"
-              "See %S\n")
+              "See %S")
              file
              spacemacs-readme-template-url))
           (unless has-feature-list?
@@ -885,7 +885,7 @@ holding export options."
              (concat "File \"%s\" "
                      "doesn't have \"Features:\"(With a colon) list in the "
                      "top level \"Description\" headline\n"
-                     "See %S\n")
+                     "See %S")
              file
              spacemacs-readme-template-url)))))
     (format (concat "{:tag :root "

@@ -121,7 +121,7 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
           (error "Malformed response:%s" line))
         (let ((type (alist-get 'type resp))
               (text (replace-regexp-in-string
-                     "\r"
+                     "{{newline}}"
                      "\n"
                      (alist-get 'text resp))))
           (message
