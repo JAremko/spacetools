@@ -33,23 +33,23 @@
                                                           make-task
                                                           sentinel))
 
-(defconst docfmt/run-file-name (or load-file-name buffer-file-name)
+(defconst docfmt-run-file-name (or load-file-name buffer-file-name)
   "Path to run script of \"docfmt\" tool.")
 
-(defconst docfmt/run-file-dir
-  (file-name-directory docfmt/run-file-name)
+(defconst docfmt-run-file-dir
+  (file-name-directory docfmt-run-file-name)
   "Path to \"docfmt\" tool directory.")
 
 (defconst docfmt-worker-el-path
-  (concat docfmt/run-file-dir "_worker.el")
+  (concat docfmt-run-file-dir "_worker.el")
   "Path to worker script .el file")
 
 (defconst docfmt-worker-path
-  (concat docfmt/run-file-dir "_worker.elc")
+  (concat docfmt-run-file-dir "_worker.elc")
   "Path to compiled worker script file.")
 
 (defconst docfmt-shared-path
-  (expand-file-name "../lib/shared.el" docfmt/run-file-dir)
+  (expand-file-name "../lib/shared.el" docfmt-run-file-dir)
   "Path to shared lib.")
 
 (defvar docfmt-workers-count nil
@@ -110,7 +110,7 @@ the rest elements are file paths (absolute or relative to Spacemacs root dir)."
          (w-count (min (spacetools/get-cpu-count) f-length))
          (toc-org-fp-pref (expand-file-name
                            "../lib/toc-org"
-                           docfmt/run-file-dir)))
+                           docfmt-run-file-dir)))
     (if (= f-length 0)
         (progn
           (message "No files to format.")

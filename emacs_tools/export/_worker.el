@@ -38,17 +38,17 @@
 (declare-function toc-org-hrefify-gh "../lib/toc-org.el" (str &optional hash))
 
 (defconst sdnize-repository "spacemacs"
-  "Name of the Spacemacs remote sdnize-repository.")
+  "Name of the Spacemacs remote repository.")
 (defconst sdnize-repository-owner "syl20bnr"
-  "Name of the Spacemacs remote sdnize-repository owner.")
+  "Name of the Spacemacs remote repository owner.")
 
 (defconst sdnize-max-headline-level 5
   "Max level of headline nesting.")
 
 (defconst sdnize-readme-template-url
-  (concat "https://github.com/syl20bnr/"
-          "blob/develop/core/templates/SDNIZE-README.org.template")
-  "URL of SDNIZE-README.org template")
+  (concat "https://github.com/syl20bnr/spacemacs"
+          "blob/develop/core/templates/README.org.template")
+  "URL of README.org template")
 
 (defconst sdnize-backend-funcs-alist
   '((bold . sdnize/bold)
@@ -158,6 +158,7 @@ be sent as the source of request (useful for debugging)"
                                  ("\r" . "\\r")
                                  ("\"" . "\\\"")
                                  ("\n" . "\\n")))
+
 (defsubst sdnize/escape-string (str)
   "Escape special characters in STR."
   (if str
@@ -195,6 +196,9 @@ without unification and \"#\" prefix."
   "Ignore locks on files"
   t)
 
+(defun sdnize/noimpl (element)
+  (sdnize/error "\"%s\" not implemented" element))
+
 
 ;;; Transcode Functions
 
@@ -220,9 +224,7 @@ holding contextual information."
   "Transcode a CLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/clock")
-  "")
+  (sdnize/noimpl "sdnize/clock"))
 
 ;;;; Code
 
@@ -247,9 +249,7 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
   "Transcode a DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/drawer")
-  "")
+  (sdnize/noimpl "sdnize/drawer"))
 
 ;;;; Dynamic Block
 
@@ -257,9 +257,7 @@ holding contextual information."
   "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/dynamic-block")
-  "")
+  (sdnize/noimpl "sdnize/dynamic-block"))
 
 ;;;; Entity
 
@@ -267,9 +265,7 @@ holding contextual information.  See `org-export-data'."
   "Transcode an ENTITY object From Org to Spacemacs SDN.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/entity")
-  "")
+  (sdnize/noimpl "sdnize/entity"))
 
 ;;;; Example Block
 
@@ -286,9 +282,7 @@ information."
 (defun sdnize/export-block (_export-block _contents _info)
   "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/export-block")
-  "")
+  (sdnize/noimpl "sdnize/export-block"))
 
 ;;;; Export Snippet
 
@@ -296,18 +290,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/export-snippet")
-  "")
+  (sdnize/noimpl "sdnize/export-snippet"))
 
 ;;;; Fixed Width
 
 (defun sdnize/fixed-width (_fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/fixed-width")
-  "")
+  (sdnize/noimpl "sdnize/fixed-width"))
 
 ;;;; Footnote Reference
 
@@ -315,9 +305,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (_footnote-reference _contents _info)
   "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/footnote-reference")
-  "")
+  (sdnize/noimpl "sdnize/footnote-reference"))
 
 ;;;; Headline
 
@@ -389,9 +377,7 @@ holding contextual information."
 (defun sdnize/horizontal-rule (_horizontal-rule _contents _info)
   "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/horizontal-rule")
-  "")
+  (sdnize/noimpl "sdnize/horizontal-rule"))
 
 ;;;; Inline Src Block
 
@@ -399,9 +385,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/inline-src-block")
-  "")
+  (sdnize/noimpl "sdnize/inline-src-block"))
 
 ;;;; Inlinetask
 
@@ -409,9 +393,7 @@ contextual information."
   "Transcode an INLINETASK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/inlinetask")
-  "")
+  (sdnize/noimpl "sdnize/inlinetask"))
 
 ;;;; Inner Template
 
@@ -488,18 +470,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun sdnize/latex-environment (_latex-environment _contents _info)
   "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/latex-environment")
-  "")
+  (sdnize/noimpl "sdnize/latex-environment"))
 
 ;;;; Latex Fragment
 
 (defun sdnize/latex-fragment (_latex-fragment _contents _info)
   "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/latex-fragment")
-  "")
+  (sdnize/noimpl "sdnize/latex-fragment"))
 
 ;;;; Line Break
 
@@ -520,7 +498,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defconst sdnize/org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
 
 
-(defsubst org-snd-fmt-output (path type raw-link desc)
+(defsubst sdnize/fmt-output (path type raw-link desc)
   (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
           (sdnize/escape-string path)
           (sdnize/escape-string type)
@@ -528,7 +506,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
           desc))
 
 
-(defsubst org-snd-copy-if-asset (file raw-link path)
+(defsubst sdnize/copy-if-asset (file raw-link path)
   ;; Errors:
   (cond
    ;; Missing target file.
@@ -581,7 +559,7 @@ INFO is a plist holding contextual information.  See
        file
        sdnize-readme-template-url))
 
-     ;; Web link to org file inside Spacemacs GitHub sdnize-repository.
+     ;; Web link to org file inside Spacemacs GitHub repository.
      ((string-match sdnize/git-org-link-regexp raw-link)
       (let ((target-file (concat
                           sdnize-root-dir
@@ -596,7 +574,7 @@ INFO is a plist holding contextual information.  See
 
      ;; Link to a file.
      (file-path?
-      (org-snd-copy-if-asset
+      (sdnize/copy-if-asset
        file
        raw-link
        (url-unhex-string path)))
@@ -613,7 +591,7 @@ INFO is a plist holding contextual information.  See
          raw-link
          file
          type)))
-    (org-snd-fmt-output path type raw-link desc)))
+    (sdnize/fmt-output path type raw-link desc)))
 
 ;;;; Node Property
 
@@ -621,9 +599,7 @@ INFO is a plist holding contextual information.  See
   "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/node-property")
-  "")
+  (sdnize/noimpl "sdnize/node-property"))
 
 ;;;; Paragraph
 
@@ -713,9 +689,7 @@ contextual information."
   "Transcode a PLANNING element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/planning")
-  "")
+  (sdnize/noimpl "sdnize/planning"))
 
 ;;;; Property Drawer
 
@@ -723,9 +697,7 @@ channel."
   "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/property-drawer")
-  "")
+  (sdnize/noimpl "sdnize/property-drawer"))
 
 ;;;; Quote Block
 
@@ -741,9 +713,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/radio-target")
-  "")
+  (sdnize/noimpl "sdnize/radio-target"))
 
 ;;;; Section
 
@@ -759,9 +729,7 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/special-block")
-  "")
+  (sdnize/noimpl "sdnize/special-block"))
 
 ;;;; Src Block
 
@@ -779,9 +747,7 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 (defun sdnize/statistics-cookie (_statistics-cookie _contents _info)
   "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/statistics-cookie")
-  "")
+  (sdnize/noimpl "sdnize/statistics-cookie"))
 
 ;;;; Strike-Through
 
@@ -846,9 +812,7 @@ communication channel."
   "Transcode a TARGET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/target")
-  "")
+  (sdnize/noimpl "sdnize/target"))
 
 ;;;; Template
 
@@ -868,7 +832,7 @@ holding export options."
                                       sdnize-root-dir
                                       "layers/"))
                                     file)
-                   (string-suffix-p "SDNIZE-README.org"
+                   (string-suffix-p "README.org"
                                     file
                                     t))
           (unless has-description?
@@ -910,12 +874,10 @@ holding export options."
 ;;;; Timestamp
 
 (defun sdnize/timestamp (_timestamp _contents _info)
-  "Transcode a TIMESTAMP object From Org to Spacemacs SDN.)))))))))
+  "Transcode a TIMESTAMP object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (sdnize/error "\"%s\" not implemented"
-                "sdnize/timestamp")
-  "")
+  (sdnize/noimpl "sdnize/timestamp"))
 
 ;;;; Underline
 

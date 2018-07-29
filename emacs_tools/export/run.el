@@ -39,22 +39,22 @@
                                                           make-task
                                                           sentinel))
 
-(defconst sdnize/run-file-name
+(defconst sdnize-run-file-name
   (or load-file-name buffer-file-name)
   "Path to  run script of \"export\" tool.")
 
-(defconst sdnize/run-file-dir
-  (file-name-directory sdnize/run-file-name)
+(defconst sdnize-run-file-dir
+  (file-name-directory sdnize-run-file-name)
   "Path to \"export\" tool directory.")
 
 (defconst sdnize-target-dir
-  (concat sdnize/run-file-dir "target/")
+  (concat sdnize-run-file-dir "target/")
   "Target directory for \"export\" tool.")
 
 (load
  (expand-file-name
   "../lib/shared.el"
-  sdnize/run-file-dir)
+  sdnize-run-file-dir)
  nil t)
 (defvar sdnize-root-dir ""
   "Root directory of the original documentation.")
@@ -173,7 +173,7 @@ See `sdnize-help-text' for description."
     (error "The first argument must be a readable directory."))
   (setq sdnize-workers-fin 0
         sdnize-stop-waiting nil)
-  (let* ((default-directory sdnize/run-file-dir)
+  (let* ((default-directory sdnize-run-file-dir)
          (w-path (progn (byte-compile-file "_worker.el")
                         (file-truename "_worker.elc")))
          (root-dir (file-truename (file-name-as-directory (pop arg-list))))
