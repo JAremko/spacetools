@@ -32,118 +32,118 @@
        buffer-file-name))
   "../lib/toc-org.elc"))
 
-(defvar spacemacs--root-dir nil
+(defvar sdnize-root-dir nil
   "Original root directory of the documentation.")
 
 (declare-function toc-org-hrefify-gh "../lib/toc-org.el" (str &optional hash))
 
-(defconst spacemacs-repository "spacemacs"
-  "Name of the Spacemacs remote repository.")
-(defconst spacemacs-repository-owner "syl20bnr"
-  "Name of the Spacemacs remote repository owner.")
+(defconst sdnize-repository "spacemacs"
+  "Name of the Spacemacs remote sdnize-repository.")
+(defconst sdnize-repository-owner "syl20bnr"
+  "Name of the Spacemacs remote sdnize-repository owner.")
 
-(defconst spacemacs-max-headline-level 5
+(defconst sdnize-max-headline-level 5
   "Max level of headline nesting.")
 
-(defconst spacemacs-readme-template-url
-  (concat "https://github.com/syl20bnr/spacemacs/"
-          "blob/develop/core/templates/README.org.template")
-  "URL of README.org template")
+(defconst sdnize-readme-template-url
+  (concat "https://github.com/syl20bnr/"
+          "blob/develop/core/templates/SDNIZE-README.org.template")
+  "URL of SDNIZE-README.org template")
 
-(defvar spacemacs--org-export-define-backend-funcs-alist
-  '((bold . spacemacs//org-sdn-bold)
-    (center-block . spacemacs//org-sdn-center-block)
-    (clock . spacemacs//org-sdn-clock)
-    (code . spacemacs//org-sdn-code)
-    (drawer . spacemacs//org-sdn-drawer)
-    (dynamic-block . spacemacs//org-sdn-dynamic-block)
-    (entity . spacemacs//org-sdn-entity)
-    (example-block . spacemacs//org-sdn-example-block)
-    (export-block . spacemacs//org-sdn-export-block)
-    (export-snippet . spacemacs//org-sdn-export-snippet)
-    (fixed-width . spacemacs//org-sdn-fixed-width)
-    (footnote-definition . spacemacs//org-sdn-footnote-definition)
-    (footnote-reference . spacemacs//org-sdn-footnote-reference)
-    (headline . spacemacs//org-sdn-headline)
-    (horizontal-rule . spacemacs//org-sdn-horizontal-rule)
-    (inline-src-block . spacemacs//org-sdn-inline-src-block)
-    (inlinetask . spacemacs//org-sdn-inlinetask)
-    (inner-template . spacemacs//org-sdn-inner-template)
-    (italic . spacemacs//org-sdn-italic)
-    (item . spacemacs//org-sdn-item)
-    (keyword . spacemacs//org-sdn-keyword)
-    (latex-environment . spacemacs//org-sdn-latex-environment)
-    (latex-fragment . spacemacs//org-sdn-latex-fragment)
-    (line-break . spacemacs//org-sdn-line-break)
-    (link . spacemacs//org-sdn-link)
-    (node-property . spacemacs//org-sdn-node-property)
-    (paragraph . spacemacs//org-sdn-paragraph)
-    (plain-list . spacemacs//org-sdn-plain-list)
-    (plain-text . spacemacs//org-sdn-plain-text)
-    (planning . spacemacs//org-sdn-planning)
-    (property-drawer . spacemacs//org-sdn-property-drawer)
-    (quote-block . spacemacs//org-sdn-quote-block)
-    (radio-target . spacemacs//org-sdn-radio-target)
-    (section . spacemacs//org-sdn-section)
-    (special-block . spacemacs//org-sdn-special-block)
-    (src-block . spacemacs//org-sdn-src-block)
-    (statistics-cookie . spacemacs//org-sdn-statistics-cookie)
-    (strike-through . spacemacs//org-sdn-strike-through)
-    (subscript . spacemacs//org-sdn-subscript)
-    (superscript . spacemacs//org-sdn-superscript)
-    (table . spacemacs//org-sdn-table)
-    (table-cell . spacemacs//org-sdn-table-cell)
-    (table-row . spacemacs//org-sdn-table-row)
-    (target . spacemacs//org-sdn-target)
-    (template . spacemacs//org-sdn-template)
-    (timestamp . spacemacs//org-sdn-timestamp)
-    (underline . spacemacs//org-sdn-underline)
-    (verbatim . spacemacs//org-sdn-verbatim)
-    (verse-block . spacemacs//org-sdn-verse-block))
-  "plist of transcode functions names for `spacemacs-sdn' backend.")
+(defconst sdnize-backend-funcs-alist
+  '((bold . sdnize/bold)
+    (center-block . sdnize/center-block)
+    (clock . sdnize/clock)
+    (code . sdnize/code)
+    (drawer . sdnize/drawer)
+    (dynamic-block . sdnize/dynamic-block)
+    (entity . sdnize/entity)
+    (example-block . sdnize/example-block)
+    (export-block . sdnize/export-block)
+    (export-snippet . sdnize/export-snippet)
+    (fixed-width . sdnize/fixed-width)
+    (footnote-definition . sdnize/footnote-definition)
+    (footnote-reference . sdnize/footnote-reference)
+    (headline . sdnize/headline)
+    (horizontal-rule . sdnize/horizontal-rule)
+    (inline-src-block . sdnize/inline-src-block)
+    (inlinetask . sdnize/inlinetask)
+    (inner-template . sdnize/inner-template)
+    (italic . sdnize/italic)
+    (item . sdnize/item)
+    (keyword . sdnize/keyword)
+    (latex-environment . sdnize/latex-environment)
+    (latex-fragment . sdnize/latex-fragment)
+    (line-break . sdnize/line-break)
+    (link . sdnize/link)
+    (node-property . sdnize/node-property)
+    (paragraph . sdnize/paragraph)
+    (plain-list . sdnize/plain-list)
+    (plain-text . sdnize/plain-text)
+    (planning . sdnize/planning)
+    (property-drawer . sdnize/property-drawer)
+    (quote-block . sdnize/quote-block)
+    (radio-target . sdnize/radio-target)
+    (section . sdnize/section)
+    (special-block . sdnize/special-block)
+    (src-block . sdnize/src-block)
+    (statistics-cookie . sdnize/statistics-cookie)
+    (strike-through . sdnize/strike-through)
+    (subscript . sdnize/subscript)
+    (superscript . sdnize/superscript)
+    (table . sdnize/table)
+    (table-cell . sdnize/table-cell)
+    (table-row . sdnize/table-row)
+    (target . sdnize/target)
+    (template . sdnize/template)
+    (timestamp . sdnize/timestamp)
+    (underline . sdnize/underline)
+    (verbatim . sdnize/verbatim)
+    (verse-block . sdnize/verse-block))
+  "plist of transcode functions names for `sdn' backend.")
 
-(org-export-define-backend 'spacemacs-sdn
-  spacemacs--org-export-define-backend-funcs-alist
+(org-export-define-backend 'sdn
+  sdnize-backend-funcs-alist
   :filters-alist
-  '((:filter-final-output . spacemacs//org-sdn-final-function)))
+  '((:filter-final-output . sdnize/final-function)))
 
 
 ;;; Helper Functions
 
-(defsubst spacemacs//org-sdn-format-payload (format-string args)
+(defsubst sdnize/format-payload (format-string args)
   "Format payload for JSON."
   (replace-regexp-in-string
    "\n"
    "{{newline}}"
    (if args (apply 'format format-string args) format-string)))
 
-(defsubst spacemacs/org-sdn-export-file (src-file file-path)
+(defsubst sdnize/export-file (src-file file-path)
   "Emit request for copying file at FILE-PATH. SRC-FILE will
 be sent as the source of request (useful for debugging)"
   (message "{\"type\":\"export\",\"text\":%S,\"source\":%S}"
-           (spacemacs//org-sdn-format-payload
+           (sdnize/format-payload
             file-path)
-           (spacemacs//org-sdn-format-payload
+           (sdnize/format-payload
             src-file)))
 
-(defsubst spacemacs/org-sdn-message (format-string &rest args)
+(defsubst sdnize/message (format-string &rest args)
   "Emit specified message."
   (message "{\"type\":\"message\",\"text\":%S}"
-           (spacemacs//org-sdn-format-payload
+           (sdnize/format-payload
             format-string
             args)))
 
-(defsubst spacemacs/org-sdn-warn (format-string &rest args)
+(defsubst sdnize/warn (format-string &rest args)
   "Emit specified warning."
   (message "{\"type\":\"warning\",\"text\":%S}"
-           (spacemacs//org-sdn-format-payload
+           (sdnize/format-payload
             format-string
             args)))
 
-(defsubst spacemacs/org-sdn-error (format-string &rest args)
+(defsubst sdnize/error (format-string &rest args)
   "Emit specified error and exit with code 1."
   (message "{\"type\":\"error\",\"text\":%S}"
-           (spacemacs//org-sdn-format-payload
+           (sdnize/format-payload
             (concat (format "current-buffer: %s\n"
                             (buffer-name))
                     (format "current-file: %s\n"
@@ -153,21 +153,21 @@ be sent as the source of request (useful for debugging)"
             args))
   (kill-emacs 1))
 
-(defconst spacemacs-org-sdn-special-chars '(("\\" . "\\\\")
-                                            ("\t" . "\\t")
-                                            ("\r" . "\\r")
-                                            ("\"" . "\\\"")
-                                            ("\n" . "\\n")))
-(defsubst spacemacs/org-sdn-escape-string (str)
+(defconst sdnize/special-chars '(("\\" . "\\\\")
+                                 ("\t" . "\\t")
+                                 ("\r" . "\\r")
+                                 ("\"" . "\\\"")
+                                 ("\n" . "\\n")))
+(defsubst sdnize/escape-string (str)
   "Escape special characters in STR."
   (if str
       (with-temp-buffer
         (insert str)
-        (format-replace-strings spacemacs-org-sdn-special-chars)
+        (format-replace-strings sdnize/special-chars)
         (buffer-string))
     ""))
 
-(defsubst spacemacs/org-sdn-headline-make-path-id (headline)
+(defsubst sdnize/headline-make-path-id (headline)
   "Make id for org HEADLINE by chaining headlines from parent to
 child headline.
 NOTE: Each headline is converted with `toc-org-hrefify-gh' but
@@ -200,7 +200,7 @@ without unification and \"#\" prefix."
 
 ;;;; Bold
 
-(defun spacemacs//org-sdn-bold (_bold contents _info)
+(defun sdnize/bold (_bold contents _info)
   "Transcode BOLD From Org to Spacemacs SDN.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
@@ -208,7 +208,7 @@ contextual information."
 
 ;;;; Center Block
 
-(defun spacemacs//org-sdn-center-block (_center-block contents _info)
+(defun sdnize/center-block (_center-block contents _info)
   "Transcode a CENTER-BLOCK element From Org to Spacemacs SDN.))
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -216,17 +216,17 @@ holding contextual information."
 
 ;;;; Clock
 
-(defun spacemacs//org-sdn-clock (_clock _contents _info)
+(defun sdnize/clock (_clock _contents _info)
   "Transcode a CLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-clock")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/clock")
   "")
 
 ;;;; Code
 
-(defun spacemacs//org-sdn-code (code _contents _info)
+(defun sdnize/code (code _contents _info)
   "Transcode CODE From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information.
@@ -235,7 +235,7 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
           (format "%S"
                   (vconcat
                    (mapcar
-                    'spacemacs/org-sdn-escape-string
+                    'sdnize/escape-string
                     (split-string
                      (org-element-property :value code)
                      " "
@@ -243,85 +243,85 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
 
 ;;;; Drawer
 
-(defun spacemacs//org-sdn-drawer (_drawer _contents _info)
+(defun sdnize/drawer (_drawer _contents _info)
   "Transcode a DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-drawer")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/drawer")
   "")
 
 ;;;; Dynamic Block
 
-(defun spacemacs//org-sdn-dynamic-block (_dynamic-block _contents _info)
+(defun sdnize/dynamic-block (_dynamic-block _contents _info)
   "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-dynamic-block")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/dynamic-block")
   "")
 
 ;;;; Entity
 
-(defun spacemacs//org-sdn-entity (_entity _contents _info)
+(defun sdnize/entity (_entity _contents _info)
   "Transcode an ENTITY object From Org to Spacemacs SDN.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-entity")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/entity")
   "")
 
 ;;;; Example Block
 
-(defun spacemacs//org-sdn-example-block (example-block _contents _info)
+(defun sdnize/example-block (example-block _contents _info)
   "Transcode a EXAMPLE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :example :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :value example-block))))
 
 ;;;; Export Block
 
-(defun spacemacs//org-sdn-export-block (_export-block _contents _info)
+(defun sdnize/export-block (_export-block _contents _info)
   "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-export-block")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/export-block")
   "")
 
 ;;;; Export Snippet
 
-(defun spacemacs//org-sdn-export-snippet (_export-snippet _contents _info)
+(defun sdnize/export-snippet (_export-snippet _contents _info)
   "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-export-snippet")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/export-snippet")
   "")
 
 ;;;; Fixed Width
 
-(defun spacemacs//org-sdn-fixed-width (_fixed-width _contents _info)
+(defun sdnize/fixed-width (_fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-fixed-width")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/fixed-width")
   "")
 
 ;;;; Footnote Reference
 
-(defun spacemacs//org-sdn-footnote-reference
+(defun sdnize/footnote-reference
     (_footnote-reference _contents _info)
   "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-footnote-reference")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/footnote-reference")
   "")
 
 ;;;; Headline
 
-(defun spacemacs//org-sdn-headline (headline contents info)
+(defun sdnize/headline (headline contents info)
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
@@ -335,31 +335,31 @@ holding contextual information."
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
          (path-id
-          (spacemacs/org-sdn-headline-make-path-id headline))
+          (sdnize/headline-make-path-id headline))
          (file (plist-get info :input-file))
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1)
                             (string= raw-value "Description"))))
-    (unless (<= level spacemacs-max-headline-level)
-      (spacemacs/org-sdn-error
+    (unless (<= level sdnize-max-headline-level)
+      (sdnize/error
        "File %S has headline %S with the nesting level %S - that's way too deep"
        file
        raw-value
        level))
     (unless (or todo? contents)
-      (spacemacs/org-sdn-error
+      (sdnize/error
        "File %S has headline %S without children or TODO marker"
        file
        raw-value))
     (when description?
       (if (plist-member info :file-has-description?)
-          (spacemacs/org-sdn-error
+          (sdnize/error
            (concat "File \"%s\" has multiply top level "
                    "\"Description\" headlines")
            file)
         (plist-put info :file-has-description? 'true)))
     (if (member path-id path-ids)
-        (spacemacs/org-sdn-error
+        (sdnize/error
          (concat "Multiply identical path IDs \"%s\" in %S file. "
                  "Usually it happens when headlines have child headlines "
                  "with similar names")
@@ -378,44 +378,44 @@ holding contextual information."
       (todo? :todo)
       (description? :description)
       (t (format "%s-level-%s" :headline level)))
-     (spacemacs/org-sdn-escape-string raw-value)
+     (sdnize/escape-string raw-value)
      level
-     (spacemacs/org-sdn-escape-string (string-remove-prefix "#" gh-id))
-     (spacemacs/org-sdn-escape-string path-id)
+     (sdnize/escape-string (string-remove-prefix "#" gh-id))
+     (sdnize/escape-string path-id)
      contents)))
 
 ;;;; Horizontal Rule
 
-(defun spacemacs//org-sdn-horizontal-rule (_horizontal-rule _contents _info)
+(defun sdnize/horizontal-rule (_horizontal-rule _contents _info)
   "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-horizontal-rule")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/horizontal-rule")
   "")
 
 ;;;; Inline Src Block
 
-(defun spacemacs//org-sdn-inline-src-block (_inline-src-block _contents _info)
+(defun sdnize/inline-src-block (_inline-src-block _contents _info)
   "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-inline-src-block")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/inline-src-block")
   "")
 
 ;;;; Inlinetask
 
-(defun spacemacs//org-sdn-inlinetask (_inlinetask _contents _info)
+(defun sdnize/inlinetask (_inlinetask _contents _info)
   "Transcode an INLINETASK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-inlinetask")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/inlinetask")
   "")
 
 ;;;; Inner Template
 
-(defun spacemacs//org-sdn-inner-template (contents _info)
+(defun sdnize/inner-template (contents _info)
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
@@ -423,7 +423,7 @@ holding export options."
 
 ;;;; Italic
 
-(defun spacemacs//org-sdn-italic (_italic contents _info)
+(defun sdnize/italic (_italic contents _info)
   "Transcode ITALIC From Org to Spacemacs SDN.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
@@ -431,7 +431,7 @@ contextual information."
 
 ;;;; Item
 
-(defun spacemacs//org-sdn-item (item contents info)
+(defun sdnize/item (item contents info)
   "Transcode an ITEM element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -444,9 +444,9 @@ contextual information."
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
-      (spacemacs/org-sdn-error
+      (sdnize/error
        (concat "File \"%s\" contains plain list item of type \"%s\" but "
-               "it isn't implemented in spacemacs//org-sdn-item")
+               "it isn't implemented in sdnize/item")
        (plist-get info :input-file)
        type))
     (format (concat "{:tag :list-item "
@@ -457,7 +457,7 @@ contextual information."
             type
             (format
              "\"%s\""
-             (spacemacs/org-sdn-escape-string
+             (sdnize/escape-string
               (org-element-property :bullet item)))
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
@@ -466,91 +466,91 @@ contextual information."
                  children
                  (if (char-or-string-p item-tag)
                      (format "\"%s\""
-                             (spacemacs/org-sdn-escape-string item-tag))
+                             (sdnize/escape-string item-tag))
                    (org-export-data-with-backend item-tag
-                                                 'spacemacs-sdn
+                                                 'sdn
                                                  info)))
               children))))
 
 ;;;; Keyword
 
-(defun spacemacs//org-sdn-keyword (keyword _contents _info)
+(defun sdnize/keyword (keyword _contents _info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :key keyword))
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :value keyword))))
 
 ;;;; Latex Environment
 
-(defun spacemacs//org-sdn-latex-environment (_latex-environment _contents _info)
+(defun sdnize/latex-environment (_latex-environment _contents _info)
   "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-latex-environment")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/latex-environment")
   "")
 
 ;;;; Latex Fragment
 
-(defun spacemacs//org-sdn-latex-fragment (_latex-fragment _contents _info)
+(defun sdnize/latex-fragment (_latex-fragment _contents _info)
   "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-latex-fragment")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/latex-fragment")
   "")
 
 ;;;; Line Break
 
-(defun spacemacs//org-sdn-line-break (_line-break _contents _info)
+(defun sdnize/line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "{:tag :line-break}")
 
 ;;;; Link
 
-(defconst spacemacs--org-sdn-spacemacs-git-org-link-regexp
+(defconst sdnize/git-org-link-regexp
   (format (concat "\\/\\/github\\.com\\/%s\\/%s\\/blob"
                   "\\/[^/]+\\/\\(.*\\.org\\)\\(\\#.*\\)?")
-          spacemacs-repository-owner
-          spacemacs-repository))
+          sdnize-repository-owner
+          sdnize-repository))
 
 
-(defconst spacemacs--org-sdn-org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
+(defconst sdnize/org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
 
 
-(defsubst spacemacs//org-snd-fmt-output (path type raw-link desc)
+(defsubst org-snd-fmt-output (path type raw-link desc)
   (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
-          (spacemacs/org-sdn-escape-string path)
-          (spacemacs/org-sdn-escape-string type)
-          (spacemacs/org-sdn-escape-string raw-link)
+          (sdnize/escape-string path)
+          (sdnize/escape-string type)
+          (sdnize/escape-string raw-link)
           desc))
 
 
-(defsubst spacemacs//org-snd-copy-if-asset (file raw-link path)
+(defsubst org-snd-copy-if-asset (file raw-link path)
   ;; Errors:
   (cond
    ;; Missing target file.
    ((not (file-readable-p path))
-    (spacemacs/org-sdn-error
+    (sdnize/error
      "File %S has a link to file %S but it isn't readable."
      file
      (file-truename path)))
    ;; Target file is outside documentation root.
-   ((not (string-prefix-p spacemacs--root-dir
+   ((not (string-prefix-p sdnize-root-dir
                           (file-truename path)))
-    (spacemacs/org-sdn-error
+    (sdnize/error
      (concat "File %S has a link to file %S "
              "but it's outside of the documentation root directory.")
      file
      (file-truename path))))
   ;; Copy assets.
-  (unless (string-match-p spacemacs--org-sdn-org-link-re raw-link)
-    (spacemacs/org-sdn-export-file file (file-truename path))))
+  (unless (string-match-p sdnize/org-link-re raw-link)
+    (sdnize/export-file file (file-truename path))))
 
 
-(defun spacemacs//org-sdn-link (link desc info)
+(defun sdnize/link (link desc info)
   "Transcode a LINK object From Org to Spacemacs SDN.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
@@ -562,14 +562,14 @@ INFO is a plist holding contextual information.  See
          (file-path? (string= type "file"))
          (org-link-with-target? (and
                                  (string-match
-                                  spacemacs--org-sdn-org-link-re
+                                  sdnize/org-link-re
                                   raw-link)
                                  (match-string 1 raw-link))))
     (cond
 
      ;; Local .org file link with target(anchor).
      ((and file-path? org-link-with-target?)
-      (spacemacs/org-sdn-error
+      (sdnize/error
        (concat "Link \"%s\" "
                "in \"%s\" "
                "should target the .org file at GitHub via web-link "
@@ -579,15 +579,15 @@ INFO is a plist holding contextual information.  See
                "See footnote of %S for details.")
        raw-link
        file
-       spacemacs-readme-template-url))
+       sdnize-readme-template-url))
 
-     ;; Web link to org file inside Spacemacs GitHub repository.
-     ((string-match spacemacs--org-sdn-spacemacs-git-org-link-regexp raw-link)
+     ;; Web link to org file inside Spacemacs GitHub sdnize-repository.
+     ((string-match sdnize/git-org-link-regexp raw-link)
       (let ((target-file (concat
-                          spacemacs--root-dir
+                          sdnize-root-dir
                           (url-unhex-string (match-string 1 raw-link)))))
         (unless (file-readable-p target-file)
-          (spacemacs/org-sdn-error
+          (sdnize/error
            (concat
             "File %S has a GitHub link to a documentation file %S but "
             "it isn't readable locally.")
@@ -596,7 +596,7 @@ INFO is a plist holding contextual information.  See
 
      ;; Link to a file.
      (file-path?
-      (spacemacs//org-snd-copy-if-asset
+      (org-snd-copy-if-asset
        file
        raw-link
        (url-unhex-string path)))
@@ -605,29 +605,29 @@ INFO is a plist holding contextual information.  See
      ((member type '("http" "https" "custom-id" "ftp")))
 
      ;; Anything else is an error.
-     (t (spacemacs/org-sdn-error
+     (t (sdnize/error
          (concat
           "Link \"%s\" in file \"%s\" "
           "has type \"%s\" "
-          "but the type isn't implemented in spacemacs//org-sdn-link")
+          "but the type isn't implemented in sdnize/link")
          raw-link
          file
          type)))
-    (spacemacs//org-snd-fmt-output path type raw-link desc)))
+    (org-snd-fmt-output path type raw-link desc)))
 
 ;;;; Node Property
 
-(defun spacemacs//org-sdn-node-property (_node-property _contents _info)
+(defun sdnize/node-property (_node-property _contents _info)
   "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-node-property")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/node-property")
   "")
 
 ;;;; Paragraph
 
-(defun spacemacs//org-sdn-paragraph (_paragraph contents _info)
+(defun sdnize/paragraph (_paragraph contents _info)
   "Transcode a PARAGRAPH element From Org to Spacemacs SDN.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
@@ -635,7 +635,7 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-(defun spacemacs//org-sdn-plain-list (plain-list contents info)
+(defun sdnize/plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element From Org to Spacemacs SDN.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
@@ -655,9 +655,9 @@ contextual information."
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
-      (spacemacs/org-sdn-error
+      (sdnize/error
        (concat "File \"%s\" contains plain list of type \"%s\" but "
-               "it isn't implemented in spacemacs//org-sdn-node-property")
+               "it isn't implemented in sdnize/node-property")
        (plist-get info :input-file)
        type))
     (if (and (not
@@ -685,7 +685,7 @@ contextual information."
                        parent-hl-parent-hl)
                       "Description"))
         (if (plist-member info :file-has-feature-list?)
-            (spacemacs/org-sdn-error
+            (sdnize/error
              (concat "File \"%s\" has multiply "
                      "\"Features:\" lists in the top "
                      "level \"Description\" headline")
@@ -700,36 +700,36 @@ contextual information."
 
 ;;;; Plain Text
 
-(defun spacemacs//org-sdn-plain-text (text _info)
+(defun sdnize/plain-text (text _info)
   "Transcode a TEXT string From Org to Spacemacs SDN.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
   (format "{:tag :plain-text :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string text)))
+          (sdnize/escape-string text)))
 
 ;;;; Planning
 
-(defun spacemacs//org-sdn-planning (_planning _contents _info)
+(defun sdnize/planning (_planning _contents _info)
   "Transcode a PLANNING element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-planning")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/planning")
   "")
 
 ;;;; Property Drawer
 
-(defun spacemacs//org-sdn-property-drawer (_property-drawer _contents _info)
+(defun sdnize/property-drawer (_property-drawer _contents _info)
   "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-property-drawer")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/property-drawer")
   "")
 
 ;;;; Quote Block
 
-(defun spacemacs//org-sdn-quote-block (_quote-block contents _info)
+(defun sdnize/quote-block (_quote-block contents _info)
   "Transcode a QUOTE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -737,17 +737,17 @@ holding contextual information."
 
 ;;;; Radio Target
 
-(defun spacemacs//org-sdn-radio-target (_radio-target _text _info)
+(defun sdnize/radio-target (_radio-target _text _info)
   "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-radio-target")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/radio-target")
   "")
 
 ;;;; Section
 
-(defun spacemacs//org-sdn-section (_section contents _info)
+(defun sdnize/section (_section contents _info)
   "Transcode a SECTION element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
@@ -755,37 +755,37 @@ holding contextual information."
 
 ;;;; Special Block
 
-(defun spacemacs//org-sdn-special-block (_special-block _contents _info)
+(defun sdnize/special-block (_special-block _contents _info)
   "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-special-block")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/special-block")
   "")
 
 ;;;; Src Block
 
-(defun spacemacs//org-sdn-src-block (src-block _contents _info)
+(defun sdnize/src-block (src-block _contents _info)
   "Transcode a SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil. INFO is a plist holding contextual information."
   (format "{:tag :src :language \"%s\" :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :language src-block))
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :value src-block))))
 
 ;;;; Statistics Cookie
 
-(defun spacemacs//org-sdn-statistics-cookie (_statistics-cookie _contents _info)
+(defun sdnize/statistics-cookie (_statistics-cookie _contents _info)
   "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-statistics-cookie")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/statistics-cookie")
   "")
 
 ;;;; Strike-Through
 
-(defun spacemacs//org-sdn-strike-through (_strike-through contents _info)
+(defun sdnize/strike-through (_strike-through contents _info)
   "Transcode STRIKE-THROUGH From Org to Spacemacs SDN.
 CONTENTS is the text with strike-through markup.  INFO is a plist
 holding contextual information."
@@ -793,7 +793,7 @@ holding contextual information."
 
 ;;;; Subscript
 
-(defun spacemacs//org-sdn-subscript (_subscript contents _info)
+(defun sdnize/subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -801,7 +801,7 @@ contextual information."
 
 ;;;; Superscript
 
-(defun spacemacs//org-sdn-superscript (_superscript contents _info)
+(defun sdnize/superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -809,14 +809,14 @@ contextual information."
 
 ;;;; Table
 
-(defun spacemacs//org-sdn-table (table contents _info)
+(defun sdnize/table (table contents _info)
   "Transcode a TABLE element From Org to Spacemacs SDN.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (let ((type (org-element-property :type table)))
     (unless (eq type 'org)
-      (spacemacs/org-sdn-error
-       "Table type \"%s\" isn't implemented in spacemacs//org-sdn-table"
+      (sdnize/error
+       "Table type \"%s\" isn't implemented in sdnize/table"
        type))
     (format "{:tag :table :type :%s :children [%s]}"
             (org-element-property :type table)
@@ -824,7 +824,7 @@ contextual information."
 
 ;;;; Table Cell
 
-(defun spacemacs//org-sdn-table-cell (_table-cell contents _info)
+(defun sdnize/table-cell (_table-cell contents _info)
   "Transcode a TABLE-CELL element From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -832,7 +832,7 @@ channel."
 
 ;;;; Table Row
 
-(defun spacemacs//org-sdn-table-row (table-row contents _info)
+(defun sdnize/table-row (table-row contents _info)
   "Transcode a TABLE-ROW element From Org to Spacemacs SDN.
 CONTENTS is the contents of the row.  INFO is a plist used as a
 communication channel."
@@ -842,17 +842,17 @@ communication channel."
 
 ;;;; Target
 
-(defun spacemacs//org-sdn-target (_target _contents _info)
+(defun sdnize/target (_target _contents _info)
   "Transcode a TARGET object From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-target")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/target")
   "")
 
 ;;;; Template
 
-(defun spacemacs//org-sdn-template (contents info)
+(defun sdnize/template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
@@ -865,29 +865,29 @@ holding export options."
                    (plist-get info :input-file))))
         (when (and (string-prefix-p (file-truename
                                      (concat
-                                      spacemacs--root-dir
+                                      sdnize-root-dir
                                       "layers/"))
                                     file)
-                   (string-suffix-p "README.org"
+                   (string-suffix-p "SDNIZE-README.org"
                                     file
                                     t))
           (unless has-description?
-            (spacemacs/org-sdn-error
+            (sdnize/error
              (concat
               "File \"%s\" "
               "doesn't have top level "
               "\"Description\" headline\n"
               "See %S")
              file
-             spacemacs-readme-template-url))
+             sdnize-readme-template-url))
           (unless has-feature-list?
-            (spacemacs/org-sdn-error
+            (sdnize/error
              (concat "File \"%s\" "
                      "doesn't have \"Features:\"(With a colon) list in the "
                      "top level \"Description\" headline\n"
                      "See %S")
              file
-             spacemacs-readme-template-url)))))
+             sdnize-readme-template-url)))))
     (format (concat "{:tag :root "
                     ;; ":export-data #inst \"%s\" "
                     ":file-has-description? %s "
@@ -903,23 +903,23 @@ holding export options."
               'false)
             (map 'vector
                  (lambda (s)
-                   (format "\"%s\"" (spacemacs/org-sdn-escape-string s)))
+                   (format "\"%s\"" (sdnize/escape-string s)))
                  (plist-get info :path-ids))
             contents)))
 
 ;;;; Timestamp
 
-(defun spacemacs//org-sdn-timestamp (_timestamp _contents _info)
+(defun sdnize/timestamp (_timestamp _contents _info)
   "Transcode a TIMESTAMP object From Org to Spacemacs SDN.)))))))))
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (spacemacs/org-sdn-error "\"%s\" not implemented"
-                           "spacemacs//org-sdn-timestamp")
+  (sdnize/error "\"%s\" not implemented"
+                "sdnize/timestamp")
   "")
 
 ;;;; Underline
 
-(defun spacemacs//org-sdn-underline (_underline contents _info)
+(defun sdnize/underline (_underline contents _info)
   "Transcode UNDERLINE From Org to Spacemacs SDN.
 CONTENTS is the text with underline markup.  INFO is a plist
 holding contextual information."
@@ -927,17 +927,17 @@ holding contextual information."
 
 ;;;; Verbatim
 
-(defun spacemacs//org-sdn-verbatim (verbatim _contents _info)
+(defun sdnize/verbatim (verbatim _contents _info)
   "Transcode VERBATIM From Org to Spacemacs SDN.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :verbatim :value \"%s\"}"
-          (spacemacs/org-sdn-escape-string
+          (sdnize/escape-string
            (org-element-property :value verbatim))))
 
 ;;;; Verse Block
 
-(defun spacemacs//org-sdn-verse-block (_verse-block contents _info)
+(defun sdnize/verse-block (_verse-block contents _info)
   "Transcode a VERSE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
@@ -946,44 +946,44 @@ contextual information."
 
 ;;; Filter Functions
 
-(defsubst spacemacs//org-sdn-final-function-tidy (contents)
+(defsubst sdnize/final-function-tidy (contents)
   "Filter to compact output by removing newline symbols.
 FIXME: Figure out where they come from :"
   (replace-regexp-in-string "\n" "" contents))
 
-(defsubst spacemacs//org-sdn-final-function-fmt-vec-of-nil (str)
+(defsubst sdnize/final-function-fmt-vec-of-nil (str)
   "Replace [nil] with []."
   (replace-regexp-in-string "\\[nil\\]" "[]" str nil t))
 
-(defsubst spacemacs//org-sdn-final-function-lint (info)
+(defsubst sdnize/final-function-lint (info)
   "Warn about potential errors."
-  (let ((warnings (plist-get info :spacemacs-sdn-warnings)))
+  (let ((warnings (plist-get info :sdn-warnings)))
     (when (stringp warnings)
-      (spacemacs/org-sdn-warn
+      (sdnize/warn
        "%s"
        (string-remove-suffix "\n" warnings)))))
 
-(defun spacemacs//org-sdn-final-function (contents _backend info)
+(defun sdnize/final-function (contents _backend info)
   "Call final functions for `space-sdn' backend"
-  (spacemacs//org-sdn-final-function-lint info)
-  (spacemacs//org-sdn-final-function-fmt-vec-of-nil
-   (spacemacs//org-sdn-final-function-tidy contents)))
+  (sdnize/final-function-lint info)
+  (sdnize/final-function-fmt-vec-of-nil
+   (sdnize/final-function-tidy contents)))
 
 
 ;;; End-user functions
 
-(defun spacemacs/export-docs-to-sdn (root-dir exp-dir file-list)
+(defun sdnize/to-sdn (root-dir exp-dir file-list)
   "Export org files in FILE-LIST into EXP-DIR.
-ROOT-DIR is original documentation root directory."
-  (let* ((spacemacs--root-dir (file-truename root-dir))
-         (default-directory spacemacs--root-dir))
+SDNIZE-ROOT-DIR is original documentation root directory."
+  (let* ((sdnize-root-dir (file-truename root-dir))
+         (default-directory sdnize-root-dir))
     (dolist (file file-list)
       (let* ((target-file-name (concat
                                 exp-dir
                                 (string-remove-suffix
                                  ".org"
                                  (string-remove-prefix
-                                  spacemacs--root-dir
+                                  sdnize-root-dir
                                   (file-truename file)))
                                 ".sdn"))
              (target-file-dir
@@ -994,24 +994,24 @@ ROOT-DIR is original documentation root directory."
         (while (not (file-accessible-directory-p target-file-dir))
           (condition-case err
               (make-directory target-file-dir t)
-            (error (spacemacs/org-sdn-error
+            (error (sdnize/error
                     "make-directory \"%s\" failed with \"%s\". Retrying..."
                     target-file-dir
                     err))))
-        (spacemacs/org-sdn-message
+        (sdnize/message
          "Exporting \"%s\" into \"%s\""
          file
          target-file-name)
         (with-temp-buffer
           (find-file file)
           (org-export-to-file
-              'spacemacs-sdn
+              'sdn
               target-file-name))
         (if (and (file-readable-p target-file-name)
                  (> (nth 7 (file-attributes target-file-name)) 0))
-            (spacemacs/org-sdn-message
+            (sdnize/message
              "Successfully exported \"%s\""
              file)
-          (spacemacs/org-sdn-error
+          (sdnize/error
            "Export finished but \"%s\" doesn't exist or empty"
            target-file-name))))))

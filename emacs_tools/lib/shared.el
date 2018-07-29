@@ -10,14 +10,14 @@
 ;;; Commentary:
 ;;; Code:
 
-(defconst spacemacs--spacetools-lib-dir
+(defconst spacetools-lib-dir
   (file-truename
    (file-name-directory
     (or load-file-name
         buffer-file-name)))
   "Path to emacs tools libs directory.")
 
-(defun spacemacs//spacetools-make-file-size-path-alist (files)
+(defun spacetools/make-file-size-path-alist (files)
   "Return (<file size> . <abs file path>) alist of FILES."
   (let ((res nil))
     (dolist (file files)
@@ -30,7 +30,7 @@
             res))
     res))
 
-(defun spacemacs//spacetools-get-cpu-count ()
+(defun spacetools/get-cpu-count ()
   "Get number of processor cores or return \"8\" :P"
   (let
       ((res (or (let ((win-cpu-num (getenv "NUMBER_OF_PROCESSORS")))
@@ -50,7 +50,7 @@
       ;; Fallback value.
       8)))
 
-(defun spacemacs//spacetools-find-org-files (paths)
+(defun spacetools/find-org-files (paths)
   "Build list of absolute paths to org files based of PATHS.
 Each path must be path to an org file or a directory.
 If it is directory find all org files in it and append
@@ -68,10 +68,10 @@ to the return value."
      paths)
     ret))
 
-(defun spacemacs//spacetools-files-to-buckets (files n)
+(defun spacetools/files-to-buckets (files n)
   "Split FILES into N lists(task buckets) balancing by file sizes."
   (let ((fps-alist (sort
-                    (spacemacs//spacetools-make-file-size-path-alist
+                    (spacetools/make-file-size-path-alist
                      files)
                     (lambda (e1 e2) (> (car e1) (car e2)))))
         (buckets '()))
@@ -84,9 +84,9 @@ to the return value."
             (cons (+ (caar buckets) (car fps))
                   (push (cdr fps) (cdar buckets)))))
     (mapcar 'cdr buckets)))
-(byte-compile 'spacemacs//spacetools-filse-to-buckets)
+(byte-compile 'spacetools-filse-to-buckets)
 
-(defun spacemacs//spacetools-do-concurrently
+(defun spacetools/do-concurrently
     (files w-count w-path make-task sentinel)
   "Run task concurrently.
 Process FILES using W-COUNT workers(child emacs processes) loaded from W-PATH
@@ -96,12 +96,12 @@ called as \"emacs -l W-PATH --batch -eval <value returned from MAKE-TASK>\"/.
 SENTINEL is a worker process sentinel."
   (let ((file-buckets '())
         (emacs-fp (executable-find "emacs"))
-        (toc-org-fp (concat spacemacs--spacetools-lib-dir
+        (toc-org-fp (concat spacetools-lib-dir
                             "toc-org.el")))
     (unless emacs-fp
       (error "Can't find emacs executable"))
     (setq file-buckets
-          (spacemacs//spacetools-files-to-buckets
+          (spacetools/files-to-buckets
            files
            (min w-count
                 (length files))))

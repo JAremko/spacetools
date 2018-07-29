@@ -19,7 +19,7 @@
 (eval-when-compile
   (require 'cl))
 
-(defconst spacemacs--docfmt-lib-dir
+(defconst docfmt-lib-dir
   (file-truename
    (concat
     (file-name-directory
@@ -27,59 +27,59 @@
          buffer-file-name))
     "../lib/")))
 
-(load (concat spacemacs--docfmt-lib-dir "toc-org.elc")  nil t)
+(load (concat docfmt-lib-dir "toc-org.elc")  nil t)
 
-(defconst spacemacs--docfmt-title-regexp "^#\\+TITLE:.*$")
-(defconst spacemacs--docfmt-begin-block-regexp "^#\\+BEGIN.*$")
-(defconst spacemacs--docfmt-end-block-regexp "^#\\+END.*$")
-(defconst spacemacs--docfmt-empty-line-regexp "^[ \t]*$")
-(defconst spacemacs--docfmt-tree-trunk-regexp "^[ 	]*|_")
-(defconst spacemacs--docfmt-toc-heading-head "* Table of Contents")
-(defconst spacemacs--docfmt-toc-heading-tail ":TOC_4_gh:noexport:")
-(defconst spacemacs--docfmt-toc-headline (format
-                                          "%-41s%s"
-                                          spacemacs--docfmt-toc-heading-head
-                                          spacemacs--docfmt-toc-heading-tail))
+(defconst docfmt-title-regexp "^#\\+TITLE:.*$")
+(defconst docfmt-begin-block-regexp "^#\\+BEGIN.*$")
+(defconst docfmt-end-block-regexp "^#\\+END.*$")
+(defconst docfmt-empty-line-regexp "^[ \t]*$")
+(defconst docfmt-tree-trunk-regexp "^[ 	]*|_")
+(defconst docfmt-toc-heading-head "* Table of Contents")
+(defconst docfmt-toc-heading-tail ":TOC_4_gh:noexport:")
+(defconst docfmt-toc-headline (format
+                               "%-41s%s"
+                               docfmt-toc-heading-head
+                               docfmt-toc-heading-tail))
 
-(defsubst spacemacs//docfmt-rm-empty-lines-at-beg ()
+(defsubst docfmt-rm-empty-lines-at-beg ()
   "Remove newlines at the beginning of the buffer."
   (goto-char (point-min))
-  (while (looking-at-p spacemacs--docfmt-empty-line-regexp)
+  (while (looking-at-p docfmt-empty-line-regexp)
     (delete-blank-lines)))
 
-(defsubst spacemacs//docfmt-rm-empty-lines-at-end ()
+(defsubst docfmt-rm-empty-lines-at-end ()
   "Remove newlines at the ending of the buffer."
-   (goto-char (point-max))
-   (delete-blank-lines)
-   (delete-blank-lines))
+  (goto-char (point-max))
+  (delete-blank-lines)
+  (delete-blank-lines))
 
-(defsubst spacemacs//docfmt-rm-trail-delim-in-hl ()
+(defsubst docfmt-rm-trail-delim-in-hl ()
   "Remove trailing delimiters in headlines."
   (goto-char (point-min))
   (while (re-search-forward "^*+[[:space:]]+.*\\([;,\\.[:space:]]+\\)$" nil t)
-   (replace-match "" nil nil nil 1)
-   (forward-line -1)))
+    (replace-match "" nil nil nil 1)
+    (forward-line -1)))
 
-(defsubst spacemacs//docfmt-remove-readtheorg-meta ()
+(defsubst docfmt-remove-readtheorg-meta ()
   "Remove '#+HTML_HEAD_EXTRA: ... readtheorg.css\" />'."
   (goto-char (point-min))
   (while (re-search-forward "#\\+HTML_HEAD_EXTRA.*readtheorg\\\.css.*" nil t)
-   (replace-match "")))
+    (replace-match "")))
 
-(defsubst spacemacs//docfmt-multy-nl-with-single ()
+(defsubst docfmt-multy-nl-with-single ()
   "Replace multiply empty lines with a single empty line."
   (goto-char (point-min))
   (while (re-search-forward "\\(^[[:space:]]*$\\)\n" nil t)
     (replace-match "\n")
     (forward-char)))
 
-(defsubst spacemacs//docfmt-replace-org-toc ()
+(defsubst docfmt-replace-org-toc ()
   "Replace \":TOC_X_org:\" with \":TOC_4_gh:\"."
   (goto-char (point-min))
   (while (re-search-forward toc-org-toc-org-regexp nil t)
-   (replace-match "_4_gh" nil nil nil 2)))
+    (replace-match "_4_gh" nil nil nil 2)))
 
-(defsubst spacemacs//docfmt-goto-next-table ()
+(defsubst docfmt-goto-next-table ()
   "Goto next org table.
 Returns nil if no more tables left."
   (cl-loop
@@ -92,60 +92,60 @@ Returns nil if no more tables left."
    ;; Skip to the next table.
    (re-search-forward org-table-any-line-regexp nil t)
    (goto-char (point-at-bol))
-   (unless (looking-at-p spacemacs--docfmt-tree-trunk-regexp)
+   (unless (looking-at-p docfmt-tree-trunk-regexp)
      (return)))
   (looking-at-p org-table-any-line-regexp))
 
-(defsubst spacemacs//docfmt-remote-empty-lines-at-the-beginning ()
+(defsubst docfmt-remote-empty-lines-at-the-beginning ()
   "Remove empty lines at the begging of the buffer."
   (goto-char (point-min))
-  (while (looking-at-p spacemacs--docfmt-empty-line-regexp)
+  (while (looking-at-p docfmt-empty-line-regexp)
     (delete-blank-lines)))
 
-(defsubst spacemacs//docfmt-insert-empty-line-after-title ()
+(defsubst docfmt-insert-empty-line-after-title ()
   "Insert an empty line after title."
   (goto-char (point-min))
-  (when (looking-at-p spacemacs--docfmt-title-regexp)
+  (when (looking-at-p docfmt-title-regexp)
     (forward-line 1)
-    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (looking-at-p docfmt-empty-line-regexp)
       (open-line 1))))
 
-(defsubst spacemacs//docfmt-insert-empty-line-before-begin-block ()
+(defsubst docfmt-insert-empty-line-before-begin-block ()
   "Insert an empty line before begins of blocks."
   (goto-char (point-max))
-  (while (re-search-backward spacemacs--docfmt-begin-block-regexp nil t)
+  (while (re-search-backward docfmt-begin-block-regexp nil t)
     (goto-char (point-at-bol))
     (forward-line -1)
-    (unless (or (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (or (looking-at-p docfmt-empty-line-regexp)
                 (looking-at-p org-heading-regexp))
       (forward-line 1)
       (open-line 1))))
 
-(defsubst spacemacs//docfmt-insert-empty-line-after-end-block ()
+(defsubst docfmt-insert-empty-line-after-end-block ()
   "Insert an empty line after ends of blocks."
   (goto-char (point-min))
-  (while (re-search-forward spacemacs--docfmt-end-block-regexp nil t)
+  (while (re-search-forward docfmt-end-block-regexp nil t)
     (forward-line 1)
-    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (looking-at-p docfmt-empty-line-regexp)
       (open-line 1))))
 
-(defsubst spacemacs//docfmt-insert-empty-line-at-the-end ()
+(defsubst docfmt-insert-empty-line-at-the-end ()
   "Insert an empty line at the end of the buffer."
   (goto-char (point-max))
-  (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+  (unless (looking-at-p docfmt-empty-line-regexp)
     (open-line 1)))
 
-(defsubst spacemacs//docfmt-insert-title ()
+(defsubst docfmt-insert-title ()
   "Insert #TITLE:{DIR_NAME} if the buffer doesn't have one."
   (goto-char (point-min))
-  (unless (looking-at-p spacemacs--docfmt-title-regexp)
+  (unless (looking-at-p docfmt-title-regexp)
     (insert (format "#+TITLE:%s\n"
                     (file-name-base
                      (directory-file-name
                       (file-name-directory
                        (buffer-file-name))))))))
 
-(defsubst spacemacs//docfmt-insert-toc ()
+(defsubst docfmt-insert-toc ()
   "Insert toc if the buffer doesn't have one."
   (goto-char (point-min))
   (unless (re-search-forward toc-org-toc-org-regexp nil t)
@@ -154,97 +154,97 @@ Returns nil if no more tables left."
     (while (re-search-backward org-heading-regexp nil t))
     (open-line 3)
     (forward-line 1)
-    (insert spacemacs--docfmt-toc-headline)))
+    (insert docfmt-toc-headline)))
 
-(defsubst spacemacs//docfmt-remove-empty-lines-after-headlines()
+(defsubst docfmt-remove-empty-lines-after-headlines()
   "Remove empty liners after each headline."
   (goto-char (point-min))
   (while (re-search-forward org-heading-regexp nil t)
     (unless (= (forward-line) 0)
-      (while (looking-at-p spacemacs--docfmt-empty-line-regexp)
+      (while (looking-at-p docfmt-empty-line-regexp)
         (delete-blank-lines)))))
 
-(defsubst spacemacs//docfmt-insert-empty-line-before-tables ()
+(defsubst docfmt-insert-empty-line-before-tables ()
   "Insert an empty line before each org table."
   (goto-char (point-min))
-  (while (spacemacs//docfmt-goto-next-table)
+  (while (docfmt-goto-next-table)
     (forward-line -1)
-    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (looking-at-p docfmt-empty-line-regexp)
       (end-of-line)
       (open-line 1))
     (forward-line 1)))
 
-(defsubst spacemacs//docfmt-insert-empty-line-after-sections ()
+(defsubst docfmt-insert-empty-line-after-sections ()
   "Insert an empty line after each section."
   (goto-char (point-min))
   (while (re-search-forward org-heading-regexp nil t)
     (forward-line -1)
-    (unless (or (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (or (looking-at-p docfmt-empty-line-regexp)
                 (looking-at-p org-heading-regexp))
       (end-of-line)
       (open-line 1))
     (forward-line 2)))
 
-(defsubst spacemacs//docfmt-insert-empty-line-after-tables ()
+(defsubst docfmt-insert-empty-line-after-tables ()
   "Insert an empty line after each table."
   (goto-char (point-min))
-  (while (spacemacs//docfmt-goto-next-table)
+  (while (docfmt-goto-next-table)
     ;; Skip current table.
     (while (looking-at-p org-table-any-line-regexp)
       (forward-line))
-    (unless (looking-at-p spacemacs--docfmt-empty-line-regexp)
+    (unless (looking-at-p docfmt-empty-line-regexp)
       (goto-char (point-at-bol))
       (open-line 1)
       (forward-line))))
 
-(defsubst spacemacs//docfmt-align-tables ()
+(defsubst docfmt-align-tables ()
   "Align all tables"
   (goto-char (point-min))
-  (while (spacemacs//docfmt-goto-next-table)
+  (while (docfmt-goto-next-table)
     (ignore-errors
       (org-table-align))))
 
-(defsubst spacemacs//docfmt-apply-toc ()
+(defsubst docfmt-apply-toc ()
   "Apply current toc-org TAG to TOC."
   (toc-org-enable)
   (goto-char (point-min))
   (toc-org-insert-toc))
 
-(defun spacemacs/docfmt-apply-all ()
+(defun docfmt/apply-all ()
   "Format current `org-mode' buffer."
   (let ((old-buff-str (buffer-string))
         (new-buff-str ""))
     (cl-loop
-     (spacemacs//docfmt-rm-empty-lines-at-beg)
-     (spacemacs//docfmt-rm-empty-lines-at-end)
-     (spacemacs//docfmt-remove-readtheorg-meta)
-     (spacemacs//docfmt-replace-org-toc)
-     (spacemacs//docfmt-rm-trail-delim-in-hl)
-     (spacemacs//docfmt-multy-nl-with-single)
-     (spacemacs//docfmt-remote-empty-lines-at-the-beginning)
-     (spacemacs//docfmt-insert-title)
-     (spacemacs//docfmt-insert-toc)
-     (spacemacs//docfmt-apply-toc)
-     (spacemacs//docfmt-remove-empty-lines-after-headlines)
-     (spacemacs//docfmt-insert-empty-line-before-tables)
-     (spacemacs//docfmt-insert-empty-line-after-title)
-     (spacemacs//docfmt-insert-empty-line-after-tables)
-     (spacemacs//docfmt-insert-empty-line-after-sections)
-     (spacemacs//docfmt-insert-empty-line-before-begin-block)
-     (spacemacs//docfmt-insert-empty-line-after-end-block)
-     (spacemacs//docfmt-insert-empty-line-at-the-end)
-     (spacemacs//docfmt-align-tables)
+     (docfmt-rm-empty-lines-at-beg)
+     (docfmt-rm-empty-lines-at-end)
+     (docfmt-remove-readtheorg-meta)
+     (docfmt-replace-org-toc)
+     (docfmt-rm-trail-delim-in-hl)
+     (docfmt-multy-nl-with-single)
+     (docfmt-remote-empty-lines-at-the-beginning)
+     (docfmt-insert-title)
+     (docfmt-insert-toc)
+     (docfmt-apply-toc)
+     (docfmt-remove-empty-lines-after-headlines)
+     (docfmt-insert-empty-line-before-tables)
+     (docfmt-insert-empty-line-after-title)
+     (docfmt-insert-empty-line-after-tables)
+     (docfmt-insert-empty-line-after-sections)
+     (docfmt-insert-empty-line-before-begin-block)
+     (docfmt-insert-empty-line-after-end-block)
+     (docfmt-insert-empty-line-at-the-end)
+     (docfmt-align-tables)
      (setq new-buff-str (buffer-string))
      (if (string= old-buff-str new-buff-str)
          (return)
        (setq old-buff-str new-buff-str)))))
 
-(defun spacemacs/docfmt-apply-all-batch (files)
+(defun docfmt/apply-all-batch (files)
   "Function for batch processing FILES in `noninteractive' mode."
   (message "Files to be formatted: %S" files)
   (dolist (file files)
     (with-temp-file file
       (insert-file-contents file)
       (set-visited-file-name file t t)
-      (spacemacs/docfmt-apply-all)))
+      (docfmt/apply-all)))
   (message "Done."))
