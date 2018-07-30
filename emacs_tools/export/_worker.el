@@ -1,6 +1,6 @@
 ;;; _worker.el ---  Spacemacs docs export worker -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (C) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Eugene "JAremko" Yaremenko <w3techplayground@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs

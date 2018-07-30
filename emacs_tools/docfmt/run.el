@@ -30,8 +30,8 @@
 (declare-function spacetools/do-concurrently "shared.el" (files
                                                           w-count
                                                           w-path
-                                                          make-task
-                                                          sentinel))
+                                                          sentinel
+                                                          make-task))
 
 (defconst docfmt-run-file-name (or load-file-name buffer-file-name)
   "Path to run script of \"docfmt\" tool.")
@@ -127,8 +127,8 @@ the rest elements are file paths (absolute or relative to Spacemacs root dir)."
          files
          (setq docfmt-workers-count w-count)
          docfmt-worker-path
-         (lambda (fps) (format "%S" `(docfmt/apply-all-batch ',fps)))
-         'docfmt/concurrently-sentinel)
+         'docfmt/concurrently-sentinel
+         (lambda (f) (format "%S" `(docfmt/apply-all-batch ',f))))
         (while (not docfmt-stop-waiting)
           (accept-process-output))))))
 

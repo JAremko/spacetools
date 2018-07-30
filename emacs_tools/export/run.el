@@ -2,7 +2,7 @@
 ;;
 ;;; run.el -- Spacemacs documentation export runner -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (C) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Eugene "JAremko" Yaremenko <w3techplayground@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -36,8 +36,8 @@
 (declare-function spacetools/do-concurrently "shared.el" (files
                                                           w-count
                                                           w-path
-                                                          make-task
-                                                          sentinel))
+                                                          sentinel
+                                                          make-task))
 
 (defconst sdnize-run-file-name
   (or load-file-name buffer-file-name)
@@ -64,8 +64,6 @@
   "Used for blocking until all exporters have exited.")
 (defvar sdnize-worker-count 0
   "How many workers(Emacs instances) should we use for exporting.")
-(defvar sdnize-worker-errored? nil
-  "Will be set to last error message if a worker emitted a standard errors.")
 (defvar sdnize-copy-queue '()
   "Queue of static dependencies to be copied to
 the export dir.")
@@ -77,8 +75,6 @@ the export dir.")
     "layers/LAYERS.org")
   "List of Spacemacs directories and ORG files that normally
  shouldn't be exported.")
-
-
 
 (defun sdnize/copy-file-to-target-dir (file-path)
   "Copy file at FILE-PATH into `sdnize-target-dir'.
@@ -92,6 +88,7 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
       (copy-file file-path np t))))
 
 (defun sdnize/sentinel (p e)
+  "Sentinel for worker process."
   (condition-case err
       (let ((buff (process-buffer p)))
         (if (not (eq (process-status p) 'exit))
@@ -110,48 +107,55 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
     (error (setq sdnize-stop-waiting t)
            (error "%s" err))))
 
+(defun sdnize/worker-msg-handler (resp)
+  "Process payload received for a worker."
+  (let ((type (alist-get 'type resp))
+        ;; Unescape newlines inside payload.
+        (text (replace-regexp-in-string
+               "{{newline}}"
+               "\n"
+               (alist-get 'text resp))))
+    (message
+     "%s"
+     (cond
+      ((string= type "message")
+       text)
+      ((string= type "warning")
+       (concat "\n=============== WARNING ===============\n"
+               text
+               "\n=======================================\n"))
+      ((string= type "error")
+       (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
+               text
+               "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"))
+      ((string= type "export")
+       (format
+        (concat "File %S has static dependency %S\n"
+                "=> it will be copied into the export directory")
+        (alist-get 'source resp)
+        (progn
+          (push text sdnize-copy-queue)
+          text)))
+      (t
+       (error
+        "%s"
+        (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
+                (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
+                "\n?????????????????????????????????????????\n")))))))
+
 (defun sdnize/interpret-proc-output (proc buff)
   "Parses process PROC BUFFER. Process P should be finished."
   (message "PROCESS: %S\n" proc)
+  ;; We have one payload per line.
   (dolist (line (split-string (with-current-buffer buff (buffer-string)) "\n"))
+    ;; Ignore junk.
     (unless (or (string= line "")
                 (string-match-p "^Loading.*\\.\\.\\.$" line))
+      ;; Parse payload
       (let ((resp (ignore-errors (json-read-from-string line))))
         (unless resp
           (error "Malformed response:%s" line))
-        (let ((type (alist-get 'type resp))
-              (text (replace-regexp-in-string
-                     "{{newline}}"
-                     "\n"
-                     (alist-get 'text resp))))
-          (message
-           "%s"
-           (cond
-            ((string= type "message")
-             text)
-            ((string= type "warning")
-             (concat "\n=============== WARNING ===============\n"
-                     text
-                     "\n=======================================\n"))
-            ((string= type "error")
-             (setq sdnize-worker-errored?
-                   (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
-                           text
-                           "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")))
-            ((string= type "export")
-             (format
-              (concat "File %S has static dependency %S\n"
-                      "=> it will be copied into the export directory")
-              (alist-get 'source resp)
-              (progn
-                (push text sdnize-copy-queue)
-                text)))
-            (t
-             (error
-              "%s"
-              (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
-                      (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
-                      "\n?????????????????????????????????????????\n")))))))))
+        (sdnize/worker-msg-handler resp))))
   (while sdnize-copy-queue
     (sdnize/copy-file-to-target-dir
      (pop sdnize-copy-queue))))
@@ -184,9 +188,7 @@ See `sdnize-help-text' for description."
          (f-length (length files))
          (w-count
           ;; FIXME: With 1-2  workers it gets extremely slow.
-          ;; Find the bottleneck.
-          ;;(min (spacetools/get-cpu-count) f-length)
-          (min 16 f-length)))
+          (min (max 4 (spacetools/get-cpu-count)) f-length)))
     (if (= f-length 0)
         (progn (message "No files to export.")
                (kill-emacs 0))
@@ -196,14 +198,8 @@ See `sdnize-help-text' for description."
        files
        w-count
        w-path
-       (lambda (fps)
-         (format
-          "%S"
-          `(sdnize/to-sdn
-            ,root-dir
-            ,sdnize-target-dir
-            ',fps)))
-       'sdnize/sentinel)
+       'sdnize/sentinel
+       (lambda (f) (format "%S" `(sdnize/to-sdn ,root-dir ,sdnize-target-dir ',f))))
       (while (not sdnize-stop-waiting)
         (accept-process-output))
       (message "Done."))))

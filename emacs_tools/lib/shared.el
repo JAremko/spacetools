@@ -87,7 +87,7 @@ to the return value."
 (byte-compile 'spacetools-filse-to-buckets)
 
 (defun spacetools/do-concurrently
-    (files w-count w-path make-task sentinel)
+    (files w-count w-path sentinel make-task)
   "Run task concurrently.
 Process FILES using W-COUNT workers(child emacs processes) loaded from W-PATH
 MAKE-TASK is a function that takes single argument (file list) and returns
