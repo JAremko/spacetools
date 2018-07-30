@@ -502,17 +502,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
           sdnize-repository-owner
           sdnize-repository))
 
-
 (defconst sdnize/org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
 
-
-(defsubst sdnize/fmt-output (path type raw-link desc)
+(defsubst sdnize/fmt-link (path type raw-link desc)
   (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
           (sdnize/escape-string path)
           (sdnize/escape-string type)
           (sdnize/escape-string raw-link)
           desc))
-
 
 (defsubst sdnize/copy-if-asset (file raw-link path)
   ;; Errors:
@@ -535,7 +532,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (unless (string-match-p sdnize/org-link-re raw-link)
     (sdnize/export-file file (file-truename path))))
 
-
 (defun sdnize/link (link desc info)
   "Transcode a LINK object From Org to Spacemacs SDN.
 DESC is the description part of the link, or the empty string.
@@ -551,9 +547,11 @@ INFO is a plist holding contextual information.  See
                                   sdnize/org-link-re
                                   raw-link)
                                  (match-string 1 raw-link))))
+
+    ;; Validation:
     (cond
 
-     ;; Local .org file link with target(anchor).
+     ;; Local .org file link with a target(anchor).
      ((and file-path? org-link-with-target?)
       (sdnize/error
        (concat "Link \"%s\" "
@@ -580,15 +578,8 @@ INFO is a plist holding contextual information.  See
            file
            (file-truename target-file)))))
 
-     ;; Link to a file.
-     (file-path?
-      (sdnize/copy-if-asset
-       file
-       raw-link
-       (url-unhex-string path)))
-
      ;; Catch the rest of known types.
-     ((member type '("http" "https" "custom-id" "ftp")))
+     ((member type '("file" "http" "https" "custom-id" "ftp")))
 
      ;; Anything else is an error.
      (t (sdnize/error
@@ -599,7 +590,13 @@ INFO is a plist holding contextual information.  See
          raw-link
          file
          type)))
-    (sdnize/fmt-output path type raw-link desc)))
+
+    (when file-path?
+      (sdnize/copy-if-asset
+       file
+       raw-link
+       (url-unhex-string path)))
+    (sdnize/fmt-link path type raw-link desc)))
 
 ;;;; Node Property
 
@@ -619,68 +616,48 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
+(defsubst sdnize/plain-list-tag (plain-list file)
+  "Return proper SDN tag for PLAIN-LIST or signal error."
+  (let* ((type (org-element-property :type plain-list))
+         (parent-type (symbol-name (car (org-export-get-parent plain-list))))
+         (parent-hl (org-export-get-parent-headline plain-list))
+         (parent-hl-parent-hl (org-export-get-parent-headline parent-hl))
+         (perant-hl-val (org-element-property :raw-value parent-hl-parent-hl)))
+    (unless (or (eq 'ordered type)
+                (eq 'unordered type)
+                (eq 'descriptive type))
+      (sdnize/error (concat
+                     "File \"%s\" contains plain list of type \"%s\" but "
+                     "it isn't implemented.")
+                    file
+                    type))
+    (if (and (not (string= parent-type "item"))
+             (= (or (org-element-property :level parent-hl) -1) 2)
+             (string= (org-element-property :raw-value parent-hl) "Features:")
+             (= (or (org-element-property :level parent-hl-parent-hl) -1) 1)
+             (string= perant-hl-val "Description"))
+        :feature-list
+      :plain-list)))
+
 (defun sdnize/plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element From Org to Spacemacs SDN.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
-         (parent-type
-          (symbol-name
-           (car
-            (org-export-get-parent
-             plain-list))))
-         (parent-hl
-          (org-export-get-parent-headline
-           plain-list))
-         (parent-hl-parent-hl
-          (org-export-get-parent-headline
-           parent-hl))
-         (file (plist-get info :input-file)))
-    (unless (or (eq 'ordered type)
-                (eq 'unordered type)
-                (eq 'descriptive type))
-      (sdnize/error
-       (concat "File \"%s\" contains plain list of type \"%s\" but "
-               "it isn't implemented in sdnize/node-property")
-       (plist-get info :input-file)
-       type))
-    (if (and (not
-              ;; FIXME: We probably should use a better way to
-              ;; tell apart nested features list and multiply
-              ;; features list.
-              (string= parent-type
-                       "item"))
-             (= (or (org-element-property
-                     :level
-                     parent-hl)
-                    -1)
-                2)
-             (string= (org-element-property
-                       :raw-value
-                       parent-hl)
-                      "Features:")
-             (= (or (org-element-property
-                     :level
-                     parent-hl-parent-hl)
-                    -1)
-                1)
-             (string= (org-element-property
-                       :raw-value
-                       parent-hl-parent-hl)
-                      "Description"))
-        (if (plist-member info :file-has-feature-list?)
-            (sdnize/error
-             (concat "File \"%s\" has multiply "
-                     "\"Features:\" lists in the top "
-                     "level \"Description\" headline")
-             file)
-          (plist-put info :file-has-feature-list? 'true)
-          (format "{:tag :feature-list :type :%s :children [%s]}"
-                  type
-                  contents))
-      (format "{:tag :plain-list :type :%s :children [%s]}"
-              type
-              contents))))
+         (file (plist-get info :input-file))
+         (tag (sdnize/plain-list-tag plain-list file)))
+    (when (eq tag :feature-list)
+      (if (plist-member info :file-has-feature-list?)
+          (sdnize/error
+           (concat "File \"%s\" has multiply "
+                   "\"Features:\" lists in the top "
+                   "level \"Description\" headline")
+           file)
+        (plist-put info :file-has-feature-list? 'true)))
+    (format "{:tag %s :type :%s :children [%s]}"
+            tag
+            type
+            contents)))
 
 ;;;; Plain Text
 
