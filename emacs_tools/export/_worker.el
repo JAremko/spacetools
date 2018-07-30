@@ -299,6 +299,14 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/fixed-width"))
 
+;;;; Footnote definition
+
+(defun sdnize/footnote-definition
+    (_footnote-definition _contents _info)
+  "Transcode a FOOTNOTE-DEFINITION element From Org to Spacemacs SDN.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (sdnize/noimpl "sdnize/footnote-definition"))
+
 ;;;; Footnote Reference
 
 (defun sdnize/footnote-reference
