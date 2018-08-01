@@ -507,8 +507,7 @@
 ;;;; root node
 
 (s/def :spacedoc.data.root/tag #{:root})
-(s/def :spacedoc.data.root/file-has-description? boolean?)
-(s/def :spacedoc.data.root/file-has-feature-list? boolean?)
+;; (s/def :spacedoc.data.root/title ::non-empty-string)
 (s/def :spacedoc.data.root/headline-path-ids (s/coll-of string?
                                                         :kind vector?
                                                         :min-count 1
@@ -520,8 +519,7 @@
                                                :distinct true
                                                :into []))
 (defnode ::root (s/keys :req-un [:spacedoc.data.root/tag
-                                 :spacedoc.data.root/file-has-description?
-                                 :spacedoc.data.root/file-has-feature-list?
+;;                                 :spacedoc.data.root/title
                                  :spacedoc.data.root/headline-path-ids
                                  :spacedoc.data.root/children]))
 

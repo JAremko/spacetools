@@ -159,7 +159,7 @@ be sent as the source of request (useful for debugging)"
                                  ("\"" . "\\\"")
                                  ("\n" . "\\n")))
 
-(defsubst sdnize/escape-string (str)
+(defsubst sdnize/esc-str (str)
   "Escape special characters in STR."
   (if str
       (with-temp-buffer
@@ -237,7 +237,7 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
           (format "%S"
                   (vconcat
                    (mapcar
-                    'sdnize/escape-string
+                    'sdnize/esc-str
                     (split-string
                      (org-element-property :value code)
                      " "
@@ -274,8 +274,7 @@ contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :example :value \"%s\"}"
-          (sdnize/escape-string
-           (org-element-property :value example-block))))
+          (sdnize/esc-str (org-element-property :value example-block))))
 
 ;;;; Export Block
 
@@ -363,22 +362,20 @@ holding contextual information."
          file)
       (plist-put info :path-ids (push path-id path-ids)))
     (puthash gh-id raw-value headline-ht)
-    (format
-     (concat "{:tag %s "
-             ":value \"%s\" "
-             ":level %s "
-             ":gh-id \"%s\" "
-             ":path-id \"%s\" "
-             ":children [%s]}")
-     (cond
-      (todo? :todo)
-      (description? :description)
-      (t (format "%s-level-%s" :headline level)))
-     (sdnize/escape-string raw-value)
-     level
-     (sdnize/escape-string (string-remove-prefix "#" gh-id))
-     (sdnize/escape-string path-id)
-     contents)))
+    (format (concat "{:tag %s "
+                    ":value \"%s\" "
+                    ":level %s "
+                    ":gh-id \"%s\" "
+                    ":path-id \"%s\" "
+                    ":children [%s]}")
+            (cond (todo? :todo)
+                  (description? :description)
+                  (t (format "%s-level-%s" :headline level)))
+            (sdnize/esc-str raw-value)
+            level
+            (sdnize/esc-str (string-remove-prefix "#" gh-id))
+            (sdnize/esc-str path-id)
+            contents)))
 
 ;;;; Horizontal Rule
 
@@ -425,41 +422,26 @@ contextual information."
   "Transcode an ITEM element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((type (org-element-property
-               :type
-               (org-export-get-parent item)))
+  (let ((type (org-element-property :type (org-export-get-parent item)))
         (item-tag (org-element-property :tag item))
+        (bullet (org-element-property :bullet item))
         (checkbox (org-element-property :checkbox item))
         (children (format "{:tag :item-children :children [%s]}" contents)))
-    (unless (or (eq 'ordered type)
-                (eq 'unordered type)
-                (eq 'descriptive type))
+    (unless (member type '(ordered unordered descriptive))
       (sdnize/error
-       (concat "File \"%s\" contains plain list item of type \"%s\" but "
-               "it isn't implemented in sdnize/item")
+       "File \"%s\" contains list item of type \"%s\" but it isn't implemented."
        (plist-get info :input-file)
        type))
-    (format (concat "{:tag :list-item "
-                    ":type :%s "
-                    ":bullet %s "
-                    ":checkbox %s "
-                    ":children [%s]}")
+    (format "{:tag :list-item :type :%s :bullet %s :checkbox %s :children [%s]}"
             type
-            (format
-             "\"%s\""
-             (sdnize/escape-string
-              (org-element-property :bullet item)))
+            (format "\"%s\"" (sdnize/esc-str bullet))
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
-                (format
-                 "%s {:tag :item-tag :value %s}"
-                 children
-                 (if (char-or-string-p item-tag)
-                     (format "\"%s\""
-                             (sdnize/escape-string item-tag))
-                   (org-export-data-with-backend item-tag
-                                                 'sdn
-                                                 info)))
+                (format "%s {:tag :item-tag :value %s}"
+                        children
+                        (if (char-or-string-p item-tag)
+                            (format "\"%s\"" (sdnize/esc-str item-tag))
+                          (org-export-data-with-backend item-tag 'sdn info)))
               children))))
 
 ;;;; Keyword
@@ -467,11 +449,11 @@ contextual information."
 (defun sdnize/keyword (keyword _contents _info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
-          (sdnize/escape-string
-           (org-element-property :key keyword))
-          (sdnize/escape-string
-           (org-element-property :value keyword))))
+  (let ((key (org-element-property :key keyword))
+        (val (org-element-property :value keyword)))
+    (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
+            (sdnize/esc-str key)
+            (sdnize/esc-str val))))
 
 ;;;; Latex Environment
 
@@ -506,9 +488,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defsubst sdnize/fmt-link (path type raw-link desc)
   (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
-          (sdnize/escape-string path)
-          (sdnize/escape-string type)
-          (sdnize/escape-string raw-link)
+          (sdnize/esc-str path)
+          (sdnize/esc-str type)
+          (sdnize/esc-str raw-link)
           desc))
 
 (defsubst sdnize/copy-if-asset (file raw-link path)
@@ -666,7 +648,7 @@ contextual information."
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
   (format "{:tag :plain-text :value \"%s\"}"
-          (sdnize/escape-string text)))
+          (sdnize/esc-str text)))
 
 ;;;; Planning
 
@@ -722,10 +704,8 @@ holding contextual information."
   "Transcode a SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil. INFO is a plist holding contextual information."
   (format "{:tag :src :language \"%s\" :value \"%s\"}"
-          (sdnize/escape-string
-           (org-element-property :language src-block))
-          (sdnize/escape-string
-           (org-element-property :value src-block))))
+          (sdnize/esc-str (org-element-property :language src-block))
+          (sdnize/esc-str (org-element-property :value src-block))))
 
 ;;;; Statistics Cookie
 
@@ -805,56 +785,29 @@ information."
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((has-description?
-         (plist-member info :file-has-description?))
-        (has-feature-list?
-         (plist-member info :file-has-feature-list?)))
-    (when (plist-get info :input-file)
-      (let ((file (file-truename
-                   (plist-get info :input-file))))
-        (when (and (string-prefix-p (file-truename
-                                     (concat
-                                      sdnize-root-dir
-                                      "layers/"))
-                                    file)
-                   (string-suffix-p "README.org"
-                                    file
-                                    t))
-          (unless has-description?
-            (sdnize/error
-             (concat
-              "File \"%s\" "
-              "doesn't have top level "
-              "\"Description\" headline\n"
-              "See %S")
-             file
-             sdnize-readme-template-url))
-          (unless has-feature-list?
-            (sdnize/error
-             (concat "File \"%s\" "
-                     "doesn't have \"Features:\"(With a colon) list in the "
-                     "top level \"Description\" headline\n"
-                     "See %S")
-             file
-             sdnize-readme-template-url)))))
-    (format (concat "{:tag :root "
-                    ;; ":export-data #inst \"%s\" "
-                    ":file-has-description? %s "
-                    ":file-has-feature-list? %s "
-                    ":headline-path-ids %s "
-                    ":children [%s]}")
-            ;; (format-time-string "%Y-%m-%dT%H:%M:%S.52Z" nil t)
-            (if (plist-member info :file-has-description?)
-                'true
-              'false)
-            (if (plist-member info :file-has-feature-list?)
-                'true
-              'false)
-            (map 'vector
-                 (lambda (s)
-                   (format "\"%s\"" (sdnize/escape-string s)))
-                 (plist-get info :path-ids))
-            contents)))
+  (let ((file (file-truename (plist-get info :input-file))))
+    (when (and (string-prefix-p (file-truename
+                                 (concat sdnize-root-dir "layers/"))
+                                file)
+               (string-suffix-p "README.org" file t))
+      (unless (plist-member info :file-has-description?)
+        (sdnize/error
+         "File \"%s\" doesn't have top level \"Description\" headline\n See %S"
+         file
+         sdnize-readme-template-url))
+      (unless (plist-member info :file-has-feature-list?)
+        (sdnize/error
+         (concat "File \"%s\" "
+                 "doesn't have \"Features:\"(With a colon) list in the "
+                 "top level \"Description\" headline\n"
+                 "See %S")
+         file
+         sdnize-readme-template-url))))
+  (format "{:tag :root :headline-path-ids %s :children [%s]}"
+          (map 'vector
+               (lambda (s) (format "\"%s\"" (sdnize/esc-str s)))
+               (plist-get info :path-ids))
+          contents))
 
 ;;;; Timestamp
 
@@ -879,8 +832,7 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "{:tag :verbatim :value \"%s\"}"
-          (sdnize/escape-string
-           (org-element-property :value verbatim))))
+          (sdnize/esc-str (org-element-property :value verbatim))))
 
 ;;;; Verse Block
 
@@ -924,41 +876,22 @@ FIXME: Figure out where they come from :"
 SDNIZE-ROOT-DIR is original documentation root directory."
   (let* ((sdnize-root-dir (file-truename root-dir))
          (default-directory sdnize-root-dir))
-    (dolist (file file-list)
-      (let* ((target-file-name (concat
-                                exp-dir
-                                (string-remove-suffix
-                                 ".org"
-                                 (string-remove-prefix
-                                  sdnize-root-dir
-                                  (file-truename file)))
-                                ".sdn"))
-             (target-file-dir
-              (file-name-as-directory
-               (file-name-directory target-file-name))))
-        ;; FIXME: Close enough. But it will be better if we
-        ;; export stuff into separate directories and then merge.
-        (while (not (file-accessible-directory-p target-file-dir))
-          (condition-case err
-              (make-directory target-file-dir t)
-            (error (sdnize/error
-                    "make-directory \"%s\" failed with \"%s\". Retrying..."
-                    target-file-dir
-                    err))))
-        (sdnize/message
-         "Exporting \"%s\" into \"%s\""
-         file
-         target-file-name)
+    (dolist (in-file file-list)
+      (let* ((out-file (concat exp-dir
+                               (string-remove-suffix
+                                ".org"
+                                (string-remove-prefix
+                                 sdnize-root-dir
+                                 (file-truename in-file)))
+                               ".sdn"))
+             (out-dir (file-name-as-directory (file-name-directory out-file))))
+        (unless (file-accessible-directory-p out-dir)
+          (make-directory out-dir t))
+        (sdnize/message "Exporting \"%s\" into \"%s\"" in-file out-file)
         (with-temp-buffer
-          (find-file file)
-          (org-export-to-file
-              'sdn
-              target-file-name))
-        (if (and (file-readable-p target-file-name)
-                 (> (nth 7 (file-attributes target-file-name)) 0))
-            (sdnize/message
-             "Successfully exported \"%s\""
-             file)
-          (sdnize/error
-           "Export finished but \"%s\" doesn't exist or empty"
-           target-file-name))))))
+          (find-file in-file)
+          (org-export-to-file 'sdn out-file))
+        (if (and (file-readable-p out-file)
+                 (> (nth 7 (file-attributes out-file)) 0))
+            (sdnize/message "Successfully exported \"%s\"" in-file)
+          (sdnize/error "Done but \"%s\" doesn't exist or empty" out-file))))))
