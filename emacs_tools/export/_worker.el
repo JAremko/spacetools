@@ -328,19 +328,21 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((rval (org-element-property :raw-value headline))
+  (let* ((raw-val (org-element-property :raw-value headline))
          (headline-ht (sdnize/headline-ht info))
-         (gh-id (toc-org-hrefify-gh rval headline-ht))
+         (gh-id (toc-org-hrefify-gh raw-val headline-ht))
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
          (path-id (sdnize/headline-make-path-id headline))
          (todo? (org-element-property :todo-keyword headline))
-         (description? (and (= level 1) (string= rval "Description")))
-         (err-2deep-fs "Headline %S has nesting level %S (> %S)")
-         (err-empty-fs "Empty headline %S without TODO marker"))
+         (description? (and (= level 1) (string= raw-val "Description"))))
     (unless (<= level sdnize-max-headline-level)
-      (sdnize/error err-2deep-fs rval level sdnize-max-headline-level))
-    (unless (or todo? contents) (sdnize/error err-empty-fs rval))
+      (sdnize/error "Headline %S has nesting level %S - max level is %S"
+                    raw-val
+                    level
+                    sdnize-max-headline-level))
+    (unless (or todo? contents)
+      (sdnize/error "Empty headline %S without TODO marker" raw-val))
     (when description?
       (if (plist-member info :file-has-description?)
           (sdnize/error "Multiply \"Description\" headlines")
@@ -351,7 +353,7 @@ holding contextual information."
                               "headlines with similar names.")
                       path-id)
       (plist-put info :path-ids (push path-id path-ids)))
-    (puthash gh-id rval headline-ht)
+    (puthash gh-id raw-val headline-ht)
     (format (concat "{:tag %s "
                     ":value \"%s\" "
                     ":level %s "
@@ -361,7 +363,7 @@ holding contextual information."
             (cond (todo? :todo)
                   (description? :description)
                   (t (format "%s-level-%s" :headline level)))
-            (sdnize/esc-str rval)
+            (sdnize/esc-str raw-val)
             level
             (sdnize/esc-str (string-remove-prefix "#" gh-id))
             (sdnize/esc-str path-id)
