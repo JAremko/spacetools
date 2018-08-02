@@ -334,24 +334,22 @@ holding contextual information."
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
          (path-id (sdnize/headline-make-path-id headline))
-         (file (plist-get info :input-file))
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1) (string= rval "Description")))
-         (err-2deep-fs "File %S has headline %S with nesting level %S (> %S)")
-         (err-empty-fs "File %S has empty headline %S without TODO marker"))
+         (err-2deep-fs "Headline %S hash nesting level %S (> %S)")
+         (err-empty-fs "Empty headline %S without TODO marker"))
     (unless (<= level sdnize-max-headline-level)
-      (sdnize/error err-2deep-fs file rval level sdnize-max-headline-level))
-    (unless (or todo? contents) (sdnize/error err-empty-fs file rval))
+      (sdnize/error err-2deep-fs rval level sdnize-max-headline-level))
+    (unless (or todo? contents) (sdnize/error err-empty-fs rval))
     (when description?
       (if (plist-member info :file-has-description?)
-          (sdnize/error "File %S has multiply \"Description\" headlines" file)
+          (sdnize/error "Multiply \"Description\" headlines")
         (plist-put info :file-has-description? 'true)))
     (if (member path-id path-ids)
-        (sdnize/error (concat "Multiply identical path IDs \"%s\" in %S file. "
-                              "Usually it happens when headlines have child "
-                              "headlines with similar names")
-                      path-id
-                      file)
+        (sdnize/error (concat "Multiply identical path IDs \"%s\". "
+                              "it can happen if headlines have child "
+                              "headlines with similar names.")
+                      path-id)
       (plist-put info :path-ids (push path-id path-ids)))
     (puthash gh-id rval headline-ht)
     (format (concat "{:tag %s "
@@ -420,10 +418,7 @@ contextual information."
         (checkbox (org-element-property :checkbox item))
         (children (format "{:tag :item-children :children [%s]}" contents)))
     (unless (member type '(ordered unordered descriptive))
-      (sdnize/error
-       "File \"%s\" contains list item of type \"%s\" but it isn't implemented."
-       (plist-get info :input-file)
-       type))
+      (sdnize/error "List item has type \"%s\" but it isn't implemented." type))
     (format "{:tag :list-item :type :%s :bullet %s :checkbox %s :children [%s]}"
             type
             (format "\"%s\"" (sdnize/esc-str bullet))
@@ -486,22 +481,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
           desc))
 
 (defsubst sdnize/copy-if-asset (file raw-link path)
-  ;; Errors:
+  ;; Validate:
   (cond
    ;; Missing target file.
    ((not (file-readable-p path))
-    (sdnize/error
-     "File %S has a link to file %S but it isn't readable."
-     file
-     (file-truename path)))
+    (sdnize/error "Linked file %S not readable" (file-truename path)))
    ;; Target file is outside documentation root.
-   ((not (string-prefix-p sdnize-root-dir
-                          (file-truename path)))
-    (sdnize/error
-     (concat "File %S has a link to file %S "
-             "but it's outside of the documentation root directory.")
-     file
-     (file-truename path))))
+   ((not (string-prefix-p sdnize-root-dir (file-truename path)))
+    (sdnize/error "link to file %S outside of root directory %S"
+                  (file-truename path)
+                  sdnize-root-dir)))
   ;; Copy assets.
   (unless (string-match-p sdnize/org-link-re raw-link)
     (sdnize/export-file file (file-truename path))))
@@ -513,7 +502,6 @@ INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-property :type link))
          (path (org-element-property :path link))
-         (file (plist-get info :input-file))
          (raw-link (org-element-property :raw-link link))
          (file-path? (string= type "file"))
          (org-link-with-target? (and
@@ -529,14 +517,12 @@ INFO is a plist holding contextual information.  See
      ((and file-path? org-link-with-target?)
       (sdnize/error
        (concat "Link \"%s\" "
-               "in \"%s\" "
                "should target the .org file at GitHub via web-link "
                "because it has target(anchors) and GitHub doesn't "
                "support them in ORG links :(\n"
                "(GitHub style anchors are supported)\n"
                "See footnote of %S for details.")
        raw-link
-       file
        sdnize-readme-template-url))
 
      ;; Web link to org file inside Spacemacs GitHub repository.
@@ -545,31 +531,19 @@ INFO is a plist holding contextual information.  See
                           sdnize-root-dir
                           (url-unhex-string (match-string 1 raw-link)))))
         (unless (file-readable-p target-file)
-          (sdnize/error
-           (concat
-            "File %S has a GitHub link to a documentation file %S but "
-            "it isn't readable locally.")
-           file
-           (file-truename target-file)))))
+          (sdnize/error "link to remote Spacemacs file %S not readable locally"
+                        (file-truename target-file)))))
 
      ;; Catch the rest of known types.
      ((member type '("file" "http" "https" "custom-id" "ftp")))
 
      ;; Anything else is an error.
-     (t (sdnize/error
-         (concat
-          "Link \"%s\" in file \"%s\" "
-          "has type \"%s\" "
-          "but the type isn't implemented in sdnize/link")
-         raw-link
-         file
-         type)))
+     (t (sdnize/error "Link \"%s\" has unknown type \"%s\"" raw-link type)))
 
     (when file-path?
-      (sdnize/copy-if-asset
-       file
-       raw-link
-       (url-unhex-string path)))
+      (sdnize/copy-if-asset (plist-get info :input-file)
+                            raw-link
+                            (url-unhex-string path)))
     (sdnize/fmt-link path type raw-link desc)))
 
 ;;;; Node Property
@@ -590,7 +564,7 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-(defsubst sdnize/plain-list-tag (plain-list file)
+(defsubst sdnize/plain-list-tag (plain-list)
   "Return proper SDN tag for PLAIN-LIST or signal error."
   (let* ((type (org-element-property :type plain-list))
          (parent-type (symbol-name (car (org-export-get-parent plain-list))))
@@ -600,11 +574,7 @@ the plist used as a communication channel."
     (unless (or (eq 'ordered type)
                 (eq 'unordered type)
                 (eq 'descriptive type))
-      (sdnize/error (concat
-                     "File \"%s\" contains plain list of type \"%s\" but "
-                     "it isn't implemented.")
-                    file
-                    type))
+      (sdnize/error "Plain list type \"%s\" is unknown" type))
     (if (and (not (string= parent-type "item"))
              (= (or (org-element-property :level parent-hl) -1) 2)
              (string= (org-element-property :raw-value parent-hl) "Features:")
@@ -618,15 +588,12 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
-         (file (plist-get info :input-file))
-         (tag (sdnize/plain-list-tag plain-list file)))
+         (tag (sdnize/plain-list-tag plain-list)))
     (when (eq tag :feature-list)
       (if (plist-member info :file-has-feature-list?)
           (sdnize/error
-           (concat "File \"%s\" has multiply "
-                   "\"Features:\" lists in the top "
-                   "level \"Description\" headline")
-           file)
+           (concat "Multiply \"Features:\" lists in the top "
+                   "level \"Description\" headline"))
         (plist-put info :file-has-feature-list? 'true)))
     (format "{:tag %s :type :%s :children [%s]}"
             tag
@@ -783,17 +750,13 @@ holding export options."
                                 file)
                (string-suffix-p "README.org" file t))
       (unless (plist-member info :file-has-description?)
-        (sdnize/error
-         "File \"%s\" doesn't have top level \"Description\" headline\n See %S"
-         file
-         sdnize-readme-template-url))
+        (sdnize/error "Missing top level \"Description\" headline\n See %S"
+                      sdnize-readme-template-url))
       (unless (plist-member info :file-has-feature-list?)
         (sdnize/error
-         (concat "File \"%s\" "
-                 "doesn't have \"Features:\"(With a colon) list in the "
+         (concat "Missing \"Features:\"(With a colon) list in the "
                  "top level \"Description\" headline\n"
                  "See %S")
-         file
          sdnize-readme-template-url))))
   (format "{:tag :root :headline-path-ids %s :children [%s]}"
           (map 'vector
