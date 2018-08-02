@@ -336,7 +336,7 @@ holding contextual information."
          (path-id (sdnize/headline-make-path-id headline))
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1) (string= rval "Description")))
-         (err-2deep-fs "Headline %S hash nesting level %S (> %S)")
+         (err-2deep-fs "Headline %S has nesting level %S (> %S)")
          (err-empty-fs "Empty headline %S without TODO marker"))
     (unless (<= level sdnize-max-headline-level)
       (sdnize/error err-2deep-fs rval level sdnize-max-headline-level))
