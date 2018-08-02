@@ -115,33 +115,29 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
                "{{newline}}"
                "\n"
                (alist-get 'text resp))))
-    (message
-     "%s"
-     (cond
-      ((string= type "message")
-       text)
-      ((string= type "warning")
-       (concat "\n=============== WARNING ===============\n"
-               text
-               "\n=======================================\n"))
-      ((string= type "error")
-       (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
-               text
-               "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"))
-      ((string= type "export")
-       (format
-        (concat "File %S has static dependency %S\n"
-                "=> it will be copied into the export directory")
-        (alist-get 'source resp)
-        (progn
-          (push text sdnize-copy-queue)
-          text)))
-      (t
-       (error
-        "%s"
-        (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
-                (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
-                "\n?????????????????????????????????????????\n")))))))
+    (message "%s"
+             (cond
+              ((string= type "message")
+               text)
+              ((string= type "warning")
+               (concat "\n=============== WARNING ===============\n"
+                       text
+                       "\n=======================================\n"))
+              ((string= type "error")
+               (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
+                       text
+                       "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"))
+              ((string= type "export")
+               (format
+                (concat "File %S has static dependency %S\n"
+                        "=> it will be copied into the export directory")
+                (alist-get 'source resp)
+                (car (push text sdnize-copy-queue))))
+              (t
+               (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
+                       (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
+                       "\n?????????????????????????????????????????\n"))))
+    (unless (member type '("message" "warning" "export")) (kill-emacs 2))))
 
 (defun sdnize/interpret-proc-output (proc buff)
   "Parses process PROC BUFFER. Process P should be finished."
@@ -149,12 +145,10 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
   ;; We have one payload per line.
   (dolist (line (split-string (with-current-buffer buff (buffer-string)) "\n"))
     ;; Ignore junk.
-    (unless (or (string= line "")
-                (string-match-p "^Loading.*\\.\\.\\.$" line))
+    (unless (or (string= line "") (string-match-p "^Loading.*\\.\\.\\.$" line))
       ;; Parse payload
       (let ((resp (ignore-errors (json-read-from-string line))))
-        (unless resp
-          (error "Malformed response:%s" line))
+        (unless resp (error "Malformed response:%s" line))
         (sdnize/worker-msg-handler resp))))
   (while sdnize-copy-queue
     (sdnize/copy-file-to-target-dir

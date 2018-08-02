@@ -507,7 +507,7 @@
 ;;;; root node
 
 (s/def :spacedoc.data.root/tag #{:root})
-;; (s/def :spacedoc.data.root/title ::non-empty-string)
+(s/def :spacedoc.data.root/title ::non-empty-string)
 (s/def :spacedoc.data.root/headline-path-ids (s/coll-of string?
                                                         :kind vector?
                                                         :min-count 1

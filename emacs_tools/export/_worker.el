@@ -316,52 +316,44 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Headline
 
+(defsubst sdnize/headline-ht (info)
+  "Get current value of :headline-hash in INFO or create it."
+  (if (plist-member info :headline-hash)
+      (plist-get info :headline-hash)
+    (let ((hh (make-hash-table :test 'equal)))
+      (plist-put info :headline-hash hh)
+      hh)))
+
 (defun sdnize/headline (headline contents info)
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((raw-value (org-element-property :raw-value headline))
-         (headline-ht (if (plist-member info :headline-hash)
-                          (plist-get info :headline-hash)
-                        (let ((hh (make-hash-table :test 'equal)))
-                          (plist-put info :headline-hash hh)
-                          hh)))
-         (gh-id (toc-org-hrefify-gh raw-value headline-ht))
+  (let* ((rval (org-element-property :raw-value headline))
+         (headline-ht (sdnize/headline-ht info))
+         (gh-id (toc-org-hrefify-gh rval headline-ht))
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
-         (path-id
-          (sdnize/headline-make-path-id headline))
+         (path-id (sdnize/headline-make-path-id headline))
          (file (plist-get info :input-file))
          (todo? (org-element-property :todo-keyword headline))
-         (description? (and (= level 1)
-                            (string= raw-value "Description"))))
+         (description? (and (= level 1) (string= rval "Description")))
+         (err-2deep-fs "File %S has headline %S with nesting level %S (> %S)")
+         (err-empty-fs "File %S has empty headline %S without TODO marker"))
     (unless (<= level sdnize-max-headline-level)
-      (sdnize/error
-       "File %S has headline %S with the nesting level %S - that's way too deep"
-       file
-       raw-value
-       level))
-    (unless (or todo? contents)
-      (sdnize/error
-       "File %S has headline %S without children or TODO marker"
-       file
-       raw-value))
+      (sdnize/error err-2deep-fs file rval level sdnize-max-headline-level))
+    (unless (or todo? contents) (sdnize/error err-empty-fs file rval))
     (when description?
       (if (plist-member info :file-has-description?)
-          (sdnize/error
-           (concat "File \"%s\" has multiply top level "
-                   "\"Description\" headlines")
-           file)
+          (sdnize/error "File %S has multiply \"Description\" headlines" file)
         (plist-put info :file-has-description? 'true)))
     (if (member path-id path-ids)
-        (sdnize/error
-         (concat "Multiply identical path IDs \"%s\" in %S file. "
-                 "Usually it happens when headlines have child headlines "
-                 "with similar names")
-         path-id
-         file)
+        (sdnize/error (concat "Multiply identical path IDs \"%s\" in %S file. "
+                              "Usually it happens when headlines have child "
+                              "headlines with similar names")
+                      path-id
+                      file)
       (plist-put info :path-ids (push path-id path-ids)))
-    (puthash gh-id raw-value headline-ht)
+    (puthash gh-id rval headline-ht)
     (format (concat "{:tag %s "
                     ":value \"%s\" "
                     ":level %s "
@@ -371,7 +363,7 @@ holding contextual information."
             (cond (todo? :todo)
                   (description? :description)
                   (t (format "%s-level-%s" :headline level)))
-            (sdnize/esc-str raw-value)
+            (sdnize/esc-str rval)
             level
             (sdnize/esc-str (string-remove-prefix "#" gh-id))
             (sdnize/esc-str path-id)
