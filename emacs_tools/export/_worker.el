@@ -442,11 +442,20 @@ contextual information."
 
 ;;;; Keyword
 
-(defun sdnize/keyword (keyword _contents _info)
+(defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((key (org-element-property :key keyword))
-        (val (org-element-property :value keyword)))
+  (let* ((key (org-element-property :key keyword))
+         (d-key (downcase key))
+         (val (org-element-property :value keyword)))
+    (when (string= "title" d-key)
+      (if (plist-member info :doc-title)
+          (sdnize/error "Multiply \"#+TITLE:\" keywords")
+        (plist-put info :file-has-title? 'true)))
+    (when (string= "tags" d-key)
+      (if (plist-member info :doc-tags)
+          (sdnize/error "Multiply \"#+TAGS:\" keywords")
+        (plist-put info :file-has-tags? 'true)))
     (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
             (sdnize/esc-str key)
             (sdnize/esc-str val))))
@@ -754,6 +763,8 @@ information."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((file (file-truename (plist-get info :input-file))))
+
+    ;; Validations for layer README.org files:
     (when (and (string-prefix-p (file-truename
                                  (concat sdnize-root-dir "layers/"))
                                 file)
@@ -767,6 +778,15 @@ holding export options."
                  "top level \"Description\" headline\n"
                  "See %S")
          sdnize-readme-template-url))))
+
+  ;; General validations:
+  (unless (plist-member info :file-has-title?)
+    (sdnize/error "Missing \"#+TITLE:\" keyword. See %S"
+                  sdnize-readme-template-url))
+  (unless (plist-member info :file-has-tags?)
+    (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
+                 sdnize-readme-template-url))
+
   (format "{:tag :root :headline-path-ids %s :children [%s]}"
           (map 'vector
                (lambda (s) (format "\"%s\"" (sdnize/esc-str s)))
