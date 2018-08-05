@@ -47,7 +47,7 @@
 
 (defconst sdnize-readme-template-url
   (concat "https://github.com/syl20bnr/spacemacs"
-          "blob/develop/core/templates/README.org.template")
+          "/blob/develop/core/templates/README.org.template")
   "URL of README.org template")
 
 (defconst sdnize-backend-funcs-alist
@@ -336,24 +336,31 @@ holding contextual information."
          (path-id (sdnize/headline-make-path-id headline))
          (todo? (org-element-property :todo-keyword headline))
          (description? (and (= level 1) (string= raw-val "Description"))))
-    (unless (<= level sdnize-max-headline-level)
+
+    ;; Validations:
+    (cond
+     ((> level sdnize-max-headline-level)
       (sdnize/error "Headline %S has nesting level %S - max level is %S"
                     raw-val
                     level
                     sdnize-max-headline-level))
-    (unless (or todo? contents)
+
+     ((not (or todo? contents))
       (sdnize/error "Empty headline %S without TODO marker" raw-val))
-    (when description?
-      (if (plist-member info :file-has-description?)
-          (sdnize/error "Multiply \"Description\" headlines")
-        (plist-put info :file-has-description? 'true)))
-    (if (member path-id path-ids)
-        (sdnize/error (concat "Multiply identical path IDs \"%s\". "
-                              "it can happen if headlines have child "
-                              "headlines with similar names.")
-                      path-id)
-      (plist-put info :path-ids (push path-id path-ids)))
+
+     ((and description? (plist-member info :file-has-description?))
+      (sdnize/error "Multiply \"Description\" headlines"))
+
+     ((member path-id path-ids)
+      (sdnize/error (concat "Multiply identical path IDs \"%s\". "
+                            "it can happen if two headlines have child "
+                            "headlines with too similar names.")
+                    path-id)))
+
+    (plist-put info :path-ids (push path-id path-ids))
+    (when description? (plist-put info :file-has-description? 'true))
     (puthash gh-id raw-val headline-ht)
+
     (format (concat "{:tag %s "
                     ":value \"%s\" "
                     ":level %s "
