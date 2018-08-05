@@ -405,7 +405,7 @@ holding contextual information."
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (format "{:tag :body :children [%s]}" contents))
+  (format "{:tag :root :children [%s]}" contents))
 
 ;;;; Italic
 
@@ -787,11 +787,8 @@ holding export options."
     (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
                  sdnize-readme-template-url))
 
-  (format "{:tag :root :headline-path-ids %s :children [%s]}"
-          (map 'vector
-               (lambda (s) (format "\"%s\"" (sdnize/esc-str s)))
-               (plist-get info :path-ids))
-          contents))
+  ;; "Content is inner Template"
+  contents)
 
 ;;;; Timestamp
 

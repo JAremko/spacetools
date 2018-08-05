@@ -507,37 +507,17 @@
 ;;;; root node
 
 (s/def :spacedoc.data.root/tag #{:root})
-(s/def :spacedoc.data.root/title ::non-empty-string)
-(s/def :spacedoc.data.root/headline-path-ids (s/coll-of string?
-                                                        :kind vector?
-                                                        :min-count 1
-                                                        :distinct true
-                                                        :into []))
-(s/def :spacedoc.data.root/children (s/coll-of ::body
-                                               :kind vector?
-                                               :count 1
-                                               :distinct true
-                                               :into []))
-(defnode ::root (s/keys :req-un [:spacedoc.data.root/tag
-;;                                 :spacedoc.data.root/title
-                                 :spacedoc.data.root/headline-path-ids
-                                 :spacedoc.data.root/children]))
-
-
-;;;; body node
-
-(s/def :spacedoc.data.body/tag #{:body})
-(defmulti ^:private  body-child :tag)
-(defmethod body-child :todo [_] ::todo)
-(defmethod body-child :section [_] ::section)
-(defmethod body-child :headline [_] ::headline)
-(defmethod body-child :headline-level-1 [_] ::headline-level-1)
-(defmethod body-child :description [_] ::description)
-(s/def ::body-child (s/multi-spec body-child :tag))
-(s/def :spacedoc.data.body/children (s/coll-of ::body-child
+(defmulti ^:private  root-child :tag)
+(defmethod root-child :todo [_] ::todo)
+(defmethod root-child :section [_] ::section)
+(defmethod root-child :headline [_] ::headline)
+(defmethod root-child :headline-level-1 [_] ::headline-level-1)
+(defmethod root-child :description [_] ::description)
+(s/def ::root-child (s/multi-spec root-child :tag))
+(s/def :spacedoc.data.root/children (s/coll-of ::root-child
                                                :kind vector?
                                                :min-count 1
                                                :distinct true
                                                :into []))
-(defnode ::body (s/keys :req-un [:spacedoc.data.body/tag
-                                 :spacedoc.data.body/children]))
+(defnode ::root (s/keys :req-un [:spacedoc.data.root/tag
+                                 :spacedoc.data.root/children]))
