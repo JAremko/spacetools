@@ -103,9 +103,9 @@
   "plist of transcode functions names for `sdn' backend.")
 
 (org-export-define-backend 'sdn
-  sdnize-backend-funcs-alist
-  :filters-alist
-  '((:filter-final-output . sdnize/final-function)))
+                           sdnize-backend-funcs-alist
+                           :filters-alist
+                           '((:filter-final-output . sdnize/final-function)))
 
 
 ;;; Helper Functions
@@ -854,7 +854,7 @@ FIXME: Figure out where they come from :"
 
 (defun sdnize/to-sdn (root-dir exp-dir file-list)
   "Export org files in FILE-LIST into EXP-DIR.
-SDNIZE-ROOT-DIR is original documentation root directory."
+ROOT-DIR is original documentation root directory."
   (let* ((sdnize-root-dir (file-truename root-dir))
          (default-directory sdnize-root-dir))
     (dolist (in-file file-list)

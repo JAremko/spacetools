@@ -1,40 +1,29 @@
 ### Spacemacs documentation tools
 *Available at DockerHub as `jare/spacedoc:latest`*
 
-**usage:** `run ACTION [ARGS]...`
+```sh
+Spacemacs documentation tools
 
-**Actions:**
-1. `validate  INPUTS...`             Validate input spacedoc(.SDN) files
-2. `describe  SPEC`                  Describe spec by keyword. Example: ":spacedoc.data/root"
-3. `relations INPUTS...`             Print node relations in the input Spacedoc(.SDN) files
-4. `format    INPUTS...`             Format .ORG files Specified directly or by parent directory
-5. `export    DOCS_ROOT [INPUTS]...` Export .ORG files to "spacedoc/emacs_tools/export/target/"
-6. `orgify    SDN__ROOT`             Export .SDN docs as .ORG files into "target/orgify/" directory
+usage: run ACTION [ARGS]...
 
-*``DOCS_ROOT`` is a root directory of Spacemacs documentation (usually "~/.emacs.d/").*
-*If one of`INPUTS` arguments is a directory it will be scanned for .ORG files.*
-*`export` called without `INPUTS` will use default list of Spacemacs documentation files.*
+Actions:
+  validate  ROOT [INPUTS]... Validate Spacemacs documentation files.
+                             If only the first argument is supplied
+                             the default list of documentation files
+                             will be used.
+  format    ROOT [INPUTS]... Format Spacemacs documentation files.
+                             If only the first argument is supplied
+                             all files in ROOT folder will be formatted.
+
+Common arguments:
+  ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
+  INPUTS are processed .org files or directories containing them.
+```
 
 **Usage example:**
-``` sh
-docker run --rm \
-  -v <docs_dir>:/tmp/sd/ \
-  jare/spacedoc \
-  format /tmp/sd/
 
-docker run --rm \
-  -v <docs_dir>:/tmp/sd/ \
-  -v <out_dir>:/tmp/export \
-  jare/spacedoc \
-  export /tmp/sd/
+Format all files:
+`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc format /tmp/docs/`
 
-docker run --rm \
-  -v <out_dir>:/tmp/sd/ \
-  jare/spacedoc \
-  relations /tmp/sd/
-
-docker run --rm \
-  -v <out_dir>:/tmp/sd/ \
-  jare/spacedoc \
-  validate /tmp/sd/layers/ /tmp/sd/doc/FAQ.sdn
-```
+Validate:
+`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc validate /tmp/docs/`

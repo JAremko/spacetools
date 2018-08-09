@@ -3,6 +3,7 @@
 cd "$(dirname "$0")"
 
 action="$1"
+first_arg="$2"
 shift
 
 print_help () {
@@ -12,20 +13,26 @@ read -d '' help <<- EOF
   usage: run ACTION [ARGS]...
 
   Actions:
-    validate  INPUTS...             Validate input spacedoc(.SDN) files.
-    describe  SPEC                  Describe spec by keyword. Example: ":spacedoc.data/root".
-    relations INPUTS...             Print node relations in the input Spacedoc(.SDN) files.
-    format    INPUTS...             Format .ORG files Specified directly or by parent directory.
-    orgify    SDN_ROOT              Export .SDN docs as .ORG files into "target/orgify/" directory.
-    export    DOCS_ROOT [INPUTS]... Export .ORG files to SDN format.
-                                    Export directory is "spacedoc/emacs_tools/export/target/".
-                                    DOCS_ROOT is a root directory of Spacemacs documentation
-                                    (usually "~/.emacs.d/").  If an argument is a directory
-                                    it will be scaned for .ORG files and they will be exported.
-                                    If only the first argument is supplied a default list of
-                                    Spacemacs documentation files will be used.
+    validate  ROOT [INPUTS]... Validate Spacemacs documentation files.
+                               If only the first argument is supplied
+                               the default list of documentation files
+                               will be used.
+    format    ROOT [INPUTS]... Format Spacemacs documentation files.
+                               If only the first argument is supplied
+                               all files in ROOT folder will be formatted.
+
+  Common arguments:
+    ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
+    INPUTS are processed .org files or directories containing them.
 EOF
 echo "$help"
+}
+
+echo_headline () {
+    printf '=%.0s' {1..70}
+    printf "\n$1\n"
+    printf '=%.0s' {1..70}
+    echo
 }
 
 case $action in
@@ -51,14 +58,25 @@ case $@ in
 esac
 
 case $action in
-export)
-    exec emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
+validate)
+    rm -rf /opt/spacedoc/emacs_tools/export/target/*
+    echo_headline "Exporting documentation for validation:"
+    emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
+    echo_headline "Validating documentation:"
+    sdn validate /opt/spacedoc/emacs_tools/export/target/
     ;;
 format)
-    exec emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
-    ;;
-describe|validate|relations|orgify)
-    exec sdn $action "$@"
+    echo_headline "Formatting documentation with Emacs tools:"
+    emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
+    rm -rf /opt/spacedoc/emacs_tools/export/target/*
+    echo_headline "Exporting documentation for formatting with Clojure tools:"
+    emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
+    echo_headline "Importing documentation back into .org format:"
+    sdn orgify /opt/spacedoc/emacs_tools/export/target/ /tmp/target/
+    echo_headline "Generate TOCs with Emacs tools:"
+    emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q /tmp/target/
+    echo_headline "Override old files with formatted ones:"
+    rsync -avh /tmp/target/ "${first_arg}"
     ;;
 *)
    print_help

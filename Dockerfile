@@ -25,6 +25,9 @@ RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
 
 FROM jare/emacs
 
+RUN apt-get update && apt-get install -y rsync
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=graalvm /tmp/sdn /usr/local/bin
 
 COPY . /opt/spacedoc
