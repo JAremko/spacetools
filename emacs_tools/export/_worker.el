@@ -103,9 +103,9 @@
   "plist of transcode functions names for `sdn' backend.")
 
 (org-export-define-backend 'sdn
-                           sdnize-backend-funcs-alist
-                           :filters-alist
-                           '((:filter-final-output . sdnize/final-function)))
+  sdnize-backend-funcs-alist
+  :filters-alist
+  '((:filter-final-output . sdnize/final-function)))
 
 
 ;;; Helper Functions

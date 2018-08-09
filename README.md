@@ -7,13 +7,13 @@ Spacemacs documentation tools
 usage: run ACTION [ARGS]...
 
 Actions:
-  validate  ROOT [INPUTS]... Validate Spacemacs documentation files.
-                             If only the first argument is supplied
-                             the default list of documentation files
-                             will be used.
-  format    ROOT [INPUTS]... Format Spacemacs documentation files.
-                             If only the first argument is supplied
-                             all files in ROOT folder will be formatted.
+  validate ROOT [INPUTS]... Validate Spacemacs documentation files.
+                            If only the first argument is supplied
+                            the default list of documentation files
+                            will be used.
+  format   ROOT [INPUTS]... Format Spacemacs documentation files.
+                            If only the first argument is supplied
+                            all files in ROOT folder will be formatted.
 
 Common arguments:
   ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
