@@ -680,9 +680,12 @@ holding contextual information."
 (defun sdnize/src-block (src-block _contents _info)
   "Transcode a SRC-BLOCK element From Org to Spacemacs SDN.
 CONTENTS is nil. INFO is a plist holding contextual information."
-  (format "{:tag :src :language \"%s\" :value \"%s\"}"
-          (sdnize/esc-str (org-element-property :language src-block))
-          (sdnize/esc-str (org-element-property :value src-block))))
+  (let ((lang (org-element-property :language src-block)))
+    (unless lang
+      (sdnize/error "Language not specified in \"#+BEGIN_SRC <language>\""))
+    (format "{:tag :src :language \"%s\" :value \"%s\"}"
+            (sdnize/esc-str lang)
+            (sdnize/esc-str (org-element-property :value src-block)))))
 
 ;;;; Statistics Cookie
 
