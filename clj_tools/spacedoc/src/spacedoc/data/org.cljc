@@ -251,10 +251,5 @@
 
 
 (defmethod sdn->org :root
-  [{[body] :children}]
-  (sdn->org body))
-
-
-(defmethod sdn->org :body
   [{children :children}]
   (conv children))

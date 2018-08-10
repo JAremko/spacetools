@@ -46,6 +46,11 @@ case $action in
     ;;
 esac
 
+if [ ! -d "${first_arg}" ]; then
+    print_help
+    exit 2
+fi
+
 case $@ in
 "")
     print_help

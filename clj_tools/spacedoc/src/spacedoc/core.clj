@@ -51,22 +51,22 @@
           (match
            ;; Handlers
            [action      a-args]
-           ["describe"  [key    ]] (ac/describe-spec key)
-           ["validate"  [_   & _]] (m/fmap ac/validate (parse-input a-args))
-           ["to_org"    [_   & _]] (m/fmap ac/orgify (parse-input a-args))
-           ["relations" [_   & _]] (m/fmap ac/relations (parse-input a-args))
+           ["describe"  [key      ]] (ac/describe-spec key)
+           ["validate"  [_   &  _ ]] (m/fmap ac/validate (parse-input a-args))
+           ["orgify"    [_   sr tg]] (ac/orgify sr tg)
+           ["relations" [_   &  _ ]] (m/fmap ac/relations (parse-input a-args))
            ;; Errors
            ["describe"  _] (fail
-                            "\"describe\" requires keyword as a single argument"
+                            "\"describe\" takes keyword as a single argument"
                             {:args a-args})
            ["validate"  _] (fail
-                            "\"validate\" requires one or more input argument"
+                            "\"validate\" takes one or more input argument"
                             {:args a-args})
-           ["to_org"    _]  (fail
-                             "\"orgify\" requires one or more input argument"
+           ["orgify"    _]  (fail
+                             "\"orgify\" takes two arguments."
                              {:args a-args})
            ["relations" _] (fail
-                            "\"relations\" requires one or more input argument"
+                            "\"relations\" takes one or more input argument"
                             {:args a-args})
            [nil         _] (fail
                             "No action specified. Run with \"--help\" for usage"

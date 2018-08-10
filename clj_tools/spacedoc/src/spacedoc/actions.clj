@@ -2,7 +2,7 @@
   (:require [spacedoc.io :as sio]
             [spacedoc.data :as data]
             [spec-tools.parse :as sp]
-            ;;            [spacedoc.data.org :refer [sdn->org]]
+            [spacedoc.data.org :refer [sdn->org]]
             [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.string :refer [join]]
@@ -19,13 +19,11 @@
                    (count spacedocs)))))
 
 
-;; (defn orgify
-;;   "Export Spacedoc files into \"target/orgify/\" directory as .org files."
-;;   [sdn-file-paths]
-;;   (exc/try-on
-;;    (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
-;;            (format "%s spacedoc files successfully validated."
-;;                    (count spacedocs)))))
+(defn orgify
+  "Export .SDN files in SOURCE-DIR to TARGET-DIR as .ORG files."
+  [source-dir target-dir]
+  (exc/try-on
+   (println "WIP")))
 
 
 (defn describe-spec
