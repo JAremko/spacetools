@@ -1,6 +1,6 @@
 (ns spacedoc.core
   (:require [spacedoc.io :as sio]
-            [spacedoc.args :refer [parse parse-input]]
+            [spacedoc.args :refer [parse parse-ins]]
             [spacedoc.actions :as ac]
             [spacedoc.util :as util]
             [cats.core :as m]
@@ -51,10 +51,10 @@
           (match
            ;; Handlers
            [action      a-args]
-           ["describe"  [key      ]] (ac/describe-spec key)
-           ["validate"  [_   &  _ ]] (m/fmap ac/validate (parse-input a-args))
-           ["orgify"    [_   sr tg]] (ac/orgify sr tg)
-           ["relations" [_   &  _ ]] (m/fmap ac/relations (parse-input a-args))
+           ["describe"  [key   ]] (ac/describe-spec key)
+           ["validate"  [_   &_]] (m/fmap ac/validate (parse-ins a-args))
+           ["orgify"    [s   t ]] (m/fmap (partial ac/orgify t) (parse-ins [s]))
+           ["relations" [_   &_]] (m/fmap ac/relations (parse-ins a-args))
            ;; Errors
            ["describe"  _] (fail
                             "\"describe\" takes keyword as a single argument"

@@ -24,8 +24,15 @@
 (def ^:private list-identation 2)
 
 
+(def
+  ^{:doc "These nodes can be converted only in their parent context."}
+  indirect-nodes
+  #{:headline :item-children :item-tag :table-row :table-cell})
+
+
 (defmulti sdn->org
   (fn [{tag :tag}]
+    {:pre  [(complement (indirect-nodes tag))]}
     (cond
       ;; Headline node group.
       (headline-tags tag) :headline
@@ -40,16 +47,7 @@
       ((set (keys block-container-delims)) tag) :block-container
 
       ;; Everything else.
-      :else (case tag
-              :headline
-              (throw
-               (Exception.
-                "Meta headline must be converted into concrete node"))
-              (:item-children :item-tag :table-row :table-cell)
-              (throw
-               (Exception.
-                (format "\"%s\" node can't be converted directly" (name tag))))
-              tag))))
+      :else tag)))
 
 
 ;;;; Helpers
@@ -235,7 +233,7 @@
   "\n")
 
 
-(defmethod sdn->org :keyword
+(defmethod sdn->org :key-word
   [{:keys [key value]}]
   (format "#+%s: %s\n" key value))
 

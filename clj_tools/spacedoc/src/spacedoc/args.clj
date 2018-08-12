@@ -26,7 +26,7 @@
      paths))))
 
 
-(defn parse-input
+(defn parse-ins
   [input]
   (exc/try-on
    (cond (empty? input)

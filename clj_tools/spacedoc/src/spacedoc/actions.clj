@@ -20,10 +20,12 @@
 
 
 (defn orgify
-  "Export .SDN files in SOURCE-DIR to TARGET-DIR as .ORG files."
-  [source-dir target-dir]
-  (exc/try-on
-   (println "WIP")))
+  "Export .SDN files to TARGET-DIR as .ORG files."
+  [target-dir sdn-file-paths]
+  (io!
+   (exc/try-on
+    (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
+            (first (pmap sdn->org spacedocs))))))
 
 
 (defn describe-spec
