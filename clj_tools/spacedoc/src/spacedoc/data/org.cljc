@@ -1,7 +1,7 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
             [clojure.set :refer [intersection]]
-            [spacedoc.data :refer [seps headline-tags tag->kind]]))
+            [spacedoc.data :refer [seps headline-tags tag->kind fill-hl]]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -239,15 +239,15 @@
 
 
 (defmethod sdn->org :headline
-  [{:keys [value level children]}]
+  [{value :val lvl :level children :children :as hl}]
   (str
-   (apply str (repeat level "*"))
+   (apply str (repeat lvl "*"))
    " "
    value
    "\n"
-   (conv children)))
+   (conv (mapv #(if (headline-tags (:tag %)) (fill-hl hl %) %) children))))
 
 
 (defmethod sdn->org :root
   [{children :children}]
-  (conv children))
+  (conv (mapv #(if (headline-tags (:tag %)) (fill-hl %) %) children)))

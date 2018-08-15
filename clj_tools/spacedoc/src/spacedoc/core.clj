@@ -1,6 +1,6 @@
 (ns spacedoc.core
   (:require [spacedoc.io :as sio]
-            [spacedoc.args :refer [parse parse-ins]]
+            [spacedoc.args :refer [parse parse-inputs]]
             [spacedoc.actions :as ac]
             [spacedoc.util :as util]
             [cats.core :as m]
@@ -51,10 +51,11 @@
           (match
            ;; Handlers
            [action      a-args]
-           ["describe"  [key   ]] (ac/describe-spec key)
-           ["validate"  [_   &_]] (m/fmap ac/validate (parse-ins a-args))
-           ["orgify"    [s   t ]] (m/fmap (partial ac/orgify t) (parse-ins [s]))
-           ["relations" [_   &_]] (m/fmap ac/relations (parse-ins a-args))
+           ["describe"  [key    ]] (ac/describe-spec key)
+           ["validate"  [_   & _]] (m/fmap ac/validate (parse-inputs a-args))
+           ["relations" [_   & _]] (m/fmap ac/relations (parse-inputs a-args))
+           ["orgify"    [s   t  ]] (m/fmap (partial ac/orgify t)
+                                           (parse-inputs [s]))
            ;; Errors
            ["describe"  _] (fail
                             "\"describe\" takes keyword as a single argument"
@@ -63,17 +64,20 @@
                             "\"validate\" takes one or more input argument"
                             {:args a-args})
            ["orgify"    _]  (fail
-                             "\"orgify\" takes two arguments."
+                             "\"orgify\" takes two arguments"
                              {:args a-args})
            ["relations" _] (fail
                             "\"relations\" takes one or more input argument"
                             {:args a-args})
            [nil         _] (fail
-                            "No action specified. Run with \"--help\" for usage"
+                            "No action specified"
                             {:action action})
-           :else (ex-info "Invalid action. Run with \"--help\" for usage"
+           :else (ex-info "Invalid action"
                           {:action action}))))
        output (m/extract output-m)]
     (if (exc/failure? output-m)
-      (sio/exit-err (util/err->msg output))
+      (sio/exit-err (str
+                     "\nError:\n"
+                     (util/err->msg output)
+                     "\n Run with \"--help\" for usage"))
       (sio/exit-success output))))

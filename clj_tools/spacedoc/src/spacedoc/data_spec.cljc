@@ -377,10 +377,6 @@
 (s/def :spacedoc.data.headline-base/tag keyword?)
 (s/def :spacedoc.data.headline-base/value ::non-empty-string)
 (s/def :spacedoc.data.headline-base/level pos-int?)
-(s/def :spacedoc.data.headline-base/gh-id (s/and string?
-                                                 #(re-matches
-                                                   #"^[\pL\pN\p{Pc}-]+$"
-                                                   %)))
 (s/def :spacedoc.data.headline-base/path-id (s/and string?
                                                    #(re-matches
                                                      #"^[\pL\pN\p{Pc}/-]+$"
@@ -391,7 +387,6 @@
   (s/keys :req-un [:spacedoc.data.headline-base/tag
                    :spacedoc.data.headline-base/value
                    :spacedoc.data.headline-base/level
-                   :spacedoc.data.headline-base/gh-id
                    :spacedoc.data.headline-base/path-id
                    :spacedoc.data.headline-base/children]))
 

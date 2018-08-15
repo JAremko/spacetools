@@ -2,7 +2,7 @@
   (:require [spacedoc.util :as util]
             [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
-            [clojure.string :refer [join]]
+            [clojure.string :as str]
             [clojure.spec.alpha :as s]))
 
 
@@ -41,10 +41,10 @@
 
 (defn- fmt-problem
   [node problem]
-  (join \newline
-        (assoc problem
-               :node-tag (:tag node)
-               :spec-form (s/form (node->spec-k node)))))
+  (str/join \newline
+            (assoc problem
+                   :node-tag (:tag node)
+                   :spec-form (s/form (node->spec-k node)))))
 
 
 (defn explain-deepest
@@ -73,3 +73,27 @@
   {:pre [(util/foldable? roots)]}
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map node-relations roots)))
+
+
+(defn- val->path-id-frag
+  [hl-value]
+  (str/replace hl-value #"[^\pL\pN\p{Pc}/-]" ""))
+
+
+(defn fill-hl
+  "Give Headline placeholder a proper tag and fill all necessary key-vals."
+  ([{tag :tag value :value :as headline}]
+   (assoc headline
+          :tag (if (= :headline tag)
+                 :headline-level-1
+                 tag)
+          :level 1
+          :path-id (val->path-id-frag value)))
+  ([{p-level :level p-path-id :path-id} {tag :tag value :value :as headline}]
+   (let [hl-level (inc p-level)]
+     (assoc headline
+            :tag (if (= :headline tag)
+                   (keyword (concat "headline-level-" hl-level))
+                   tag)
+            :level hl-level
+            :path-id (concat p-path-id "/" (val->path-id-frag value))))))

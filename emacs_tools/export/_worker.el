@@ -25,17 +25,8 @@
 
 (require 'ox)
 
-(load-file
- (concat
-  (file-name-directory
-   (or load-file-name
-       buffer-file-name))
-  "../lib/toc-org.elc"))
-
 (defvar sdnize-root-dir nil
   "Original root directory of the documentation.")
-
-(declare-function toc-org-hrefify-gh "../lib/toc-org.el" (str &optional hash))
 
 (defconst sdnize-repository "spacemacs"
   "Name of the Spacemacs remote repository.")
@@ -169,22 +160,17 @@ be sent as the source of request (useful for debugging)"
     ""))
 
 (defsubst sdnize/headline-make-path-id (headline)
-  "Make id for org HEADLINE by chaining headlines from parent to
-child headline.
-NOTE: Each headline is converted with `toc-org-hrefify-gh' but
-without unification and \"#\" prefix."
+  "Get id for org HEADLINE by chaining headlines from parent to child headline."
   (let* ((res nil)
          (cur-node headline)
          (parent-node (org-export-get-parent cur-node)))
     (cl-loop
      t
      (when (eq 'headline (car-safe cur-node))
-       (push (string-remove-prefix
-              "#"
-              (toc-org-hrefify-gh
-               (org-element-property
-                :raw-value
-                cur-node)))
+       (push (thread-last (org-element-property :raw-value cur-node)
+               (replace-regexp-in-string " " "-")
+               (downcase)
+               (replace-regexp-in-string "[^[:alnum:]_-]" ""))
              res))
      (if (not parent-node)
          (return res)
@@ -316,21 +302,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Headline
 
-(defsubst sdnize/headline-ht (info)
-  "Get current value of :headline-hash in INFO or create it."
-  (if (plist-member info :headline-hash)
-      (plist-get info :headline-hash)
-    (let ((hh (make-hash-table :test 'equal)))
-      (plist-put info :headline-hash hh)
-      hh)))
-
 (defun sdnize/headline (headline contents info)
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((raw-val (org-element-property :raw-value headline))
-         (headline-ht (sdnize/headline-ht info))
-         (gh-id (toc-org-hrefify-gh raw-val headline-ht))
          (level (org-element-property :level headline))
          (path-ids (plist-get info :path-ids))
          (path-id (sdnize/headline-make-path-id headline))
@@ -359,12 +335,10 @@ holding contextual information."
 
     (plist-put info :path-ids (push path-id path-ids))
     (when description? (plist-put info :file-has-description? 'true))
-    (puthash gh-id raw-val headline-ht)
 
     (format (concat "{:tag %s "
                     ":value \"%s\" "
                     ":level %s "
-                    ":gh-id \"%s\" "
                     ":path-id \"%s\" "
                     ":children [%s]}")
             (cond (todo? :todo)
@@ -372,7 +346,6 @@ holding contextual information."
                   (t (format "%s-level-%s" :headline level)))
             (sdnize/esc-str raw-val)
             level
-            (sdnize/esc-str (string-remove-prefix "#" gh-id))
             (sdnize/esc-str path-id)
             contents)))
 
@@ -565,6 +538,7 @@ INFO is a plist holding contextual information.  See
     (sdnize/fmt-link path type raw-link desc)))
 
 ;;;; Node Property
+
 
 (defun sdnize/node-property (_node-property _contents _info)
   "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
