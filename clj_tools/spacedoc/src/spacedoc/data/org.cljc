@@ -239,7 +239,7 @@
 
 
 (defmethod sdn->org :headline
-  [{value :val lvl :level children :children :as hl}]
+  [{value :value lvl :level children :children :as hl}]
   (str
    (apply str (repeat lvl "*"))
    " "

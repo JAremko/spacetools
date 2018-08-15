@@ -89,11 +89,12 @@
                  tag)
           :level 1
           :path-id (val->path-id-frag value)))
-  ([{p-level :level p-path-id :path-id} {tag :tag value :value :as headline}]
+  ([{p-level :level p-path-id :path-id :as parent-headline}
+    {tag :tag value :value :as headline}]
    (let [hl-level (inc p-level)]
      (assoc headline
             :tag (if (= :headline tag)
-                   (keyword (concat "headline-level-" hl-level))
+                   (keyword (str "headline-level-" hl-level))
                    tag)
             :level hl-level
-            :path-id (concat p-path-id "/" (val->path-id-frag value))))))
+            :path-id (str p-path-id "/" (val->path-id-frag value))))))
