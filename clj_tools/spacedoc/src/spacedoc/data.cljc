@@ -84,7 +84,7 @@
   "Give Headline placeholder a proper tag and fill all necessary key-vals."
   ([{tag :tag value :value :as headline}]
    (assoc headline
-          :tag (if (= :headline tag)
+          :tag (if (str/starts-with? (name tag) "headline")
                  :headline-level-1
                  tag)
           :level 1
@@ -93,7 +93,7 @@
     {tag :tag value :value :as headline}]
    (let [hl-level (inc p-level)]
      (assoc headline
-            :tag (if (= :headline tag)
+            :tag (if (str/starts-with? (name tag) "headline")
                    (keyword (str "headline-level-" hl-level))
                    tag)
             :level hl-level

@@ -7,28 +7,38 @@
             [cats.monad.exception :as exc]
             [clojure.string :refer [join]]
             [clojure.edn :as edn]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]))
 
 
-(defn validate
+(defn *validate
   "Validate Spacedoc files with specs."
   [sdn-file-paths]
   (exc/try-on
-   (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
+   (m/alet [spacedocs (m/sequence (pmap sio/*fp->spacedoc sdn-file-paths))]
            (format "%s spacedoc files successfully validated."
                    (count spacedocs)))))
 
 
-(defn orgify
+(defn *orgify
   "Export .SDN files to TARGET-DIR as .ORG files."
-  [target-dir sdn-file-paths]
+  [source-dir target-dir fs]
   (io!
    (exc/try-on
-    (m/alet [spacedocs (m/sequence (pmap sio/fp->spacedoc sdn-file-paths))]
-            (first (pmap sdn->org spacedocs))))))
+    (m/alet [spacedocs (m/sequence (pmap sio/*fp->spacedoc fs))]
+            (m/sequence
+             (let [orgs (pmap sdn->org spacedocs)]
+               (pmap
+                (fn [path cont]
+                  (let [new-path (str/replace
+                                  (sio/rebase-path source-dir target-dir path)
+                                  #"(?ix)\.sdn$" ".org")]
+                    (sio/*safe-spit new-path cont)))
+                fs
+                orgs)))))))
 
 
-(defn describe-spec
+(defn *describe-spec
   "Describe spec by qualified keyword."
   [spec-key]
   (exc/try-on
@@ -45,11 +55,11 @@
                              {:keyword key}))))))
 
 
-(defn relations
+(defn *relations
   "Output nodes relations in SDN files."
   [sdn-file-paths]
   (exc/try-on
    (m/alet [spacedocs (m/sequence (pmap
-                                   (partial sio/fp->spacedoc :spacedoc.data/any)
+                                   (partial sio/*fp->spacedoc :spacedoc.data/any)
                                    sdn-file-paths))]
            (join \newline (data/node-relations-aggregate (vec spacedocs))))))

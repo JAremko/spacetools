@@ -6,24 +6,61 @@
             [clojure.tools.cli :refer [parse-opts]]
             [spacedoc.data :as data]
             [cats.core :as m]
-            [clojure.core.reducers :as r]))
+            [clojure.core.reducers :as r]
+            [clojure.string :refer [replace-first]]))
+
+
+(defn absolute
+  [path]
+  (io! (.getCanonicalFile (.getAbsoluteFile (io/file path)))))
+
+
+(defn mkdir
+  "Make directory tree.
+  Returns true if actually created something."
+  [path]
+  (io! (.mkdirs (io/file path))))
+
+
+(defn rebase-path
+  [old-base new-base path]
+  (io!
+   (let [a-ob (str (absolute old-base))
+         a-nb (str (absolute new-base))
+         a-p (str (absolute path))]
+     (io/file (replace-first a-p a-ob a-nb)))))
+
+
+(defn *safe-spit
+  "Like `spit` but also creates parent directories.
+  Output is wrapped in try monad."
+  [path content]
+  (io!
+   (exc/try-on
+    (do
+      (->> path
+           (io/file)
+           (.getParent)
+           (mkdir))
+      (spit path content)
+      (absolute path)))))
 
 
 (defn sdn-file?
-  [file-path]
-  (io! (and (.isFile (io/file file-path))
-            (re-matches #"(?i).*\.sdn$" (str file-path))
+  [path]
+  (io! (and (.isFile (io/file path))
+            (re-matches #"(?i).*\.sdn$" (str path))
             true)))
 
 
 (defn directory?
-  [file-path]
+  [path]
   (io!
-   (when-let [f (io/file file-path)]
+   (when-let [f (io/file path)]
      (.isDirectory f))))
 
 
-(defn sdn-fps-in-dir
+(defn *sdn-fps-in-dir
   [input-dir-path]
   (io!
    (exc/try-on (if-not (directory? input-dir-path)
@@ -37,14 +74,14 @@
                        (file-seq (io/file input-dir-path)))))))
 
 
-(defn fp->spacedoc
+(defn *fp->spacedoc
   "Read and validate Spacedoc END file."
-  ([file-path]
-   (fp->spacedoc :spacedoc.data/root file-path))
-  ([root-node-spec file-path]
+  ([path]
+   (*fp->spacedoc :spacedoc.data/root path))
+  ([root-node-spec path]
    (io!
     (exc/try-or-recover
-     (with-open [input (->> file-path
+     (with-open [input (->> path
                             (io/file)
                             (io/reader)
                             (java.io.PushbackReader.))]
@@ -60,8 +97,8 @@
      (fn [^Exception err]
        (exc/failure
         (ex-info (.getMessage err) (if-let [ed (ex-data err)]
-                                     (assoc ed :file file-path)
-                                     {:file file-path}))))))))
+                                     (assoc ed :file path)
+                                     {:file path}))))))))
 
 
 (defn exit-err

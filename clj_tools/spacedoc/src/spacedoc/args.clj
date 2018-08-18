@@ -10,7 +10,7 @@
             [clojure.core.reducers :as r]))
 
 
-(defn- flatten-fps
+(defn- *flatten-fps
   [paths]
   {:pre [(util/foldable? paths)]}
   (exc/try-on
@@ -19,14 +19,14 @@
     (r/map
      #(cond
         (sio/sdn-file? %) (exc/success (hash-set %))
-        (sio/directory? %) (sio/sdn-fps-in-dir %)
+        (sio/directory? %) (sio/*sdn-fps-in-dir %)
         :else (exc/failure (ex-info
                             "File isn't a .sdn file or a readable directory."
                             {:file %})))
      paths))))
 
 
-(defn parse-inputs
+(defn *parse-inputs
   [input]
   (exc/try-on
    (cond (empty? input)
@@ -38,7 +38,7 @@
           (ex-info "all inputs must be .SDN files or readable directories."
                    {:input input}))
          :else
-         (let [flat-input (flatten-fps (set input))]
+         (let [flat-input (*flatten-fps (set input))]
            (io! ;; FIXME: Mb use "writer M" instead of "sideeffecting"?
             (->> flat-input
                  (m/extract)
@@ -48,7 +48,7 @@
            flat-input))))
 
 
-(defn parse
+(defn *parse
   "Parse ARGS with `parse-opts` using OPS.
   Returns options wrapped in exception monad."
   [args ops]

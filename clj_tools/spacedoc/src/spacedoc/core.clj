@@ -1,6 +1,6 @@
 (ns spacedoc.core
   (:require [spacedoc.io :as sio]
-            [spacedoc.args :refer [parse parse-inputs]]
+            [spacedoc.args :refer [*parse *parse-inputs]]
             [spacedoc.actions :as ac]
             [spacedoc.util :as util]
             [cats.core :as m]
@@ -45,17 +45,17 @@
   (let
       [output-m
        (m/alet
-        [{:keys [help summary action a-args]} (parse args ops)]
+        [{:keys [help summary action a-args]} (*parse args ops)]
         (if help
           (usage summary)
           (match
            ;; Handlers
            [action      a-args]
-           ["describe"  [key    ]] (ac/describe-spec key)
-           ["validate"  [_   & _]] (m/fmap ac/validate (parse-inputs a-args))
-           ["relations" [_   & _]] (m/fmap ac/relations (parse-inputs a-args))
-           ["orgify"    [s   t  ]] (m/fmap (partial ac/orgify t)
-                                           (parse-inputs [s]))
+           ["describe"  [key    ]] (ac/*describe-spec key)
+           ["validate"  [_   & _]] (m/fmap ac/*validate (*parse-inputs a-args))
+           ["relations" [_   & _]] (m/fmap ac/*relations (*parse-inputs a-args))
+           ["orgify"    [s   t  ]] (m/fmap (partial ac/*orgify s t)
+                                           (*parse-inputs [s]))
            ;; Errors
            ["describe"  _] (fail
                             "\"describe\" takes keyword as a single argument"
