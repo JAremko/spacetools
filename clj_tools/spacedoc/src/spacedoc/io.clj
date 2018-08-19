@@ -38,7 +38,7 @@
   (io!
    (exc/try-or-recover
     (let [a-path (absolute path)
-          parent-dir (.getParent a-path)]
+          parent-dir (.getParent (io/file a-path))]
       (mkdir parent-dir)
       (spit path content)
       a-path)
