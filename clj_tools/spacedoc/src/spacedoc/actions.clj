@@ -16,26 +16,29 @@
   [sdn-file-paths]
   (exc/try-on
    (m/alet [spacedocs (m/sequence (pmap sio/*fp->spacedoc sdn-file-paths))]
-           (format "%s spacedoc files successfully validated."
+           (format "%s .sdn files have been successfully validated."
                    (count spacedocs)))))
 
 
 (defn *orgify
   "Export .SDN files to TARGET-DIR as .ORG files."
-  [source-dir target-dir fs]
+  [src-dir target-dir fs]
   (io!
    (exc/try-on
-    (m/alet [spacedocs (m/sequence (pmap sio/*fp->spacedoc fs))]
-            (m/sequence
-             (let [orgs (pmap sdn->org spacedocs)]
-               (pmap
-                (fn [path cont]
-                  (let [new-path (str/replace
-                                  (sio/rebase-path source-dir target-dir path)
-                                  #"(?ix)\.sdn$" ".org")]
-                    (sio/*safe-spit new-path cont)))
-                fs
-                orgs)))))))
+    (m/alet [spacedocs (m/sequence (pmap sio/*fp->spacedoc fs))
+             orgs (m/sequence
+                   (pmap
+                    (fn [path cont]
+                      (let [new-path (str/replace
+                                      (sio/rebase-path src-dir target-dir path)
+                                      #"(?ix)\.sdn$" ".org")]
+                        (sio/*spit new-path (sdn->org cont))))
+                    fs
+                    spacedocs))]
+            (format (str "%s .sdn files have been successfully exported "
+                         "to \"%s\" directory as .org files")
+                    (count orgs)
+                    (sio/absolute target-dir))))))
 
 
 (defn *describe-spec

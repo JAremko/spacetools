@@ -31,19 +31,20 @@
      (io/file (replace-first a-p a-ob a-nb)))))
 
 
-(defn *safe-spit
+(defn *spit
   "Like `spit` but also creates parent directories.
   Output is wrapped in try monad."
   [path content]
   (io!
-   (exc/try-on
-    (do
-      (->> path
-           (io/file)
-           (.getParent)
-           (mkdir))
+   (exc/try-or-recover
+    (let [a-path (absolute path)
+          parent-dir (.getParent a-path)]
+      (mkdir parent-dir)
       (spit path content)
-      (absolute path)))))
+      a-path)
+    (fn [^Exception err]
+      (exc/failure
+       (ex-info "Can't write file" {:path path :err err}))))))
 
 
 (defn sdn-file?
