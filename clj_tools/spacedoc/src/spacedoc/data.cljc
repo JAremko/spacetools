@@ -13,7 +13,7 @@
 (def max-headline-depth 5)
 
 
-(def seps  #{\! \? \: \; \) \} \, \. \- \\ \newline \space \tab})
+(def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
 
 
 (load "data_spec")

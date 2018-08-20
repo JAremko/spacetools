@@ -40,8 +40,8 @@
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
 
-      ;; Emphasis node group.
-      ((set (keys emphasis-tokens)) tag) :emphasis
+      ;; Emphasis containers.
+      (#{:bold :italic :underline :strike-through} tag) :emphasis-container
 
       ;; Block-container node group.
       ((set (keys block-container-delims)) tag) :block-container
@@ -91,15 +91,16 @@
 ;;;; Groups of nodes (many to one).
 
 
+(defmethod sdn->org :emphasis-container
+  [{:keys [tag children]}]
+  (let [token (emphasis-tokens tag)]
+    (when (= tag :bold) (println "BOLD!!!!" children "!!!!BOLD"))
+    (str token (conv children) token)))
+
+
 (defmethod sdn->org :list
   [{children :children}]
   (conv children))
-
-
-(defmethod sdn->org :emphasis
-  [{:keys [tag value children]}]
-  (let [token (emphasis-tokens tag)]
-    (str token (or (join value) (conv children)) token)))
 
 
 (defmethod sdn->org :block-container
@@ -246,6 +247,18 @@
    value
    "\n"
    (conv (mapv #(if (headline-tags (:tag %)) (fill-hl hl %) %) children))))
+
+
+(defmethod sdn->org :verbatim
+  [{:keys [tag value]}]
+  (let [token (emphasis-tokens tag)]
+    (str token value token)))
+
+
+(defmethod sdn->org :kbd
+  [{:keys [tag value]}]
+  (let [token (emphasis-tokens tag)]
+    (str token (join " " value) token)))
 
 
 (defmethod sdn->org :root
