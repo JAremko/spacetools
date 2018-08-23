@@ -168,11 +168,11 @@ be sent as the source of request (useful for debugging)"
      t
      (when (eq 'headline (car-safe cur-node))
        (push (thread-last (org-element-property :raw-value cur-node)
+               (downcase)
                (replace-regexp-in-string "[^[:alnum:]-]" " ")
                (replace-regexp-in-string "^\s+" "")
                (replace-regexp-in-string "\s+$" "")
-               (replace-regexp-in-string "\s+" "_")
-               (downcase))
+               (replace-regexp-in-string "\s+" "_"))
              res))
      (if (not parent-node)
          (return res)

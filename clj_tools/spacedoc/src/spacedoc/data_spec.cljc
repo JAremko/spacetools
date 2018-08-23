@@ -17,10 +17,12 @@
 (defn path-id?
   [val]
   (and (string? val)
-       ;; NOTE: Could've make one huge-black list regexp instead of these two.
-       ;;       But this way it is more reliable.
-       (re-matches #"^[\p{Nd}\p{Ll}\p{Pd}\p{Pc}/]+$" val)
-       (not (re-matches #".*_{2}.*|.*/{2}.*|^/.*|.*/$" val))))
+       ;; NOTE: Chinese thingies don't have cases so we
+       ;;       first need to match them with \p{L} - any letter.
+       ;;       And then (in the next regexp) we can say that
+       ;;       we don't want uppercase letters \p{Lu}.
+       (re-matches #"^[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$" val)
+       (not (re-matches #".*_{2}.*|.*/{2}.*|^/.*|.*/$|.*[\p{Lu}].*" val))))
 
 
 ;;;; anything
