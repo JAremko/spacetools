@@ -51,7 +51,6 @@
 
 ;;;; Helpers
 
-
 (defn- nl-wrap?
   [node-tag]
   (and
@@ -64,22 +63,23 @@
   (#{:block :headline} (tag->kind node-tag)))
 
 
-(def ^:private conv*
-  (partial reduce
-     (fn [acc next]
-       (let [h-t (:head-tag (meta acc))
-             b-s (last acc)
-             n-s (sdn->org next)]
-         (with-meta
-           (conj acc
-                 (str (cond
-                        (not (and b-s n-s)) ""
-                        (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
-                        (not (or (seps (last b-s)) (seps (first n-s)))) " "
-                        :else "")
-                      n-s))
-           {:head-tag (:tag next)})))
-     []))
+(defn- conv*
+  [node-seq]
+  (reduce (fn [acc next]
+            (let [h-t (:head-tag (meta acc))
+                  b-s (last acc)
+                  n-s (sdn->org next)]
+              (with-meta
+                (conj acc
+                      (str (cond
+                             (not (and b-s n-s)) ""
+                             (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
+                             (not (or (seps (last b-s)) (seps (first n-s)))) " "
+                             :else "")
+                           n-s))
+                {:head-tag (:tag next)})))
+          []
+          node-seq))
 
 
 (defn- conv
