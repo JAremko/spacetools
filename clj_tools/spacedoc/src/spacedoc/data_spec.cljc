@@ -22,7 +22,7 @@
        ;;       And then (in the next regexp) we can say that
        ;;       we don't want uppercase letters \p{Lu}.
        (re-matches #"^[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$" val)
-       (not (re-matches #".*_{2}.*|.*/{2}.*|^/.*|.*/$|.*[\p{Lu}].*" val))))
+       (not (re-matches #".*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*" val))))
 
 
 ;;;; anything
