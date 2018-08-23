@@ -1,6 +1,5 @@
 (ns spacedoc.util
-  (:require [clojure.string :refer [join]]
-            [cats.monad.exception :as exc]))
+  (:require [clojure.string :refer [join]]))
 
 
 (defn err->msg
@@ -12,7 +11,7 @@
                 ["Cause" "File" "Data"])
            [cause
             (or (:file data) "<none>")
-            (or (:problems data) (or data "<none>"))]))))
+            (or (seq (:problem data)) (seq data) "<none>")]))))
 
 
 (defn foldable?
@@ -20,8 +19,3 @@
   (or (vector? col)
       (map? col)
       (set? col)))
-
-
-(defn fail
-  ([msg] (exc/failure (Exception. (str msg))))
-  ([msg dat] (exc/failure (ex-info msg dat))))

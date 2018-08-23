@@ -45,7 +45,7 @@
       a-path)
     (fn [^Exception err]
       (exc/failure
-       (ex-info "Can't write file" {:path path :err err}))))))
+       (ex-info "Can't write file" {:path path}))))))
 
 
 (defn sdn-file?
