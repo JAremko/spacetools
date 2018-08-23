@@ -6,7 +6,6 @@
             [spacedoc.data.org :refer [sdn->org]]
             [cats.core :as m]
             [cats.monad.exception :as exc]
-            [clojure.string :refer [join]]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]))
@@ -71,4 +70,5 @@
                                    sdn-fps))]
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
-            (join \newline (data/node-relations-aggregate (vec spacedocs)))))))
+            (str/join \newline
+                      (data/node-relations-aggregate (vec spacedocs)))))))

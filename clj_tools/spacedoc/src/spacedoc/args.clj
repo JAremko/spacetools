@@ -3,10 +3,8 @@
             [spacedoc.util :as util]
             [clojure.set :refer [union]]
             [cats.core :as m]
-            [clojure.core.match :refer [match]]
             [cats.monad.exception :as exc]
             [clojure.tools.cli :refer [parse-opts]]
-            [clojure.spec.alpha :as s]
             [clojure.core.reducers :as r]))
 
 

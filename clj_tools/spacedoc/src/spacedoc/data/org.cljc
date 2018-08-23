@@ -1,6 +1,5 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
-            [clojure.set :refer [intersection]]
             [spacedoc.data :refer [seps headline-tags tag->kind fill-hl]]))
 
 

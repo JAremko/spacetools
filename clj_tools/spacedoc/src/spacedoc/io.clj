@@ -1,13 +1,11 @@
 (ns spacedoc.io
   (:require [clojure.java.io :as io]
-            [clojure.string :refer [join]]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [cats.monad.exception :as exc]
             [clojure.tools.cli :refer [parse-opts]]
             [cats.core :as m]
             [clojure.core.reducers :as r]
-            [clojure.string :refer [replace-first]]
             [spacedoc.util :refer [err->msg]]
             [spacedoc.data :as data]
             [clojure.string :as str]))
@@ -31,7 +29,7 @@
    (let [a-ob (str (absolute old-base))
          a-nb (str (absolute new-base))
          a-p (str (absolute path))]
-     (io/file (replace-first a-p a-ob a-nb)))))
+     (io/file (str/replace-first a-p a-ob a-nb)))))
 
 
 (defn *spit
@@ -109,14 +107,14 @@
   [& msg]
   (io!
    (binding [*out* *err*]
-     (println (join msg))
+     (println (str/join msg))
      2)))
 
 
 (defn println-ok
   [& msg]
   (io!
-   (println (join msg))
+   (println (str/join msg))
    0))
 
 
