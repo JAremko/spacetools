@@ -1,5 +1,5 @@
 (ns spacedoc.data
-  (:require [spacedoc.util :as util]
+  (:require [spacedoc.util :refer [foldable?]]
             [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.string :as str]
@@ -70,7 +70,7 @@
 (defn node-relations-aggregate
   "Apply `node-relations` to ROOTS and union the outputs.."
   [roots]
-  {:pre [(util/foldable? roots)]}
+  {:pre [(foldable? roots)]}
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map node-relations roots)))
 

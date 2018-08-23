@@ -1,10 +1,9 @@
 (ns spacedoc.core
-  (:require [spacedoc.io :as sio]
-            [spacedoc.args :refer [*parse]]
+  (:require [spacedoc.args :refer [*parse]]
             [spacedoc.actions :as ac]
-            [spacedoc.util :refer [err->msg fail]]
+            [spacedoc.util :refer [fail]]
+            [spacedoc.io :refer [try-m->output]]
             [cats.core :as m]
-            [cats.monad.exception :as exc]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]])
   (:gen-class))
@@ -37,32 +36,22 @@
 
 
 (defn -main [& args]
-  (let [*output (m/mlet
-                 [{:keys [help summary action a-args]} (*parse args ops)]
-                 (if help
-                   (usage summary)
-                   (match
-                    ;; Handlers
-                    [action      a-args       ]
-                    ["describe"  [key        ]] (ac/*describe-spec key)
-                    ["validate"  [_     &   _]] (ac/*validate a-args)
-                    ["relations" [_     &   _]] (ac/*relations a-args)
-                    ["orgify"    [src   trg  ]] (ac/*orgify src trg src)
-                    ;; Errors
-                    ["describe"  _] (fail "\"describe\" takes keyword"
-                                          {:args a-args})
-                    ["validate"  _] (fail "\"validate\" takes at least 1 input"
-                                          {:args a-args})
-                    ["orgify"    _]  (fail "\"orgify\" takes 2 arguments"
-                                           {:args a-args})
-                    ["relations" _] (fail "\"relations\" takes at least 1 input"
-                                          {:args a-args})
-                    [nil         _] (fail "No action specified")
-                    :else (ex-info "Invalid action" {:action action}))))
-        output (m/extract *output)]
-    (if (exc/failure? *output)
-      (sio/exit-err (str
-                     "\nError:\n"
-                     (err->msg output)
-                     "Run with \"--help\" for usage"))
-      (sio/exit-success output))))
+  (try-m->output
+   (m/mlet
+    [{:keys [help summary action a-args]} (*parse args ops)]
+    (if help
+      (usage summary)
+      (match
+       ;; Handlers
+       [action      a-args       ]
+       ["describe"  [key        ]] (ac/*describe-spec key)
+       ["validate"  [_     &   _]] (ac/*validate a-args)
+       ["relations" [_     &   _]] (ac/*relations a-args)
+       ["orgify"    [src   trg  ]] (ac/*orgify src trg src)
+       ;; Errors
+       ["describe"  _] (fail "\"describe\" takes qualified keyword")
+       ["validate"  _] (fail "\"validate\" takes at least 1 input")
+       ["orgify"    _] (fail "\"orgify\" takes 2 arguments" {:args a-args})
+       ["relations" _] (fail "\"relations\" takes at least 1 input")
+       [nil         _] (fail "No action specified")
+       :else (fail "Invalid action" {:action action}))))))

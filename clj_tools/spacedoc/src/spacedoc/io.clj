@@ -1,13 +1,16 @@
 (ns spacedoc.io
   (:require [clojure.java.io :as io]
+            [clojure.string :refer [join]]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [cats.monad.exception :as exc]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacedoc.data :as data]
             [cats.core :as m]
             [clojure.core.reducers :as r]
-            [clojure.string :refer [replace-first]]))
+            [clojure.string :refer [replace-first]]
+            [spacedoc.util :refer [err->msg]]
+            [spacedoc.data :as data]
+            [clojure.string :as str]))
 
 
 (defn absolute
@@ -102,18 +105,28 @@
                                      {:file path}))))))))
 
 
-(defn exit-err
-  "`println` MSG to STDERR and exit with code 2."
-  [msg]
+(defn println-err
+  [& msg]
   (io!
    (binding [*out* *err*]
-     (println msg)
-     (System/exit 2))))
+     (println (join msg))
+     2)))
 
 
-(defn exit-success
-  "`println` MSG to STDOUT and exit with code 0."
-  [msg]
+(defn println-ok
+  [& msg]
   (io!
-   (println msg)
-   (System/exit 0)))
+   (println (join msg))
+   0))
+
+
+(defn try-m->output
+  "Prints output to stderr or stdout and `System/exit` with code 0 or 2"
+  [*output]
+  (io!
+   (System/exit
+    (let [output (m/extract *output)]
+      (if (exc/failure? *output)
+        (println-err
+         (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
+        (println-ok output))))))

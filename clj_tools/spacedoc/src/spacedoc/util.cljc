@@ -6,14 +6,13 @@
 (defn err->msg
   [err]
   (let [{:keys [cause data]} (Throwable->map err)]
-    (println-str
-     (join \newline
-           (interleave
-            (map #(apply str % ": " (repeat (- 78 (count %)) "="))
-                 ["Cause" "File" "Data"])
-            [cause
-             (or (:file data) "<none>")
-             (or (:problems data) (or data "<none>"))])))))
+    (join \newline
+          (interleave
+           (map #(apply str % ": " (repeat (- 78 (count %)) "="))
+                ["Cause" "File" "Data"])
+           [cause
+            (or (:file data) "<none>")
+            (or (:problems data) (or data "<none>"))]))))
 
 
 (defn foldable?
