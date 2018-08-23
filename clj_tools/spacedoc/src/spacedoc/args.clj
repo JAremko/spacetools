@@ -33,13 +33,18 @@
          (exc/failure
           (ex-info "At least one input must be specified for this action."
                    {:input input}))
+
+         (string? input)
+         (*parse-inputs [input])
+
          (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input))
          (exc/failure
           (ex-info "all inputs must be .SDN files or readable directories."
                    {:input input}))
+
          :else
          (let [flat-input (*flatten-fps (set input))]
-           (io! ;; FIXME: Mb use "writer M" instead of "sideeffecting"?
+           (io! ;; FIXME: "writer M" instead of side-effecting?
             (->> flat-input
                  (m/extract)
                  (list* "Inputs:")

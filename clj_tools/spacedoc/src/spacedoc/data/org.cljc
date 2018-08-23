@@ -94,7 +94,6 @@
 (defmethod sdn->org :emphasis-container
   [{:keys [tag children]}]
   (let [token (emphasis-tokens tag)]
-    (when (= tag :bold) (println "BOLD!!!!" children "!!!!BOLD"))
     (str token (conv children) token)))
 
 
