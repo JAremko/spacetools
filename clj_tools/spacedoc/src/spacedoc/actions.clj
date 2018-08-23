@@ -70,7 +70,5 @@
                                    (partial sio/*fp->spacedoc :spacedoc.data/any)
                                    sdn-fps))]
            (str
-            \newline
-            "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]"
-            \newline
+            "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (join \newline (data/node-relations-aggregate (vec spacedocs)))))))

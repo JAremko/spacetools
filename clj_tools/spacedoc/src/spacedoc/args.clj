@@ -43,14 +43,7 @@
                    {:input input}))
 
          :else
-         (let [flat-input (*flatten-fps (set input))]
-           (io! ;; FIXME: "writer M" instead of side-effecting?
-            (->> flat-input
-                 (m/extract)
-                 (list* "Inputs:")
-                 (interpose \newline)
-                 (println)))
-           flat-input))))
+         (*flatten-fps (set input)))))
 
 
 (defn *parse
