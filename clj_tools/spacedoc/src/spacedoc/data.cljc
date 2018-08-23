@@ -16,6 +16,20 @@
 (def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
 
 
+(def link-type->prefix {:file "file:"
+                        :http "http://"
+                        :https "https://"
+                        :custom-id "#"
+                        :ftp "ftp://"})
+
+
+(defn path->link-prefix
+  [path]
+  (->> (vals link-type->prefix)
+       (filter (partial str/starts-with? path))
+       (first)))
+
+
 (load "data_spec")
 
 
@@ -73,6 +87,15 @@
   {:pre [(foldable? roots)]}
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map node-relations roots)))
+
+
+(defn hl-val->gh-id-base
+  [hl-value]
+  (str "#"
+       (-> hl-value
+           (str/replace " " "-")
+           (str/lower-case)
+           (str/replace #"[^\p{Nd}\p{L}\p{Pd}\p{Pc}]" ""))))
 
 
 (defn hl-val->path-id-frag

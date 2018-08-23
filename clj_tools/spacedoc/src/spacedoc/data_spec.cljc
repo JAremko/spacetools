@@ -147,7 +147,7 @@
 
 (s/def :spacedoc.data.link/tag #{:link})
 (s/def :spacedoc.data.link/path ::non-empty-string)
-(s/def :spacedoc.data.link/type #{:file :http :https :custom-id :ftp})
+(s/def :spacedoc.data.link/type (set (keys link-type->prefix)))
 (s/def :spacedoc.data.link/raw-link ::non-empty-string)
 (s/def :spacedoc.data.link/children (s/coll-of ::inline-element
                                                :kind vector?
