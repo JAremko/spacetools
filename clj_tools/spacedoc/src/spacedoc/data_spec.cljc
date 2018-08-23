@@ -14,6 +14,15 @@
      (s/def ~k  ~spec-form)))
 
 
+(defn path-id?
+  [val]
+  (and (string? val)
+       ;; NOTE: Could've make one huge-black list regexp instead of these two.
+       ;;       But this way it is more reliable.
+       (re-matches #"^[\p{Nd}\p{Ll}\p{Pd}\p{Pc}/]+$" val)
+       (not (re-matches #".*_{2}.*|.*/{2}.*|^/.*|.*/$" val))))
+
+
 ;;;; anything
 
 (s/def ::any any?)
@@ -377,10 +386,7 @@
 (s/def :spacedoc.data.headline-base/tag keyword?)
 (s/def :spacedoc.data.headline-base/value ::non-empty-string)
 (s/def :spacedoc.data.headline-base/level pos-int?)
-(s/def :spacedoc.data.headline-base/path-id (s/and string?
-                                                   #(re-matches
-                                                     #"^[\pL\pN\p{Pc}/-]+$"
-                                                     %)))
+(s/def :spacedoc.data.headline-base/path-id path-id?)
 (s/def :spacedoc.data.headline-base/children (s/nilable vector?))
 
 (s/def ::headline-base

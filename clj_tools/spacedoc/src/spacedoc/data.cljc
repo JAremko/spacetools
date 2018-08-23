@@ -77,7 +77,11 @@
 
 (defn- val->path-id-frag
   [hl-value]
-  (str/replace hl-value #"[^\pL\pN\p{Pc}/-]" ""))
+  (-> hl-value
+      (str/lower-case)
+      (str/replace #"[^\p{Nd}\p{Ll}\p{Pd}\p{Pc}/]|[_/]" " ")
+      (str/trim)
+      (str/replace #"\s+" "_")))
 
 
 (defn fill-hl
