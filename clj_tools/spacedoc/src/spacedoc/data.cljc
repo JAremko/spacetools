@@ -75,11 +75,11 @@
           (r/map node-relations roots)))
 
 
-(defn- val->path-id-frag
+(defn hl-val->path-id-frag
   [hl-value]
   (-> hl-value
       (str/lower-case)
-      (str/replace #"[^\p{Nd}\p{Ll}\p{Pd}\p{Pc}/]|[_/]" " ")
+      (str/replace #"[^\p{Nd}\p{L}\p{Pd}]" " ")
       (str/trim)
       (str/replace #"\s+" "_")))
 
@@ -92,7 +92,7 @@
                  :headline-level-1
                  tag)
           :level 1
-          :path-id (val->path-id-frag value)))
+          :path-id (hl-val->path-id-frag value)))
   ([{p-level :level p-path-id :path-id :as parent-headline}
     {tag :tag value :value :as headline}]
    (let [hl-level (inc p-level)]
@@ -101,4 +101,4 @@
                    (keyword (str "headline-level-" hl-level))
                    tag)
             :level hl-level
-            :path-id (str p-path-id "/" (val->path-id-frag value))))))
+            :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
