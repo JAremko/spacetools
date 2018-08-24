@@ -16,13 +16,9 @@
 
 (defn path-id?
   [val]
-  (and (string? val)
-       ;; NOTE: Chinese thingies don't have cases so we
-       ;;       first need to match them with \p{L} - any letter.
-       ;;       And then (in the next regexp) we can say that
-       ;;       we don't want uppercase letters \p{Lu}.
-       (re-matches #"^[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$" val)
-       (not (re-matches #".*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*" val))))
+  (re-matches
+   ;; forgive me God for i have sinned
+   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$" val))
 
 
 ;;;; anything
