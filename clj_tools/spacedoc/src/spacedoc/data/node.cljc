@@ -26,16 +26,15 @@
 
 (defn link
   "\"link\" node constructor."
-  ([path] (linkz path []))
-  ([path children]
-   {:pre  [(data/path->link-prefix path)]}
-   (let [link-prefix (data/path->link-prefix path)
-         link-type ((map-invert data/link-type->prefix) link-prefix)]
-     {:tag :link
-      :path (str/replace-first path link-prefix "")
-      :type link-type
-      :raw-link path
-      :children children})))
+  [path & children]
+  {:pre  [(data/path->link-prefix path)]}
+  (let [link-prefix (data/path->link-prefix path)
+        link-type ((map-invert data/link-type->prefix) link-prefix)]
+    {:tag :link
+     :path (str/replace-first path link-prefix "")
+     :type link-type
+     :raw-link path
+     :children (vec children)}))
 
 
 (defn text
@@ -48,7 +47,18 @@
 (defn- node-tag->should-gen?
   [tag]
   (not (or (str/starts-with? (name tag) "headline")
-           (#{:link :plain-list :plain-text} tag))))
+           (#{:link
+              :plain-list
+              :plain-text
+              :item-tag
+              :list-item
+              :feature-list
+              :todo
+              :description
+              :table
+              :table-row
+              :table-cell
+              :item-children} tag))))
 
 
 (doall
@@ -57,12 +67,15 @@
      (let [node-name (name node-tag)
            node-spec (keyword data/doc-ns-str node-name)
            keys (:keys (parse-spec node-spec))
-           specific-keys (->> (disj keys :tag)
-                              (vec)
-                              (sort-by #(= % :children)))
-           args (mapv (comp symbol name) specific-keys)]
+           specific-keys (disj keys :tag :children)
+           args (mapv (comp symbol name) specific-keys)
+           parent (:children keys)]
        (eval `(defn ~(symbol node-name)
                 ~(format "\"%s\" node SDN constructor." node-name)
-                ~args
+                ~(if parent (conj args '& 'children) args)
                 {:post [(s/valid? ~node-spec ~'%)]}
-                ~(zipmap (list* :tag specific-keys) (list* node-tag args))))))))
+                ~(let [ret (zipmap (list* :tag specific-keys)
+                                   (list* node-tag args))]
+                   (if parent
+                     (assoc ret :children '(vec children))
+                     ret))))))))
