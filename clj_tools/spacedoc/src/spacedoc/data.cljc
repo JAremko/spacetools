@@ -9,7 +9,7 @@
 (def doc-ns-str (str *ns*))
 
 
-;;;; Generate `max-headline-depth` levels of headline nodes.
+;; Generate `max-headline-depth` levels of headline nodes.
 (def max-headline-depth 5)
 
 

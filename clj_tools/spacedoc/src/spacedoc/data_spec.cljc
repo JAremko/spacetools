@@ -1,11 +1,13 @@
 (in-ns 'spacedoc.data)
 
+
 ;;;; Helpers
 
 (defmulti node->spec-k :tag)
 (s/def ::known-node #{:known-node})
 (defmethod node->spec-k :default [_] ::known-node)
 (s/def ::node (s/multi-spec node->spec-k :tag))
+
 
 (defmacro ^:private defnode
   [k spec-form]
@@ -18,20 +20,24 @@
   [val]
   (re-matches
    ;; forgive me God for i have sinned
-   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$" val))
+   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+   val))
 
 
-;;;; anything
+;;;; Specs
+
+
+;; anything
 
 (s/def ::any any?)
 
 
-;;;; Shared specs
+;; Shared specs
 
 (s/def ::non-empty-string (s/and string? #(>= (count  %) 1)))
 
 
-;;;; inline leaf
+;; inline leaf
 
 (defmulti ^:private  inline-leaf :tag)
 (defmethod inline-leaf :kbd [_] ::kbd)
@@ -43,7 +49,7 @@
 (def inline-leaf-tags (set (keys (methods inline-leaf))))
 
 
-;;;; kbd node
+;; kbd node
 
 (s/def :spacedoc.data.kbd/tag #{:kbd})
 (s/def :spacedoc.data.kbd/value (s/coll-of ::non-empty-string
@@ -54,13 +60,13 @@
                                 :spacedoc.data.kbd/value]))
 
 
-;;;; line-break node
+;; line-break node
 
 (s/def :spacedoc.data.line-break/tag #{:line-break})
 (defnode ::line-break (s/keys :req-un [:spacedoc.data.line-break/tag]))
 
 
-;;;; plain-text node
+;; plain-text node
 
 (s/def :spacedoc.data.plain-text/tag #{:plain-text})
 (s/def :spacedoc.data.plain-text/value string?)
@@ -68,7 +74,7 @@
                                        :spacedoc.data.plain-text/value]))
 
 
-;;;; verbatim node
+;; verbatim node
 
 (s/def :spacedoc.data.verbatim/tag #{:verbatim})
 (s/def :spacedoc.data.verbatim/value ::non-empty-string)
@@ -76,13 +82,13 @@
                                      :spacedoc.data.verbatim/value]))
 
 
-;;;; inline element
+;; inline element
 
 (s/def ::inline-element (s/or :inline-container ::inline-container
                               :inline-leaf ::inline-leaf))
 
 
-;;;; inline-container children
+;; inline-container children
 
 (s/def ::inline-container-children (s/coll-of ::inline-element
                                               :kind vector?
@@ -90,7 +96,7 @@
                                               :into []))
 
 
-;;;; bold node
+;; bold node
 
 (s/def :spacedoc.data.bold/tag #{:bold})
 (s/def :spacedoc.data.bold/children ::inline-container-children)
@@ -98,7 +104,7 @@
                                  :spacedoc.data.bold/children]))
 
 
-;;;; italic node
+;; italic node
 
 (s/def :spacedoc.data.italic/tag #{:italic})
 (s/def :spacedoc.data.italic/children ::inline-container-children)
@@ -106,7 +112,7 @@
                                    :spacedoc.data.italic/children]))
 
 
-;;;; strike-through node
+;; strike-through node
 
 (s/def :spacedoc.data.strike-through/tag #{:strike-through})
 (s/def :spacedoc.data.strike-through/children ::inline-container-children)
@@ -115,7 +121,7 @@
                                    :spacedoc.data.strike-through/children]))
 
 
-;;;; subscript node
+;; subscript node
 
 (s/def :spacedoc.data.subscript/tag #{:subscript})
 (s/def :spacedoc.data.subscript/children ::inline-container-children)
@@ -123,7 +129,7 @@
                                       :spacedoc.data.subscript/children]))
 
 
-;;;; superscript node
+;; superscript node
 
 (s/def :spacedoc.data.superscript/tag #{:superscript})
 (s/def :spacedoc.data.superscript/children ::inline-container-children)
@@ -131,7 +137,7 @@
                                         :spacedoc.data.superscript/children]))
 
 
-;;;; underline node
+;; underline node
 
 (s/def :spacedoc.data.underline/tag #{:underline})
 (s/def :spacedoc.data.underline/children ::inline-container-children)
@@ -139,7 +145,7 @@
                                       :spacedoc.data.underline/children]))
 
 
-;;;; link
+;; link
 
 (s/def :spacedoc.data.link/tag #{:link})
 (s/def :spacedoc.data.link/path ::non-empty-string)
@@ -155,7 +161,7 @@
                                  :spacedoc.data.link/children]))
 
 
-;;;; paragraph node
+;; paragraph node
 
 (s/def :spacedoc.data.paragraph/tag #{:paragraph})
 (s/def ::paragraph-child ::inline-element)
@@ -167,7 +173,7 @@
                                       :spacedoc.data.paragraph/children]))
 
 
-;;;; inline container
+;; inline container
 
 (defmulti ^:private  inline-container :tag)
 (defmethod inline-container :bold [_] ::bold)
@@ -184,7 +190,7 @@
 (def inline-tags (set (union inline-leaf-tags inline-container-tags)))
 
 
-;;;; center node
+;; center node
 
 (s/def :spacedoc.data.center/tag #{:center})
 (s/def ::center-child ::inline-element)
@@ -196,7 +202,7 @@
                                    :spacedoc.data.center/children]))
 
 
-;;;; example node
+;; example node
 
 (s/def :spacedoc.data.example/tag #{:example})
 (s/def :spacedoc.data.example/value ::non-empty-string)
@@ -204,7 +210,7 @@
                                     :spacedoc.data.example/value]))
 
 
-;;;; item-children
+;; item-children
 
 (s/def :spacedoc.data.item-children/tag #{:item-children})
 (s/def :spacedoc.data.item-children/child
@@ -220,7 +226,7 @@
                    :spacedoc.data.item-children/children]))
 
 
-;;;; item-tag
+;; item-tag
 
 (s/def :spacedoc.data.item-tag/tag #{:item-tag})
 (s/def :spacedoc.data.item-tag/value
@@ -230,7 +236,7 @@
                                      :spacedoc.data.item-tag/value]))
 
 
-;;;; list-item
+;; list-item
 
 (s/def :spacedoc.data.list-item/tag #{:list-item})
 (s/def :spacedoc.data.list-item/type #{:ordered :unordered :descriptive})
@@ -245,7 +251,7 @@
                                       :spacedoc.data.list-item/children]))
 
 
-;;;; feature-list node
+;; feature-list node
 
 (s/def :spacedoc.data.feature-list/tag #{:feature-list})
 (s/def :spacedoc.data.feature-list/type #{:ordered :unordered :descriptive})
@@ -258,7 +264,7 @@
                                          :spacedoc.data.feature-list/children]))
 
 
-;;;; plain-list node
+;; plain-list node
 
 (s/def :spacedoc.data.plain-list/tag #{:plain-list})
 (s/def :spacedoc.data.plain-list/type #{:ordered :unordered :descriptive})
@@ -271,7 +277,7 @@
                                        :spacedoc.data.plain-list/children]))
 
 
-;;;; quote node
+;; quote node
 
 (s/def :spacedoc.data.quote/tag #{:quote})
 (s/def :spacedoc.data.quote/children (s/coll-of ::paragraph
@@ -282,7 +288,7 @@
                                   :spacedoc.data.quote/children]))
 
 
-;;;; src node
+;; src node
 
 (s/def :spacedoc.data.src/tag #{:src})
 (s/def :spacedoc.data.src/language ::non-empty-string)
@@ -292,7 +298,7 @@
                                 :spacedoc.data.src/value]))
 
 
-;;;; table-row node
+;; table-row node
 
 (s/def :spacedoc.data.table-row/tag #{:table-row})
 (s/def :spacedoc.data.table-row/type #{:rule :standard})
@@ -305,7 +311,7 @@
                                       :spacedoc.data.table-row/children]))
 
 
-;;;; table-cell node
+;; table-cell node
 
 (s/def :spacedoc.data.table-cell/tag #{:table-cell})
 (s/def :spacedoc.data.table-cell/children (s/coll-of ::inline-element
@@ -316,7 +322,7 @@
                                        :spacedoc.data.table-cell/children]))
 
 
-;;;; table node
+;; table node
 
 (s/def :spacedoc.data.table/tag #{:table})
 (s/def :spacedoc.data.table/type #{:org})
@@ -329,7 +335,7 @@
                                   :spacedoc.data.table/children]))
 
 
-;;;; verse node
+;; verse node
 
 (s/def :spacedoc.data.verse/tag #{:verse})
 (s/def :spacedoc.data.verse/children (s/coll-of ::inline-element
@@ -340,7 +346,7 @@
                                   :spacedoc.data.verse/children]))
 
 
-;;;; key-word node
+;; key-word node
 
 (s/def :spacedoc.data.key-word/tag #{:key-word})
 (s/def :spacedoc.data.key-word/key ::non-empty-string)
@@ -368,7 +374,7 @@
 (def block-tags (set (keys (methods block-element))))
 
 
-;;;; section node
+;; section node
 
 (s/def :spacedoc.data.section/tag #{:section})
 (s/def :spacedoc.data.section/children (s/coll-of ::block-element
@@ -379,7 +385,7 @@
                                     :spacedoc.data.section/children]))
 
 
-;;;; Headlines
+;; Headlines
 
 (s/def :spacedoc.data.headline-base/tag keyword?)
 (s/def :spacedoc.data.headline-base/value ::non-empty-string)
@@ -438,7 +444,7 @@
                            ~children])))))))
 
 
-;;;; Headline placeholder
+;; Headline placeholder
 ;; NOTE: It is used for "hand crafting" SDN structures and
 ;; should never occur in the import from  .ORG files.
 
@@ -467,7 +473,7 @@
                    :spacedoc.data.headline/children]))
 
 
-;;;; description node
+;; description node
 
 (s/def :spacedoc.data.description/tag #{:description})
 (s/def :spacedoc.data.description/value #{"Description"})
@@ -486,7 +492,7 @@
                     :spacedoc.data.description/children])))
 
 
-;;;; todo node
+;; todo node
 
 (s/def :spacedoc.data.todo/tag #{:todo})
 (defnode ::todo
@@ -503,7 +509,7 @@
                         (union #{:description :todo :headline})))
 
 
-;;;; root node
+;; root node
 
 (s/def :spacedoc.data.root/tag #{:root})
 (defmulti ^:private  root-child :tag)
