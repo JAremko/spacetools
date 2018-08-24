@@ -44,7 +44,7 @@
 
 ;;;; Generate rest of the node constructors
 
-(defn- node-tag->should-gen?
+(defn- has-alternative?
   [tag]
   (not (or (str/starts-with? (name tag) "headline")
            (#{:link
@@ -61,21 +61,22 @@
               :item-children} tag))))
 
 
+(defn- fmt-children
+  [children]
+  (mapv #(if (string? %) ({:tag :plain-text :value %}) %) children))
+
+
 (doall
- (for [node-tag data/all-tags]
-   (when (node-tag->should-gen? node-tag)
-     (let [node-name (name node-tag)
-           node-spec (keyword data/doc-ns-str node-name)
-           keys (:keys (parse-spec node-spec))
-           specific-keys (disj keys :tag :children)
-           args (mapv (comp symbol name) specific-keys)
-           has-children (:children keys)]
-       (eval `(defn ~(symbol node-name)
-                ~(format "\"%s\" node constructor." node-name)
-                ~(if has-children (conj args '& 'children) args)
-                {:post [(s/valid? ~node-spec ~'%)]}
-                ~(let [ret (zipmap (list* :tag specific-keys)
-                                   (list* node-tag args))]
-                   (if has-children
-                     (assoc ret :children '(vec children))
-                     ret))))))))
+ (for [n-tag data/all-tags]
+   (let [n-name (name n-tag)
+         n-spec (keyword data/doc-ns-str n-name)
+         keys (:keys (parse-spec n-spec))
+         prop-keys (disj keys :tag :children)
+         args (mapv (comp symbol name) prop-keys)
+         has-children (:children keys)]
+     (eval `(defn ~(symbol (str n-name (when (has-alternative? n-tag) "*")))
+              ~(format "\"%s\" node constructor [auto-generated]." n-name)
+              ~(if has-children (conj args '& 'children) args)
+              {:post [(s/valid? ~n-spec ~'%)]}
+              ~(merge (when has-children {:children '(fmt-children  children)})
+                      (zipmap (list* :tag prop-keys) (list* n-tag args))))))))

@@ -189,17 +189,15 @@
                (string? item-tag) (item-tag)
                (map? item-tag) (sdn->org (:value item-tag))
                :else nil)]
-    (str
-     (apply
-      str
-      b
-      (if itag (format "%s :: " itag) "")
-      (->> children
-           (conv)
-           (split-lines)
-           (remove empty?)
-           (join (apply str "\n" (repeat list-identation " ")))))
-     "\n")))
+    (str (apply str
+                b
+                (if itag (format "%s :: " itag) "")
+                (->> children
+                     (conv)
+                     (split-lines)
+                     (remove empty?)
+                     (join (apply str "\n" (repeat list-identation " ")))))
+         "\n")))
 
 
 (defmethod sdn->org :example
