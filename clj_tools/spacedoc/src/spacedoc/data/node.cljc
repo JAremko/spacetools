@@ -69,13 +69,13 @@
            keys (:keys (parse-spec node-spec))
            specific-keys (disj keys :tag :children)
            args (mapv (comp symbol name) specific-keys)
-           parent (:children keys)]
+           has-children (:children keys)]
        (eval `(defn ~(symbol node-name)
-                ~(format "\"%s\" node SDN constructor." node-name)
-                ~(if parent (conj args '& 'children) args)
+                ~(format "\"%s\" node constructor." node-name)
+                ~(if has-children (conj args '& 'children) args)
                 {:post [(s/valid? ~node-spec ~'%)]}
                 ~(let [ret (zipmap (list* :tag specific-keys)
                                    (list* node-tag args))]
-                   (if parent
+                   (if has-children
                      (assoc ret :children '(vec children))
                      ret))))))))
