@@ -391,7 +391,7 @@
 (s/def :spacedoc.data.headline-base/value ::non-empty-string)
 (s/def :spacedoc.data.headline-base/level pos-int?)
 (s/def :spacedoc.data.headline-base/path-id path-id?)
-(s/def :spacedoc.data.headline-base/children (s/nilable vector?))
+(s/def :spacedoc.data.headline-base/children vector?)
 
 (s/def ::headline-base
   (s/keys :req-un [:spacedoc.data.headline-base/tag
@@ -495,10 +495,13 @@
 ;; todo node
 
 (s/def :spacedoc.data.todo/tag #{:todo})
+(s/def :spacedoc.data.todo/value ::non-empty-string)
+(s/def :spacedoc.data.todo/children (s/nilable vector?))
+
 (defnode ::todo
-  (s/merge
-   ::headline-base
-   (s/keys :req-un [:spacedoc.data.todo/tag])))
+  (s/keys :req-un [:spacedoc.data.todo/tag
+                   :spacedoc.data.todo/value
+                   :spacedoc.data.todo/children]))
 
 
 (def headline-tags (->> node->spec-k

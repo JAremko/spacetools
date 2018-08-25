@@ -47,7 +47,9 @@
            (val)))
 
 
-(def all-tags (remove #{:default} (keys (methods node->spec-k))))
+(defn all-tags
+  []
+  (remove #{:default} (keys (methods node->spec-k))))
 
 
 (def children-tag-s (comp (partial into #{} (map :tag)) :children))

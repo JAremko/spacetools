@@ -44,39 +44,54 @@
 
 ;;;; Generate rest of the node constructors
 
-(defn- has-alternative?
+(defn- alt-cons
   [tag]
-  (not (or (str/starts-with? (name tag) "headline")
-           (#{:link
-              :plain-list
-              :plain-text
-              :item-tag
-              :list-item
-              :feature-list
-              :todo
-              :description
-              :table
-              :table-row
-              :table-cell
-              :item-children} tag))))
+  (or (when (str/starts-with? (name tag) "headline")
+        "headline")
+      ({:link "`link`"
+        :plain-list "`ordered-list` and `unordered-list`."
+        :plain-text "You can simply use strings."
+        :description "`description`"
+        :table "`table`"}
+       tag)))
 
 
 (defn- fmt-children
   [children]
-  (mapv #(if (string? %) ({:tag :plain-text :value %}) %) children))
+  (mapv #(if (string? %) {:tag :plain-text :value %} %) children))
+
+
+(defn- gen-constructor-inner
+  [node-tag doc alt]
+  (let [n-name (name node-tag)
+        n-spec (keyword data/doc-ns-str n-name)
+        keys (:keys (parse-spec n-spec))
+        prop-keys (disj keys :tag :children)
+        args (mapv (comp symbol name) prop-keys)
+        parent (:children keys)]
+    (eval `(defn ~(symbol (str n-name (when alt "*")))
+             ~doc
+             ~(if parent (conj args '& 'children) args)
+             {:post [(s/valid? ~n-spec ~'%)]}
+             ~(merge (zipmap (list* :tag prop-keys) (list* node-tag args))
+                     (when parent {:children '(fmt-children children)}))))))
+
+
+(defn gen-constructor
+  [node-tag doc]
+  (gen-constructor-inner node-tag doc false))
+
+
+(defn gen-constructor*
+  [node-tag doc]
+  (gen-constructor-inner node-tag doc true))
 
 
 (doall
- (for [n-tag data/all-tags]
-   (let [n-name (name n-tag)
-         n-spec (keyword data/doc-ns-str n-name)
-         keys (:keys (parse-spec n-spec))
-         prop-keys (disj keys :tag :children)
-         args (mapv (comp symbol name) prop-keys)
-         has-children (:children keys)]
-     (eval `(defn ~(symbol (str n-name (when (has-alternative? n-tag) "*")))
-              ~(format "\"%s\" node constructor [auto-generated]." n-name)
-              ~(if has-children (conj args '& 'children) args)
-              {:post [(s/valid? ~n-spec ~'%)]}
-              ~(merge (when has-children {:children '(fmt-children  children)})
-                      (zipmap (list* :tag prop-keys) (list* n-tag args))))))))
+ (for [node-tag (data/all-tags)]
+   (let [alt (alt-cons node-tag)]
+     (gen-constructor-inner
+      node-tag
+      (str (format "\"%s\" node constructor [auto-generated]." (name node-tag))
+           (some->> alt (str "\nThe node has an alternative constructor: ")))
+      alt))))

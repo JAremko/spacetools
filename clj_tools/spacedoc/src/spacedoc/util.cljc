@@ -11,7 +11,7 @@
                 ["Cause" "File" "Data"])
            [cause
             (or (:file data) "<none>")
-            (or (seq (:problem data)) (seq data) "<none>")]))))
+            (or (:problems data) (seq data) "<none>")]))))
 
 
 (defn foldable?
