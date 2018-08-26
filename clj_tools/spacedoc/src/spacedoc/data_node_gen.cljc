@@ -1,7 +1,7 @@
 (in-ns 'spacedoc.data)
 
 
-;;;; Helprs
+;;;; Helpers
 
 (defn- alt-cons
   [tag]
