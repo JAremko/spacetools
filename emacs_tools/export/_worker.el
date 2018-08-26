@@ -310,6 +310,10 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((raw-val (org-element-property :raw-value headline))
          (level (org-element-property :level headline))
+         (p-level-prop (thread-last headline
+                         (org-export-get-parent)
+                         (org-element-property :level)))
+         (p-level (if (numberp p-level-prop) p-level-prop 0))
          (path-ids (plist-get info :path-ids))
          (path-id (sdnize/headline-make-path-id headline))
          (todo? (org-element-property :todo-keyword headline))
@@ -317,6 +321,12 @@ holding contextual information."
 
     ;; Validations:
     (cond
+     ((not (= (- level p-level) 1))
+      (sdnize/error "Headline %S has level %S but its parent level is %S"
+                    raw-val
+                    level
+                    p-level))
+
      ((> level sdnize-max-headline-level)
       (sdnize/error "Headline %S has nesting level %S - max level is %S"
                     raw-val
@@ -340,11 +350,13 @@ holding contextual information."
 
     (format (concat "{:tag %s "
                     ":value \"%s\" "
+                    ":level %s "
                     ":children [%s]}")
             (cond (todo? :todo)
                   (description? :description)
-                  (t (format "%s-level-%s" :headline level)))
+                  (t :headline))
             (sdnize/esc-str raw-val)
+            level
             contents)))
 
 ;;;; Horizontal Rule

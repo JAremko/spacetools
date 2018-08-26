@@ -1,43 +1,6 @@
 (in-ns 'spacedoc.data)
 
 
-;;;; Helpers
-
-(defmulti node->spec-k :tag)
-
-
-(defn all-tags
-  []
-  (set (remove #{:default} (keys (methods node->spec-k)))))
-
-
-(defn- known-node?
-  [tag]
-  ((all-tags) tag))
-
-
-(s/def ::known-node known-node?)
-(defmethod node->spec-k :default [_] ::known-node)
-
-
-(s/def ::node (s/multi-spec node->spec-k :tag))
-
-
-(defmacro defnode
-  [k spec-form]
-  `(do
-     (defmethod node->spec-k ~(keyword (name k)) [_#] ~k)
-     (s/def ~k  ~spec-form)))
-
-
-(defn path-id?
-  [val]
-  (re-matches
-   ;; forgive me God for i have sinned
-   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-   val))
-
-
 ;;;; Specs
 
 
@@ -399,82 +362,34 @@
                                     :spacedoc.data.section/children]))
 
 
-;; Headlines
+;;;; Headlines
 
-(s/def :spacedoc.data.headline-base/tag keyword?)
-(s/def :spacedoc.data.headline-base/value ::non-empty-string)
-(s/def :spacedoc.data.headline-base/children vector?)
-
-(s/def ::headline-base
-  (s/keys :req-un [:spacedoc.data.headline-base/tag
-                   :spacedoc.data.headline-base/value
-                   :spacedoc.data.headline-base/children]))
+(def headline-tags #{:description :todo :headline})
 
 
-(doall
- (for [n (range 1 (inc max-headline-depth))
-       :let [[child hl]
-             (mapv #(keyword
-                     (str *ns*)
-                     (format %1 n))
-                   ["headline-level-%s-child"
-                    "headline-level-%s"])
-             child-mm (symbol (format "headline-level-%s-child" n))
-             [tag children]
-             (mapv #(keyword (format %1 n))
-                   ["spacedoc.data.headline-level-%s/tag"
-                    "spacedoc.data.headline-level-%s/children"])
-             next-hl (keyword doc-ns-str
-                              (str "headline-level-" (inc n)))]]
-   (eval
-    `(do
-       (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
-       (defmulti ^:private  ~child-mm :tag)
-       (defmethod ~child-mm
-         ~(keyword (format "headline-level-%s" (inc n)))
-         [_#] ~next-hl)
-       (defmethod ~child-mm :todo [_#] ::todo)
-       (defmethod ~child-mm :section [_#] ::section)
-       (defmethod ~child-mm :headline [_#] ::headline)
-       (s/def ~child (s/multi-spec ~child-mm :tag))
-       (s/def ~children (s/coll-of ~child
-                                   :kind vector?
-                                   :min-count 1
-                                   :distinct true
-                                   :into []))
-
-       (defnode ~hl
-         (s/merge
-          ::headline-base
-          (s/keys :req-un [~tag ~children])))))))
-
-
-;; Headline placeholder
-;; NOTE: It is used for "hand crafting" SDN structures and
-;; should never occur in the import from  .ORG files.
-
-(s/def :spacedoc.data.headline/tag #{:headline})
-(s/def :spacedoc.data.headline/value ::non-empty-string)
 (defmulti ^:private headline-child :tag)
 (defmethod headline-child :todo [_] ::todo)
 (defmethod headline-child :section [_] ::section)
 (defmethod headline-child :headline [_] ::headline)
-(defmethod headline-child :description [_] ::description)
-(doall
- (for [n (range 1 (inc max-headline-depth))
-       :let [key-name (str "headline-level-" n)
-             ukey (keyword key-name)
-             skey (keyword doc-ns-str key-name)]]
-   `(defmethod headline-child ~ukey [_#] ~skey)))
 (s/def ::headline-child (s/multi-spec headline-child :tag))
+
+
+;; headline
+
+(s/def :spacedoc.data.headline/tag #{:headline})
+(s/def :spacedoc.data.headline/value ::non-empty-string)
+(s/def :spacedoc.data.headline/level (s/and pos-int?
+                                            #(<= % max-headline-depth)))
 (s/def :spacedoc.data.headline/children (s/coll-of ::headline-child
                                                    :kind vector?
                                                    :min-count 1
                                                    :distinct true
                                                    :into []))
+
 (defnode ::headline
   (s/keys :req-un [:spacedoc.data.headline/tag
                    :spacedoc.data.headline/value
+                   :spacedoc.data.headline/level
                    :spacedoc.data.headline/children]))
 
 
@@ -482,37 +397,31 @@
 
 (s/def :spacedoc.data.description/tag #{:description})
 (s/def :spacedoc.data.description/value #{"Description"})
-(s/def :spacedoc.data.description/children (s/coll-of ::headline-level-1-child
-                                                      :kind vector?
-                                                      :min-count 1
-                                                      :distinct true
-                                                      :into []))
+(s/def :spacedoc.data.description/level #{1})
+(s/def :spacedoc.data.description/children :spacedoc.data.headline/children)
+
 (defnode ::description
-  (s/merge
-   ::headline-base
-   (s/keys :req-un [:spacedoc.data.description/tag
-                    :spacedoc.data.description/value
-                    :spacedoc.data.description/children])))
+  (s/keys :req-un [:spacedoc.data.description/tag
+                   :spacedoc.data.description/value
+                   :spacedoc.data.description/level
+                   :spacedoc.data.description/children]))
 
 
 ;; todo node
 
 (s/def :spacedoc.data.todo/tag #{:todo})
 (s/def :spacedoc.data.todo/value ::non-empty-string)
-(s/def :spacedoc.data.todo/children (s/nilable vector?))
+(s/def :spacedoc.data.todo/level (s/and pos-int?
+                                        #(<= % max-headline-depth)))
+(s/def :spacedoc.data.todo/children (s/coll-of ::headline-child
+                                               :kind vector?
+                                               :into []))
 
 (defnode ::todo
   (s/keys :req-un [:spacedoc.data.todo/tag
-                   :spacedoc.data.todo/value
+                   :spacedoc.data.todo/value]
+          :opt-un [:spacedoc.data.todo/level
                    :spacedoc.data.todo/children]))
-
-
-(def headline-tags (->> node->spec-k
-                        (methods)
-                        (keys)
-                        (filter #(re-matches #"^headline-level-.*$" (name %)))
-                        (set)
-                        (union #{:description :todo :headline})))
 
 
 ;; root node
@@ -522,7 +431,6 @@
 (defmethod root-child :todo [_] ::todo)
 (defmethod root-child :section [_] ::section)
 (defmethod root-child :headline [_] ::headline)
-(defmethod root-child :headline-level-1 [_] ::headline-level-1)
 (defmethod root-child :description [_] ::description)
 (s/def ::root-child (s/multi-spec root-child :tag))
 (s/def :spacedoc.data.root/children (s/coll-of ::root-child
