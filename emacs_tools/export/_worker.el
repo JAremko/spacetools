@@ -340,15 +340,11 @@ holding contextual information."
 
     (format (concat "{:tag %s "
                     ":value \"%s\" "
-                    ":level %s "
-                    ":path-id \"%s\" "
                     ":children [%s]}")
             (cond (todo? :todo)
                   (description? :description)
                   (t (format "%s-level-%s" :headline level)))
             (sdnize/esc-str raw-val)
-            level
-            (sdnize/esc-str path-id)
             contents)))
 
 ;;;; Horizontal Rule

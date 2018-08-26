@@ -4,12 +4,26 @@
 ;;;; Helpers
 
 (defmulti node->spec-k :tag)
-(s/def ::known-node #{:known-node})
+
+
+(defn all-tags
+  []
+  (set (remove #{:default} (keys (methods node->spec-k)))))
+
+
+(defn- known-node?
+  [tag]
+  ((all-tags) tag))
+
+
+(s/def ::known-node known-node?)
 (defmethod node->spec-k :default [_] ::known-node)
+
+
 (s/def ::node (s/multi-spec node->spec-k :tag))
 
 
-(defmacro ^:private defnode
+(defmacro defnode
   [k spec-form]
   `(do
      (defmethod node->spec-k ~(keyword (name k)) [_#] ~k)
@@ -389,15 +403,11 @@
 
 (s/def :spacedoc.data.headline-base/tag keyword?)
 (s/def :spacedoc.data.headline-base/value ::non-empty-string)
-(s/def :spacedoc.data.headline-base/level pos-int?)
-(s/def :spacedoc.data.headline-base/path-id path-id?)
 (s/def :spacedoc.data.headline-base/children vector?)
 
 (s/def ::headline-base
   (s/keys :req-un [:spacedoc.data.headline-base/tag
                    :spacedoc.data.headline-base/value
-                   :spacedoc.data.headline-base/level
-                   :spacedoc.data.headline-base/path-id
                    :spacedoc.data.headline-base/children]))
 
 
@@ -410,18 +420,15 @@
                    ["headline-level-%s-child"
                     "headline-level-%s"])
              child-mm (symbol (format "headline-level-%s-child" n))
-             [tag children level]
-             (mapv #(keyword
-                     (format %1 n))
+             [tag children]
+             (mapv #(keyword (format %1 n))
                    ["spacedoc.data.headline-level-%s/tag"
-                    "spacedoc.data.headline-level-%s/children"
-                    "spacedoc.data.headline-level-%s/level"])
+                    "spacedoc.data.headline-level-%s/children"])
              next-hl (keyword doc-ns-str
                               (str "headline-level-" (inc n)))]]
    (eval
     `(do
        (s/def ~tag #{ ~(keyword (format "headline-level-%s" n))})
-       (s/def ~level #{~n})
        (defmulti ^:private  ~child-mm :tag)
        (defmethod ~child-mm
          ~(keyword (format "headline-level-%s" (inc n)))
@@ -439,9 +446,7 @@
        (defnode ~hl
          (s/merge
           ::headline-base
-          (s/keys :req-un [~tag
-                           ~level
-                           ~children])))))))
+          (s/keys :req-un [~tag ~children])))))))
 
 
 ;; Headline placeholder
@@ -477,7 +482,6 @@
 
 (s/def :spacedoc.data.description/tag #{:description})
 (s/def :spacedoc.data.description/value #{"Description"})
-(s/def :spacedoc.data.description/level #{1})
 (s/def :spacedoc.data.description/children (s/coll-of ::headline-level-1-child
                                                       :kind vector?
                                                       :min-count 1
@@ -488,7 +492,6 @@
    ::headline-base
    (s/keys :req-un [:spacedoc.data.description/tag
                     :spacedoc.data.description/value
-                    :spacedoc.data.description/level
                     :spacedoc.data.description/children])))
 
 
