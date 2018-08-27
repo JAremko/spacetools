@@ -7,7 +7,7 @@ RUN cd /usr/src/app && lein uberjar
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=1.0.0-rc4
+ENV GRAALVM_V=1.0.0-rc5
 
 WORKDIR /tmp
 
