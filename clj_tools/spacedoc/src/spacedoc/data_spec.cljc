@@ -378,6 +378,7 @@
 
 (s/def :spacedoc.data.headline/tag #{:headline})
 (s/def :spacedoc.data.headline/value ::non-empty-string)
+(s/def :spacedoc.data.headline/path-id path-id?)
 (s/def :spacedoc.data.headline/level (s/and pos-int?
                                             #(<= % max-headline-depth)))
 (s/def :spacedoc.data.headline/children (s/coll-of ::headline-child
@@ -389,20 +390,23 @@
 (defnode ::headline
   (s/keys :req-un [:spacedoc.data.headline/tag
                    :spacedoc.data.headline/value
-                   :spacedoc.data.headline/level
-                   :spacedoc.data.headline/children]))
+                   :spacedoc.data.headline/children]
+          :opt-un [:spacedoc.data.headline/level
+                   :spacedoc.data.headline/path-id]))
 
 
 ;; description node
 
 (s/def :spacedoc.data.description/tag #{:description})
 (s/def :spacedoc.data.description/value #{"Description"})
+(s/def :spacedoc.data.description/path-id #{"description"})
 (s/def :spacedoc.data.description/level #{1})
 (s/def :spacedoc.data.description/children :spacedoc.data.headline/children)
 
 (defnode ::description
   (s/keys :req-un [:spacedoc.data.description/tag
                    :spacedoc.data.description/value
+                   :spacedoc.data.description/path-id
                    :spacedoc.data.description/level
                    :spacedoc.data.description/children]))
 
@@ -411,6 +415,7 @@
 
 (s/def :spacedoc.data.todo/tag #{:todo})
 (s/def :spacedoc.data.todo/value ::non-empty-string)
+(s/def :spacedoc.data.todo/path-id path-id?)
 (s/def :spacedoc.data.todo/level (s/and pos-int?
                                         #(<= % max-headline-depth)))
 (s/def :spacedoc.data.todo/children (s/coll-of ::headline-child
@@ -421,6 +426,7 @@
   (s/keys :req-un [:spacedoc.data.todo/tag
                    :spacedoc.data.todo/value]
           :opt-un [:spacedoc.data.todo/level
+                   :spacedoc.data.todo/path-id
                    :spacedoc.data.todo/children]))
 
 

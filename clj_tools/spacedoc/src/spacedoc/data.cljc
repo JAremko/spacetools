@@ -29,7 +29,7 @@
 (defn path-id?
   [val]
   (re-matches
-   ;; forgive me God for i have sinned
+   ;; forgive me Father for I have sinned
    #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
    val))
 

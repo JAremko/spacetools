@@ -74,7 +74,7 @@
   (let [n-tag (keyword (name k))
         alt (alt-cons n-tag)]
     `(do
-       (defmethod node->spec-k :tag [_#] ~k)
+       (defmethod node->spec-k ~n-tag [_#] ~k)
        (s/def ~k  ~spec-form)
        (gen-constructor-inner
         ~n-tag
