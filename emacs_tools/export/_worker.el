@@ -418,10 +418,11 @@ contextual information."
             (format "\"%s\"" (sdnize/esc-str bullet))
             (when checkbox (format ":%s" (symbol-name checkbox)))
             (if item-tag
-                (format "%s {:tag :item-tag :value %s}"
+                (format "%s {:tag :item-tag :children [%s]}"
                         children
                         (if (char-or-string-p item-tag)
-                            (format "\"%s\"" (sdnize/esc-str item-tag))
+                            (format "{:tag :text :value \"%s\"}"
+                                    (sdnize/esc-str item-tag))
                           (org-export-data-with-backend item-tag 'sdn info)))
               children))))
 
@@ -610,7 +611,7 @@ contextual information."
   "Transcode a TEXT string From Org to Spacemacs SDN.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  (format "{:tag :plain-text :value \"%s\"}"
+  (format "{:tag :text :value \"%s\"}"
           (sdnize/esc-str text)))
 
 ;;;; Planning

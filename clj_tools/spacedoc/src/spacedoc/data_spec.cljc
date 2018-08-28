@@ -19,7 +19,7 @@
 (defmulti ^:private  inline-leaf :tag)
 (defmethod inline-leaf :kbd [_] ::kbd)
 (defmethod inline-leaf :line-break [_] ::line-break)
-(defmethod inline-leaf :plain-text [_] ::plain-text)
+(defmethod inline-leaf :text [_] ::text)
 (defmethod inline-leaf :verbatim [_] ::verbatim)
 (s/def ::inline-leaf (s/multi-spec inline-leaf :tag))
 
@@ -43,12 +43,12 @@
 (defnode ::line-break (s/keys :req-un [:spacedoc.data.line-break/tag]))
 
 
-;; plain-text node
+;; text node
 
-(s/def :spacedoc.data.plain-text/tag #{:plain-text})
-(s/def :spacedoc.data.plain-text/value string?)
-(defnode ::plain-text (s/keys :req-un [:spacedoc.data.plain-text/tag
-                                       :spacedoc.data.plain-text/value]))
+(s/def :spacedoc.data.text/tag #{:text})
+(s/def :spacedoc.data.text/value string?)
+(defnode ::text (s/keys :req-un [:spacedoc.data.text/tag
+                                 :spacedoc.data.text/value]))
 
 
 ;; verbatim node
@@ -206,11 +206,15 @@
 ;; item-tag
 
 (s/def :spacedoc.data.item-tag/tag #{:item-tag})
-(s/def :spacedoc.data.item-tag/value
-  (s/or :string ::non-empty-string
-        :inline-element ::inline-element))
+(s/def :spacedoc.data.item-tag/child ::inline-element)
+(s/def :spacedoc.data.item-tag/children
+  (s/coll-of :spacedoc.data.item-tag/child
+             :kind vector?
+             :min-count 1
+             :into []))
+
 (defnode ::item-tag (s/keys :req-un [:spacedoc.data.item-tag/tag
-                                     :spacedoc.data.item-tag/value]))
+                                     :spacedoc.data.item-tag/children]))
 
 
 ;; list-item

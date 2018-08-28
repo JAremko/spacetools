@@ -7,7 +7,6 @@
   [tag]
   ({:link "`link`"
     :plain-list "`ordered-list` and `unordered-list`."
-    :plain-text "You can simply use strings."
     :description "`description`"
     :headline "`headline`"
     :todo "`todo`"
@@ -15,35 +14,44 @@
    tag))
 
 
-(defn- fmt-children
-  [children]
-  (mapv #(if (string? %) {:tag :plain-text :value %} %) children))
-
-
 (defn- gen-constructor-inner
-  [node-tag doc alt]
-  (let [n-name (name node-tag)
-        n-spec (keyword doc-ns-str n-name)
-        keys (into #{} (map u/unqualify) (u/map-spec->keys n-spec))
-        prop-keys (disj keys :tag :children)
-        args (mapv (comp symbol name) prop-keys)
-        parent (:children keys)]
-    (eval `(defn ~(symbol (str n-name (when alt "*")))
-             ~doc
-             ~(if parent (conj args '& 'children) args)
-             {:post [(s/valid? ~n-spec ~'%)]}
-             ~(merge (zipmap (list* :tag prop-keys) (list* node-tag args))
-                     (when parent {:children '(fmt-children children)}))))))
+  [tag doc alt]
+  {:pre [(qualified-keyword? tag)]}
+  (letfn [(sort-keys [ks] (sort (fn [a _] (if (= "children" (name a)) 1 -1)) ks))
+          (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
+          (sym-col [col] (mapv (comp symbol name) col))]
+    (let [sorted-keys (sort-keys (u/map-spec->keys tag))
+          un-k->q-k (keys->un-k->q-k sorted-keys)]
+      (eval
+       `(defn ~(symbol (str (name tag) (when alt "*")))
+          ~doc
+          ~(->> sorted-keys
+                (sym-col)
+                (remove #{'tag})
+                (replace {'children ['& 'children]})
+                (flatten)
+                (vec))
+          {:pre ~(mapv (fn [spec-key arg] `(s/valid? ~spec-key ~arg))
+                       sorted-keys
+                       (replace {'tag (u/unqualify tag)
+                                 'children '(vec children)}
+                                (sym-col sorted-keys)))
+           :post [(s/valid? ~tag ~'%)]}
+          ~(zipmap (keys un-k->q-k)
+                   (replace {'tag (u/unqualify tag) 'children '(vec children)}
+                            (sym-col (vals un-k->q-k)))))))))
 
 
 (defn gen-constructor
-  [node-tag doc]
-  (gen-constructor-inner node-tag doc false))
+  [qualified-node-tag doc]
+  {:pre [(qualified-keyword? qualified-node-tag)]}
+  (gen-constructor-inner qualified-node-tag doc false))
 
 
 (defn gen-constructor*
-  [node-tag doc]
-  (gen-constructor-inner node-tag doc true))
+  [qualified-node-tag doc]
+  {:pre [(qualified-keyword? qualified-node-tag)]}
+  (gen-constructor-inner qualified-node-tag doc true))
 
 
 (defmulti node->spec-k :tag)
@@ -69,16 +77,14 @@
 (defmacro defnode
   "Like `s/def` but also creates node constructor based on spec-form spec."
   [k spec-form]
-  (let [n-tag (u/unqualify k)
-        alt (alt-cons n-tag)]
-    `(do
-       (defmethod node->spec-k ~n-tag [_#] ~k)
-       (s/def ~k  ~spec-form)
-       (gen-constructor-inner
-        ~n-tag
-        (str (format "\"%s\" node constructor [auto-generated]." ~(name n-tag))
-             (some->> ~alt (str "\nThe node has an alternative constructor: ")))
-        ~alt))))
+  `(let [alt# ~(alt-cons (u/unqualify k))]
+     (defmethod node->spec-k ~(u/unqualify k) [_#] ~k)
+     (s/def ~k  ~spec-form)
+     (gen-constructor-inner
+      ~k
+      (str (format "\"%s\" node constructor [auto-generated]." ~(name k))
+           (some->> alt# (str "\nThe node has an alternative constructor: ")))
+      alt#)))
 
 
 ;;;; Constructors

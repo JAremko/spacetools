@@ -1,6 +1,7 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
-            [spacedoc.data :refer [seps headline-tags tag->kind fill-hl]]))
+            [spacedoc.data :refer [seps headline-tags tag->kind fill-hl]]
+            [clojure.spec.alpha :as s]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -30,8 +31,10 @@
 
 
 (defmulti sdn->org
-  (fn [{tag :tag}]
-    {:pre  [(complement (indirect-nodes tag))]}
+  (fn [{tag :tag :as node}]
+    {:pre  [(complement (indirect-nodes tag))
+            (map? node)
+            (keyword? tag)]}
     (cond
       ;; Headline node group.
       (headline-tags tag) :headline
@@ -53,6 +56,7 @@
 
 (defn- nl-wrap?
   [node-tag]
+  {:pre [(keyword? node-tag)]}
   (and
    (not (#{:plain-list :feature-list} node-tag))
    (#{:block :headline} (tag->kind node-tag))))
@@ -60,11 +64,13 @@
 
 (defn- nl-after?
   [node-tag]
+  {:pre [(keyword? node-tag)]}
   (#{:block :headline} (tag->kind node-tag)))
 
 
 (defn- conv*
   [node-seq]
+  {:pre [((some-fn vector? nil?) node-seq)]}
   (reduce (fn [acc next]
             (let [h-t (:head-tag (meta acc))
                   b-s (last acc)
@@ -84,6 +90,7 @@
 
 (defn- conv
   [node-seq]
+  {:pre [((some-fn vector? nil?) node-seq)]}
   (join (conv* node-seq)))
 
 
@@ -117,6 +124,7 @@
 
 (defn- table->vec-rep
   [{rows :children}]
+  {:pre [((some-fn vector? nil?) rows)]}
   (let [vec-tab (mapv
                  (fn [{type :type cells :children}]
                    (if (= type :standard)
@@ -132,11 +140,14 @@
 
 (defn- make-table-rule-str
   [cols-w]
+  {:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
   (join "+" (map #(join (repeat % "-")) cols-w)))
 
 
 (defn- make-table-row-str
   [row cols-w]
+  {:pre [(vector? row)
+         (s/valid? (s/coll-of pos-int?) cols-w)]}
   (join "|"
         (map (fn [column-width cell-s]
                (str cell-s
@@ -185,10 +196,9 @@
 
 (defmethod sdn->org :list-item
   [{b :bullet c :checkbox [{children :children} item-tag] :children}]
-  (let [itag (cond
-               (string? item-tag) (item-tag)
-               (map? item-tag) (sdn->org (:value item-tag))
-               :else nil)]
+  (let [itag (some->> item-tag
+                      (:children)
+                      (conv))]
     (str (apply str
                 b
                 (if itag (format "%s :: " itag) "")
@@ -210,7 +220,7 @@
   (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" language value))
 
 
-(defmethod sdn->org :plain-text
+(defmethod sdn->org :text
   [{value :value}]
   value)
 

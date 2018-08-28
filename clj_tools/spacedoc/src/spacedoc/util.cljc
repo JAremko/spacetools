@@ -24,7 +24,7 @@
 
 (defn map-spec->keys
   [spec-or-key]
-  {:pre [(or (s/spec? spec-or-key) (keyword? spec-or-key))]}
+  {:pre [((some-fn s/spec? keyword?) spec-or-key)]}
   (let [spec (if (keyword? spec-or-key)
                (s/get-spec spec-or-key)
                spec-or-key)]
