@@ -121,6 +121,7 @@
 (defn try-m->output
   "Prints output to stderr or stdout and `System/exit` with code 0 or 2"
   [*output]
+  {:pre [(or (exc/success? *output) (exc/failure? *output))]}
   (io!
    (System/exit
     (let [output (m/extract *output)]

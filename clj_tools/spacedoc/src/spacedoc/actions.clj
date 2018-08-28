@@ -1,8 +1,7 @@
 (ns spacedoc.actions
   (:require [spacedoc.io :as sio]
             [spacedoc.data :as data]
-            [spacedoc.args :refer [*parse *parse-inputs]]
-            [spec-tools.parse :as sp]
+            [spacedoc.args :refer [*parse *parse-fs]]
             [spacedoc.data.org :refer [sdn->org]]
             [cats.core :as m]
             [cats.monad.exception :as exc]
@@ -11,11 +10,13 @@
             [clojure.string :as str]))
 
 
+(:tag (s/get-spec :spacedoc.data/root))
+
 (defn *validate
   "Validate Spacedoc files with specs."
-  [inputs]
+  [fs]
   (exc/try-on
-   (m/mlet [sdn-fps (*parse-inputs inputs)
+   (m/mlet [sdn-fps (*parse-fs fs)
             spacedocs (m/sequence (pmap sio/*fp->spacedoc sdn-fps))]
            (format "%s .sdn files have been successfully validated."
                    (count spacedocs)))))
@@ -23,9 +24,9 @@
 
 (defn *orgify
   "Export .SDN files to TARGET-DIR as .ORG files."
-  [src-dir target-dir inputs]
+  [src-dir target-dir fs]
   (exc/try-on
-   (m/mlet [sdn-fps (*parse-inputs inputs)
+   (m/mlet [sdn-fps (*parse-fs fs)
             spacedocs (m/sequence (pmap sio/*fp->spacedoc sdn-fps))
             orgs (m/sequence
                   (pmap
@@ -49,22 +50,16 @@
   (exc/try-on
    (let [key (edn/read-string spec-key)]
      (if (qualified-keyword? key)
-       (let [{:keys [type keys]}(sp/parse-spec key)]
-         (str "Type: " (name type)
-              \newline
-              "Keys: " keys
-              \newline
-              "Spec: " (s/form key)
-              \newline))
+       (s/describe* (s/get-spec key))
        (exc/failure (ex-info "Spec key must be a qualified keyword"
                              {:keyword key}))))))
 
 
 (defn *relations
   "Output nodes relations in SDN files."
-  [inputs]
+  [fs]
   (exc/try-on
-   (m/mlet [sdn-fps (*parse-inputs inputs)
+   (m/mlet [sdn-fps (*parse-fs fs)
             spacedocs (m/sequence (pmap
                                    (partial sio/*fp->spacedoc :spacedoc.data/any)
                                    sdn-fps))]

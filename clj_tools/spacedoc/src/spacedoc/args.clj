@@ -24,7 +24,7 @@
      paths))))
 
 
-(defn *parse-inputs
+(defn *parse-fs
   [input]
   (exc/try-on
    (cond (empty? input)
@@ -33,7 +33,7 @@
                    {:input input}))
 
          (string? input)
-         (*parse-inputs [input])
+         (*parse-fs [input])
 
          (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input))
          (exc/failure

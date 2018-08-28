@@ -5,16 +5,14 @@
 
 (defn- alt-cons
   [tag]
-  (or (when (str/starts-with? (name tag) "headline")
-        "headline")
-      ({:link "`link`"
-        :plain-list "`ordered-list` and `unordered-list`."
-        :plain-text "You can simply use strings."
-        :description "`description`"
-        :headline "`headline`"
-        :todo "`todo`"
-        :table "`table`"}
-       tag)))
+  ({:link "`link`"
+    :plain-list "`ordered-list` and `unordered-list`."
+    :plain-text "You can simply use strings."
+    :description "`description`"
+    :headline "`headline`"
+    :todo "`todo`"
+    :table "`table`"}
+   tag))
 
 
 (defn- fmt-children
@@ -26,7 +24,7 @@
   [node-tag doc alt]
   (let [n-name (name node-tag)
         n-spec (keyword doc-ns-str n-name)
-        keys (:keys (parse-spec n-spec))
+        keys (into #{} (map u/unqualify) (u/map-spec->keys n-spec))
         prop-keys (disj keys :tag :children)
         args (mapv (comp symbol name) prop-keys)
         parent (:children keys)]
@@ -69,9 +67,9 @@
 
 
 (defmacro defnode
-  "Like `s/def` but also creates node constructor bases on spec-form spec."
+  "Like `s/def` but also creates node constructor based on spec-form spec."
   [k spec-form]
-  (let [n-tag (keyword (name k))
+  (let [n-tag (u/unqualify k)
         alt (alt-cons n-tag)]
     `(do
        (defmethod node->spec-k ~n-tag [_#] ~k)
