@@ -10,7 +10,7 @@
             [clojure.string :as str]))
 
 
-(:tag (s/get-spec :spacedoc.data/root))
+(:tag (s/get-spec :spacedoc.data.node/root))
 
 (defn *validate
   "Validate Spacedoc files with specs."
@@ -61,7 +61,7 @@
   (exc/try-on
    (m/mlet [sdn-fps (*parse-fs fs)
             spacedocs (m/sequence (pmap
-                                   (partial sio/*fp->spacedoc :spacedoc.data/any)
+                                   (partial sio/*fp->spacedoc :spacedoc.data.node/any)
                                    sdn-fps))]
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"

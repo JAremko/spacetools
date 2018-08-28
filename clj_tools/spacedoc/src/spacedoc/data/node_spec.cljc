@@ -1,4 +1,4 @@
-(in-ns 'spacedoc.data)
+(in-ns 'spacedoc.data.node)
 
 
 ;;;; Specs

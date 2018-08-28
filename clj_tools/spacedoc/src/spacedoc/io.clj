@@ -79,7 +79,7 @@
 (defn *fp->spacedoc
   "Read and validate Spacedoc END file."
   ([path]
-   (*fp->spacedoc :spacedoc.data/root path))
+   (*fp->spacedoc :spacedoc.data.node/root path))
   ([root-node-spec path]
    (io!
     (exc/try-or-recover

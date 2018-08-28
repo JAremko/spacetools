@@ -28,7 +28,7 @@
     "                          SOURCE is parent directory with .SDN files."
     "                          TARGET is target directory for .ORG files."
     "  describe  SPEC          Describe spec by fully qualified keyword."
-    "                          Example :spacedoc.data/<keyword>"
+    "                          Example :spacedoc.data.node/<keyword>"
     ""]))
 
 

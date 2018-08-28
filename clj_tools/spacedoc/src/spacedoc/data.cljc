@@ -1,25 +1,13 @@
 (ns spacedoc.data
   (:require [spacedoc.util :as u]
+            [spacedoc.data.node :as n]
             [clojure.core.reducers :as r]
-            [clojure.set :refer [union map-invert]]
+            [clojure.set :refer [union]]
             [clojure.string :as str]
             [clojure.spec.alpha :as s]))
 
 
-(def doc-ns-str (str *ns*))
-
-
-(def max-headline-depth 5)
-
-
 (def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
-
-
-(def link-type->prefix {:file "file:"
-                        :http "http://"
-                        :https "https://"
-                        :custom-id "#"
-                        :ftp "ftp://"})
 
 
 ;;;; Headline stuff
@@ -65,32 +53,7 @@
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
 
 
-(defn path->link-prefix
-  [path]
-  (->> (vals link-type->prefix)
-       (filter (partial str/starts-with? path))
-       (first)))
-
 ;;;; Generic data related stuff
-
-(load "data_node_gen")
-
-
-(load "data_spec")
-
-
-(def kinds {inline-container-tags :inline-container
-            inline-leaf-tags :inline-leaf
-            block-tags :block
-            headline-tags :headline})
-
-
-(defn tag->kind
-  [tag]
-  (some->> kinds
-           (filter #((key %) tag))
-           (first)
-           (val)))
 
 
 (def children-tag-s (comp (partial into #{} (map :tag)) :children))
@@ -101,7 +64,7 @@
   (str/join \newline
             (assoc problem
                    :node-tag (:tag node)
-                   :spec-form (s/form (node->spec-k node)))))
+                   :spec-form (s/form (n/node->spec-k node)))))
 
 
 (defn explain-deepest
@@ -112,7 +75,7 @@
   [node]
   (or (first (sequence (keep (partial explain-deepest)) (:children node)))
       (when-let [p (:clojure.spec.alpha/problems
-                    (s/explain-data (node->spec-k node) node))]
+                    (s/explain-data (n/node->spec-k node) node))]
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 

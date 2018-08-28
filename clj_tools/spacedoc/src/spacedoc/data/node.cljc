@@ -1,18 +1,76 @@
-(in-ns 'spacedoc.data)
+(ns spacedoc.data.node
+  (:require [spacedoc.util :as u]
+            [clojure.set :refer [union map-invert]]
+            [clojure.string :as str]
+            [clojure.spec.alpha :as s]))
+
+
+(def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
+
+
+(def link-type->prefix {:file "file:"
+                        :http "http://"
+                        :https "https://"
+                        :custom-id "#"
+                        :ftp "ftp://"})
+
+
+(def max-headline-depth 5)
 
 
 ;;;; Helpers
 
-(defn- alt-cons
-  [tag]
-  ({:link "`link`"
-    :plain-list "`ordered-list` and `unordered-list`."
-    :description "`description`"
-    :headline "`headline`"
-    :todo "`todo`"
-    :table "`table`"}
-   tag))
 
+(defn path->link-prefix
+  [path]
+  (->> (vals link-type->prefix)
+       (filter (partial str/starts-with? path))
+       (first)))
+
+
+;; Headline stuff
+
+(defn path-id?
+  [val]
+  (re-matches
+   ;; forgive me Father for I have sinned
+   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+   val))
+
+
+(defn hl-val->gh-id-base
+  [hl-value]
+  (str "#"
+       (-> hl-value
+           (str/replace " " "-")
+           (str/lower-case)
+           (str/replace #"[^\p{Nd}\p{L}\p{Pd}\p{Pc}]" ""))))
+
+
+(defn hl-val->path-id-frag
+  [hl-value]
+  (-> hl-value
+      (str/lower-case)
+      (str/replace #"[^\p{Nd}\p{L}\p{Pd}]" " ")
+      (str/trim)
+      (str/replace #"\s+" "_")))
+
+
+(defn fill-hl
+  "Give Headline placeholder a proper tag and fill all necessary key-vals."
+  ([{tag :tag value :value :as headline}]
+   (assoc headline
+          :level 1
+          :path-id (hl-val->path-id-frag value)))
+  ([{p-level :level p-path-id :path-id :as parent-headline}
+    {tag :tag value :value :as headline}]
+   (let [hl-level (inc p-level)]
+     (assoc headline
+            :level hl-level
+            :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
+
+
+;; Defnode
 
 (defn- gen-constructor-inner
   [tag doc alt]
@@ -74,6 +132,17 @@
 (s/def ::node (s/multi-spec node->spec-k :tag))
 
 
+(defn- alt-cons
+  [tag]
+  ({:link "`link`"
+    :plain-list "`ordered-list` and `unordered-list`."
+    :description "`description`"
+    :headline "`headline`"
+    :todo "`todo`"
+    :table "`table`"}
+   tag))
+
+
 (defmacro defnode
   "Like `s/def` but also creates node constructor based on spec-form spec."
   [k spec-form]
@@ -119,3 +188,8 @@
      :type link-type
      :raw-link path
      :children (vec children)}))
+
+
+;;; Nodes definitions
+
+(load "node_spec")

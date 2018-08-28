@@ -1,6 +1,6 @@
 (ns spacedoc.data.org
   (:require [clojure.string :refer [split-lines join]]
-            [spacedoc.data :refer [seps headline-tags tag->kind fill-hl]]
+            [spacedoc.data.node :as n]
             [clojure.spec.alpha :as s]))
 
 
@@ -30,6 +30,20 @@
   #{:headline :item-children :item-tag :table-row :table-cell})
 
 
+(def kinds {n/inline-container-tags :inline-container
+            n/inline-leaf-tags :inline-leaf
+            n/block-tags :block
+            n/headline-tags :headline})
+
+
+(defn tag->kind
+  [tag]
+  (some->> kinds
+           (filter #((key %) tag))
+           (first)
+           (val)))
+
+
 (defmulti sdn->org
   (fn [{tag :tag :as node}]
     {:pre  [(complement (indirect-nodes tag))
@@ -37,7 +51,7 @@
             (keyword? tag)]}
     (cond
       ;; Headline node group.
-      (headline-tags tag) :headline
+      (n/headline-tags tag) :headline
 
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
@@ -80,7 +94,8 @@
                       (str (cond
                              (not (and b-s n-s)) ""
                              (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
-                             (not (or (seps (last b-s)) (seps (first n-s)))) " "
+                             (not (or (n/seps (last b-s))
+                                      (n/seps (first n-s)))) " "
                              :else "")
                            n-s))
                 {:head-tag (:tag next)})))
@@ -252,7 +267,7 @@
    " "
    value
    "\n"
-   (conv (mapv #(if (headline-tags (:tag %)) (fill-hl hl %) %) children))))
+   (conv (mapv #(if (n/headline-tags (:tag %)) (n/fill-hl hl %) %) children))))
 
 
 (defmethod sdn->org :verbatim
@@ -269,4 +284,4 @@
 
 (defmethod sdn->org :root
   [{children :children}]
-  (conv (mapv #(if (headline-tags (:tag %)) (fill-hl %) %) children)))
+  (conv (mapv #(if (n/headline-tags (:tag %)) (n/fill-hl %) %) children)))
