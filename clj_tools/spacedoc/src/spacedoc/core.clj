@@ -5,8 +5,7 @@
             [clojure.string :refer [join]]
             [spacedoc.actions :as ac]
             [spacedoc.args :refer [*parse]]
-            [spacedoc.io :refer [try-m->output]]
-            [cats.core :as m])
+            [spacedoc.io :refer [try-m->output]])
   (:gen-class))
 
 
@@ -38,7 +37,7 @@
 
 (defn -main [& args]
   (try-m->output
-   (m/mlet
+   (mlet
     [{:keys [help summary action a-args]} (*parse args ops)]
     (if help
       (usage summary)

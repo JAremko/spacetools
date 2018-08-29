@@ -21,6 +21,9 @@
 ;;;; Helpers
 
 
+(defmulti node->spec-k :tag)
+
+
 (defn path->link-prefix
   [path]
   (->> (vals link-type->prefix)
@@ -59,12 +62,13 @@
 (defn fill-hl
   "Give Headline placeholder a proper tag and fill all necessary key-vals."
   ([{tag :tag value :value :as headline}]
-   {:pre [(s/valid? :spacedoc.data.node/headline headline)]}
+   {:post [(s/valid? (node->spec-k %) %)]}
    (assoc headline
           :level 1
           :path-id (hl-val->path-id-frag value)))
   ([{p-level :level p-path-id :path-id :as parent-headline}
     {tag :tag value :value :as headline}]
+   {:post [(s/valid? (node->spec-k %) %)]}
    (let [hl-level (inc p-level)]
      (assoc headline
             :level hl-level
@@ -111,9 +115,6 @@
   [qualified-node-tag doc]
   {:pre [(qualified-keyword? qualified-node-tag)]}
   (gen-constructor-inner qualified-node-tag doc true))
-
-
-(defmulti node->spec-k :tag)
 
 
 (defn all-tags
