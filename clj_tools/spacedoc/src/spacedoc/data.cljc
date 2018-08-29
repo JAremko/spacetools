@@ -47,8 +47,7 @@
 
 (defn- fmt-problem
   [node problem]
-  {:pre [(map? node) (:tag node)
-         (map? problem)]}
+  {:pre [(map? node) (:tag node) (map? problem)]}
   (str/join \newline
             (assoc problem
                    :node-tag (:tag node)
@@ -62,24 +61,24 @@
   The function returns `nil` If all nodes are valid."
   [node]
   {:pre [(map? node) (:tag node)]}
-  (or (first (sequence (keep (partial explain-deepest)) (:children node)))
+  (or (first (sequence (keep explain-deepest) (:children node)))
       (when-let [p (:clojure.spec.alpha/problems
                     (s/explain-data (node->spec-k node) node))]
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
 (defn node-relations
-  "Return mapping between nodes and children sets."
-  [parent]
-  {:pre [(map? parent) (:tag parent)]}
-  (r/reduce
-   (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
-   (tree-seq :children :children parent)))
+"Return mapping between nodes and children sets."
+[parent]
+{:pre [(map? parent) (:tag parent)]}
+(r/reduce
+ (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
+ (tree-seq :children :children parent)))
 
 
 (defn node-relations-aggregate
-  "Apply `node-relations` to PARENTS and union the outputs.."
-  [parents]
-  {:pre [(foldable? parents)]}
-  (r/fold (r/monoid (partial merge-with union) hash-map)
-          (r/map node-relations parents)))
+"Apply `node-relations` to PARENTS and union the outputs.."
+[parents]
+{:pre [(foldable? parents)]}
+(r/fold (r/monoid (partial merge-with union) hash-map)
+        (r/map node-relations parents)))

@@ -9,11 +9,13 @@
                  [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
   :global-vars {*warn-on-reflection* true}
-  :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
-             "-Dclojure.compiler.direct-linking=true"
-             "-Xms1G"
-             "-Xmx1G"]
+  :jvm-opts ["-Xms1G" "-Xmx1G"]
   :target-path "target/%s"
   :uberjar-name "sdn.jar"
-  :profiles {:uberjar {:aot :all
+  :profiles {:user {:plugins [[jonase/eastwood "0.2.9"]]}
+             :uberjar {:aot :all
+                       :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
+                                  "-Dclojure.compiler.direct-linking=true"
+                                  "-Xms1G"
+                                  "-Xmx1G"]
                        :global-vars {*assert* false}}})
