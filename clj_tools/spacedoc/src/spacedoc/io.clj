@@ -1,14 +1,14 @@
 (ns spacedoc.io
-  (:require [clojure.java.io :as io]
-            [clojure.edn :as edn]
-            [clojure.spec.alpha :as s]
+  (:require [cats.core :as m]
             [cats.monad.exception :as exc]
-            [clojure.tools.cli :refer [parse-opts]]
-            [cats.core :as m]
             [clojure.core.reducers :as r]
-            [spacedoc.util :refer [err->msg]]
-            [spacedoc.data :as data]
-            [clojure.string :as str]))
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [clojure.tools.cli :refer [parse-opts]]
+            [spacedoc.data :refer [explain-deepest]]
+            [spacedoc.util :refer [err->msg]]))
 
 
 (defn absolute
@@ -50,9 +50,10 @@
 
 (defn sdn-file?
   [path]
-  (io! (and (.isFile (io/file path))
-            (re-matches #"(?i).*\.sdn$" (str path))
-            true)))
+  (io!
+   (and (.isFile (io/file path))
+        (re-matches #"(?i).*\.sdn$" (str path))
+        true)))
 
 
 (defn directory?
@@ -94,7 +95,7 @@
            (not= :root (:tag obj))
            (throw (Exception. "Non-root top level node in .SDN file."))
            (not (s/valid? root-node-spec obj))
-           (throw (ex-info "Validation filed." (data/explain-deepest obj)))
+           (throw (ex-info "Validation filed." (explain-deepest obj)))
            :else obj)))
      (fn [^Exception err]
        (exc/failure

@@ -1,11 +1,11 @@
 (ns spacedoc.args
-  (:require [spacedoc.io :as sio]
-            [spacedoc.util :as util]
-            [clojure.set :refer [union]]
-            [cats.core :as m]
+  (:require [cats.core :as m]
             [cats.monad.exception :as exc]
+            [clojure.core.reducers :as r]
+            [clojure.set :refer [union]]
             [clojure.tools.cli :refer [parse-opts]]
-            [clojure.core.reducers :as r]))
+            [spacedoc.io :as sio]
+            [spacedoc.util :as util]))
 
 
 (defn- *flatten-fps

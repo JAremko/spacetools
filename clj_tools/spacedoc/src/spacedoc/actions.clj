@@ -1,16 +1,14 @@
 (ns spacedoc.actions
-  (:require [spacedoc.io :as sio]
-            [spacedoc.data :as data]
-            [spacedoc.args :refer [*parse *parse-fs]]
-            [spacedoc.data.org :refer [sdn->org]]
-            [cats.core :as m]
+  (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [spacedoc.args :refer [*parse-fs]]
+            [spacedoc.data :refer [node-relations-aggregate]]
+            [spacedoc.data.org :refer [sdn->org]]
+            [spacedoc.io :as sio]))
 
-
-(:tag (s/get-spec :spacedoc.data.node/root))
 
 (defn *validate
   "Validate Spacedoc files with specs."
@@ -60,10 +58,10 @@
   [fs]
   (exc/try-on
    (m/mlet [sdn-fps (*parse-fs fs)
-            spacedocs (m/sequence (pmap
-                                   (partial sio/*fp->spacedoc :spacedoc.data.node/any)
-                                   sdn-fps))]
+            spacedocs (->> sdn-fps
+                           (pmap (partial sio/*fp->spacedoc :spacedoc.data.node/any))
+                           (m/sequence))]
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (str/join \newline
-                      (data/node-relations-aggregate (vec spacedocs)))))))
+                      (node-relations-aggregate (vec spacedocs)))))))

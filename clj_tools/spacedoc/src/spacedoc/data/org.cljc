@@ -1,7 +1,7 @@
 (ns spacedoc.data.org
-  (:require [clojure.string :refer [split-lines join]]
-            [spacedoc.data.node :as n]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :refer [split-lines join]]
+            [spacedoc.data.node :as n]))
 
 
 (def ^:private emphasis-tokens {:bold "*"

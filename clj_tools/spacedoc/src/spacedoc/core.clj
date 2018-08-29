@@ -1,11 +1,11 @@
 (ns spacedoc.core
-  (:require [spacedoc.args :refer [*parse]]
-            [spacedoc.actions :as ac]
-            [spacedoc.io :refer [try-m->output]]
-            [cats.core :refer [mlet]]
+  (:require [cats.core :refer [mlet]]
             [cats.monad.exception :refer [failure]]
             [clojure.core.match :refer [match]]
-            [clojure.string :refer [join]])
+            [clojure.string :refer [join]]
+            [spacedoc.actions :as ac]
+            [spacedoc.args :refer [*parse]]
+            [spacedoc.io :refer [try-m->output]])
   (:gen-class))
 
 

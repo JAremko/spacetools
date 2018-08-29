@@ -1,9 +1,6 @@
 (in-ns 'spacedoc.data.node)
 
 
-;;;; Specs
-
-
 ;; anything
 
 (s/def ::any any?)
@@ -212,7 +209,6 @@
              :kind vector?
              :min-count 1
              :into []))
-
 (defnode ::item-tag (s/keys :req-un [:spacedoc.data.item-tag/tag
                                      :spacedoc.data.item-tag/children]))
 
@@ -383,14 +379,13 @@
 (s/def :spacedoc.data.headline/tag #{:headline})
 (s/def :spacedoc.data.headline/value ::non-empty-string)
 (s/def :spacedoc.data.headline/path-id path-id?)
-(s/def :spacedoc.data.headline/level (s/and pos-int?
-                                            #(<= % max-headline-depth)))
+(s/def :spacedoc.data.headline/level
+  (set (range 1 (inc max-headline-depth))))
 (s/def :spacedoc.data.headline/children (s/coll-of ::headline-child
                                                    :kind vector?
                                                    :min-count 1
                                                    :distinct true
                                                    :into []))
-
 (defnode ::headline
   (s/keys :req-un [:spacedoc.data.headline/tag
                    :spacedoc.data.headline/value
@@ -406,7 +401,6 @@
 (s/def :spacedoc.data.description/path-id #{"description"})
 (s/def :spacedoc.data.description/level #{1})
 (s/def :spacedoc.data.description/children :spacedoc.data.headline/children)
-
 (defnode ::description
   (s/keys :req-un [:spacedoc.data.description/tag
                    :spacedoc.data.description/value
@@ -425,7 +419,6 @@
 (s/def :spacedoc.data.todo/children (s/coll-of ::headline-child
                                                :kind vector?
                                                :into []))
-
 (defnode ::todo
   (s/keys :req-un [:spacedoc.data.todo/tag
                    :spacedoc.data.todo/value]

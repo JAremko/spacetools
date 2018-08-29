@@ -1,6 +1,6 @@
 (ns spacedoc.util
-  (:require [clojure.string :refer [join]]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :refer [join]]))
 
 
 (defn err->msg

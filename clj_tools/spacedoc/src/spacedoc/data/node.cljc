@@ -1,8 +1,8 @@
 (ns spacedoc.data.node
-  (:require [spacedoc.util :as u]
-            [clojure.set :refer [union map-invert]]
+  (:require [clojure.set :refer [union map-invert]]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [clojure.spec.alpha :as s]))
+            [spacedoc.util :as u]))
 
 
 (def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
@@ -59,6 +59,8 @@
 (defn fill-hl
   "Give Headline placeholder a proper tag and fill all necessary key-vals."
   ([{tag :tag value :value :as headline}]
+   {:pre {(keyword? tag)
+          (s/valid? :spacedoc.data.node/headline headline)}}
    (assoc headline
           :level 1
           :path-id (hl-val->path-id-frag value)))
