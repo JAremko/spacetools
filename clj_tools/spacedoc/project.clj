@@ -12,7 +12,8 @@
   :jvm-opts ["-Xms1G" "-Xmx1G"]
   :target-path "target/%s"
   :uberjar-name "sdn.jar"
-  :profiles {:user {:plugins [[jonase/eastwood "0.2.9"]]}
+  :plugins [[lein-environ "1.0.0"]]
+  :profiles {:dev {:env {}}
              :uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
                                   "-Dclojure.compiler.direct-linking=true"

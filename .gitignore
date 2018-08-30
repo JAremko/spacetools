@@ -1,6 +1,8 @@
 .*
 !.gitignore
 \#*
+.lein-env
+.directory
 *.jar
 target
 clojure.iws

@@ -1,7 +1,8 @@
 (ns spacedoc.data.org
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [split-lines join]]
-            [spacedoc.data.node :as n]))
+            [spacedoc.data.node :as n]
+            [spacedoc.data :as data]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -94,8 +95,8 @@
                       (str (cond
                              (not (and b-s n-s)) ""
                              (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
-                             (not (or (n/seps (last b-s))
-                                      (n/seps (first n-s)))) " "
+                             (not (or (data/seps (last b-s))
+                                      (data/seps (first n-s)))) " "
                              :else "")
                            n-s))
                 {:head-tag (:tag next)})))
@@ -263,11 +264,12 @@
 (defmethod sdn->org :headline
   [{value :value lvl :level children :children :as hl}]
   (str
-   (apply str (repeat lvl "*"))
+   (join (repeat lvl "*"))
    " "
    value
    "\n"
-   (conv (mapv #(if (n/headline-tags (:tag %)) (n/fill-hl hl %) %) children))))
+   (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
+               children))))
 
 
 (defmethod sdn->org :verbatim
@@ -284,4 +286,4 @@
 
 (defmethod sdn->org :root
   [{children :children}]
-  (conv (mapv #(if (n/headline-tags (:tag %)) (n/fill-hl %) %) children)))
+  (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %) children)))
