@@ -1,4 +1,5 @@
-(ns spacedoc.data
+(ns ^{:doc "General SDN manipulation facilities."}
+    spacedoc.data
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]

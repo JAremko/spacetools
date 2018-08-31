@@ -1,4 +1,5 @@
-(ns spacedoc.actions
+(ns ^{:doc "Actions that the app can perform."}
+    spacedoc.actions
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.edn :as edn]

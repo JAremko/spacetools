@@ -1,4 +1,5 @@
-(ns spacedoc.util
+(ns ^{:doc "General utilities."}
+    spacedoc.util
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]))
 

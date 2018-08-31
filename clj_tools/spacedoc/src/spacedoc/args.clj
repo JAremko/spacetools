@@ -1,4 +1,5 @@
-(ns spacedoc.args
+(ns ^{:doc "Application arguments."}
+    spacedoc.args
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]

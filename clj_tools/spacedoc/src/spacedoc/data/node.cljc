@@ -1,5 +1,5 @@
-(ns
-    ^{:doc "All public function in this namespace are node constructors."}
+(ns ^{:doc "SDN node generators.
+All public function in this namespace are node constructors."}
     spacedoc.data.node
   (:require [spacedoc.data :refer [defnode path-id?]]
             [spacedoc.data :as data]
