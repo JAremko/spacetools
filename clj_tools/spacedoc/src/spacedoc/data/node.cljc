@@ -1,5 +1,6 @@
-(ns spacedoc.data.node
-  ^{:doc "All public function in this namespace are node constructors."}
+(ns
+    ^{:doc "All public function in this namespace are node constructors."}
+    spacedoc.data.node
   (:require [spacedoc.data :refer [defnode path-id?]]
             [spacedoc.data :as data]
             [clojure.set :refer [union map-invert]]
@@ -46,6 +47,8 @@
 
 ;; Shared specs
 
+
+;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::non-empty-lines #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %))
 
 
