@@ -1,4 +1,5 @@
 (ns spacedoc.data.node
+  ^{:doc "All public function in this namespace are node constructors."}
   (:require [spacedoc.data :refer [defnode path-id?]]
             [spacedoc.data :as data]
             [clojure.set :refer [union map-invert]]
@@ -43,14 +44,15 @@
 ;;; Nodes definitions
 
 
-;; anything
-
-(s/def ::any any?)
-
-
 ;; Shared specs
 
-(s/def ::non-empty-string (s/and string? #(>= (count  %) 1)))
+(s/def ::non-empty-lines #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %))
+
+
+(s/def ::non-empty-string #(re-matches #"^.+$" %))
+
+
+(s/def ::any any?)
 
 
 ;; inline leaf
@@ -95,7 +97,7 @@
 ;; verbatim node
 
 (s/def :spacedoc.data.verbatim/tag #{:verbatim})
-(s/def :spacedoc.data.verbatim/value ::non-empty-string)
+(s/def :spacedoc.data.verbatim/value ::non-empty-lines)
 (defnode ::verbatim (s/keys :req-un [:spacedoc.data.verbatim/tag
                                      :spacedoc.data.verbatim/value]))
 
@@ -223,7 +225,7 @@
 ;; example node
 
 (s/def :spacedoc.data.example/tag #{:example})
-(s/def :spacedoc.data.example/value ::non-empty-string)
+(s/def :spacedoc.data.example/value ::non-empty-lines)
 (defnode ::example (s/keys :req-un [:spacedoc.data.example/tag
                                     :spacedoc.data.example/value]))
 
@@ -313,7 +315,7 @@
 
 (s/def :spacedoc.data.src/tag #{:src})
 (s/def :spacedoc.data.src/language ::non-empty-string)
-(s/def :spacedoc.data.src/value ::non-empty-string)
+(s/def :spacedoc.data.src/value ::non-empty-lines)
 (defnode ::src (s/keys :req-un [:spacedoc.data.src/tag
                                 :spacedoc.data.src/language
                                 :spacedoc.data.src/value]))

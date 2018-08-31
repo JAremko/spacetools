@@ -1,4 +1,5 @@
 (ns spacedoc.data.org
+  ^{:doc "Exporting to .org format"}
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [split-lines join]]
             [spacedoc.data.node :as n]

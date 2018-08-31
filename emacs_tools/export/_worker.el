@@ -421,8 +421,7 @@ contextual information."
                 (format "%s {:tag :item-tag :children [%s]}"
                         children
                         (if (char-or-string-p item-tag)
-                            (format "{:tag :text :value \"%s\"}"
-                                    (sdnize/esc-str item-tag))
+                            (sdnize/plain-text item-tag info)
                           (org-export-data-with-backend item-tag 'sdn info)))
               children))))
 
@@ -611,8 +610,9 @@ contextual information."
   "Transcode a TEXT string From Org to Spacemacs SDN.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  (format "{:tag :text :value \"%s\"}"
-          (sdnize/esc-str text)))
+  (if (not (string= "\n" text))
+      (format "{:tag :text :value \"%s\"}" (sdnize/esc-str text))
+    "{:tag :line-break}"))
 
 ;;;; Planning
 
