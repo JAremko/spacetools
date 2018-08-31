@@ -27,18 +27,19 @@
 
 
 (def
-  ^{:doc "These nodes can be converted only in their parent context."}
+  ^{:doc "These nodes can be converted only in their parent context."
+    :private true}
   indirect-nodes
   #{:headline :item-children :item-tag :table-row :table-cell})
 
 
-(def kinds {n/inline-container-tags :inline-container
-            n/inline-leaf-tags :inline-leaf
-            n/block-tags :block
-            n/headline-tags :headline})
+(def ^:private kinds {n/inline-container-tags :inline-container
+                      n/inline-leaf-tags :inline-leaf
+                      n/block-tags :block
+                      n/headline-tags :headline})
 
 
-(defn tag->kind
+(defn- tag->kind
   [tag]
   (some->> kinds
            (filter #((key %) tag))
