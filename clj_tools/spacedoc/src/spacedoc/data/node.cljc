@@ -1,5 +1,7 @@
-(ns ^{:doc "SDN node generators.
-All public function in this namespace are node constructors."}
+(ns ^{:doc "Shared SDN node generators.
+All public function in this name-space are node constructors.
+NOTE: Format specific specs are in corresponding name-spaces.
+EXAMPLE: :spacedoc.data.org.toc"}
     spacedoc.data.node
   (:require [spacedoc.data :refer [defnode path-id?]]
             [spacedoc.data :as data]
@@ -9,7 +11,6 @@ All public function in this namespace are node constructors."}
 
 
 ;;;; Constructors
-
 
 ;; Document constructors
 
@@ -42,17 +43,20 @@ All public function in this namespace are node constructors."}
      :children (vec children)}))
 
 
-;;; Nodes definitions
+;;; Nodes definitions via specs
 
 
 ;; Shared specs
 
 
 ;; NOTE: Actually some lines may be empty but not all of them.
-(s/def ::non-empty-lines #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %))
+(s/def ::has-non-empty-line
+  (s/and string?
+         #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
 
 
-(s/def ::non-empty-string #(re-matches #"^.+$" %))
+(s/def ::non-empty-string (s/and string?
+                                 #(re-matches #"^.+$" %)))
 
 
 (s/def ::any any?)
@@ -100,7 +104,7 @@ All public function in this namespace are node constructors."}
 ;; verbatim node
 
 (s/def :spacedoc.data.verbatim/tag #{:verbatim})
-(s/def :spacedoc.data.verbatim/value ::non-empty-lines)
+(s/def :spacedoc.data.verbatim/value ::has-non-empty-line)
 (defnode ::verbatim (s/keys :req-un [:spacedoc.data.verbatim/tag
                                      :spacedoc.data.verbatim/value]))
 
@@ -228,7 +232,7 @@ All public function in this namespace are node constructors."}
 ;; example node
 
 (s/def :spacedoc.data.example/tag #{:example})
-(s/def :spacedoc.data.example/value ::non-empty-lines)
+(s/def :spacedoc.data.example/value ::has-non-empty-line)
 (defnode ::example (s/keys :req-un [:spacedoc.data.example/tag
                                     :spacedoc.data.example/value]))
 
@@ -318,7 +322,7 @@ All public function in this namespace are node constructors."}
 
 (s/def :spacedoc.data.src/tag #{:src})
 (s/def :spacedoc.data.src/language ::non-empty-string)
-(s/def :spacedoc.data.src/value ::non-empty-lines)
+(s/def :spacedoc.data.src/value ::has-non-empty-line)
 (defnode ::src (s/keys :req-un [:spacedoc.data.src/tag
                                 :spacedoc.data.src/language
                                 :spacedoc.data.src/value]))

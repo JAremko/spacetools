@@ -97,10 +97,12 @@
 
 (defn path-id?
   [val]
-  (re-matches
-   ;; forgive me Father for I have sinned
-   #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-   val))
+  (and
+   (string? val)
+   (re-matches
+    ;; forgive me Father for I have sinned
+    #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+    val)))
 
 
 (defn hl-val->gh-id-base
@@ -137,6 +139,25 @@
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
 
 
+;; (require '[clojure.spec.test.alpha :as stest])
+
+;; (defn foo
+;;   [a b & c]
+;;   (println a b c))
+
+;; (s/fdef foo
+;;   :args (s/cat :a int? :b int? :c-rest (s/* int?))
+;;   :ret nil?)
+
+;; (stest/instrument `foo)
+
+;; (foo 1 2 3 5 6 "s" 7)
+
+
+;; :fn (s/and #(>= (:ret %) (-> % :args :start))
+;;            #(< (:ret %) (-> % :args :end))))
+
+
 ;;;; Defnode
 
 (defmacro gen-constructor-inner
@@ -144,26 +165,35 @@
   {:pre [(qualified-keyword? tag)]}
   (letfn [(sort-keys [ks] (sort (fn [a _] (if (= "children" (name a)) 1 -1)) ks))
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
-          (sym-col [col] (mapv (comp symbol name) col))]
-    (let [sorted-keys (sort-keys (u/map-spec->keys tag))
-          un-k->q-k (keys->un-k->q-k sorted-keys)]
-      `(defn ~(symbol (str (name tag) (when alt "*")))
-         ~doc
-         ~(->> sorted-keys
-               (sym-col)
-               (remove #{'tag})
-               (replace {'children ['& 'children]})
-               (flatten)
-               (vec))
-         {:pre ~(mapv (fn [spec-key arg] `(s/valid? ~spec-key ~arg))
-                      sorted-keys
-                      (replace {'tag (u/unqualify tag)
-                                'children '(vec children)}
-                               (sym-col sorted-keys)))
-          :post [(s/valid? ~tag ~'%)]}
-         ~(zipmap (keys un-k->q-k)
-                  (replace {'tag (u/unqualify tag) 'children '(vec children)}
-                           (sym-col (vals un-k->q-k))))))))
+          (keys->syms [coll] (mapv (comp symbol name) coll))]
+    (let [un-k->q-k (keys->un-k->q-k (sort-keys (u/map-spec->keys tag)))
+          ch-spec (:children un-k->q-k)
+          q-k (vals un-k->q-k)
+          u-tag (u/unqualify tag)
+          arg-tmpl (replace {'tag u-tag} (keys->syms q-k))
+          f-name (symbol (str (name tag) (when alt "*")))]
+      `(do
+         ;; Constructor function's spec
+         (s/fdef ~f-name
+           :args (s/cat ~@(when-let [k-m (dissoc un-k->q-k :tag)]
+                            (interleave (keys k-m) (vals k-m))))
+           :ret ~tag
+           :fn (s/and
+                #(= (-> % :args (conj :tag) count)
+                    (-> % :ret keys count))
+                #(= (-> % :args :children count)
+                    (-> % :ret :children count))))
+         ;; Constructor function's definition
+         (defn ~f-name
+           ;; Doc-string
+           ~doc
+           ;; Args
+           ~(vec (remove #{u-tag} arg-tmpl))
+           ;; pre/post conditions
+           {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k arg-tmpl)
+            :post [(s/valid? ~tag ~'%)]}
+           ;; Returned value
+           ~(zipmap (keys un-k->q-k) arg-tmpl))))))
 
 
 (defn- alt-cons
