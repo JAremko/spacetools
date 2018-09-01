@@ -147,8 +147,8 @@
        {:tag (Integer/MIN_VALUE)
         :key (inc Integer/MIN_VALUE)
         :value (+ 2 (Integer/MIN_VALUE))
-        :type 1
-        :path 2
+        :type -2
+        :path -1
         :children (Integer/MAX_VALUE)}
        0)))
 
