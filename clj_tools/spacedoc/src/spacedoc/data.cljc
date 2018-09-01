@@ -141,14 +141,32 @@
 
 ;;;; Defnode
 
+(defn- alt-cons
+  [tag]
+  {:pre [(keyword? tag)(u/unqualified-ident? tag)]
+   :post [(or (string? %) (nil? %))]}
+  ({:link "`link`"
+    :plain-list "`ordered-list` and `unordered-list`."
+    :description "`description`"
+    :headline "`headline`"
+    :todo "`todo`"
+    :table "`table`"}
+   tag))
+
+
 (defn sdn-key-rank
   [sdn-key]
+  {:pre [(keyword? sdn-key)(u/unqualified-ident? sdn-key)]
+   :post [(integer? %)]}
   (or (sdn-key
        {:tag (Integer/MIN_VALUE)
         :key (inc Integer/MIN_VALUE)
         :value (+ 2 (Integer/MIN_VALUE))
         :type -2
         :path -1
+        ;; Everything else here
+
+        ;; Always last
         :children (Integer/MAX_VALUE)}
        0)))
 
@@ -158,7 +176,7 @@
   {:pre [(qualified-keyword? tag)]}
   (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
-          (keys->syms [coll] (mapv (comp symbol name) coll))]
+          (keys->syms [ks] (mapv (comp symbol name) ks))]
     (let [un-k->q-k (keys->un-k->q-k (sort-keys (u/map-spec->keys tag)))
           ch-spec (:children un-k->q-k)
           q-k (vals un-k->q-k)
@@ -187,17 +205,6 @@
             :post [(s/valid? ~tag ~'%)]}
            ;; Returned value
            ~(zipmap (keys un-k->q-k) arg-tmpl))))))
-
-
-(defn- alt-cons
-  [tag]
-  ({:link "`link`"
-    :plain-list "`ordered-list` and `unordered-list`."
-    :description "`description`"
-    :headline "`headline`"
-    :todo "`todo`"
-    :table "`table`"}
-   tag))
 
 
 (defmacro defnode

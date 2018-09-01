@@ -12,13 +12,6 @@ EXAMPLE: :spacedoc.data.org.toc"}
 
 ;;;; Constructors
 
-;; Document constructors
-
-(defn conj-toc
-  [body-node])
-
-
-;; SDN node constructors
 
 (defn unordered-list
   "Unordered \"plain-list\" node constructor."
@@ -43,7 +36,7 @@ EXAMPLE: :spacedoc.data.org.toc"}
      :children (vec children)}))
 
 
-;;; Nodes definitions via specs
+;;;; Nodes definitions via specs
 
 
 ;; Shared specs
