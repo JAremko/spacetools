@@ -139,31 +139,24 @@
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
 
 
-;; (require '[clojure.spec.test.alpha :as stest])
-
-;; (defn foo
-;;   [a b & c]
-;;   (println a b c))
-
-;; (s/fdef foo
-;;   :args (s/cat :a int? :b int? :c-rest (s/* int?))
-;;   :ret nil?)
-
-;; (stest/instrument `foo)
-
-;; (foo 1 2 3 5 6 "s" 7)
-
-
-;; :fn (s/and #(>= (:ret %) (-> % :args :start))
-;;            #(< (:ret %) (-> % :args :end))))
-
-
 ;;;; Defnode
+
+(defn sdn-key-rank
+  [sdn-key]
+  (or (sdn-key
+       {:tag (Integer/MIN_VALUE)
+        :key (inc Integer/MIN_VALUE)
+        :value (+ 2 (Integer/MIN_VALUE))
+        :type 1
+        :path 2
+        :children (Integer/MAX_VALUE)}
+       0)))
+
 
 (defmacro gen-constructor-inner
   [tag doc alt]
   {:pre [(qualified-keyword? tag)]}
-  (letfn [(sort-keys [ks] (sort (fn [a _] (if (= "children" (name a)) 1 -1)) ks))
+  (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
           (keys->syms [coll] (mapv (comp symbol name) coll))]
     (let [un-k->q-k (keys->un-k->q-k (sort-keys (u/map-spec->keys tag)))
