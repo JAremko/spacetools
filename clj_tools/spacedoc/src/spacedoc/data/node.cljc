@@ -3,15 +3,14 @@ All public function in this name-space are node constructors.
 NOTE: Format specific specs are in corresponding name-spaces.
 EXAMPLE: :spacedoc.data.org.toc"}
     spacedoc.data.node
-  (:require [spacedoc.data :refer [defnode path-id?]]
-            [spacedoc.data :as data]
-            [clojure.set :refer [union map-invert]]
+  (:require [clojure.set :refer [union map-invert]]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [spacedoc.data :as data]
+            [spacedoc.util :as u]))
 
 
 ;;;; Constructors
-
 
 (defn unordered-list
   "Unordered \"plain-list\" node constructor."
@@ -34,6 +33,84 @@ EXAMPLE: :spacedoc.data.org.toc"}
      :type link-type
      :raw-link path
      :children (vec children)}))
+
+
+;;;; Defnode macro
+
+(defn- alt-cons
+  [tag]
+  {:pre [(keyword? tag)(u/unqualified-ident? tag)]
+   :post [(or (string? %) (nil? %))]}
+  ({:link "`link`"
+    :plain-list "`ordered-list` and `unordered-list`."
+    :description "`description`"
+    :headline "`headline`"
+    :todo "`todo`"
+    :table "`table`"}
+   tag))
+
+
+(defn- sdn-key-rank
+  [sdn-key]
+  {:pre [(keyword? sdn-key)(u/unqualified-ident? sdn-key)]
+   :post [(integer? %)]}
+  (or (sdn-key
+       {:tag (Integer/MIN_VALUE)
+        :key (inc Integer/MIN_VALUE)
+        :value (+ 2 (Integer/MIN_VALUE))
+        :type -2
+        :path -1
+        ;; Everything else here
+
+        ;; Always last
+        :children (Integer/MAX_VALUE)}
+       0)))
+
+
+(defmacro defnode
+  "Like `s/def` but also creates node constructor based on spec-form spec."
+  [k spec-form]
+  (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
+          (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
+          (keys->syms [ks] (mapv (comp symbol name) ks))]
+    (let [alt (alt-cons (u/unqualify k))
+          un-k->q-k (keys->un-k->q-k (sort-keys (u/map-spec->keys k)))
+          ch-spec (:children un-k->q-k)
+          q-k (vals un-k->q-k)
+          u-tag (u/unqualify k)
+          arg-tmpl (replace {'tag u-tag} (keys->syms q-k))
+          f-name (symbol (str (name k) (when alt "*")))
+          doc (str (format "\"%s\" node constructor [auto-generated]."
+                           (name k))
+                   (some->> alt
+                            (str "\nThe node has an alternative "
+                                 "human friendly constructor: ")))]
+      `(do
+         ;; Register node
+         (defmethod data/node->spec-k ~(u/unqualify k) [_#] ~k)
+         ;; Define node's spec
+         (s/def ~k  ~spec-form)
+         ;; Constructor function's spec
+         (s/fdef ~f-name
+           :args (s/cat ~@(when-let [k-m (dissoc un-k->q-k :tag)]
+                            (interleave (keys k-m) (vals k-m))))
+           :ret ~k
+           :fn (s/and
+                #(= (-> % :args (conj :tag) count)
+                    (-> % :ret keys count))
+                #(= (-> % :args :children count)
+                    (-> % :ret :children count))))
+         ;; Constructor function's definition
+         (defn ~f-name
+           ;; Doc-string
+           ~doc
+           ;; Args
+           ~(vec (remove #{u-tag} arg-tmpl))
+           ;; pre/post conditions
+           {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k arg-tmpl)
+            :post [(s/valid? ~k ~'%)]}
+           ;; Returned value
+           ~(zipmap (keys un-k->q-k) arg-tmpl))))))
 
 
 ;;;; Nodes definitions via specs
@@ -424,7 +501,7 @@ EXAMPLE: :spacedoc.data.org.toc"}
 
 (s/def :spacedoc.data.headline/tag #{:headline})
 (s/def :spacedoc.data.headline/value ::non-empty-string)
-(s/def :spacedoc.data.headline/path-id path-id?)
+(s/def :spacedoc.data.headline/path-id data/path-id?)
 (s/def :spacedoc.data.headline/level
   (set (range 1 (inc data/max-headline-depth))))
 (s/def :spacedoc.data.headline/children (s/coll-of ::headline-child
@@ -459,7 +536,7 @@ EXAMPLE: :spacedoc.data.org.toc"}
 
 (s/def :spacedoc.data.todo/tag #{:todo})
 (s/def :spacedoc.data.todo/value ::non-empty-string)
-(s/def :spacedoc.data.todo/path-id path-id?)
+(s/def :spacedoc.data.todo/path-id data/path-id?)
 (s/def :spacedoc.data.todo/level (set (range 1 (inc data/max-headline-depth))))
 (s/def :spacedoc.data.todo/children (s/coll-of ::headline-child
                                                :kind vector?
