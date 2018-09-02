@@ -93,7 +93,8 @@ EXAMPLE: :spacedoc.data.org/toc"}
          (defmethod data/node->spec-k ~(u/unqualify k) [_#] ~k)
          ;; Define node's spec
          (s/def ~tag-spec-k #{~u-tag})
-         (s/def ~k  (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
+         #_ (s/def ~k  (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
+         (s/def ~k  ~spec-form)
          ;; Constructor function's spec
          (s/fdef ~f-name
            :args (s/cat ~@(when-let [k-m (dissoc un-k->q-k :tag)]
