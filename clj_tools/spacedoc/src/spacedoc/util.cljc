@@ -31,8 +31,7 @@
                spec-or-key)]
     (some->> spec
              (s/describe)
-             (reduce #(if (vector? %2) (concat %1 %2) %1) [])
-             (vec))))
+             (reduce #(if (vector? %2) (concat %1 %2) %1) []))))
 
 
 (def unqualified-ident? (complement qualified-ident?))
