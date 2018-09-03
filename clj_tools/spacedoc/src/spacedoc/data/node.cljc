@@ -68,7 +68,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 
 (defmacro defnode
-  "Define node and its spec and constructor by spec-form"
+  "Define node and its spec and constructor by SPEC-FORM. K us the spec key."
   [k spec-form]
   (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
@@ -128,7 +128,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::has-non-empty-line
-(s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
+  (s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
 
 
 (s/def ::non-empty-string (s/and string? #(re-matches #"^.+$" %)))
@@ -207,7 +207,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.strike-through/children ::inline-container-children)
 (defnode ::strike-through
-(s/keys :req-un [:spacedoc.data.node.strike-through/children]))
+  (s/keys :req-un [:spacedoc.data.node.strike-through/children]))
 
 
 ;; subscript node
@@ -220,7 +220,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.superscript/children ::inline-container-children)
 (defnode ::superscript
-(s/keys :req-un [:spacedoc.data.node.superscript/children]))
+  (s/keys :req-un [:spacedoc.data.node.superscript/children]))
 
 
 ;; underline node
@@ -289,13 +289,13 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; item-children
 
 (s/def :spacedoc.data.node.item-children/child
-(s/or :block-element ::block-element
-      :inline-element ::inline-element))
+  (s/or :block-element ::block-element
+        :inline-element ::inline-element))
 (s/def :spacedoc.data.node.item-children/children
-(s/coll-of :spacedoc.data.node.item-children/child
-           :kind vector?
-           :min-count 1
-           :into []))
+  (s/coll-of :spacedoc.data.node.item-children/child
+             :kind vector?
+             :min-count 1
+             :into []))
 (defnode ::item-children
   (s/keys :req-un [:spacedoc.data.node.item-children/children]))
 
