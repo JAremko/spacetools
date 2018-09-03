@@ -63,55 +63,67 @@ EXAMPLE: :spacedoc.data.org/toc"}
        0)))
 
 
-;; (headline* "foo" 1 "foo" [(section [(paragraph [(text "s")])])])
+
+;; (s/valid? (s/spec (s/cat :a int? :b int? :c (s/coll-of string?))) [1 2 "s" "s"])
+
+
+;; (headline* "foo" 1 "foo" (section (paragraph (text "s"))))
+
+
+(defn- spec-form->un-keys->q-keys
+  [spec-form]
+  (letfn [(keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
+          (sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
+          (map-spec->keys [sf] (some->> sf
+                                        (tree-seq #(list? %) rest)
+                                        (mapcat #(when (vector? %) %))
+                                        (set)))]
+    (-> spec-form map-spec->keys sort-keys keys->un-k->q-k)))
+
 
 (defmacro defnode
   "Define node and its spec and constructor by SPEC-FORM. K us the spec key."
   [k spec-form]
-  (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
-          (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
-          (keys->syms [ks] (mapv (comp symbol name) ks))
-          (map-spec->keys [sf]
-            (set (mapcat #(when (vector? %) %) (tree-seq #(list? %) rest sf))))]
-    (let [alt ((u/unqualify k) alt-cons)
-          tag (u/unqualify k)
-          un-k->q-k (keys->un-k->q-k (sort-keys (map-spec->keys spec-form)))
-          q-k (vals un-k->q-k)
-          arg-tmpl (keys->syms q-k)
-          f-name (symbol (str (name k) (when alt "*")))
-          tag-spec-k (keyword (str (namespace k) "." (name k)) "tag")
-          doc (str (format "\"%s\" node constructor [auto-generated]."
-                           (name k))
-                   (some->> alt
-                            (str "\nThe node has an alternative "
-                                 "human friendly constructor: ")))]
-      `(do
-         ;; Register node
-         (defmethod data/node->spec-k ~tag [_#] ~k)
-         ;; Define tag spec
-         (s/def ~tag-spec-k #{~tag})
-         ;; Define node's spec
-         (s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
-         ;; Constructor function's spec
-         (s/fdef ~f-name
-           :args (s/cat ~@(interleave (keys un-k->q-k) (vals un-k->q-k)))
-           :ret ~k
-           :fn (s/and
-                #(= (-> % :args (conj :tag) count)
-                    (-> % :ret keys count))
-                #(= (-> % :args :children count)
-                    (-> % :ret :children count))))
-         ;; Constructor function's definition
-         (defn ~f-name
-           ;; Doc-string
-           ~doc
-           ;; Args
-           ~(vec arg-tmpl)
-           ;; pre/post conditions
-           {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k arg-tmpl)
-            :post [(s/valid? ~k ~'%)]}
-           ;; Returned value
-           ~(merge {:tag tag} (zipmap (keys un-k->q-k) arg-tmpl)))))))
+  (let [alt ((u/unqualify k) alt-cons)
+        tag (u/unqualify k)
+        un-k->q-k (spec-form->un-keys->q-keys spec-form)
+        q-k (vals un-k->q-k)
+        arg-tmpl (mapv (comp symbol name) q-k)
+        ret-tmpl (replace {'children '(vec children)} arg-tmpl)
+        f-name (symbol (str (name k) (when alt "*")))
+        tag-spec-k (keyword (str (namespace k) "." (name k)) "tag")
+        doc (str (format "\"%s\" node constructor [auto-generated]."
+                         (name k))
+                 (some->> alt
+                          (str "\nThe node has an alternative "
+                               "human friendly constructor: ")))]
+    `(do
+       ;; Register node
+       (defmethod data/node->spec-k ~tag [_#] ~k)
+       ;; Define tag spec
+       (s/def ~tag-spec-k #{~tag})
+       ;; Define node's spec
+       (s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
+       ;; Constructor function's spec
+       (s/fdef ~f-name
+         :args (s/cat ~@(interleave (keys un-k->q-k) (vals un-k->q-k)))
+         :ret ~k
+         :fn (s/and
+              #(= (-> % :args (conj :tag) count)
+                  (-> % :ret keys count))
+              #(= (-> % :args :children count)
+                  (-> % :ret :children count))))
+       ;; Constructor function's definition
+       (defn ~f-name
+         ;; Doc-string
+         ~doc
+         ;; Args
+         ~(vec (flatten (replace {'children ['& 'children]}  arg-tmpl)))
+         ;; pre/post conditions
+         {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k ret-tmpl)
+          :post [(s/valid? ~k ~'%)]}
+         ;; Returned value
+         ~(merge {:tag tag} (zipmap (keys un-k->q-k) ret-tmpl))))))
 
 
 ;;;; Nodes definitions via specs
