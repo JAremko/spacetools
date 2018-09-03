@@ -37,17 +37,13 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;;;; Defnode macro
 
-(defn- alt-cons
-  [tag]
-  {:pre [(keyword? tag)(u/unqualified-ident? tag)]
-   :post [(or (string? %) (nil? %))]}
-  ({:link "`link`"
-    :plain-list "`ordered-list` and `unordered-list`."
-    :description "`description`"
-    :headline "`headline`"
-    :todo "`todo`"
-    :table "`table`"}
-   tag))
+(def ^:dynamic alt-cons
+  {:link "`link`"
+   :plain-list "`ordered-list` and `unordered-list`."
+   :description "`description`"
+   :headline "`headline`"
+   :todo "`todo`"
+   :table "`table`"})
 
 
 (defn- sdn-key-rank
@@ -67,6 +63,8 @@ EXAMPLE: :spacedoc.data.org/toc"}
        0)))
 
 
+;; (headline* "foo" 1 "foo" [(section [(paragraph [(text "s")])])])
+
 (defmacro defnode
   "Define node and its spec and constructor by SPEC-FORM. K us the spec key."
   [k spec-form]
@@ -74,12 +72,8 @@ EXAMPLE: :spacedoc.data.org/toc"}
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
           (keys->syms [ks] (mapv (comp symbol name) ks))
           (map-spec->keys [sf]
-            (some->> (eval `(s/spec ~sf))
-                     (s/describe)
-                     (tree-seq #(and (seq? %) (#{'merge 'keys} (first %))) rest)
-                     (mapcat #(when (vector? %) %))
-                     (set)))]
-    (let [alt (alt-cons (u/unqualify k))
+            (set (mapcat #(when (vector? %) %) (tree-seq #(list? %) rest sf))))]
+    (let [alt ((u/unqualify k) alt-cons)
           tag (u/unqualify k)
           un-k->q-k (keys->un-k->q-k (sort-keys (map-spec->keys spec-form)))
           q-k (vals un-k->q-k)
