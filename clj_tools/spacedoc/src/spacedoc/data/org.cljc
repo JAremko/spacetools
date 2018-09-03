@@ -6,6 +6,18 @@
             [spacedoc.data.node :as n]))
 
 
+
+(s/def :spacedoc.data.node.baz/value (s/coll-of any?
+                                                :kind vector?
+                                                :min-count 1
+                                                :into []))
+
+
+(n/defnode ::baz (s/keys :req-un [:spacedoc.data.node.baz/value]))
+
+(baz ['s])
+
+
 (def ^:private emphasis-tokens {:bold "*"
                                 :italic "/"
                                 :verbatim "="

@@ -23,23 +23,6 @@
       (set? col)))
 
 
-
-(defn map-spec->keys
-  "Given a spec of a map or a qualified keyword of a map spec
-  return all map keys as qualified keywords.
-  NOTE: May fail with complex specs."
-  [spec-or-key]
-  {:pre [((some-fn s/spec? keyword?) spec-or-key)]}
-  (let [spec (if (keyword? spec-or-key)
-               (s/get-spec spec-or-key)
-               spec-or-key)]
-    (some->> spec
-             (s/describe)
-             (tree-seq #(and (seq? %) (#{'merge 'keys} (first %))) rest)
-             (mapcat #(when (vector? %) %))
-             (dedupe))))
-
-
 (def unqualified-ident? (complement qualified-ident?))
 
 

@@ -68,19 +68,22 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 
 (defmacro defnode
-  "Like `s/def` but also:
-  - Creates node constructor based on spec-form spec.
-  - Merge SPEC-FORM with #{<TAG>} spec where TAG is unqualified K."
+  "Define node and its spec and constructor by spec-form"
   [k spec-form]
   (letfn [(sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
           (keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
-          (keys->syms [ks] (mapv (comp symbol name) ks))]
+          (keys->syms [ks] (mapv (comp symbol name) ks))
+          (map-spec->keys [sf]
+            (some->> (eval `(s/spec ~sf))
+                     (s/describe)
+                     (tree-seq #(and (seq? %) (#{'merge 'keys} (first %))) rest)
+                     (mapcat #(when (vector? %) %))
+                     (set)))]
     (let [alt (alt-cons (u/unqualify k))
-          un-k->q-k (keys->un-k->q-k (sort-keys (u/map-spec->keys k)))
-          ch-spec (:children un-k->q-k)
+          tag (u/unqualify k)
+          un-k->q-k (keys->un-k->q-k (sort-keys (map-spec->keys spec-form)))
           q-k (vals un-k->q-k)
-          u-tag (u/unqualify k)
-          arg-tmpl (replace {'tag u-tag} (keys->syms q-k))
+          arg-tmpl (keys->syms q-k)
           f-name (symbol (str (name k) (when alt "*")))
           tag-spec-k (keyword (str (namespace k) "." (name k)) "tag")
           doc (str (format "\"%s\" node constructor [auto-generated]."
@@ -90,14 +93,14 @@ EXAMPLE: :spacedoc.data.org/toc"}
                                  "human friendly constructor: ")))]
       `(do
          ;; Register node
-         (defmethod data/node->spec-k ~(u/unqualify k) [_#] ~k)
+         (defmethod data/node->spec-k ~tag [_#] ~k)
+         ;; Define tag spec
+         (s/def ~tag-spec-k #{~tag})
          ;; Define node's spec
-         (s/def ~tag-spec-k #{~u-tag})
-         (s/def ~k  (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
+         (s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
          ;; Constructor function's spec
          (s/fdef ~f-name
-           :args (s/cat ~@(when-let [k-m (dissoc un-k->q-k :tag)]
-                            (interleave (keys k-m) (vals k-m))))
+           :args (s/cat ~@(interleave (keys un-k->q-k) (vals un-k->q-k)))
            :ret ~k
            :fn (s/and
                 #(= (-> % :args (conj :tag) count)
@@ -109,12 +112,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
            ;; Doc-string
            ~doc
            ;; Args
-           ~(vec (remove #{u-tag} arg-tmpl))
+           ~(vec arg-tmpl)
            ;; pre/post conditions
            {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k arg-tmpl)
             :post [(s/valid? ~k ~'%)]}
            ;; Returned value
-           ~(zipmap (keys un-k->q-k) arg-tmpl))))))
+           ~(merge {:tag tag} (zipmap (keys un-k->q-k) arg-tmpl)))))))
 
 
 ;;;; Nodes definitions via specs
@@ -125,7 +128,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::has-non-empty-line
-  (s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
+(s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
 
 
 (s/def ::non-empty-string (s/and string? #(re-matches #"^.+$" %)))
@@ -204,7 +207,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.strike-through/children ::inline-container-children)
 (defnode ::strike-through
-  (s/keys :req-un [:spacedoc.data.node.strike-through/children]))
+(s/keys :req-un [:spacedoc.data.node.strike-through/children]))
 
 
 ;; subscript node
@@ -217,7 +220,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.superscript/children ::inline-container-children)
 (defnode ::superscript
-  (s/keys :req-un [:spacedoc.data.node.superscript/children]))
+(s/keys :req-un [:spacedoc.data.node.superscript/children]))
 
 
 ;; underline node
@@ -286,13 +289,13 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; item-children
 
 (s/def :spacedoc.data.node.item-children/child
-  (s/or :block-element ::block-element
-        :inline-element ::inline-element))
+(s/or :block-element ::block-element
+      :inline-element ::inline-element))
 (s/def :spacedoc.data.node.item-children/children
-  (s/coll-of :spacedoc.data.node.item-children/child
-             :kind vector?
-             :min-count 1
-             :into []))
+(s/coll-of :spacedoc.data.node.item-children/child
+           :kind vector?
+           :min-count 1
+           :into []))
 (defnode ::item-children
   (s/keys :req-un [:spacedoc.data.node.item-children/children]))
 
