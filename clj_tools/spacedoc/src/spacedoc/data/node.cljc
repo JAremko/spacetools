@@ -7,7 +7,11 @@ EXAMPLE: :spacedoc.data.org/toc"}
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacedoc.data :as data]
-            [spacedoc.util :as u]))
+            [spacedoc.data.node-impl :refer [defnode]]))
+
+
+;; (headline* "foo" 1 "foo" (section (paragraph (text "s"))))
+
 
 
 ;;;; Constructors
@@ -33,97 +37,6 @@ EXAMPLE: :spacedoc.data.org/toc"}
      :type link-type
      :raw-link path
      :children (vec children)}))
-
-
-;;;; Defnode macro
-
-(def ^:dynamic alt-cons
-  {:link "`link`"
-   :plain-list "`ordered-list` and `unordered-list`."
-   :description "`description`"
-   :headline "`headline`"
-   :todo "`todo`"
-   :table "`table`"})
-
-
-(defn- sdn-key-rank
-  [sdn-key]
-  {:pre [(keyword? sdn-key)(u/unqualified-ident? sdn-key)]
-   :post [(integer? %)]}
-  (or (sdn-key
-       {:tag (Integer/MIN_VALUE)
-        :key (inc Integer/MIN_VALUE)
-        :value (+ 2 (Integer/MIN_VALUE))
-        :type -2
-        :path -1
-        ;; Everything else here
-
-        ;; Always last
-        :children (Integer/MAX_VALUE)}
-       0)))
-
-
-
-;; (s/valid? (s/spec (s/cat :a int? :b int? :c (s/coll-of string?))) [1 2 "s" "s"])
-
-
-;; (headline* "foo" 1 "foo" (section (paragraph (text "s"))))
-
-
-(defn- spec-form->un-keys->q-keys
-  [spec-form]
-  (letfn [(keys->un-k->q-k [ks] (zipmap (map u/unqualify ks) ks))
-          (sort-keys [ks] (sort-by (comp sdn-key-rank u/unqualify) ks))
-          (map-spec->keys [sf] (some->> sf
-                                        (tree-seq #(list? %) rest)
-                                        (mapcat #(when (vector? %) %))
-                                        (set)))]
-    (-> spec-form map-spec->keys sort-keys keys->un-k->q-k)))
-
-
-(defmacro defnode
-  "Define node and its spec and constructor by SPEC-FORM. K us the spec key."
-  [k spec-form]
-  (let [alt ((u/unqualify k) alt-cons)
-        tag (u/unqualify k)
-        un-k->q-k (spec-form->un-keys->q-keys spec-form)
-        q-k (vals un-k->q-k)
-        arg-tmpl (mapv (comp symbol name) q-k)
-        ret-tmpl (replace {'children '(vec children)} arg-tmpl)
-        f-name (symbol (str (name k) (when alt "*")))
-        tag-spec-k (keyword (str (namespace k) "." (name k)) "tag")
-        doc (str (format "\"%s\" node constructor [auto-generated]."
-                         (name k))
-                 (some->> alt
-                          (str "\nThe node has an alternative "
-                               "human friendly constructor: ")))]
-    `(do
-       ;; Register node
-       (defmethod data/node->spec-k ~tag [_#] ~k)
-       ;; Define tag spec
-       (s/def ~tag-spec-k #{~tag})
-       ;; Define node's spec
-       (s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
-       ;; Constructor function's spec
-       (s/fdef ~f-name
-         :args (s/cat ~@(interleave (keys un-k->q-k) (vals un-k->q-k)))
-         :ret ~k
-         :fn (s/and
-              #(= (-> % :args (conj :tag) count)
-                  (-> % :ret keys count))
-              #(= (-> % :args :children count)
-                  (-> % :ret :children count))))
-       ;; Constructor function's definition
-       (defn ~f-name
-         ;; Doc-string
-         ~doc
-         ;; Args
-         ~(vec (flatten (replace {'children ['& 'children]}  arg-tmpl)))
-         ;; pre/post conditions
-         {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-k ret-tmpl)
-          :post [(s/valid? ~k ~'%)]}
-         ;; Returned value
-         ~(merge {:tag tag} (zipmap (keys un-k->q-k) ret-tmpl))))))
 
 
 ;;;; Nodes definitions via specs
@@ -243,10 +156,10 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.link/children (s/coll-of ::inline-element
                                                     :kind vector?
                                                     :into []))
-(defnode ::link (s/keys :req-un [:spacedoc.data.node.link/path
-                                 :spacedoc.data.node.link/type
-                                 :spacedoc.data.node.link/raw-link
-                                 :spacedoc.data.node.link/children]))
+(defnode ::link "`link`" (s/keys :req-un [:spacedoc.data.node.link/path
+                                          :spacedoc.data.node.link/type
+                                          :spacedoc.data.node.link/raw-link
+                                          :spacedoc.data.node.link/children]))
 
 
 ;; paragraph node
@@ -350,7 +263,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
                                                           :kind vector?
                                                           :min-count 1
                                                           :into []))
-(defnode ::plain-list
+(defnode ::plain-list "`ordered-list` and `unordered-list`."
   (s/keys :req-un [:spacedoc.data.node.plain-list/type
                    :spacedoc.data.node.plain-list/children]))
 
@@ -400,8 +313,9 @@ EXAMPLE: :spacedoc.data.org/toc"}
                                                      :kind vector?
                                                      :min-count 1
                                                      :into []))
-(defnode ::table (s/keys :req-un [:spacedoc.data.node.table/type
-                                  :spacedoc.data.node.table/children]))
+(defnode ::table "`table`"
+  (s/keys :req-un [:spacedoc.data.node.table/type
+                   :spacedoc.data.node.table/children]))
 
 
 ;; verse node
@@ -471,7 +385,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
                                                         :min-count 1
                                                         :distinct true
                                                         :into []))
-(defnode ::headline
+(defnode ::headline "`headline`"
   (s/keys :req-un [:spacedoc.data.node.headline/value
                    :spacedoc.data.node.headline/children]
           :opt-un [:spacedoc.data.node.headline/level
@@ -485,7 +399,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.description/level #{1})
 (s/def :spacedoc.data.node.description/children
   :spacedoc.data.node.headline/children)
-(defnode ::description
+(defnode ::description "`description`"
   (s/keys :req-un [:spacedoc.data.node.description/value
                    :spacedoc.data.node.description/path-id
                    :spacedoc.data.node.description/level
@@ -501,7 +415,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.todo/children (s/coll-of ::headline-child
                                                     :kind vector?
                                                     :into []))
-(defnode ::todo
+(defnode ::todo "`todo`"
   (s/keys :req-un [:spacedoc.data.node.todo/value]
           :opt-un [:spacedoc.data.node.todo/level
                    :spacedoc.data.node.todo/path-id
