@@ -35,6 +35,18 @@
 (def ops [["-h" "--help" "Show help message."]])
 
 
+(defn bad-args-handler
+  [action a-args]
+  (match
+   [action      a-args]
+   ["describe"  _     ] (failure {} "\"describe\" takes qualified keyword")
+   ["validate"  _     ] (failure {} "\"validate\" takes at least 1 input")
+   ["orgify"    _     ] (failure {:args a-args} "\"orgify\" takes 2 arguments")
+   ["relations" _     ] (failure {} "\"relations\" takes at least 1 input")
+   [nil         _     ] (failure {} "No action specified")
+   :else (failure {:action action} "Invalid action")))
+
+
 (defn -main [& args]
   (try-m->output
    (mlet
@@ -48,10 +60,4 @@
        ["validate"  [_     &   _]] (ac/*validate a-args)
        ["relations" [_     &   _]] (ac/*relations a-args)
        ["orgify"    [src   trg  ]] (ac/*orgify src trg src)
-       ;; Errors:
-       ["describe"  _] (failure {} "\"describe\" takes qualified keyword")
-       ["validate"  _] (failure {} "\"validate\" takes at least 1 input")
-       ["orgify"    _] (failure {:args a-args} "\"orgify\" takes 2 arguments")
-       ["relations" _] (failure {} "\"relations\" takes at least 1 input")
-       [nil         _] (failure {} "No action specified")
-       :else (failure {:action action} "Invalid action"))))))
+       :else (bad-args-handler action a-args))))))
