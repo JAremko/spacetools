@@ -12,6 +12,11 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; (headline* "foo" 1 "foo" (section (paragraph (text "s"))))
 
+;; (require '[clojure.spec.test.alpha :as stest])
+
+;; (stest/instrument `list-item)
+
+;; (list-item :ordered nil "+" (item-children (text "ss")) (item-tag (text "ss")))
 
 
 ;;;; Constructors
