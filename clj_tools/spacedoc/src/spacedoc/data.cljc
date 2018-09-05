@@ -43,7 +43,7 @@
 (s/def :spacedoc.data.node/node (s/multi-spec node->spec-k :tag))
 
 
-(defn path->link-prefix
+(defn link->link-prefix
   [path]
   (->> (vals link-type->prefix)
        (filter (partial str/starts-with? path))

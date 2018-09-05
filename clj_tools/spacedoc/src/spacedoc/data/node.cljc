@@ -5,46 +5,10 @@ EXAMPLE: :spacedoc.data.org/toc"}
     spacedoc.data.node
   (:require [clojure.set :refer [union map-invert]]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [spacedoc.data :as data]
             [spacedoc.data.node-impl :refer [defnode]]))
-
-
-;; (headline* "foo" 1 "foo" (section (paragraph (text "s"))))
-
-;; (require '[clojure.spec.test.alpha :as stest])
-
-;; (stest/instrument `list-item)
-
-;; (list-item :ordered nil "+" (item-children (text "ss")) (item-tag (text "ss")))
-
-
-;;;; Constructors
-
-(defn unordered-list
-  "Unordered \"plain-list\" node constructor."
-  [items])
-
-
-(defn ordered-list
-  "ordered \"plain-list\" node constructor."
-  [items])
-
-
-(defn link
-  "\"link\" node constructor."
-  [path & children]
-  {:pre  [(data/path->link-prefix path)]}
-  (let [link-prefix (data/path->link-prefix path)
-        link-type ((map-invert data/link-type->prefix) link-prefix)]
-    {:tag :link
-     :path (str/replace-first path link-prefix "")
-     :type link-type
-     :raw-link path
-     :children (vec children)}))
-
-
-;;;; Nodes definitions via specs
 
 
 ;; Shared specs
@@ -52,10 +16,15 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::has-non-empty-line
-  (s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %)))
+  (s/with-gen
+    (s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %))
+    #(gen/string-alphanumeric)))
 
 
-(s/def ::non-empty-string (s/and string? #(re-matches #"^.+$" %)))
+;; TODO Paths(especially URL fragments) can use more precise regexps.
+(s/def ::non-empty-string (s/with-gen
+                            (s/and string? #(re-matches #"^.+$" %))
+                            #(gen/string-alphanumeric)))
 
 
 (s/def ::any any?)
@@ -75,10 +44,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; kbd node
 
-(s/def :spacedoc.data.node.kbd/value (s/coll-of ::non-empty-string
-                                                :kind vector?
-                                                :min-count 1
-                                                :into []))
+(s/def :spacedoc.data.node.kbd/value
+  (s/with-gen (s/coll-of ::non-empty-string
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::non-empty-string) 1 3)))
 
 
 (defnode ::kbd (s/keys :req-un [:spacedoc.data.node.kbd/value]))
@@ -104,15 +75,17 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; inline element
 
 (s/def ::inline-element (s/or :inline-container ::inline-container
-                              :inline-leaf ::inline-leaf))
+:inline-leaf ::inline-leaf))
 
 
 ;; inline-container children
 
-(s/def ::inline-container-children (s/coll-of ::inline-element
-                                              :kind vector?
-                                              :min-count 1
-                                              :into []))
+(s/def ::inline-container-children
+  (s/with-gen (s/coll-of ::inline-element
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::inline-element) 1 3)))
 
 
 ;; bold node
@@ -157,10 +130,18 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.link/path ::non-empty-string)
 (s/def :spacedoc.data.node.link/type (set (keys data/link-type->prefix)))
-(s/def :spacedoc.data.node.link/raw-link ::non-empty-string)
-(s/def :spacedoc.data.node.link/children (s/coll-of ::inline-element
-                                                    :kind vector?
-                                                    :into []))
+(s/def :spacedoc.data.node.link/raw-link
+  (s/with-gen ::non-empty-string
+    #(gen/fmap (fn [[prefix path]] (str prefix path))
+               (gen/tuple
+                (gen/elements (vals data/link-type->prefix))
+                (gen/string-alphanumeric)))))
+(s/def :spacedoc.data.node.link/children
+  (s/with-gen (s/coll-of ::inline-element
+                         :kind vector?
+                         :min-count 0
+                         :into [])
+    #(gen/vector (s/gen ::inline-element) 0 3)))
 (defnode ::link "`link`" (s/keys :req-un [:spacedoc.data.node.link/path
                                           :spacedoc.data.node.link/type
                                           :spacedoc.data.node.link/raw-link
@@ -170,10 +151,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; paragraph node
 
 (s/def ::paragraph-child ::inline-element)
-(s/def :spacedoc.data.node.paragraph/children (s/coll-of ::paragraph-child
-                                                         :kind vector?
-                                                         :min-count 1
-                                                         :into []))
+(s/def :spacedoc.data.node.paragraph/children
+  (s/with-gen (s/coll-of ::paragraph-child
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::paragraph-child) 1 3)))
 (defnode ::paragraph (s/keys :req-un [:spacedoc.data.node.paragraph/children]))
 
 
@@ -197,10 +180,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; center node
 
 (s/def ::center-child ::inline-element)
-(s/def :spacedoc.data.node.center/children (s/coll-of ::center-child
-                                                      :kind vector?
-                                                      :min-count 1
-                                                      :into []))
+(s/def :spacedoc.data.node.center/children
+  (s/with-gen (s/coll-of ::center-child
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::center-child) 1 3)))
 (defnode ::center (s/keys :req-un [:spacedoc.data.node.center/children]))
 
 
@@ -216,10 +201,11 @@ EXAMPLE: :spacedoc.data.org/toc"}
   (s/or :block-element ::block-element
         :inline-element ::inline-element))
 (s/def :spacedoc.data.node.item-children/children
-  (s/coll-of :spacedoc.data.node.item-children/child
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/with-gen (s/coll-of :spacedoc.data.node.item-children/child
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen :spacedoc.data.node.item-children/child) 1 3)))
 (defnode ::item-children
   (s/keys :req-un [:spacedoc.data.node.item-children/children]))
 
@@ -228,10 +214,11 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.item-tag/child ::inline-element)
 (s/def :spacedoc.data.node.item-tag/children
-  (s/coll-of :spacedoc.data.node.item-tag/child
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/with-gen (s/coll-of :spacedoc.data.node.item-tag/child
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen :spacedoc.data.node.item-tag/child) 1 3)))
 (defnode ::item-tag (s/keys :req-un [:spacedoc.data.node.item-tag/children]))
 
 
@@ -252,10 +239,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def :spacedoc.data.node.feature-list/type
   #{:ordered :unordered :descriptive})
-(s/def :spacedoc.data.node.feature-list/children (s/coll-of ::list-item
-                                                            :kind vector?
-                                                            :min-count 1
-                                                            :into []))
+(s/def :spacedoc.data.node.feature-list/children
+  (s/with-gen (s/coll-of ::list-item
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::list-item) 1 3)))
 (defnode ::feature-list
   (s/keys :req-un [:spacedoc.data.node.feature-list/type
                    :spacedoc.data.node.feature-list/children]))
@@ -264,10 +253,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; plain-list node
 
 (s/def :spacedoc.data.node.plain-list/type #{:ordered :unordered :descriptive})
-(s/def :spacedoc.data.node.plain-list/children (s/coll-of ::list-item
-                                                          :kind vector?
-                                                          :min-count 1
-                                                          :into []))
+(s/def :spacedoc.data.node.plain-list/children
+  (s/with-gen (s/coll-of ::list-item
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::list-item) 1 3)))
 (defnode ::plain-list "`ordered-list` and `unordered-list`."
   (s/keys :req-un [:spacedoc.data.node.plain-list/type
                    :spacedoc.data.node.plain-list/children]))
@@ -275,10 +266,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; quote node
 
-(s/def :spacedoc.data.node.quote/children (s/coll-of ::paragraph
-                                                     :kind vector?
-                                                     :min-count 1
-                                                     :into []))
+(s/def :spacedoc.data.node.quote/children
+  (s/with-gen (s/coll-of ::paragraph
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::paragraph) 1 3)))
 (defnode ::quote (s/keys :req-un [:spacedoc.data.node.quote/children]))
 
 
@@ -293,20 +286,24 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; table-row node
 
 (s/def :spacedoc.data.node.table-row/type #{:rule :standard})
-(s/def :spacedoc.data.node.table-row/children (s/coll-of ::table-cell
-                                                         :kind vector?
-                                                         :min-count 0
-                                                         :into []))
+(s/def :spacedoc.data.node.table-row/children
+  (s/with-gen (s/coll-of ::table-cell
+                         :kind vector?
+                         :min-count 0
+                         :into [])
+    #(gen/vector (s/gen ::table-cell) 0 3)))
 (defnode ::table-row (s/keys :req-un [:spacedoc.data.node.table-row/type
                                       :spacedoc.data.node.table-row/children]))
 
 
 ;; table-cell node
 
-(s/def :spacedoc.data.node.table-cell/children (s/coll-of ::inline-element
-                                                          :kind vector?
-                                                          :min-count 0
-                                                          :into []))
+(s/def :spacedoc.data.node.table-cell/children
+  (s/with-gen (s/coll-of ::inline-element
+                         :kind vector?
+                         :min-count 0
+                         :into [])
+    #(gen/vector (s/gen ::inline-element) 0 3)))
 (defnode ::table-cell
   (s/keys :req-un [:spacedoc.data.node.table-cell/children]))
 
@@ -314,10 +311,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; table node
 
 (s/def :spacedoc.data.node.table/type #{:org})
-(s/def :spacedoc.data.node.table/children (s/coll-of ::table-row
-                                                     :kind vector?
-                                                     :min-count 1
-                                                     :into []))
+(s/def :spacedoc.data.node.table/children
+  (s/with-gen (s/coll-of ::table-row
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::table-row) 1 3)))
 (defnode ::table "`table`"
   (s/keys :req-un [:spacedoc.data.node.table/type
                    :spacedoc.data.node.table/children]))
@@ -325,10 +324,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; verse node
 
-(s/def :spacedoc.data.node.verse/children (s/coll-of ::inline-element
-                                                     :kind vector?
-                                                     :min-count 1
-                                                     :into []))
+(s/def :spacedoc.data.node.verse/children
+  (s/with-gen (s/coll-of ::inline-element
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::inline-element) 1 3)))
 (defnode ::verse (s/keys :req-un [:spacedoc.data.node.verse/children]))
 
 
@@ -360,10 +361,17 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; section node
 
-(s/def :spacedoc.data.node.section/children (s/coll-of ::block-element
-                                                       :kind vector?
-                                                       :min-count 1
-                                                       :into []))
+(s/def :spacedoc.data.node.section/children
+  (s/with-gen (s/coll-of ::block-element
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::block-element) 1 2)))
+
+;; (gen/sample (s/gen :spacedoc.data.node.section/children))
+
+;; (gen/sample  (gen/vector (s/gen ::block-element) 1 1))
+
 (defnode ::section (s/keys :req-un [:spacedoc.data.node.section/children]))
 
 
@@ -385,11 +393,14 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.headline/path-id data/path-id?)
 (s/def :spacedoc.data.node.headline/level
   (set (range 1 (inc data/max-headline-depth))))
-(s/def :spacedoc.data.node.headline/children (s/coll-of ::headline-child
-                                                        :kind vector?
-                                                        :min-count 1
-                                                        :distinct true
-                                                        :into []))
+(s/def :spacedoc.data.node.headline/children
+  (s/with-gen (s/coll-of ::headline-child
+                         :kind vector?
+                         :min-count 1
+                         :distinct true
+                         :into [])
+    #(gen/vector-distinct (s/gen ::headline-child)
+                          {:min-elements 1 :max-elements 2 :max-tries 100})))
 (defnode ::headline "`headline`"
   (s/keys :req-un [:spacedoc.data.node.headline/value
                    :spacedoc.data.node.headline/children]
@@ -417,9 +428,12 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.todo/path-id data/path-id?)
 (s/def :spacedoc.data.node.todo/level
   (set (range 1 (inc data/max-headline-depth))))
-(s/def :spacedoc.data.node.todo/children (s/coll-of ::headline-child
-                                                    :kind vector?
-                                                    :into []))
+(s/def :spacedoc.data.node.todo/children
+  (s/with-gen (s/coll-of ::headline-child
+                         :min-count 0
+                         :kind vector?
+                         :into [])
+    #(gen/vector (s/gen ::headline-child) 0 2)))
 (defnode ::todo "`todo`"
   (s/keys :req-un [:spacedoc.data.node.todo/value]
           :opt-un [:spacedoc.data.node.todo/level
@@ -435,9 +449,51 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (defmethod root-child :headline [_] ::headline)
 (defmethod root-child :description [_] ::description)
 (s/def ::root-child (s/multi-spec root-child :tag))
-(s/def :spacedoc.data.node.root/children (s/coll-of ::root-child
-                                                    :kind vector?
-                                                    :min-count 1
-                                                    :distinct true
-                                                    :into []))
+(s/def :spacedoc.data.node.root/children
+  (s/with-gen (s/coll-of ::root-child
+                         :kind vector?
+                         :min-count 1
+                         :distinct true
+                         :into [])
+    #(gen/vector-distinct (s/gen ::root-child)
+                          {:min-elements 1 :max-elements 3 :max-tries 100})))
 (defnode ::root (s/keys :req-un [:spacedoc.data.node.root/children]))
+
+
+;;;; Constructors
+
+(defn unordered-list
+  "Unordered \"plain-list\" node constructor."
+  [items])
+
+
+(defn ordered-list
+  "ordered \"plain-list\" node constructor."
+  [items])
+
+
+;; link
+
+(s/fdef link
+  :args (s/cat :link :spacedoc.data.node.link/raw-link
+               :children (s/* ::inline-element))
+  :ret :spacedoc.data.node/link)
+
+
+(defn link
+  "\"link\" node constructor."
+  [link & children]
+  {:pre  [(data/link->link-prefix link)
+          (s/valid? :spacedoc.data.node.link/raw-link link)
+          (s/valid? :spacedoc.data.node.link/children (vec children))]
+   :post [(s/valid? :spacedoc.data.node/link %)]}
+  (let [link-prefix (data/link->link-prefix link)
+        link-type ((map-invert data/link-type->prefix) link-prefix)]
+    {:tag :link
+     :path (str/replace-first link link-prefix "")
+     :type link-type
+     :raw-link link
+     :children (vec children)}))
+
+
+;; (s/exercise ::section 100)
