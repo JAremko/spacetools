@@ -1,6 +1,7 @@
 .*
 !.gitignore
 \#*
+*.log
 .lein-env
 .directory
 *.jar
