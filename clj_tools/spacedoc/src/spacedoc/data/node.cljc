@@ -13,7 +13,6 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;; Shared specs
 
-
 ;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::has-non-empty-line
   (s/with-gen
@@ -25,6 +24,15 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def ::non-empty-string (s/with-gen
                             (s/and string? #(re-matches #"^.+$" %))
                             #(gen/string-alphanumeric)))
+
+
+(s/def ::path-id? (s/with-gen data/path-id?
+                    #(gen/fmap
+                      (fn [[a delm b]] (str/lower-case (str a delm b)))
+                      (gen/tuple
+                       (gen/string-alphanumeric)
+                       (gen/elements ["/" ""])
+                       (gen/string-alphanumeric)))))
 
 
 (s/def ::any any?)
@@ -75,7 +83,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; inline element
 
 (s/def ::inline-element (s/or :inline-container ::inline-container
-:inline-leaf ::inline-leaf))
+                              :inline-leaf ::inline-leaf))
 
 
 ;; inline-container children
@@ -135,7 +143,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
     #(gen/fmap (fn [[prefix path]] (str prefix path))
                (gen/tuple
                 (gen/elements (vals data/link-type->prefix))
-                (gen/string-alphanumeric)))))
+                (gen/not-empty (gen/string-alphanumeric))))))
 (s/def :spacedoc.data.node.link/children
   (s/with-gen (s/coll-of ::inline-element
                          :kind vector?
@@ -390,7 +398,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; headline
 
 (s/def :spacedoc.data.node.headline/value ::non-empty-string)
-(s/def :spacedoc.data.node.headline/path-id data/path-id?)
+(s/def :spacedoc.data.node.headline/path-id ::path-id?)
 (s/def :spacedoc.data.node.headline/level
   (set (range 1 (inc data/max-headline-depth))))
 (s/def :spacedoc.data.node.headline/children
@@ -425,7 +433,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; todo node
 
 (s/def :spacedoc.data.node.todo/value ::non-empty-string)
-(s/def :spacedoc.data.node.todo/path-id data/path-id?)
+(s/def :spacedoc.data.node.todo/path-id ::path-id?)
 (s/def :spacedoc.data.node.todo/level
   (set (range 1 (inc data/max-headline-depth))))
 (s/def :spacedoc.data.node.todo/children
@@ -462,14 +470,14 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 ;;;; Constructors
 
-(defn unordered-list
-  "Unordered \"plain-list\" node constructor."
-  [items])
+;; (defn unordered-list
+;;   "Unordered \"plain-list\" node constructor."
+;;   [items])
 
 
-(defn ordered-list
-  "ordered \"plain-list\" node constructor."
-  [items])
+;; (defn ordered-list
+;;   "ordered \"plain-list\" node constructor."
+;;   [items])
 
 
 ;; link
@@ -477,7 +485,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/fdef link
   :args (s/cat :link :spacedoc.data.node.link/raw-link
                :children (s/* ::inline-element))
-  :ret :spacedoc.data.node/link)
+  :ret ::link)
 
 
 (defn link
@@ -486,7 +494,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
   {:pre  [(data/link->link-prefix link)
           (s/valid? :spacedoc.data.node.link/raw-link link)
           (s/valid? :spacedoc.data.node.link/children (vec children))]
-   :post [(s/valid? :spacedoc.data.node/link %)]}
+   :post [(s/valid? ::link %)]}
   (let [link-prefix (data/link->link-prefix link)
         link-type ((map-invert data/link-type->prefix) link-prefix)]
     {:tag :link
@@ -494,6 +502,3 @@ EXAMPLE: :spacedoc.data.org/toc"}
      :type link-type
      :raw-link link
      :children (vec children)}))
-
-
-;; (s/exercise ::section 100)

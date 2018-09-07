@@ -49,7 +49,15 @@
         ch-s-f (some-> key-map :children s/get-spec s/form)]
     (concat (interleave (mapv u/unqualify q-keys-no-ch) q-keys-no-ch)
             (condp = (some-> ch-s-f first name)
-              "coll-of" [:children `(s/+ ~(second ch-s-f))]
+              "coll-of" [:children
+                         `(s/+ ~(second ch-s-f))
+                         #_ `(s/with-gen
+                               (s/+ ~(second ch-s-f))
+                               #(gen/vector-distinct
+                                 (s/gen ~(second ch-s-f))
+                                 {:min-elements 1
+                                  :max-elements 3
+                                  :max-tries 100}))]
               "cat" (rest ch-s-f)
               []))))
 
@@ -80,12 +88,7 @@
         ;; Constructor function's spec
         (s/fdef ~f-name
           :args (s/cat ~@(defnode-spec-args q-ks))
-          :ret ~k
-          :fn (s/and
-               #(= (-> % :args (conj :tag) count)
-                   (-> % :ret keys count))
-               #(= (-> % :args :children count)
-                   (-> % :ret :children count))))
+          :ret ~k)
         ;; Constructor function's definition
         (defn ~f-name
           ;; Doc-string
