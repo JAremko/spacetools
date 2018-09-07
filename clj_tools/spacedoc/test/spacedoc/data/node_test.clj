@@ -18,23 +18,23 @@
          (testing (str "Node constructor function \"" '~f-name "\" speced.")
            (is (s/spec? f-spec#))))
        ;; Spec-test
-       (when f-spec#)
-       (deftest ~(symbol (str f-name "-generates-valid-node"))
-         (binding [s/*recursion-limit* 2]
-           (let [ret-spec# (:ret f-spec#)
-                 fail# (->> (s/exercise-fn ~v 10)
-                            (filter #(->> %
-                                          (second)
-                                          (s/valid? ret-spec#)
-                                          (false?)))
-                            (first))]
-             (is (nil? fail#)
-                 (format (str "Function \"%s\" validation failed\n"
-                              "With\n"
-                              " arguments: %s\n"
-                              " returned value: %s\n"
-                              "Explanation:\n%s\n")
-                         ~v
-                         (vec (first fail#))
-                         (second fail#)
-                         (s/explain-str ret-spec# (second fail#)))))))))))
+       (when f-spec#
+         (deftest ~(symbol (str f-name "-generates-valid-node"))
+           (binding [s/*recursion-limit* 2]
+             (let [ret-spec# (:ret f-spec#)
+                   fail# (->> (s/exercise-fn ~v 10)
+                              (filter #(->> %
+                                            (second)
+                                            (s/valid? ret-spec#)
+                                            (false?)))
+                              (first))]
+               (is (nil? fail#)
+                   (format (str "Function \"%s\" validation failed\n"
+                                "With\n"
+                                " arguments: %s\n"
+                                " returned value: %s\n"
+                                "Explanation:\n%s\n")
+                           ~v
+                           (vec (first fail#))
+                           (second fail#)
+                           (s/explain-str ret-spec# (second fail#))))))))))))

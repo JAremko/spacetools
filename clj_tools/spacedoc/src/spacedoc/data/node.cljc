@@ -487,7 +487,6 @@ EXAMPLE: :spacedoc.data.org/toc"}
                :children (s/* ::inline-element))
   :ret ::link)
 
-
 (defn link
   "\"link\" node constructor."
   [link & children]
