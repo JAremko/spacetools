@@ -8,16 +8,24 @@
                  [funcool/cats "2.2.0"]
                  [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
-  :global-vars {*warn-on-reflection* true}
+  :global-vars {*warn-on-reflection* true
+                *assert* true}
   :jvm-opts ["-Xms1G" "-Xmx1G"]
   :target-path "target/%s"
   :uberjar-name "sdn.jar"
   :plugins [[lein-environ "1.0.0"]]
   :profiles {:dev {:env {}
-                   :jvm-opts ["-Xms2G" "-Xmx2G"]
+                   :jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]
                    :dependencies [[org.clojure/test.check "0.10.0-alpha3"]]}
+             :test {
+                    ;; NOTE: Added this to get more informative spec fails
+                    ;;       instead of assert fails on :ret checks
+                    ;;       of functions.
+                    :global-vars {*assert* false}}
              :uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
+                       :jvm-opts [(str "-Dclojure.compiler.elide-meta=["
+                                       ":doc :file :line :added"
+                                       "]")
                                   "-Dclojure.compiler.direct-linking=true"
                                   "-Xms1G"
                                   "-Xmx1G"]
