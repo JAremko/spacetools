@@ -19,22 +19,22 @@
 
        ;; All node constructors have specs?
        (deftest ~(symbol (str f-name "-has-spec"))
-         (testing (str "Node constructor function \"" '~f-name "\" speced.")
+         (testing (str "Node constructor function \"" ~v "\" speced.")
            (is (s/spec? f-spec#)
                (format (str "Public function `%s` doesn't have spec\n"
-                            "All public functions in the `spacedoc.data.node` "
+                            "All public functions in the `spacedoc.data.node`"
                             " ns considered node constructors "
                             "and must be speced.\n")
-                       '~f-name))
+                       ~v))
            (is (s/spec? f-spec-args#)
                (format "Function `%s` doesn't have :args spec.\n spec: \"%s\"\n"
-                       '~f-name
+                       ~v
                        f-spec-desc#))
            (is (and (s/spec? f-spec-ret#)
                     (not= 'clojure.core/any? (s/form f-spec-ret#)))
                (format (str "Function `%s` doesn't have :ret spec or "
                             "its spec is `any?`.\n spec: \"%s\"\n")
-                       '~f-name
+                       ~v
                        f-spec-desc#))))
 
        ;; [gentest] All node constructors produce valid values?
@@ -42,19 +42,16 @@
          (deftest ~(symbol (str f-name "-generates-valid-node"))
            (binding [s/*recursion-limit* 2]
              (let [ret-spec# (:ret f-spec#)
-                   fail# (->> (s/exercise-fn ~v 10)
-                              (filter #(->> %
-                                            (second)
-                                            (s/valid? ret-spec#)
-                                            (false?)))
-                              (first))]
-               (is (nil? fail#)
+                   fails# (filter #(false? (s/valid? ret-spec# (second %)))
+                                  (s/exercise-fn ~v 10))
+                   f-fail# (first fails#)]
+               (is (= (count fails#) 0)
                    (format (str "Function `%s` validation failed\n"
-                                "With\n"
+                                "With first fail:\n"
                                 " arguments: %s\n"
                                 " returned value: %s\n"
                                 "Explanation:\n%s\n")
                            ~v
-                           (vec (first fail#))
-                           (second fail#)
-                           (s/explain-str ret-spec# (second fail#))))))))))))
+                           (vec (first f-fail#))
+                           (second f-fail#)
+                           (s/explain-str ret-spec# (second f-fail#))))))))))))
