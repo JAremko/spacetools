@@ -483,9 +483,10 @@ EXAMPLE: :spacedoc.data.org/toc"}
 ;; link
 
 (s/fdef link
-  :args (s/cat :link :spacedoc.data.node.link/raw-link
-               :children (s/* ::inline-element))
-  :ret ::link)
+  :args  (s/cat :link :spacedoc.data.node.link/raw-link
+                :children (s/* ::inline-element))
+  :ret  ::link)
+
 
 (defn link
   "\"link\" node constructor."
