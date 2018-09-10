@@ -139,7 +139,15 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (s/def :spacedoc.data.node.link/path ::non-empty-string)
 (s/def :spacedoc.data.node.link/type (set (keys data/link-type->prefix)))
 (s/def :spacedoc.data.node.link/raw-link
-  (s/with-gen ::non-empty-string
+  (s/with-gen (s/and string?
+                     #(re-matches
+                       (re-pattern
+                        (str "^(?:"
+                             (str/join "|"
+                                       (map str/re-quote-replacement
+                                            (vals data/link-type->prefix)))
+                             ").+$"))
+                       %))
     #(gen/fmap (fn [[prefix path]] (str prefix path))
                (gen/tuple
                 (gen/elements (vals data/link-type->prefix))
