@@ -1,10 +1,10 @@
-(ns ^{:doc "Exporting SDN to .org format."}
-    spacedoc.data.org
+(ns spacedoc.data.org
+  "Exporting SDN to .org format."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
+            [clojure.string :as str]
             [spacedoc.data :as data]
-            [spacedoc.data.node :as n]
-            [clojure.string :as str]))
+            [spacedoc.data.node :as n]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -24,7 +24,9 @@
                                        :section ["" ""]})
 
 
-(def ^:private list-identation 2)
+(def ^:private list-indentation 2)
+
+(def ^:private src-indentation 2)
 
 
 (def ^{:doc "These nodes can be converted only in their parent context."}
@@ -36,20 +38,6 @@
                       n/inline-leaf-tags :inline-leaf
                       n/block-tags :block
                       n/headline-tags :headline})
-
-
-(defn s-count
-  "Like `count` but for strings only and accounts for zero-width spaces."
-  [^String s]
-  (count (str/replace s "\u200B" "")))
-
-
-(defn- tag->kind
-  [tag]
-  (some->> kinds
-           (filter #((key %) tag))
-           (first)
-           (val)))
 
 
 (defmulti sdn->org
@@ -75,6 +63,20 @@
 
 
 ;;;; Helpers
+
+
+(defn length
+  "Like `count` but for strings only and accounts for zero-width spaces."
+  [^String s]
+  (count (str/replace s "\u200B" "")))
+
+
+(defn- tag->kind
+  [tag]
+  (some->> kinds
+           (filter #((key %) tag))
+           (first)
+           (val)))
 
 (defn- nl-wrap?
   [node-tag]
@@ -157,7 +159,7 @@
         cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
                  (apply mapv
                         (fn [& cols]
-                          (apply max (map s-count cols)))
+                          (apply max (map length cols)))
                         ne-vec-tab)
                  [])]
     (vec (concat [cols-w] vec-tab))))
@@ -177,7 +179,7 @@
         (map (fn [column-width cell-s]
                (str cell-s
                     (join (repeat (- column-width
-                                     (s-count cell-s))
+                                     (length cell-s))
                                   " "))))
              cols-w
              row)))
@@ -240,7 +242,7 @@
                      (conv)
                      (str/split-lines)
                      (remove empty?)
-                     (join (apply str "\n" (repeat list-identation " ")))))
+                     (join (apply str "\n" (repeat list-indentation " ")))))
          "\n")))
 
 

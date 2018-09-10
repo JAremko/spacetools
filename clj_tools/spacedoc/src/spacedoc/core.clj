@@ -1,4 +1,5 @@
 (ns spacedoc.core
+  "Spacemacs documentation tools for .SDN files."
   (:require [cats.core :refer [mlet]]
             [cats.monad.exception :refer [failure]]
             [clojure.core.match :refer [match]]

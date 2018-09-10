@@ -1,5 +1,5 @@
-(ns ^{:doc "General utilities."}
-    spacedoc.util
+(ns spacedoc.util
+  "General utilities."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]))
 

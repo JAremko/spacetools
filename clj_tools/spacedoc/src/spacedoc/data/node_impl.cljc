@@ -1,5 +1,5 @@
-(ns ^{:doc "Defnode implementation. Highly meh."}
-    spacedoc.data.node-impl
+(ns spacedoc.data.node-impl
+  "Defnode implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacedoc.data :as data]

@@ -1,8 +1,8 @@
-(ns ^{:doc "Shared SDN node generators.
-All public function in this name-space are node constructors.
-NOTE: Format specific specs are in corresponding name-spaces.
-EXAMPLE: :spacedoc.data.org/toc"}
-    spacedoc.data.node
+(ns spacedoc.data.node
+  "Shared SDN node generators.
+  All public function in this name-space are node constructors.
+  NOTE: Format specific specs are in corresponding name-spaces.
+  EXAMPLE: :spacedoc.data.org/toc"
   (:require [clojure.set :refer [union map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
@@ -11,7 +11,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
             [spacedoc.data.node-impl :refer [defnode]]))
 
 
-;; Shared specs
+;;;; General specs
 
 ;; NOTE: Actually some lines may be empty but not all of them.
 (s/def ::has-non-empty-line
@@ -37,6 +37,8 @@ EXAMPLE: :spacedoc.data.org/toc"}
 
 (s/def ::any any?)
 
+
+;;;; Node specs
 
 ;; inline leaf
 
@@ -476,7 +478,7 @@ EXAMPLE: :spacedoc.data.org/toc"}
 (defnode ::root (s/keys :req-un [:spacedoc.data.node.root/children]))
 
 
-;;;; Constructors
+;;;; "handmade" human-friendly constructors
 
 ;; (defn unordered-list
 ;;   "Unordered \"plain-list\" node constructor."

@@ -1,5 +1,5 @@
-(ns ^{:doc "General SDN manipulation facilities."}
-    spacedoc.data
+(ns spacedoc.data
+  "General SDN manipulation facilities."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
@@ -20,7 +20,7 @@
 (def max-headline-depth 5)
 
 
-;;;; Generic data related stuff
+;;;; Generic stuff for SDN manipulation
 
 
 (defmulti node->spec-k :tag)
@@ -98,7 +98,6 @@
 
 
 ;;;; Headline stuff
-
 
 (defn path-id?
   [val]

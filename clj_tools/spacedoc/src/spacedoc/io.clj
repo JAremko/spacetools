@@ -1,7 +1,7 @@
-(ns ^{:doc "File-system I/O module.
-Functions that can fail return exception monad.
-Actually I/O wrapped in `io!`."}
-    spacedoc.io
+(ns spacedoc.io
+  "File-system I/O module.
+  Functions that can fail return `cats.monad.exception`.
+  Actually I/O wrapped in `io!`."
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]
