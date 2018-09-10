@@ -1,7 +1,7 @@
 (ns ^{:doc "Exporting SDN to .org format."}
     spacedoc.data.org
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :refer [split-lines join]]
+            [clojure.string :refer [join]]
             [spacedoc.data :as data]
             [spacedoc.data.node :as n]
             [clojure.string :as str]))
@@ -36,6 +36,12 @@
                       n/inline-leaf-tags :inline-leaf
                       n/block-tags :block
                       n/headline-tags :headline})
+
+
+(defn s-count
+  "Like `count` but for strings only and accounts for zero-width spaces."
+  [^String s]
+  (count (str/replace s "\u200B" "")))
 
 
 (defn- tag->kind
@@ -151,19 +157,19 @@
         cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
                  (apply mapv
                         (fn [& cols]
-                          (apply max (map count cols)))
+                          (apply max (map s-count cols)))
                         ne-vec-tab)
                  [])]
     (vec (concat [cols-w] vec-tab))))
 
 
-(defn- make-table-rule-str
+(defn- table-rule-str
   [cols-w]
   {:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
   (join "+" (map #(join (repeat % "-")) cols-w)))
 
 
-(defn- make-table-row-str
+(defn- table-row-str
   [row cols-w]
   {:pre [(vector? row)
          (s/valid? (s/coll-of pos-int?) cols-w)]}
@@ -171,7 +177,7 @@
         (map (fn [column-width cell-s]
                (str cell-s
                     (join (repeat (- column-width
-                                     (count cell-s))
+                                     (s-count cell-s))
                                   " "))))
              cols-w
              row)))
@@ -186,8 +192,8 @@
                       (str "|"
                            (if (seq cols-w)
                              (if (empty? row)
-                               (make-table-rule-str cols-w)
-                               (make-table-row-str row cols-w))
+                               (table-rule-str cols-w)
+                               (table-row-str row cols-w))
                              "")
                            "|"))
                     vrep))
@@ -232,7 +238,7 @@
                 (if itag (format "%s :: " itag) "")
                 (->> children
                      (conv)
-                     (split-lines)
+                     (str/split-lines)
                      (remove empty?)
                      (join (apply str "\n" (repeat list-identation " ")))))
          "\n")))
