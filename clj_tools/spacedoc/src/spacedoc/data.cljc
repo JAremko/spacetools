@@ -26,6 +26,11 @@
 (defmulti node->spec-k :tag)
 
 
+(defn tag->spec-k
+  [node-tag]
+  (node->spec-k {:tag node-tag}))
+
+
 (defn all-tags
   []
   (set (remove #{:default} (keys (methods node->spec-k)))))

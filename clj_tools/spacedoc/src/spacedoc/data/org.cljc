@@ -3,7 +3,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [split-lines join]]
             [spacedoc.data :as data]
-            [spacedoc.data.node :as n]))
+            [spacedoc.data.node :as n]
+            [clojure.string :as str]))
 
 
 (def ^:private emphasis-tokens {:bold "*"
@@ -26,9 +27,7 @@
 (def ^:private list-identation 2)
 
 
-(def
-  ^{:doc "These nodes can be converted only in their parent context."
-    :private true}
+(def ^{:doc "These nodes can be converted only in their parent context."}
   indirect-nodes
   #{:headline :item-children :item-tag :table-row :table-cell})
 
@@ -140,7 +139,7 @@
   (conv children))
 
 
-(defn- table->vec-rep
+(defn table->vec-rep
   [{rows :children}]
   {:pre [((some-fn vector? nil?) rows)]}
   (let [vec-tab (mapv
@@ -149,10 +148,12 @@
                      (mapv #(str " " (conv (:children %)) " ") cells)
                      []))
                  rows)
-        cols-w (apply mapv
-                      (fn [& cols]
-                        (apply max (map count cols)))
-                      (remove empty? vec-tab))]
+        cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
+                 (apply mapv
+                        (fn [& cols]
+                          (apply max (map count cols)))
+                        ne-vec-tab)
+                 [])]
     (vec (concat [cols-w] vec-tab))))
 
 
@@ -183,17 +184,26 @@
          (join "\n"
                (map (fn [row]
                       (str "|"
-                           (if (empty? row)
-                             (make-table-rule-str cols-w)
-                             (make-table-row-str row cols-w))
+                           (if (seq cols-w)
+                             (if (empty? row)
+                               (make-table-rule-str cols-w)
+                               (make-table-row-str row cols-w))
+                             "")
                            "|"))
                     vrep))
          "\n")))
 
 
+(defn- fmt-cell-content
+  "FIXME: Tables shouldn't have newlines or pipes
+  but silently removing them is sub-optimal."
+  [t-c-children-str]
+  (str/replace t-c-children-str #"\n|\|" " "))
+
+
 (defmethod sdn->org :table-cell
   [{children :children}]
-  (conv children))
+  (fmt-cell-content (conv children)))
 
 
 (defmethod sdn->org :table-row
@@ -266,13 +276,13 @@
 (defmethod sdn->org :headline
   [{value :value lvl :level children :children :as hl}]
   (str
-   (join (repeat lvl "*"))
+   (join (repeat (or lvl 1) "*"))
    " "
    value
    "\n"
    (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
                children))))
-
+(conv nil)
 
 (defmethod sdn->org :verbatim
   [{:keys [tag value]}]
