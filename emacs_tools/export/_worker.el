@@ -848,7 +848,6 @@ ROOT-DIR is original documentation root directory."
   (cl-letf* ((sdnize-root-dir (file-truename root-dir))
              (org-src-preserve-indentation t)
              (default-directory sdnize-root-dir))
-    ;; (custom-set-variables '(org-src-preserve-indentation t))
     (dolist (in-file file-list)
       (let* ((out-file (concat exp-dir
                                (string-remove-suffix
