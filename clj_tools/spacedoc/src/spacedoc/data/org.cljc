@@ -33,8 +33,8 @@
 (def ^:private table-indentation 0)
 
 
-(def ^{:doc "These nodes can be converted only in their parent context."}
-  indirect-nodes
+(def indirect-nodes
+  "These nodes can be converted only in their parent context."
   #{:headline :item-children :item-tag :table-row :table-cell})
 
 

@@ -383,11 +383,6 @@
                          :min-count 1
                          :into [])
     #(gen/vector (s/gen ::block-element) 1 2)))
-
-;; (gen/sample (s/gen :spacedoc.data.node.section/children))
-
-;; (gen/sample  (gen/vector (s/gen ::block-element) 1 1))
-
 (defnode ::section (s/keys :req-un [:spacedoc.data.node.section/children]))
 
 
