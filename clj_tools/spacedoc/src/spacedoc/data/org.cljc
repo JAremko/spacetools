@@ -308,14 +308,17 @@
 
 
 (defmethod sdn->org :headline
-  [{value :value lvl :level children :children :as hl}]
-  (str
-   (join (repeat lvl "*"))
-   " "
-   value
-   "\n"
-   (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
-               children))))
+  [{value :value children :children :as hl}]
+  (let [headline (-> hl
+                     (update :path-id #(or % (data/hl-val->path-id-frag value)))
+                     (update :level #(or % 1)))]
+    (str
+     (join (repeat (:level headline) "*"))
+     " "
+     value
+     "\n"
+     (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl headline %) %)
+                 children)))))
 
 
 (defmethod sdn->org :verbatim
