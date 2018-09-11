@@ -3,7 +3,7 @@
             [clojure.test :refer :all]
             [spacedoc.data :as data]
             [spacedoc.data.org :refer :all]
-            [spacedoc.shared :refer [gen-mult]]))
+            [spacedoc.shared :refer [samples]]))
 
 
 (doall
@@ -15,5 +15,5 @@
                              "be exported to org format.")
                         ~node-name)
          (let [node-spec# (s/get-spec (data/tag->spec-k ~v))
-               samples# (map first (s/exercise node-spec# (* gen-mult 10)))]
+               samples# (map first (s/exercise node-spec# (samples 10)))]
            (is (every? string? (map sdn->org samples#)))))))))

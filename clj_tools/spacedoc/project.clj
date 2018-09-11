@@ -11,14 +11,14 @@
   :main spacedoc.core
   :global-vars {*warn-on-reflection* true
                 *assert* true}
-  :jvm-opts ["-Xms1G" "-Xmx1G"]
   :target-path "target/%s"
   :uberjar-name "sdn.jar"
   :plugins [[lein-environ "1.0.0"]]
   :profiles {:dev {:env {}
                    :jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]
                    :dependencies [[org.clojure/test.check "0.10.0-alpha3"]]}
-             :test {:env {:gentest-multiplier "10"}
+             :test {:env {:gentest-multiplier "1"}
+                    :jvm-opts ["-Xms8G" "-Xmx8G" "-Xss4m"]
                     ;; NOTE: Added this to get more informative spec fails
                     ;;       instead of assert fails on :ret checks
                     ;;       of functions.
