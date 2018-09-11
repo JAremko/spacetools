@@ -13,11 +13,9 @@
 
 ;;;; General specs
 
-;; NOTE: Actually some lines may be empty but not all of them.
-(s/def ::has-non-empty-line
-  (s/with-gen
-    (s/and string? #(re-matches #"^(?:.+\n*.*|.*\n*.+|\n*.+\n*)+$" %))
-    #(gen/string-alphanumeric)))
+;; NOTE: Some lines may be empty but not all of them.
+(s/def ::has-non-empty-line (s/with-gen (complement str/blank?)
+                              #(gen/string-alphanumeric)))
 
 
 ;; TODO Paths(especially URL fragments) can use more precise regexps.

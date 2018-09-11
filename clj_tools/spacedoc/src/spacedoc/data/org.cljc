@@ -26,7 +26,11 @@
 
 (def ^:private list-indentation 2)
 
-(def ^:private src-indentation 2)
+
+(def ^:private beging-end-indentation 2)
+
+
+(def ^:private table-indentation 0)
 
 
 (def ^{:doc "These nodes can be converted only in their parent context."}
@@ -64,8 +68,17 @@
 
 ;;;; Helpers
 
+(defn- indent-str
+  [indent-level s]
+  (if (str/blank? s)
+    s
+    (let [ind (apply str (repeat indent-level " "))]
+      (->> (str/split-lines s)
+           (map #(str ind % "\n"))
+           (reduce #(str %1 (if (empty? %2) "\n" %2)) "")))))
 
-(defn length
+
+(defn- length
   "Like `count` but for strings only and accounts for zero-width spaces."
   [^String s]
   (count (str/replace s "\u200B" "")))
@@ -77,6 +90,7 @@
            (filter #((key %) tag))
            (first)
            (val)))
+
 
 (defn- nl-wrap?
   [node-tag]
@@ -92,6 +106,12 @@
   (#{:block :headline} (tag->kind node-tag)))
 
 
+(defn- nl-between?
+  [first-node-tag second-node-tag]
+  {:pre [(every? keyword? [first-node-tag second-node-tag])]}
+  (= :paragraph first-node-tag second-node-tag))
+
+
 (defn- conv*
   [node-seq]
   {:pre [((some-fn vector? nil?) node-seq)]}
@@ -101,8 +121,10 @@
                   n-s (sdn->org next)]
               (with-meta
                 (conj acc
+                      ;; Figuring out how to separate children
                       (str (cond
                              (not (and b-s n-s)) ""
+                             (nl-between? h-t (:tag next)) "\n"
                              (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
                              (not (or (data/seps (last b-s))
                                       (data/seps (first n-s)))) " "
@@ -114,55 +136,59 @@
 
 
 (defn- conv
-  [node-seq]
-  {:pre [((some-fn vector? nil?) node-seq)]}
-  (join (conv* node-seq)))
+[node-seq]
+{:pre [((some-fn vector? nil?) node-seq)]}
+(join (conv* node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
 
 
 (defmethod sdn->org :emphasis-container
-  [{:keys [tag children]}]
-  (let [token (emphasis-tokens tag)]
-    (str token (conv children) token)))
+[{:keys [tag children]}]
+(let [token (emphasis-tokens tag)]
+  (str token (conv children) token)))
 
 
 (defmethod sdn->org :list
-  [{children :children}]
-  (conv children))
+[{children :children}]
+(conv children))
 
 
 (defmethod sdn->org :block-container
-  [{:keys [tag children]}]
-  (let [{[begin-token end-token] tag} block-container-delims]
-    (str begin-token (conv children) end-token)))
+[{:keys [tag children]}]
+(let [{[begin-token end-token] tag} block-container-delims]
+  (str begin-token
+       ;; NOTE: We don't "hard-code" indentation into sections
+       (indent-str (if (= tag :section) 0 beging-end-indentation)
+                   (conv children))
+       end-token)))
 
 
 ;;;; Individual nodes (one to one).
 
 
 (defmethod sdn->org :paragraph
-  [{children :children}]
-  (conv children))
+[{children :children}]
+(conv children))
 
 
 (defn table->vec-rep
-  [{rows :children}]
-  {:pre [((some-fn vector? nil?) rows)]}
-  (let [vec-tab (mapv
-                 (fn [{type :type cells :children}]
-                   (if (= type :standard)
-                     (mapv #(str " " (conv (:children %)) " ") cells)
-                     []))
-                 rows)
-        cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
-                 (apply mapv
-                        (fn [& cols]
-                          (apply max (map length cols)))
-                        ne-vec-tab)
-                 [])]
-    (vec (concat [cols-w] vec-tab))))
+[{rows :children}]
+{:pre [((some-fn vector? nil?) rows)]}
+(let [vec-tab (mapv
+               (fn [{type :type cells :children}]
+                 (if (= type :standard)
+                   (mapv #(str " " (conv (:children %)) " ") cells)
+                   []))
+               rows)
+      cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
+               (apply mapv
+                      (fn [& cols]
+                        (apply max (map length cols)))
+                      ne-vec-tab)
+               [])]
+  (vec (concat [cols-w] vec-tab))))
 
 
 (defn- table-rule-str
@@ -189,16 +215,17 @@
   [table]
   (let [[cols-w & vrep] (table->vec-rep table)]
     (str "\n"
-         (join "\n"
-               (map (fn [row]
-                      (str "|"
-                           (if (seq cols-w)
-                             (if (empty? row)
-                               (table-rule-str cols-w)
-                               (table-row-str row cols-w))
-                             "")
-                           "|"))
-                    vrep))
+         (indent-str table-indentation
+                     (join "\n"
+                           (map (fn [row]
+                                  (str "|"
+                                       (if (seq cols-w)
+                                         (if (empty? row)
+                                           (table-rule-str cols-w)
+                                           (table-row-str row cols-w))
+                                         "")
+                                       "|"))
+                                vrep)))
          "\n")))
 
 
@@ -238,22 +265,21 @@
     (str (apply str
                 b
                 (if itag (format "%s :: " itag) "")
-                (->> children
-                     (conv)
-                     (str/split-lines)
-                     (remove empty?)
-                     (join (apply str "\n" (repeat list-indentation " ")))))
+                (str/trim (indent-str list-indentation (conv children))))
          "\n")))
 
 
 (defmethod sdn->org :example
   [{value :value}]
-  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n" value))
+  (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n"
+          (indent-str beging-end-indentation value)))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
-  (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" language value))
+  (format "#+BEGIN_SRC %s\n%s#+END_SRC\n"
+          language
+          (indent-str beging-end-indentation value)))
 
 
 (defmethod sdn->org :text
