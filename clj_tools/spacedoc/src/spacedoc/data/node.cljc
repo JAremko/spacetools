@@ -483,6 +483,26 @@
 ;;   [items])
 
 
+;; (defn table
+;;   "ordered \"plain-list\" node constructor."
+;;   [items])
+
+
+;; (defn headline
+;;   "ordered \"plain-list\" node constructor."
+;;   [items])
+
+
+;; (defn description
+;;   "\"Description\" node constructor"
+;;   [items])
+
+
+;; (defn todo
+;;   "ordered \"plain-list\" node constructor."
+;;   [items])
+
+
 ;; link
 
 (s/fdef link

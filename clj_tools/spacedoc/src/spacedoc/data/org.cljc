@@ -314,9 +314,11 @@
    " "
    value
    "\n"
-   (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
-               children))))
-(conv nil)
+   (if children
+     (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
+                 children))
+     "")))
+
 
 (defmethod sdn->org :verbatim
   [{:keys [tag value]}]
