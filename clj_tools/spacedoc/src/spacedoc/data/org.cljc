@@ -310,14 +310,12 @@
 (defmethod sdn->org :headline
   [{value :value lvl :level children :children :as hl}]
   (str
-   (join (repeat (or lvl 1) "*"))
+   (join (repeat lvl "*"))
    " "
    value
    "\n"
-   (if children
-     (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
-                 children))
-     "")))
+   (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl hl %) %)
+               children))))
 
 
 (defmethod sdn->org :verbatim

@@ -5,6 +5,7 @@
             :url "https://www.gnu.org/licenses/gpl.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
+                 [environ "1.1.0"]
                  [funcool/cats "2.2.0"]
                  [org.clojure/tools.cli "0.3.7"]]
   :main spacedoc.core
@@ -17,7 +18,7 @@
   :profiles {:dev {:env {}
                    :jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]
                    :dependencies [[org.clojure/test.check "0.10.0-alpha3"]]}
-             :test {
+             :test {:env {:gentest-multiplier "10"}
                     ;; NOTE: Added this to get more informative spec fails
                     ;;       instead of assert fails on :ret checks
                     ;;       of functions.

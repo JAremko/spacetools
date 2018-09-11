@@ -1,10 +1,8 @@
 (ns spacedoc.data.node-test
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
-            [clojure.test.check.clojure-test :refer :all]
-            [spacedoc.data :as data]
             [spacedoc.data.node :refer :all]
-            [clojure.spec.gen.alpha :as gen]))
+            [spacedoc.shared :refer [gen-mult]]))
 
 
 (doall
@@ -43,7 +41,7 @@
            (binding [s/*recursion-limit* 2]
              (let [ret-spec# (:ret f-spec#)
                    fails# (filter #(false? (s/valid? ret-spec# (second %)))
-                                  (s/exercise-fn ~v 10))
+                                  (s/exercise-fn ~v (* gen-mult 10)))
                    f-fail# (first fails#)]
                (is (= (count fails#) 0)
                    (format (str "Function `%s` validation failed\n"
