@@ -27,7 +27,7 @@
 (def ^:private list-indentation 2)
 
 
-(def ^:private beging-end-indentation 2)
+(def ^:private beging-end-indentation 0)
 
 
 (def ^:private table-indentation 0)
@@ -35,7 +35,7 @@
 
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
-  #{:headline :item-children :item-tag :table-row :table-cell})
+  #{:item-children :item-tag :table-row :table-cell})
 
 
 (def ^:private kinds {n/inline-container-tags :inline-container
@@ -46,7 +46,7 @@
 
 (defmulti sdn->org
   (fn [{tag :tag :as node}]
-    {:pre  [(complement (indirect-nodes tag))
+    {:pre  [((complement indirect-nodes) tag)
             (map? node)
             (keyword? tag)]}
     (cond

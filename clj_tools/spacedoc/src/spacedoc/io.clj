@@ -97,7 +97,7 @@
            (throw (Exception. ".SDN file should contain single root form."))
            (not= :root (:tag obj))
            (throw (Exception. "Non-root top level node in .SDN file."))
-           (not (s/valid? root-node-spec obj))
+           ((complement s/valid?) root-node-spec obj)
            (throw (ex-info "Validation filed." (explain-deepest obj)))
            :else obj)))
      (fn [^Exception err]
