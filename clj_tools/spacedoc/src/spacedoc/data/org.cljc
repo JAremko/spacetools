@@ -225,8 +225,7 @@
                                            (table-row-str row cols-w))
                                          "")
                                        "|"))
-                                vrep)))
-         "\n")))
+                                vrep))))))
 
 
 (defn- fmt-cell-content
