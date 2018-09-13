@@ -473,34 +473,62 @@
 
 ;;;; "handmade" human-friendly constructors
 
-;; (defn unordered-list
-;;   "Unordered \"plain-list\" node constructor."
-;;   [items])
-
-
-;; (defn ordered-list
-;;   "ordered \"plain-list\" node constructor."
-;;   [items])
-
-
 ;; (defn table
 ;;   "ordered \"plain-list\" node constructor."
 ;;   [items])
 
 
-;; (defn headline
-;;   "ordered \"plain-list\" node constructor."
-;;   [items])
+;; headline
+
+(s/fdef headline
+  :args  (s/cat :value :spacedoc.data.node.headline/value
+                :children (s/+ ::headline-child))
+  :ret  ::headline)
 
 
-;; (defn description
-;;   "\"Description\" node constructor"
-;;   [items])
+(defn headline
+  "\"headline\" node constructor."
+  [value & children]
+  {:pre [(s/valid? :spacedoc.data.node.headline/value value)
+         (s/valid? :spacedoc.data.node.headline/children (vec children))]
+   :post [(s/valid? ::headline %)]}
+  {:tag :headline :value value :children (vec children)})
 
 
-;; (defn todo
-;;   "ordered \"plain-list\" node constructor."
-;;   [items])
+;; todo
+
+(s/fdef todo
+  :args  (s/cat :value :spacedoc.data.node.todo/value
+                :children (s/* ::headline-child))
+  :ret  ::todo)
+
+
+(defn todo
+  "\"todo\" node constructor."
+  [value & children]
+  {:pre [(s/valid? :spacedoc.data.node.todo/value value)
+         (s/valid? :spacedoc.data.node.todo/children (vec children))]
+   :post [(s/valid? ::todo %)]}
+  {:tag :todo :value value :children (vec children)})
+
+
+;; description
+
+(s/fdef description
+  :args  (s/cat :children (s/+ ::headline-child))
+  :ret  ::description)
+
+
+(defn description
+  "\"description\" node constructor."
+  [& children]
+  {:pre [(s/valid? :spacedoc.data.node.description/children (vec children))]
+   :post [(s/valid? ::description %)]}
+  {:tag :description
+   :value "Description"
+   :level 1
+   :path-id "description"
+   :children (vec children)})
 
 
 ;; link
@@ -525,3 +553,65 @@
      :type link-type
      :raw-link link
      :children (vec children)}))
+
+
+;; plain-list
+
+(defn- make-list-item
+  [item-type idx item]
+  {:tag :list-item
+   :type item-type
+   :bullet (if (= item-type :unordered) "- " (str (inc idx) ". "))
+   :checkbox nil
+   :children [{:tag :item-children :children item}]})
+
+
+(s/fdef unordered-list
+  :args (s/with-gen (s/cat :items :spacedoc.data.node.item-children/children)
+          #(gen/vector (s/gen :spacedoc.data.node.item-children/children) 1 3))
+  :ret ::plain-list)
+
+
+(defn unordered-list
+  "Unordered \"plain-list\" node constructor.
+  Usage:
+  (unordered-list
+    [(text \"foo\") (text \"bar\")]
+    ...
+    [(bold (text \"qux\"))])"
+  [& items]
+  {:tag :plain-list
+   :type :unordered
+   :children (into [] (map-indexed (partial make-list-item :unordered)) items)})
+
+
+(s/fdef ordered-list
+  :args (s/with-gen (s/cat :items :spacedoc.data.node.item-children/children)
+          #(gen/vector (s/gen :spacedoc.data.node.item-children/children) 1 3))
+  :ret ::plain-list)
+
+
+(defn ordered-list
+  "ordered \"plain-list\" node constructor.
+  Usage:
+  (ordered-list
+   [(text \"foo\") (text \"bar\")]
+   ...
+   [(bold (text \"qux\"))])"
+  [& items]
+  {:tag :plain-list
+   :type :ordered
+   :children (into [] (map-indexed (partial make-list-item :ordered)) items)})
+
+
+;; TODO: Add `:descriptive` list constructor.
+;; `:descriptive` lists have `::list-item`s with optional `::item-tag`.
+;; Arguments of the constructor can be something like this:
+;; [<item-child>..]
+;; ...
+;; {<item-tag> [<item-child>...]} <- item-tag is a vector or string.
+;; ...
+;; [<item-child>...]
+
+;; NOTE: We don't use checkboxes because GitHub doesn't support them
+;;       But they can be added in a similar way to `::item-tag`s.

@@ -97,6 +97,6 @@
           ~(vec (flatten (replace {'children ['& 'children]}  arg-tmpl)))
           ;; pre/post conditions
           {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-ks ret-tmpl)
-           #_ :post #_ [(s/valid? ~k ~'%)]}
+           :post [(s/valid? ~k ~'%)]}
           ;; Returned value
           ~(merge {:tag tag} (zipmap (mapv u/unqualify q-ks) ret-tmpl)))))))

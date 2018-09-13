@@ -2,7 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [spacedoc.data.node :refer :all]
-            [spacedoc.shared :refer [samples]]))
+            [spacedoc.shared :refer [samples]]
+            [clojure.spec.gen.alpha :as gen]))
 
 
 (doall

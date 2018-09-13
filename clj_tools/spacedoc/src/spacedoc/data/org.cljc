@@ -214,18 +214,14 @@
 (defmethod sdn->org :table
   [table]
   (let [[cols-w & vrep] (table->vec-rep table)]
-    (str "\n"
-         (indent-str table-indentation
-                     (join "\n"
-                           (map (fn [row]
-                                  (str "|"
-                                       (if (seq cols-w)
-                                         (if (empty? row)
-                                           (table-rule-str cols-w)
-                                           (table-row-str row cols-w))
-                                         "")
-                                       "|"))
-                                vrep))))))
+    (->> vrep
+         (map #(cond (empty? cols-w) ""
+                     (empty? %) (table-rule-str cols-w)
+                     :else (table-row-str % cols-w)))
+         (map (partial format "|%s|"))
+         (join "\n")
+         (indent-str table-indentation)
+         (str "\n"))))
 
 
 (defn- fmt-cell-content
