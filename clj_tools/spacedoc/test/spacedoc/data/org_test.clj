@@ -1,6 +1,9 @@
 (ns spacedoc.data.org-test
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
             [spacedoc.data :as data]
             [spacedoc.data.org :refer :all]
             [spacedoc.shared :refer [samples]]))
@@ -30,10 +33,13 @@
  (for [v (filter (complement indirect-nodes) (data/all-tags))
        :let [node-name (name v)]]
    (eval
-    `(deftest ~(symbol (str node-name "-node->org-string"))
-       (testing (format (str "Any valid \"%s\" node can "
-                             "be exported to org format.")
-                        ~node-name)
-         (let [node-spec# (s/get-spec (data/tag->spec-k ~v))
-               samples# (map first (s/exercise node-spec# (samples 10)))]
-           (is (every? #(invariants % (sdn->org %)) samples#))))))))
+    `(binding [s/*recursion-limit* 2]
+       (defspec ~(symbol (str node-name "-node->org-string"))
+         ~(samples 10)
+         (testing (format (str "Any valid \"%s\" node can "
+                               "be exported to the org format.")
+                          ~node-name)
+           ;; TODO To shrink or not to shrink...
+           (prop/for-all [node# (-> ~v data/tag->spec-k s/get-spec s/gen)]
+                         #_ (is (invariants node# (sdn->org node#)))
+                         (invariants node# (sdn->org node#)))))))))

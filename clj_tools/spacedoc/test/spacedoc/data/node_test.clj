@@ -1,14 +1,17 @@
 (ns spacedoc.data.node-test
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
+            [clojure.test.check :as tc]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
             [spacedoc.data.node :refer :all]
-            [spacedoc.shared :refer [samples]]
-            [clojure.spec.gen.alpha :as gen]))
+            [spacedoc.shared :refer [samples make-f-spec-reper]]))
 
 
 (doall
  (for [v (vals (ns-publics 'spacedoc.data.node))
-       :let [f-name (:name (meta v))]
+       :let [f-name (str (:name (meta v)))]
        :when (function? (deref v))]
    (eval
     `(let [f-spec# (s/get-spec ~v)
@@ -38,19 +41,11 @@
 
        ;; [gentest] All node constructors produce valid values?
        (when (and f-spec-args# f-spec-ret#)
-         (deftest ~(symbol (str f-name "-generates-valid-node"))
-           (binding [s/*recursion-limit* 2]
-             (let [ret-spec# (:ret f-spec#)
-                   fails# (filter #(false? (s/valid? ret-spec# (second %)))
-                                  (s/exercise-fn ~v (samples 10)))
-                   f-fail# (first fails#)]
-               (is (= (count fails#) 0)
-                   (format (str "Function `%s` validation failed\n"
-                                "With first fail:\n"
-                                " arguments: %s\n"
-                                " returned value: %s\n"
-                                "Explanation:\n%s\n")
-                           ~v
-                           (vec (first f-fail#))
-                           (second f-fail#)
-                           (s/explain-str ret-spec# (second f-fail#))))))))))))
+         (binding [s/*recursion-limit* 2]
+           (defspec ~(symbol (str f-name "-gentest"))
+             {:num-tests ~(samples 10)
+              :reporter-fn (make-f-spec-reper f-spec-ret# ~v ~f-name)}
+             (testing "The function always returns valid result"
+               (prop/for-all
+                [args# (gen/no-shrink (s/gen f-spec-args#))]
+                (s/valid? f-spec-ret# (apply ~v args#)))))))))))
