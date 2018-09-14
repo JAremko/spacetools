@@ -299,6 +299,18 @@
                                 :spacedoc.data.node.src/value]))
 
 
+;; table-cell node
+
+(s/def :spacedoc.data.node.table-cell/children
+  (s/with-gen (s/coll-of ::inline-element
+                         :kind vector?
+                         :min-count 0
+                         :into [])
+    #(gen/vector (s/gen ::inline-element) 0 3)))
+(defnode ::table-cell
+  (s/keys :req-un [:spacedoc.data.node.table-cell/children]))
+
+
 ;; table-row node
 
 (s/def :spacedoc.data.node.table-row/type #{:rule :standard})
@@ -312,27 +324,37 @@
                                       :spacedoc.data.node.table-row/children]))
 
 
-;; table-cell node
-
-(s/def :spacedoc.data.node.table-cell/children
-  (s/with-gen (s/coll-of ::inline-element
-                         :kind vector?
-                         :min-count 0
-                         :into [])
-    #(gen/vector (s/gen ::inline-element) 0 3)))
-(defnode ::table-cell
-  (s/keys :req-un [:spacedoc.data.node.table-cell/children]))
-
-
 ;; table node
 
 (s/def :spacedoc.data.node.table/type #{:org})
 (s/def :spacedoc.data.node.table/children
-  (s/with-gen (s/coll-of ::table-row
-                         :kind vector?
-                         :min-count 1
-                         :into [])
-    #(gen/vector (s/gen ::table-row) 1 3)))
+  (s/with-gen (s/and (s/coll-of ::table-row
+                                :kind vector?
+                                :min-count 1
+                                :into [])
+                     data/same-row-length?)
+    #(gen/fmap (fn [[cells cells-per-row]]
+                 (mapv
+                  (fn [row-children]
+                    {:tag :table-row
+                     :type :standard
+                     :children (vec row-children)})
+                  (partition
+                   cells-per-row
+                   cells-per-row
+                   ;; FIXME Split out `:rule` rows into separate thing.
+                   (repeatedly (constantly {:tag :table-cell :children []}))
+                   cells)))
+               (gen/tuple
+                (gen/vector
+                 (gen/one-of
+                  [(gen/return {:tag :table-cell
+                                :type :rule
+                                :children []})
+                   (s/gen ::table-cell)])
+                 1
+                 6)
+                (gen/elements (range 1 3))))))
 (defnode ::table "`table`"
   (s/keys :req-un [:spacedoc.data.node.table/type
                    :spacedoc.data.node.table/children]))

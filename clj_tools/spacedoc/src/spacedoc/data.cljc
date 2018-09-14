@@ -97,6 +97,24 @@
           (r/map node-relations parents)))
 
 
+;;;; Table stuff
+
+(defn same-row-length?
+  "Returns true if each row of the table has same amount of cells."
+  [table-children]
+  (let [t-c (remove #(#{:rule} (:type %)) table-children)]
+    (or (empty? t-c)
+        (apply = (map #(count (:children %)) t-c)))))
+
+#_ (same-row-length?
+    [{:tag :table-row
+      :type :rule
+      :children [{:tag :table-cell :children [{:tag :text :value "s"}]}
+                 {:tag :table-cell :children [{:tag :text :value "s"}]}]}
+     {:tag :table-row
+      :children [{:tag :table-cell :children [{:tag :text :value "s"}]}]}])
+
+
 ;;;; Headline stuff
 
 (defn path-id?
