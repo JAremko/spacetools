@@ -1,5 +1,6 @@
 (ns spacedoc.data.org-test
-  (:require [clojure.spec.alpha :as s]
+  (:require #_ [clojure.spec.gen.alpha :as gen]
+            [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
@@ -39,7 +40,9 @@
          (testing (format (str "Any valid \"%s\" node can "
                                "be exported to the org format.")
                           ~node-name)
-           ;; TODO To shrink or not to shrink...
-           (prop/for-all [node# (-> ~v data/tag->spec-k s/get-spec s/gen)]
-                         #_ (is (invariants node# (sdn->org node#)))
+           (prop/for-all [node# (-> ~v
+                                    (data/tag->spec-k)
+                                    (s/get-spec)
+                                    (s/gen)
+                                    (gen/no-shrink))]
                          (invariants node# (sdn->org node#)))))))))

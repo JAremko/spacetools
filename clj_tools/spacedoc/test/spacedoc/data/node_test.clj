@@ -1,5 +1,6 @@
 (ns spacedoc.data.node-test
-  (:require [clojure.spec.alpha :as s]
+  (:require #_ [clojure.spec.gen.alpha :as gen]
+            [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -47,5 +48,7 @@
               :reporter-fn (make-f-spec-reper f-spec-ret# ~v ~f-name)}
              (testing "The function always returns valid result"
                (prop/for-all
-                [args# (gen/no-shrink (s/gen f-spec-args#))]
+                [args# (-> f-spec-args#
+                           (s/gen)
+                           (gen/no-shrink))]
                 (s/valid? f-spec-ret# (apply ~v args#)))))))))))
