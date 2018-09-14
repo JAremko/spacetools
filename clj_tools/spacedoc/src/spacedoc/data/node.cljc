@@ -8,7 +8,7 @@
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [spacedoc.data :as data]
-            [spacedoc.data.node-impl :refer [defnode]]))
+            [spacedoc.data.node-impl :refer [defnode defnode*]]))
 
 
 ;;;; General specs
@@ -158,10 +158,10 @@
                          :min-count 0
                          :into [])
     #(gen/vector (s/gen ::inline-element) 0 3)))
-(defnode ::link "`link`" (s/keys :req-un [:spacedoc.data.node.link/path
-                                          :spacedoc.data.node.link/type
-                                          :spacedoc.data.node.link/raw-link
-                                          :spacedoc.data.node.link/children]))
+(defnode* ::link (s/keys :req-un [:spacedoc.data.node.link/path
+                                  :spacedoc.data.node.link/type
+                                  :spacedoc.data.node.link/raw-link
+                                  :spacedoc.data.node.link/children]))
 
 
 ;; paragraph node
@@ -261,7 +261,7 @@
                          :min-count 1
                          :into [])
     #(gen/vector (s/gen ::list-item) 1 3)))
-(defnode ::feature-list
+(defnode* ::feature-list
   (s/keys :req-un [:spacedoc.data.node.feature-list/type
                    :spacedoc.data.node.feature-list/children]))
 
@@ -275,7 +275,7 @@
                          :min-count 1
                          :into [])
     #(gen/vector (s/gen ::list-item) 1 3)))
-(defnode ::plain-list "`ordered-list` and `unordered-list`."
+(defnode* ::plain-list
   (s/keys :req-un [:spacedoc.data.node.plain-list/type
                    :spacedoc.data.node.plain-list/children]))
 
@@ -355,7 +355,7 @@
                  1
                  6)
                 (gen/elements (range 1 3))))))
-(defnode ::table "`table`"
+(defnode* ::table
   (s/keys :req-un [:spacedoc.data.node.table/type
                    :spacedoc.data.node.table/children]))
 
@@ -434,7 +434,7 @@
                          :into [])
     #(gen/vector-distinct (s/gen ::headline-child)
                           {:min-elements 1 :max-elements 2 :max-tries 100})))
-(defnode ::headline "`headline`"
+(defnode* ::headline
   (s/keys :req-un [:spacedoc.data.node.headline/value
                    :spacedoc.data.node.headline/children]
           :opt-un [:spacedoc.data.node.headline/level
@@ -448,7 +448,7 @@
 (s/def :spacedoc.data.node.description/level #{1})
 (s/def :spacedoc.data.node.description/children
   :spacedoc.data.node.headline/children)
-(defnode ::description "`description`"
+(defnode* ::description
   (s/keys :req-un [:spacedoc.data.node.description/value
                    :spacedoc.data.node.description/path-id
                    :spacedoc.data.node.description/level
@@ -467,7 +467,7 @@
                          :kind vector?
                          :into [])
     #(gen/vector (s/gen ::headline-child) 0 2)))
-(defnode ::todo "`todo`"
+(defnode* ::todo
   (s/keys :req-un [:spacedoc.data.node.todo/value]
           :opt-un [:spacedoc.data.node.todo/level
                    :spacedoc.data.node.todo/path-id
