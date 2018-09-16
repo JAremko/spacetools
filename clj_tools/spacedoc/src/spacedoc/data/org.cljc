@@ -33,6 +33,14 @@
 (def ^:private table-indentation 0)
 
 
+(def ^:private toc-depth 4)
+
+
+(def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
+                                  (join (repeatedly 42 (constantly " ")))
+                                  toc-depth))
+
+
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
@@ -78,6 +86,14 @@
            (reduce #(str %1 (if (empty? %2) "\n" %2)) "")))))
 
 
+(defn- conj-toc
+  [root-node-children-vec]
+  {:pre [(s/valid? :spacedoc.data.node.root/children root-node-children-vec)]
+   :post [(s/valid? :spacedoc.data.node.root/children %)]}
+  (let [toc (tree-seq #(n/headline-tags (:tag %)) :children root-node-children-vec)]
+    root-node-children-vec))
+
+
 (defn- length
   "Like `count` but for strings only and accounts for zero-width spaces."
   [^String s]
@@ -113,6 +129,7 @@
 
 
 (defn- conv*
+  "Like `conv` but without joining into single string."
   [node-seq]
   {:pre [((some-fn vector? nil?) node-seq)]}
   (reduce (fn [acc next]
@@ -136,59 +153,59 @@
 
 
 (defn- conv
-[node-seq]
-{:pre [((some-fn vector? nil?) node-seq)]}
-(join (conv* node-seq)))
+  [node-seq]
+  {:pre [((some-fn vector? nil?) node-seq)]}
+  (join (conv* node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
 
 
 (defmethod sdn->org :emphasis-container
-[{:keys [tag children]}]
-(let [token (emphasis-tokens tag)]
-  (str token (conv children) token)))
+  [{:keys [tag children]}]
+  (let [token (emphasis-tokens tag)]
+    (str token (conv children) token)))
 
 
 (defmethod sdn->org :list
-[{children :children}]
-(conv children))
+  [{children :children}]
+  (conv children))
 
 
 (defmethod sdn->org :block-container
-[{:keys [tag children]}]
-(let [{[begin-token end-token] tag} block-container-delims]
-  (str begin-token
-       ;; NOTE: We don't "hard-code" indentation into sections
-       (indent-str (if (= tag :section) 0 beging-end-indentation)
-                   (conv children))
-       end-token)))
+  [{:keys [tag children]}]
+  (let [{[begin-token end-token] tag} block-container-delims]
+    (str begin-token
+         ;; NOTE: We don't "hard-code" indentation into sections
+         (indent-str (if (= tag :section) 0 beging-end-indentation)
+                     (conv children))
+         end-token)))
 
 
 ;;;; Individual nodes (one to one).
 
 
 (defmethod sdn->org :paragraph
-[{children :children}]
-(conv children))
+  [{children :children}]
+  (conv children))
 
 
 (defn table->vec-rep
-[{rows :children}]
-{:pre [((some-fn vector? nil?) rows)]}
-(let [vec-tab (mapv
-               (fn [{type :type cells :children}]
-                 (if (= type :standard)
-                   (mapv #(str " " (conv (:children %)) " ") cells)
-                   []))
-               rows)
-      cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
-               (apply mapv
-                      (fn [& cols]
-                        (apply max (map length cols)))
-                      ne-vec-tab)
-               [])]
-  (vec (concat [cols-w] vec-tab))))
+  [{rows :children}]
+  {:pre [((some-fn vector? nil?) rows)]}
+  (let [vec-tab (mapv
+                 (fn [{type :type cells :children}]
+                   (if (= type :standard)
+                     (mapv #(str " " (conv (:children %)) " ") cells)
+                     []))
+                 rows)
+        cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
+                 (apply mapv
+                        (fn [& cols]
+                          (apply max (map length cols)))
+                        ne-vec-tab)
+                 [])]
+    (vec (concat [cols-w] vec-tab))))
 
 
 (defn- table-rule-str
@@ -202,10 +219,10 @@
   {:pre [(vector? row)
          (s/valid? (s/coll-of pos-int?) cols-w)]}
   (join "|"
-        (map (fn [column-width cell-s]
-               (str cell-s
+        (map (fn [column-width cell-str]
+               (str cell-str
                     (join (repeat (- column-width
-                                     (length cell-s))
+                                     (length cell-str))
                                   " "))))
              cols-w
              row)))
@@ -215,7 +232,8 @@
   [table]
   (let [[cols-w & vrep] (table->vec-rep table)]
     (->> vrep
-         (map #(cond (empty? cols-w) ""
+         (map #(cond (empty? cols-w) "" ;; <- no cols
+                     ;; Empty cols are rulers.
                      (empty? %) (table-rule-str cols-w)
                      :else (table-row-str % cols-w)))
          (map (partial format "|%s|"))
@@ -240,6 +258,7 @@
   [{:keys [type children]}]
   (if (= type :standard)
     (str "| " (join " |" (conv* children)) " |")
+    ;; Ruler prefix.
     "|-"))
 
 
@@ -257,11 +276,10 @@
   (let [itag (some->> item-tag
                       (:children)
                       (conv))]
-    (str (apply str
-                b
-                (if itag (format "%s :: " itag) "")
-                (str/trim (indent-str list-indentation (conv children))))
-         "\n")))
+    (apply str
+           b
+           (if itag (format "%s :: " itag) "")
+           (str/trim (indent-str list-indentation (conv children))))))
 
 
 (defmethod sdn->org :example
@@ -330,4 +348,7 @@
 
 (defmethod sdn->org :root
   [{children :children}]
-  (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %) children)))
+  (some->> children
+           (conj-toc)
+           (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
+           (conv)))
