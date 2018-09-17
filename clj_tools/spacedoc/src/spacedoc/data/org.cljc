@@ -33,7 +33,7 @@
 (def ^:private table-indentation 0)
 
 
-(def ^:private toc-depth 4)
+(def ^:private toc-depth (data/max-headline-depth))
 
 
 (def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
@@ -87,7 +87,7 @@
 
 
 (defn- conj-toc
-  [root]
+  [{children :children :as root}]
   {:pre [(s/valid? :spacedoc.data.node/root root)]
    :post [(s/valid? :spacedoc.data.node/root %)]}
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
@@ -107,18 +107,16 @@
                 (inner id->count headline))))
           (hl->toc-el [{:keys [value children]} id->count]
             (n/unordered-list
-             (vec (list* (n/text (data/hl-val->gh-id-base value))
+             (vec (list* (n/link (data/hl-val->gh-id-base value) (n/text value))
                          (n/line-break)
                          (some->> children seq)))))]
-    (let [toc (->> root
-                   :children
+    (let [toc (->> children
                    (filter hl?)
                    (map (partial walk hl->toc-el))
                    (apply n/section)
-                   (n/headline toc-hl-val))]
-      (do
-        (println (sdn->org toc))
-        root))))
+                   (n/headline toc-hl-val))
+          [b-toc a-toc] (split-with (complement hl?) children)]
+      (assoc root :children (vec (concat b-toc [toc] a-toc))))))
 
 
 (defn- length
