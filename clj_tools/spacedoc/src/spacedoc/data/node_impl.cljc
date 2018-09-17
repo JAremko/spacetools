@@ -19,8 +19,8 @@
         ;; Everything else here
 
         ;; Always last
-        :children (Integer/MAX_VALUE)}
-       0)))
+        :children (Integer/MAX_VALUE)})
+      0))
 
 
 (defn- map-spec->keys
