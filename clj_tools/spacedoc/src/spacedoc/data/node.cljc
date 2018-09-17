@@ -496,10 +496,6 @@
 
 ;;;; "handmade" human-friendly constructors
 
-;; (defn table
-;;   "ordered \"plain-list\" node constructor."
-;;   [items])
-
 
 ;; headline
 
