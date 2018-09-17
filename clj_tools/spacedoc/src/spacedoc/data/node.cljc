@@ -599,6 +599,8 @@
     ...
     [(bold (text \"qux\"))])"
   [& items]
+  {:pre [(every? vector? items)]
+   :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :unordered
    :children (into [] (map-indexed (partial make-list-item :unordered)) items)})
@@ -618,6 +620,8 @@
    ...
    [(bold (text \"qux\"))])"
   [& items]
+  {:pre [(every? vector? items)]
+   :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :ordered
    :children (into [] (map-indexed (partial make-list-item :ordered)) items)})

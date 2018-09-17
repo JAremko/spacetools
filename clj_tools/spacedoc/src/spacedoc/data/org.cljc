@@ -87,11 +87,38 @@
 
 
 (defn- conj-toc
-  [root-node-children-vec]
-  {:pre [(s/valid? :spacedoc.data.node.root/children root-node-children-vec)]
-   :post [(s/valid? :spacedoc.data.node.root/children %)]}
-  (let [toc (tree-seq #(n/headline-tags (:tag %)) :children root-node-children-vec)]
-    root-node-children-vec))
+  [root]
+  {:pre [(s/valid? :spacedoc.data.node/root root)]
+   :post [(s/valid? :spacedoc.data.node/root %)]}
+  (letfn [(hl? [node] (n/headline-tags (:tag node)))
+          (walk [post-f headline]
+            (let [id->count (transient {})]
+              (letfn [(inner [i->c hl]
+                        (let [gid (data/hl-val->gh-id-base (:value hl))
+                              new-i->c (assoc! i->c gid (inc (i->c gid 0)))]
+                          (post-f (update
+                                   hl
+                                   :children
+                                   #(some->> %
+                                             (filter hl?)
+                                             (seq)
+                                             (mapv (partial inner new-i->c))))
+                                  id->count)))]
+                (inner id->count headline))))
+          (hl->toc-el [{:keys [value children]} id->count]
+            (n/unordered-list
+             (vec (list* (n/text (data/hl-val->gh-id-base value))
+                         (n/line-break)
+                         (some->> children seq)))))]
+    (let [toc (->> root
+                   :children
+                   (filter hl?)
+                   (map (partial walk hl->toc-el))
+                   (apply n/section)
+                   (n/headline toc-hl-val))]
+      (do
+        (println (sdn->org toc))
+        root))))
 
 
 (defn- length
@@ -101,174 +128,174 @@
 
 
 (defn- tag->kind
-  [tag]
-  (some->> kinds
-           (filter #((key %) tag))
-           (first)
-           (val)))
+[tag]
+(some->> kinds
+         (filter #((key %) tag))
+         (first)
+         (val)))
 
 
 (defn- nl-wrap?
-  [node-tag]
-  {:pre [(keyword? node-tag)]}
-  (and
-   (not (#{:plain-list :feature-list} node-tag))
-   (#{:block :headline} (tag->kind node-tag))))
+[node-tag]
+{:pre [(keyword? node-tag)]}
+(and
+ (not (#{:plain-list :feature-list} node-tag))
+ (#{:block :headline} (tag->kind node-tag))))
 
 
 (defn- nl-after?
-  [node-tag]
-  {:pre [(keyword? node-tag)]}
-  (#{:block :headline} (tag->kind node-tag)))
+[node-tag]
+{:pre [(keyword? node-tag)]}
+(#{:block :headline} (tag->kind node-tag)))
 
 
 (defn- nl-between?
-  [first-node-tag second-node-tag]
-  {:pre [(every? keyword? [first-node-tag second-node-tag])]}
-  (= :paragraph first-node-tag second-node-tag))
+[first-node-tag second-node-tag]
+{:pre [(every? keyword? [first-node-tag second-node-tag])]}
+(= :paragraph first-node-tag second-node-tag))
 
 
 (defn- conv*
-  "Like `conv` but without joining into single string."
-  [node-seq]
-  {:pre [((some-fn vector? nil?) node-seq)]}
-  (reduce (fn [acc next]
-            (let [h-t (:head-tag (meta acc))
-                  b-s (last acc)
-                  n-s (sdn->org next)]
-              (with-meta
-                (conj acc
-                      ;; Figuring out how to separate children
-                      (str (cond
-                             (not (and b-s n-s)) ""
-                             (nl-between? h-t (:tag next)) "\n"
-                             (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
-                             (not (or (data/seps (last b-s))
-                                      (data/seps (first n-s)))) " "
-                             :else "")
-                           n-s))
-                {:head-tag (:tag next)})))
-          []
-          node-seq))
+"Like `conv` but without joining into single string."
+[node-seq]
+{:pre [((some-fn vector? nil?) node-seq)]}
+(reduce (fn [acc next]
+          (let [h-t (:head-tag (meta acc))
+                b-s (last acc)
+                n-s (sdn->org next)]
+            (with-meta
+              (conj acc
+                    ;; Figuring out how to separate children
+                    (str (cond
+                           (not (and b-s n-s)) ""
+                           (nl-between? h-t (:tag next)) "\n"
+                           (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
+                           (not (or (data/seps (last b-s))
+                                    (data/seps (first n-s)))) " "
+                           :else "")
+                         n-s))
+              {:head-tag (:tag next)})))
+        []
+        node-seq))
 
 
 (defn- conv
-  [node-seq]
-  {:pre [((some-fn vector? nil?) node-seq)]}
-  (join (conv* node-seq)))
+[node-seq]
+{:pre [((some-fn vector? nil?) node-seq)]}
+(join (conv* node-seq)))
 
 
 ;;;; Groups of nodes (many to one).
 
 
 (defmethod sdn->org :emphasis-container
-  [{:keys [tag children]}]
-  (let [token (emphasis-tokens tag)]
-    (str token (conv children) token)))
+[{:keys [tag children]}]
+(let [token (emphasis-tokens tag)]
+  (str token (conv children) token)))
 
 
 (defmethod sdn->org :list
-  [{children :children}]
-  (conv children))
+[{children :children}]
+(conv children))
 
 
 (defmethod sdn->org :block-container
-  [{:keys [tag children]}]
-  (let [{[begin-token end-token] tag} block-container-delims]
-    (str begin-token
-         ;; NOTE: We don't "hard-code" indentation into sections
-         (indent-str (if (= tag :section) 0 beging-end-indentation)
-                     (conv children))
-         end-token)))
+[{:keys [tag children]}]
+(let [{[begin-token end-token] tag} block-container-delims]
+  (str begin-token
+       ;; NOTE: We don't "hard-code" indentation into sections
+       (indent-str (if (= tag :section) 0 beging-end-indentation)
+                   (conv children))
+       end-token)))
 
 
 ;;;; Individual nodes (one to one).
 
 
 (defmethod sdn->org :paragraph
-  [{children :children}]
-  (conv children))
+[{children :children}]
+(conv children))
 
 
 (defn table->vec-rep
-  [{rows :children}]
-  {:pre [((some-fn vector? nil?) rows)]}
-  (let [vec-tab (mapv
-                 (fn [{type :type cells :children}]
-                   (if (= type :standard)
-                     (mapv #(str " " (conv (:children %)) " ") cells)
-                     []))
-                 rows)
-        cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
-                 (apply mapv
-                        (fn [& cols]
-                          (apply max (map length cols)))
-                        ne-vec-tab)
-                 [])]
-    (vec (concat [cols-w] vec-tab))))
+[{rows :children}]
+{:pre [((some-fn vector? nil?) rows)]}
+(let [vec-tab (mapv
+               (fn [{type :type cells :children}]
+                 (if (= type :standard)
+                   (mapv #(str " " (conv (:children %)) " ") cells)
+                   []))
+               rows)
+      cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
+               (apply mapv
+                      (fn [& cols]
+                        (apply max (map length cols)))
+                      ne-vec-tab)
+               [])]
+  (vec (concat [cols-w] vec-tab))))
 
 
 (defn- table-rule-str
-  [cols-w]
-  {:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
-  (join "+" (map #(join (repeat % "-")) cols-w)))
+[cols-w]
+{:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
+(join "+" (map #(join (repeat % "-")) cols-w)))
 
 
 (defn- table-row-str
-  [row cols-w]
-  {:pre [(vector? row)
-         (s/valid? (s/coll-of pos-int?) cols-w)]}
-  (join "|"
-        (map (fn [column-width cell-str]
-               (str cell-str
-                    (join (repeat (- column-width
-                                     (length cell-str))
-                                  " "))))
-             cols-w
-             row)))
+[row cols-w]
+{:pre [(vector? row)
+       (s/valid? (s/coll-of pos-int?) cols-w)]}
+(join "|"
+      (map (fn [column-width cell-str]
+             (str cell-str
+                  (join (repeat (- column-width
+                                   (length cell-str))
+                                " "))))
+           cols-w
+           row)))
 
 
 (defmethod sdn->org :table
-  [table]
-  (let [[cols-w & vrep] (table->vec-rep table)]
-    (->> vrep
-         (map #(cond (empty? cols-w) "" ;; <- no cols
-                     ;; Empty cols are rulers.
-                     (empty? %) (table-rule-str cols-w)
-                     :else (table-row-str % cols-w)))
-         (map (partial format "|%s|"))
-         (join "\n")
-         (indent-str table-indentation)
-         (str "\n"))))
+[table]
+(let [[cols-w & vrep] (table->vec-rep table)]
+  (->> vrep
+       (map #(cond (empty? cols-w) "" ;; <- no cols
+                   ;; Empty cols are rulers.
+                   (empty? %) (table-rule-str cols-w)
+                   :else (table-row-str % cols-w)))
+       (map (partial format "|%s|"))
+       (join "\n")
+       (indent-str table-indentation)
+       (str "\n"))))
 
 
 (defn- fmt-cell-content
-  "FIXME: Tables shouldn't have newlines or pipes
+"FIXME: Tables shouldn't have newlines or pipes
   but silently removing them is sub-optimal."
-  [t-c-children-str]
-  (str/replace t-c-children-str #"\n|\|" " "))
+[t-c-children-str]
+(str/replace t-c-children-str #"\n|\|" " "))
 
 
 (defmethod sdn->org :table-cell
-  [{children :children}]
-  (fmt-cell-content (conv children)))
+[{children :children}]
+(fmt-cell-content (conv children)))
 
 
 (defmethod sdn->org :table-row
-  [{:keys [type children]}]
-  (if (= type :standard)
-    (str "| " (join " |" (conv* children)) " |")
-    ;; Ruler prefix.
-    "|-"))
+[{:keys [type children]}]
+(if (= type :standard)
+  (str "| " (join " |" (conv* children)) " |")
+  ;; Ruler prefix.
+  "|-"))
 
 
 (defmethod sdn->org :link
-  [{:keys [raw-link children]}]
-  (format "[[%s]%s]"
-          raw-link
-          (if (seq children)
-            (format "[%s]" (conv children))
-            "")))
+[{:keys [raw-link children]}]
+(format "[[%s]%s]"
+        raw-link
+        (if (seq children)
+          (format "[%s]" (conv children))
+          "")))
 
 
 (defmethod sdn->org :list-item
@@ -347,8 +374,9 @@
 
 
 (defmethod sdn->org :root
-  [{children :children}]
-  (some->> children
-           (conj-toc)
-           (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
-           (conv)))
+  [root]
+  (->> root
+       (conj-toc)
+       (:children)
+       (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
+       (conv)))

@@ -9,7 +9,6 @@
 
 (def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
 
-
 (def link-type->prefix {:file "file:"
                         :http "http://"
                         :https "https://"
@@ -117,18 +116,9 @@
 
 ;;;; Headline stuff
 
-(defn path-id?
-  [val]
-  (and
-   (string? val)
-   (re-matches
-    ;; forgive me Father for I have sinned
-    #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-    val)))
-
-
 (defn hl-val->gh-id-base
   [hl-value]
+  {:pre [(string? hl-value) (not-empty hl-value)]}
   (str "#"
        (-> hl-value
            (str/replace " " "-")
@@ -145,16 +135,38 @@
       (str/replace #"\s+" "_")))
 
 
+(defn path-id?
+  [val]
+  (and
+   (string? val)
+   (re-matches
+    ;; forgive me Father for I have sinned
+    #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+    val)))
+
+
+(s/def ::filled-headline
+  (s/keys :req-un [:spacedoc.data.node.headline/value
+                   :spacedoc.data.node.headline/children
+                   :spacedoc.data.node.headline/level
+                   :spacedoc.data.node.headline/path-id]))
+
+
 (defn fill-hl
   "Give Headline placeholder a proper tag and fill all necessary key-vals."
   ([{tag :tag value :value :as headline}]
-   {:post [(s/valid? (node->spec-k %) %)]}
+   {:pre [(keyword? tag)
+          (s/valid? (tag->spec-k tag) headline)]
+    :post [(s/valid? (node->spec-k %) %)]}
    (assoc headline
           :level 1
           :path-id (hl-val->path-id-frag value)))
-  ([{p-level :level p-path-id :path-id :as parent-headline}
+  ([{p-tag :tag p-level :level p-path-id :path-id :as parent-headline}
     {tag :tag value :value :as headline}]
-   {:post [(s/valid? (node->spec-k %) %)]}
+   {:pre [(s/valid? ::filled-headline parent-headline)
+          (keyword? tag)
+          (s/valid? (tag->spec-k tag) headline)]
+    :post [(s/valid? (node->spec-k %) %)]}
    (let [hl-level (inc p-level)]
      (assoc headline
             :level hl-level
