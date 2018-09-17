@@ -10,17 +10,17 @@
   [sdn-key]
   {:pre [(keyword? sdn-key)(u/unqualified-ident? sdn-key)]
    :post [(integer? %)]}
-  (or (sdn-key
-       {:tag (Integer/MIN_VALUE)
-        :key (inc Integer/MIN_VALUE)
-        :value (+ 2 (Integer/MIN_VALUE))
-        :type -2
-        :path -1
-        ;; Everything else here
+  (sdn-key
+   {:tag (Integer/MIN_VALUE)
+    :key (inc Integer/MIN_VALUE)
+    :value (+ 2 (Integer/MIN_VALUE))
+    :type -2
+    :path -1
+    ;; Everything else here
 
-        ;; Always last
-        :children (Integer/MAX_VALUE)})
-      0))
+    ;; Always last
+    :children (Integer/MAX_VALUE)}
+   0))
 
 
 (defn- map-spec->keys
