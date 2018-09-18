@@ -33,12 +33,12 @@
 (def ^:private table-indentation 0)
 
 
-(def ^:private toc-depth data/max-headline-depth)
+(def ^:private toc-max-depth 4)
 
 
 (def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
                                   (join (repeatedly 42 (constantly " ")))
-                                  toc-depth))
+                                  toc-max-depth))
 
 
 (def indirect-nodes
@@ -91,35 +91,39 @@
   {:pre [(s/valid? :spacedoc.data.node/root root)]
    :post [(s/valid? :spacedoc.data.node/root %)]}
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
+          (hl->gid-base [headlin] (data/hl-val->gh-id-base (:value headlin)))
           (gh-id [gid-base cnt] (if (> cnt 1)
                                   (str gid-base "-" (dec cnt))
                                   gid-base))
           (hls->toc [headlines]
+            ;; NOTE: Could've use something like state monad.
+            ;;       Cats have it. But it will reduce readability
+            ;;       for no apparent benefits since `atom` doesn't leak.
             (let [*gid->count (atom {})]
               (letfn [(up-*gid->count! [hl]
-                        (let [gid-base (data/hl-val->gh-id-base (:value hl))]
-                          ((swap! *gid->count
-                                  update
-                                  gid-base
-                                  #(if % (inc %) 1))
-                           (data/hl-val->gh-id-base (:value hl)))))
+                        (let [gid-base (hl->gid-base hl)]
+                          ((swap! *gid->count update gid-base #(if % (inc %) 1))
+                           gid-base)))
                       (hl->toc-el [{:keys [value gh-id children]}]
                         (n/unordered-list
                          (vec (list* (n/link gh-id (n/text value))
                                      (n/line-break)
                                      (some->> children seq)))))
-                      (inner [hl]
+                      (inner [depth hl]
                         (-> hl
-                            (assoc :gh-id (gh-id
-                                           (data/hl-val->gh-id-base (:value hl))
-                                           (up-*gid->count! hl)))
+                            (assoc :gh-id
+                                   (gh-id
+                                    (hl->gid-base hl)
+                                    (up-*gid->count! hl)))
                             (update :children
-                                    #(some->> %
-                                              (filter hl?)
-                                              (seq)
-                                              (mapv inner)))
+                                    #(when (<= depth toc-max-depth)
+                                       (some->>
+                                        %
+                                        (filter hl?)
+                                        (seq)
+                                        (mapv (partial inner (inc depth))))))
                             hl->toc-el))]
-                (mapv inner headlines))))]
+                (mapv (partial inner 1) headlines))))]
     (let [toc (->> children
                    (filter hl?)
                    (hls->toc)
