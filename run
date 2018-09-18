@@ -79,8 +79,9 @@ format)
     emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     echo_headline "Importing documentation back into .org format:"
     sdn orgify /opt/spacedoc/emacs_tools/export/target/ /tmp/target/
-    echo_headline "Overwriting old documentation files:"
-    rsync -avh /tmp/target/ "${first_arg}" > /dev/null
+    echo_headline "Overwriting old documentation files."
+    OWNER=$(stat -c "%U:%G" "${first_arg}")
+    rsync  -a --chown="${OWNER}" \/tmp/target/ "${first_arg}"
     exit $?
     ;;
 *)
