@@ -69,16 +69,19 @@ validate)
     emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     echo_headline "Validating documentation:"
     sdn validate /opt/spacedoc/emacs_tools/export/target/
+    exit $?
     ;;
 format)
-    echo_headline "Formatting documentation with Emacs tools:"
+    echo_headline "Reformatting documentation with Emacs tools(in place):"
     emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
     rm -rf /opt/spacedoc/emacs_tools/export/target/*
     echo_headline "Exporting documentation for formatting with Clojure tools:"
     emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     echo_headline "Importing documentation back into .org format:"
     sdn orgify /opt/spacedoc/emacs_tools/export/target/ /tmp/target/
-    rsync -avh /tmp/target/ "${first_arg}"
+    echo_headline "Overwriting old documentation files:"
+    rsync -avh /tmp/target/ "${first_arg}" > /dev/null
+    exit $?
     ;;
 *)
    print_help
