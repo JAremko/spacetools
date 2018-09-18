@@ -222,10 +222,10 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information.
 NOTE: In Spacemacs ~code blocks~ are key sequences."
   (format "{:tag :kbd :value %s}"
-          (format "%S"
+          (format "%s"
                   (vconcat
                    (mapcar
-                    'sdnize/esc-str
+                    (lambda (el) (format "\"%s\"" (sdnize/esc-str el)))
                     (split-string
                      (org-element-property :value code)
                      " "
@@ -847,6 +847,7 @@ FIXME: Figure out where they come from :"
 ROOT-DIR is original documentation root directory."
   (cl-letf* ((sdnize-root-dir (file-truename root-dir))
              (org-src-preserve-indentation t)
+             (org-export-with-sub-superscripts nil)
              (default-directory sdnize-root-dir))
     (dolist (in-file file-list)
       (let* ((out-file (concat exp-dir

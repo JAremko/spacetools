@@ -18,9 +18,8 @@
                               #(gen/string-alphanumeric)))
 
 
-;; TODO: Paths(especially URL fragments) can use more precise regexps.
 (s/def ::non-empty-string (s/with-gen
-                            (s/and string? #(re-matches #"^.+$" %))
+                            (s/and string? (complement str/blank?))
                             #(gen/string-alphanumeric)))
 
 

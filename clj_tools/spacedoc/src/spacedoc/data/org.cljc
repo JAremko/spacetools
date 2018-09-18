@@ -1,6 +1,7 @@
 (ns spacedoc.data.org
   "Exporting SDN to .org format."
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.core.match :refer [match]]
+            [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
             [spacedoc.data :as data]
@@ -116,7 +117,7 @@
                                     (hl->gid-base hl)
                                     (up-*gid->count! hl)))
                             (update :children
-                                    #(when (<= depth toc-max-depth)
+                                    #(when (< depth toc-max-depth)
                                        (some->>
                                         %
                                         (filter hl?)
@@ -139,6 +140,13 @@
   (count (str/replace s "\u200B" "")))
 
 
+(defn- viz-len
+  "Returns real visual length of a string.
+  TODO: Make it less hacky."
+  [^String s]
+  (length (str/replace s #"\[.*\[(.*)\]\]" "$1")))
+
+
 (defn- tag->kind
   [tag]
   (some->> kinds
@@ -147,48 +155,51 @@
            (val)))
 
 
-(defn- nl-wrap?
-  [node-tag]
-  {:pre [(keyword? node-tag)]}
-  (and
-   (not (#{:plain-list :feature-list} node-tag))
-   (#{:block :headline} (tag->kind node-tag))))
-
-
-(defn- nl-after?
-  [node-tag]
-  {:pre [(keyword? node-tag)]}
-  (#{:block :headline} (tag->kind node-tag)))
-
-
-(defn- nl-between?
-  [first-node-tag second-node-tag]
-  {:pre [(every? keyword? [first-node-tag second-node-tag])]}
-  (= :paragraph first-node-tag second-node-tag))
-
-
 (defn- conv*
   "Like `conv` but without joining into single string."
   [node-seq]
   {:pre [((some-fn vector? nil?) node-seq)]}
-  (reduce (fn [acc next]
-            (let [h-t (:head-tag (meta acc))
-                  b-s (last acc)
-                  n-s (sdn->org next)]
-              (with-meta
-                (conj acc
-                      ;; Figuring out how to separate children
-                      (str (cond
-                             (not (and b-s n-s)) ""
-                             (nl-between? h-t (:tag next)) "\n"
-                             (or (nl-after? h-t) (nl-wrap? (:tag next))) "\n"
-                             (not (or (data/seps (last b-s))
-                                      (data/seps (first n-s)))) " "
-                             :else "")
-                           n-s))
-                {:head-tag (:tag next)})))
-          []
-          node-seq))
+  (letfn [(nl-before?
+            [node-tag]
+            {:pre [(keyword? node-tag)]}
+            (and
+             (not (#{:plain-list :feature-list} node-tag))
+             (#{:block :headline} (tag->kind node-tag))))
+
+          (nl-after?
+            [node-tag]
+            {:pre [(keyword? node-tag)]}
+            (#{:block :headline} (tag->kind node-tag)))
+
+          (nl-between?
+            [first-node-tag second-node-tag]
+            {:pre [(every? keyword? [first-node-tag second-node-tag])]}
+            (= :paragraph first-node-tag second-node-tag))
+
+          (strs-need-sep?
+            [s1 s2]
+            (let [l-s1-sep? ((disj data/seps \)) (last s1))
+                  f-s2-sep? ((disj data/seps \() (first s2))]
+              (not (or l-s1-sep? f-s2-sep?))))]
+    (reduce (fn [acc next]
+              (let [h-t (:head-tag (meta acc))
+                    b-s (last acc)
+                    n-s (sdn->org next)
+                    n-t (:tag next)]
+                (with-meta
+                  (conj acc
+                        ;; Figuring out how to separate children
+                        (str (cond
+                               (= :text h-t n-t) "" ;; <- fix for ^ and _
+                               (not (and b-s n-s)) ""
+                               (nl-between? h-t n-t) "\n"
+                               (or (nl-after? h-t) (nl-before? n-t)) "\n"
+                               (strs-need-sep? b-s n-s) " "
+                               :else "")
+                             n-s))
+                  {:head-tag n-t})))
+            []
+            node-seq)))
 
 
 (defn- conv
@@ -261,7 +272,7 @@
         (map (fn [column-width cell-str]
                (str cell-str
                     (join (repeat (- column-width
-                                     (length cell-str))
+                                     (viz-len cell-str))
                                   " "))))
              cols-w
              row)))

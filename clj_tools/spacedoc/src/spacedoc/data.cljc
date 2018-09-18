@@ -7,7 +7,7 @@
             [spacedoc.util :as u]))
 
 
-(def seps  #{\! \? \: \; \( \) \{ \} \, \. \- \\ \newline \space \tab})
+(def seps  #{\! \? \: \( \) \; \{ \} \, \. \- \\ \newline \space \tab})
 
 (def link-type->prefix {:file "file:"
                         :http "http://"
