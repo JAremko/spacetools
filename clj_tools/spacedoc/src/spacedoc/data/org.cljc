@@ -84,7 +84,7 @@
     (let [ind (apply str (repeat indent-level " "))]
       (->> (str/split-lines s)
            (map #(str ind % "\n"))
-           (reduce #(str %1 (if (empty? %2) "\n" %2)) "")))))
+           (reduce #(str %1 (if (str/blank? %2) "\n" %2)) "")))))
 
 
 (defn- assoc-toc
@@ -163,7 +163,7 @@
             [node-tag]
             {:pre [(keyword? node-tag)]}
             (and
-             (not (#{:plain-list :feature-list} node-tag))
+             (not (#{:plain-list :feature-list :table} node-tag))
              (#{:block :headline} (tag->kind node-tag))))
 
           (nl-after?
@@ -190,7 +190,11 @@
                   (conj acc
                         ;; Figuring out how to separate children
                         (str (cond
-                               (= :text h-t n-t) "" ;; <- fix for ^ and _
+                               ;; We always add an empty line
+                               ;; between headline line and table.
+                               (and (not h-t) (= n-t :table)) "\n"
+                               ;; fix for ^ and _
+                               (= :text h-t n-t) ""
                                (not (and b-s n-s)) ""
                                (nl-between? h-t n-t) "\n"
                                (or (nl-after? h-t) (nl-before? n-t)) "\n"

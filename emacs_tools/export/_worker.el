@@ -847,6 +847,7 @@ FIXME: Figure out where they come from :"
 ROOT-DIR is original documentation root directory."
   (cl-letf* ((sdnize-root-dir (file-truename root-dir))
              (org-src-preserve-indentation t)
+             (org-export-preserve-breaks t)
              (org-export-with-sub-superscripts nil)
              (default-directory sdnize-root-dir))
     (dolist (in-file file-list)
