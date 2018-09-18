@@ -22,7 +22,7 @@ Common arguments:
 
 **Usage example:**
 
-Format all files:
+Format all files (add `--user <UID>:<GID>` to keep ownership):
 `docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc format /tmp/docs/`
 
 Validate:
