@@ -78,9 +78,6 @@ format)
     emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     echo_headline "Importing documentation back into .org format:"
     sdn orgify /opt/spacedoc/emacs_tools/export/target/ /tmp/target/
-    echo_headline "Generate TOCs with Emacs tools:"
-    emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q /tmp/target/
-    echo_headline "Override old files with formatted ones:"
     rsync -avh /tmp/target/ "${first_arg}"
     ;;
 *)
