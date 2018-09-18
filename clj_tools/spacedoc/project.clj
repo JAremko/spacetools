@@ -24,9 +24,7 @@
                     ;;       of functions.
                     :global-vars {*assert* false}}
              :uberjar {:aot :all
-                       :jvm-opts [(str "-Dclojure.compiler.elide-meta=["
-                                       ":doc :file :line :added"
-                                       "]")
+                       :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
                                   "-Dclojure.compiler.direct-linking=true"
                                   "-Xms1G"
                                   "-Xmx1G"]
