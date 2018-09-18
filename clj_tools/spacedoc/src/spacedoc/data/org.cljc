@@ -360,13 +360,14 @@
 
 
 (defmethod sdn->org :headline
-  [{value :value children :children :as hl}]
+  [{tag :tag value :value children :children :as hl}]
   (let [headline (-> hl
                      (update :path-id #(or % (data/hl-val->path-id-frag value)))
                      (update :level #(or % 1)))]
     (str
      (join (repeat (:level headline) "*"))
      " "
+     (when (= tag :todo) "TODO")
      value
      "\n"
      (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl headline %) %)
