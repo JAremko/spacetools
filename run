@@ -80,7 +80,7 @@ format)
     echo_headline "Importing documentation back into .org format:"
     sdn orgify /opt/spacedoc/emacs_tools/export/target/ /tmp/target/
     echo_headline "Overwriting old documentation files:"
-    rsync  -avh "${first_arg}"
+    rsync  -auh "${first_arg}"
     exit $?
     ;;
 *)
