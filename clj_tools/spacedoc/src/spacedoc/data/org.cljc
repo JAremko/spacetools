@@ -33,7 +33,7 @@
 (def ^:private table-indentation 0)
 
 
-(def ^:private toc-depth (data/max-headline-depth))
+(def ^:private toc-depth data/max-headline-depth)
 
 
 (def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
@@ -86,33 +86,43 @@
            (reduce #(str %1 (if (empty? %2) "\n" %2)) "")))))
 
 
-(defn- conj-toc
+(defn- assoc-toc
   [{children :children :as root}]
   {:pre [(s/valid? :spacedoc.data.node/root root)]
    :post [(s/valid? :spacedoc.data.node/root %)]}
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
-          (walk [post-f headline]
-            (let [id->count (transient {})]
-              (letfn [(inner [i->c hl]
-                        (let [gid (data/hl-val->gh-id-base (:value hl))
-                              new-i->c (assoc! i->c gid (inc (i->c gid 0)))]
-                          (post-f (update
-                                   hl
-                                   :children
-                                   #(some->> %
-                                             (filter hl?)
-                                             (seq)
-                                             (mapv (partial inner new-i->c))))
-                                  id->count)))]
-                (inner id->count headline))))
-          (hl->toc-el [{:keys [value children]} id->count]
-            (n/unordered-list
-             (vec (list* (n/link (data/hl-val->gh-id-base value) (n/text value))
-                         (n/line-break)
-                         (some->> children seq)))))]
+          (gh-id [gid-base cnt] (if (> cnt 1)
+                                  (str gid-base "-" (dec cnt))
+                                  gid-base))
+          (hls->toc [headlines]
+            (let [*gid->count (atom {})]
+              (letfn [(up-*gid->count! [hl]
+                        (let [gid-base (data/hl-val->gh-id-base (:value hl))]
+                          ((swap! *gid->count
+                                  update
+                                  gid-base
+                                  #(if % (inc %) 1))
+                           (data/hl-val->gh-id-base (:value hl)))))
+                      (hl->toc-el [{:keys [value gh-id children]}]
+                        (n/unordered-list
+                         (vec (list* (n/link gh-id (n/text value))
+                                     (n/line-break)
+                                     (some->> children seq)))))
+                      (inner [hl]
+                        (-> hl
+                            (assoc :gh-id (gh-id
+                                           (data/hl-val->gh-id-base (:value hl))
+                                           (up-*gid->count! hl)))
+                            (update :children
+                                    #(some->> %
+                                              (filter hl?)
+                                              (seq)
+                                              (mapv inner)))
+                            hl->toc-el))]
+                (mapv inner headlines))))]
     (let [toc (->> children
                    (filter hl?)
-                   (map (partial walk hl->toc-el))
+                   (hls->toc)
                    (apply n/section)
                    (n/headline toc-hl-val))
           [b-toc a-toc] (split-with (complement hl?) children)]
@@ -374,7 +384,7 @@
 (defmethod sdn->org :root
   [root]
   (->> root
-       (conj-toc)
+       (assoc-toc)
        (:children)
        (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
        (conv)))
