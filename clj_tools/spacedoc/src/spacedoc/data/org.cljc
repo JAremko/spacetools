@@ -15,7 +15,6 @@
                                 :kbd "~"  ;; Called code in "the classic ORG".
                                 :strike-through "+"})
 
-
 (def ^:private block-container-delims {:verse ["#+BEGIN_VERSE\n"
                                                "#+END_VERSE\n"]
                                        :quote ["#+BEGIN_QUOTE\n"
@@ -24,28 +23,21 @@
                                                 "#+END_CENTER\n"]
                                        :section ["" ""]})
 
-
 (def ^:private list-indentation 2)
-
 
 (def ^:private beging-end-indentation 0)
 
-
 (def ^:private table-indentation 0)
 
-
 (def ^:private toc-max-depth 4)
-
 
 (def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
                                   (join (repeatedly 42 (constantly " ")))
                                   toc-max-depth))
 
-
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
-
 
 (def ^:private kinds {n/inline-container-tags :inline-container
                       n/inline-leaf-tags :inline-leaf
@@ -190,11 +182,9 @@
                   (conj acc
                         ;; Figuring out how to separate children
                         (str (cond
-                               ;; We always add an empty line
-                               ;; between headline line and table.
-                               (and (not h-t) (= n-t :table)) "\n"
                                ;; fix for ^ and _
                                (= :text h-t n-t) ""
+                               ;; Do not split nothing
                                (not (and b-s n-s)) ""
                                (nl-between? h-t n-t) "\n"
                                (or (nl-after? h-t) (nl-before? n-t)) "\n"
@@ -256,7 +246,7 @@
         cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
                  (apply mapv
                         (fn [& cols]
-                          (apply max (map length cols)))
+                          (apply max (map viz-len cols)))
                         ne-vec-tab)
                  [])]
     (vec (concat [cols-w] vec-tab))))

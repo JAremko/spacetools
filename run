@@ -74,7 +74,6 @@ validate)
 format)
     echo_headline "Reformatting documentation with Emacs tools(in place):"
     emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
-    rm -rf /opt/spacedoc/emacs_tools/export/target/*
     echo_headline "Exporting documentation for formatting with Clojure tools:"
     emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
     echo_headline "Importing documentation back into .org format:"
