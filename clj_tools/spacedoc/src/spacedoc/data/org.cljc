@@ -70,7 +70,7 @@
 
 ;;;; Helpers
 
-(defn- indent-str
+(defn- indent
   [indent-level s]
   (if (str/blank? s)
     s
@@ -78,7 +78,7 @@
           lines (str/split-lines s)
           cur-ind (reduce #(min %1 (- (count %2) (count (str/triml %2))))
                           (count s)
-                          lines)
+                          (remove str/blank? lines))
           ws-prefix (apply str (repeat cur-ind " "))]
       (str
        (r/fold (r/monoid #(str %1
@@ -90,7 +90,7 @@
                          #(str ind %)
                          #(str/replace-first % ws-prefix ""))
                       lines))
-       (when (= (last s) \newline) "\n")))))
+       "\n"))))
 
 
 (defn- assoc-toc
@@ -168,16 +168,14 @@
   (letfn [(nl-before?
             [node-tag]
             {:pre [(keyword? node-tag)]}
-            (or
-             (#{:list-item} node-tag)
-             (#{:headline} (tag->kind node-tag))))
+            (and
+             (not (#{:plain-list :feature-list :table} node-tag))
+             (#{:block :headline} (tag->kind node-tag))))
 
           (nl-after?
             [node-tag]
             {:pre [(keyword? node-tag)]}
-            (or
-             (#{:list-item :plain-list :feature-list} node-tag)
-             (#{:headline} (tag->kind node-tag))))
+            (#{:block :headline} (tag->kind node-tag)))
 
           (nl-between?
             [first-node-tag second-node-tag]
@@ -237,8 +235,8 @@
   (let [{[begin-token end-token] tag} block-container-delims]
     (str begin-token
          ;; NOTE: We don't "hard-code" indentation into sections
-         (indent-str (if (= tag :section) 0 begin-end-indentation)
-                     (conv children))
+         (indent (if (= tag :section) 0 begin-end-indentation)
+                 (conv children))
          end-token)))
 
 
@@ -298,7 +296,7 @@
                      :else (table-row-str % cols-w)))
          (map (partial format "|%s|"))
          (join "\n")
-         (indent-str table-indentation)
+         (indent table-indentation)
          (str "\n"))))
 
 
@@ -335,24 +333,31 @@
   [{b :bullet c :checkbox [{children :children} item-tag] :children}]
   (let [itag (some->> item-tag
                       (:children)
-                      (conv))]
+                      (conv))
+        last-child-tag (->> children last :tag)
+        last-child-kind (tag->kind last-child-tag)]
     (apply str
-           b
-           (if itag (format "%s :: " itag) "")
-           (str/trim (indent-str list-indentation (conv children))))))
+           (str/trim b)
+           " "
+           (when itag (format "%s :: " itag) "")
+           (str/trim (indent list-indentation (conv children)))
+           (when (and (= last-child-kind :block)
+                      (not (#{:plain-list :feature-list :table}
+                            last-child-tag)))
+             "\n"))))
 
 
 (defmethod sdn->org :example
   [{value :value}]
   (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n"
-          (indent-str begin-end-indentation value)))
+          (indent begin-end-indentation value)))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
   (format "#+BEGIN_SRC %s\n%s#+END_SRC\n"
           language
-          (indent-str begin-end-indentation value)))
+          (indent begin-end-indentation value)))
 
 
 (defmethod sdn->org :text
