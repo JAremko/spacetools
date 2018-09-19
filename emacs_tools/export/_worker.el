@@ -194,7 +194,7 @@ be sent as the source of request (useful for debugging)"
 
 (defun sdnize/bold (_bold contents _info)
   "Transcode BOLD From Org to Spacemacs SDN.
-CONTENTS is the text with bold markup.  INFO is a plist holding
+CONTENTS is the text with bold markup. INFO is a plist holding
 contextual information."
   (format "{:tag :bold :children [%s]}" contents))
 
@@ -202,7 +202,7 @@ contextual information."
 
 (defun sdnize/center-block (_center-block contents _info)
   "Transcode a CENTER-BLOCK element From Org to Spacemacs SDN.))
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
   (format "{:tag :center :children [%s]}" contents))
 
@@ -210,7 +210,7 @@ holding contextual information."
 
 (defun sdnize/clock (_clock _contents _info)
   "Transcode a CLOCK element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist used as a communication
+CONTENTS is nil. INFO is a plist used as a communication
 channel."
   (sdnize/noimpl "sdnize/clock"))
 
@@ -218,7 +218,7 @@ channel."
 
 (defun sdnize/code (code _contents _info)
   "Transcode CODE From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information.
 NOTE: In Spacemacs ~code blocks~ are key sequences."
   (format "{:tag :kbd :value %s}"
@@ -235,7 +235,7 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
 
 (defun sdnize/drawer (_drawer _contents _info)
   "Transcode a DRAWER element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
   (sdnize/noimpl "sdnize/drawer"))
 
@@ -243,7 +243,7 @@ holding contextual information."
 
 (defun sdnize/dynamic-block (_dynamic-block _contents _info)
   "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information.  See `org-export-data'."
   (sdnize/noimpl "sdnize/dynamic-block"))
 
@@ -251,7 +251,7 @@ holding contextual information.  See `org-export-data'."
 
 (defun sdnize/entity (_entity _contents _info)
   "Transcode an ENTITY object From Org to Spacemacs SDN.
-CONTENTS are the definition itself.  INFO is a plist holding
+CONTENTS are the definition itself. INFO is a plist holding
 contextual information."
   (sdnize/noimpl "sdnize/entity"))
 
@@ -259,7 +259,7 @@ contextual information."
 
 (defun sdnize/example-block (example-block _contents _info)
   "Transcode a EXAMPLE-BLOCK element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information."
   (format "{:tag :example :value \"%s\"}"
           (sdnize/esc-str (org-element-property :value example-block))))
@@ -275,7 +275,7 @@ information."
 
 (defun sdnize/export-snippet (_export-snippet _contents _info)
   "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
-  CONTENTS is nil.  INFO is a plist holding contextual
+  CONTENTS is nil. INFO is a plist holding contextual
   information."
   (sdnize/noimpl "sdnize/export-snippet"))
 
@@ -283,7 +283,7 @@ information."
 
 (defun sdnize/fixed-width (_fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
-  CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/fixed-width"))
 
 ;;;; Footnote definition
@@ -291,7 +291,7 @@ information."
 (defun sdnize/footnote-definition
     (_footnote-definition _contents _info)
   "Transcode a FOOTNOTE-DEFINITION element From Org to Spacemacs SDN.
-  CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/footnote-definition"))
 
 ;;;; Footnote Reference
@@ -299,14 +299,14 @@ information."
 (defun sdnize/footnote-reference
     (_footnote-reference _contents _info)
   "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
-  CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/footnote-reference"))
 
 ;;;; Headline
 
 (defun sdnize/headline (headline contents info)
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
-  CONTENTS holds the contents of the headline.  INFO is a plist
+  CONTENTS holds the contents of the headline. INFO is a plist
   holding contextual information."
   (let* ((raw-val (org-element-property :raw-value headline))
          (level (org-element-property :level headline))
@@ -365,14 +365,14 @@ information."
 
 (defun sdnize/horizontal-rule (_horizontal-rule _contents _info)
   "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/horizontal-rule"))
 
 ;;;; Inline Src Block
 
 (defun sdnize/inline-src-block (_inline-src-block _contents _info)
   "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the item.  INFO is a plist holding
+CONTENTS holds the contents of the item. INFO is a plist holding
 contextual information."
   (sdnize/noimpl "sdnize/inline-src-block"))
 
@@ -380,7 +380,7 @@ contextual information."
 
 (defun sdnize/inlinetask (_inlinetask _contents _info)
   "Transcode an INLINETASK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
   (sdnize/noimpl "sdnize/inlinetask"))
 
@@ -388,7 +388,7 @@ holding contextual information."
 
 (defun sdnize/inner-template (contents _info)
   "Return body of document string after HTML conversion.
-CONTENTS is the transcoded contents string.  INFO is a plist
+CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
   (format "{:tag :root :children [%s]}" contents))
 
@@ -396,7 +396,7 @@ holding export options."
 
 (defun sdnize/italic (_italic contents _info)
   "Transcode ITALIC From Org to Spacemacs SDN.
-CONTENTS is the text with italic markup.  INFO is a plist holding
+CONTENTS is the text with italic markup. INFO is a plist holding
 contextual information."
   (format "{:tag :italic :children [%s]}" contents))
 
@@ -404,7 +404,7 @@ contextual information."
 
 (defun sdnize/item (item contents info)
   "Transcode an ITEM element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the item.  INFO is a plist holding
+CONTENTS holds the contents of the item. INFO is a plist holding
 contextual information."
   (let ((type (org-element-property :type (org-export-get-parent item)))
         (item-tag (org-element-property :tag item))
@@ -429,7 +429,7 @@ contextual information."
 
 (defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (let* ((key (org-element-property :key keyword))
          (d-key (downcase key))
          (val (org-element-property :value keyword)))
@@ -449,21 +449,21 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun sdnize/latex-environment (_latex-environment _contents _info)
   "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/latex-environment"))
 
 ;;;; Latex Fragment
 
 (defun sdnize/latex-fragment (_latex-fragment _contents _info)
   "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/latex-fragment"))
 
 ;;;; Line Break
 
 (defun sdnize/line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   "{:tag :line-break}")
 
 ;;;; Link
@@ -554,7 +554,7 @@ INFO is a plist holding contextual information.  See
 
 (defun sdnize/node-property (_node-property _contents _info)
   "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information."
   (sdnize/noimpl "sdnize/node-property"))
 
@@ -562,7 +562,7 @@ information."
 
 (defun sdnize/paragraph (_paragraph contents _info)
   "Transcode a PARAGRAPH element From Org to Spacemacs SDN.
-CONTENTS is the contents of the paragraph, as a string.  INFO is
+CONTENTS is the contents of the paragraph, as a string. INFO is
 the plist used as a communication channel."
   (format "{:tag :paragraph :children [%s]}" contents))
 
@@ -589,7 +589,7 @@ the plist used as a communication channel."
 
 (defun sdnize/plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element From Org to Spacemacs SDN.
-CONTENTS is the contents of the list.  INFO is a plist holding
+CONTENTS is the contents of the list. INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
          (tag (sdnize/plain-list-tag plain-list)))
@@ -608,7 +608,7 @@ contextual information."
 
 (defun sdnize/plain-text (text _info)
   "Transcode a TEXT string From Org to Spacemacs SDN.
-TEXT is the string to transcode.  INFO is a plist holding
+TEXT is the string to transcode. INFO is a plist holding
 contextual information."
   (if (not (string= "\n" text))
       (format "{:tag :text :value \"%s\"}" (sdnize/esc-str text))
@@ -618,7 +618,7 @@ contextual information."
 
 (defun sdnize/planning (_planning _contents _info)
   "Transcode a PLANNING element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist used as a communication
+CONTENTS is nil. INFO is a plist used as a communication
 channel."
   (sdnize/noimpl "sdnize/planning"))
 
@@ -626,7 +626,7 @@ channel."
 
 (defun sdnize/property-drawer (_property-drawer _contents _info)
   "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the drawer.  INFO is a plist
+CONTENTS holds the contents of the drawer. INFO is a plist
 holding contextual information."
   (sdnize/noimpl "sdnize/property-drawer"))
 
@@ -634,7 +634,7 @@ holding contextual information."
 
 (defun sdnize/quote-block (_quote-block contents _info)
   "Transcode a QUOTE-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
   (format "{:tag :quote :children [%s]}" contents))
 
@@ -642,7 +642,7 @@ holding contextual information."
 
 (defun sdnize/radio-target (_radio-target _text _info)
   "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
-TEXT is the text of the target.  INFO is a plist holding
+TEXT is the text of the target. INFO is a plist holding
 contextual information."
   (sdnize/noimpl "sdnize/radio-target"))
 
@@ -650,7 +650,7 @@ contextual information."
 
 (defun sdnize/section (_section contents _info)
   "Transcode a SECTION element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the section.  INFO is a plist
+CONTENTS holds the contents of the section. INFO is a plist
 holding contextual information."
   (format "{:tag :section :children [%s]}" contents))
 
@@ -658,7 +658,7 @@ holding contextual information."
 
 (defun sdnize/special-block (_special-block _contents _info)
   "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
   (sdnize/noimpl "sdnize/special-block"))
 
@@ -678,14 +678,14 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 
 (defun sdnize/statistics-cookie (_statistics-cookie _contents _info)
   "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/statistics-cookie"))
 
 ;;;; Strike-Through
 
 (defun sdnize/strike-through (_strike-through contents _info)
   "Transcode STRIKE-THROUGH From Org to Spacemacs SDN.
-CONTENTS is the text with strike-through markup.  INFO is a plist
+CONTENTS is the text with strike-through markup. INFO is a plist
 holding contextual information."
   (format "{:tag :strike-through :children [%s]}" contents))
 
@@ -693,7 +693,7 @@ holding contextual information."
 
 (defun sdnize/subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
-CONTENTS is the contents of the object.  INFO is a plist holding
+CONTENTS is the contents of the object. INFO is a plist holding
 contextual information."
   (format "{:tag :subscript :children [%s]}" contents))
 
@@ -701,7 +701,7 @@ contextual information."
 
 (defun sdnize/superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
-CONTENTS is the contents of the object.  INFO is a plist holding
+CONTENTS is the contents of the object. INFO is a plist holding
 contextual information."
   (format "{:tag :superscript :children [%s]}" contents))
 
@@ -709,7 +709,7 @@ contextual information."
 
 (defun sdnize/table (table contents _info)
   "Transcode a TABLE element From Org to Spacemacs SDN.
-CONTENTS is the contents of the table.  INFO is a plist holding
+CONTENTS is the contents of the table. INFO is a plist holding
 contextual information."
   (let ((type (org-element-property :type table)))
     (unless (eq type 'org)
@@ -724,7 +724,7 @@ contextual information."
 
 (defun sdnize/table-cell (_table-cell contents _info)
   "Transcode a TABLE-CELL element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist used as a communication
+CONTENTS is nil. INFO is a plist used as a communication
 channel."
   (format "{:tag :table-cell :children [%s]}" contents))
 
@@ -732,7 +732,7 @@ channel."
 
 (defun sdnize/table-row (table-row contents _info)
   "Transcode a TABLE-ROW element From Org to Spacemacs SDN.
-CONTENTS is the contents of the row.  INFO is a plist used as a
+CONTENTS is the contents of the row. INFO is a plist used as a
 communication channel."
   (format "{:tag :table-row :type :%s :children [%s]}"
           (org-element-property :type table-row)
@@ -742,7 +742,7 @@ communication channel."
 
 (defun sdnize/target (_target _contents _info)
   "Transcode a TARGET object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information."
   (sdnize/noimpl "sdnize/target"))
 
@@ -750,7 +750,7 @@ information."
 
 (defun sdnize/template (contents info)
   "Return complete document string after HTML conversion.
-CONTENTS is the transcoded contents string.  INFO is a plist
+CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
   (let ((file (file-truename (plist-get info :input-file))))
 
@@ -784,7 +784,7 @@ holding export options."
 
 (defun sdnize/timestamp (_timestamp _contents _info)
   "Transcode a TIMESTAMP object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information."
   (sdnize/noimpl "sdnize/timestamp"))
 
@@ -792,7 +792,7 @@ information."
 
 (defun sdnize/underline (_underline contents _info)
   "Transcode UNDERLINE From Org to Spacemacs SDN.
-CONTENTS is the text with underline markup.  INFO is a plist
+CONTENTS is the text with underline markup. INFO is a plist
 holding contextual information."
   (format "{:tag :underline :children [%s]}" contents))
 
@@ -800,7 +800,7 @@ holding contextual information."
 
 (defun sdnize/verbatim (verbatim _contents _info)
   "Transcode VERBATIM From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
+CONTENTS is nil. INFO is a plist holding contextual
 information."
   (format "{:tag :verbatim :value \"%s\"}"
           (sdnize/esc-str (org-element-property :value verbatim))))
@@ -809,7 +809,7 @@ information."
 
 (defun sdnize/verse-block (_verse-block contents _info)
   "Transcode a VERSE-BLOCK element From Org to Spacemacs SDN.
-CONTENTS is verse block contents.  INFO is a plist holding
+CONTENTS is verse block contents. INFO is a plist holding
 contextual information."
   (format "{:tag :verse :children [%s]}" contents))
 
