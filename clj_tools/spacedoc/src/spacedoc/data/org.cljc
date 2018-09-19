@@ -1,6 +1,7 @@
 (ns spacedoc.data.org
   "Exporting SDN to .org format."
   (:require [clojure.core.match :refer [match]]
+            [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
@@ -25,7 +26,7 @@
 
 (def ^:private list-indentation 2)
 
-(def ^:private beging-end-indentation 0)
+(def ^:private begin-end-indentation 2)
 
 (def ^:private table-indentation 0)
 
@@ -73,10 +74,23 @@
   [indent-level s]
   (if (str/blank? s)
     s
-    (let [ind (apply str (repeat indent-level " "))]
-      (->> (str/split-lines s)
-           (map #(str ind % "\n"))
-           (reduce #(str %1 (if (str/blank? %2) "\n" %2)) "")))))
+    (let [ind (apply str (repeat indent-level " "))
+          lines (str/split-lines s)
+          cur-ind (reduce #(min %1 (- (count %2) (count (str/triml %2))))
+                          (count s)
+                          lines)
+          ws-prefix (apply str (repeat cur-ind " "))]
+      (str
+       (r/fold (r/monoid #(str %1
+                               (when (every? (complement str/blank?) [%1 %2])
+                                 "\n")
+                               %2)
+                         str)
+               (r/map (comp #(if (str/blank? %) "\n" %)
+                         #(str ind %)
+                         #(str/replace-first % ws-prefix ""))
+                      lines))
+       (when (= (last s) \newline) "\n")))))
 
 
 (defn- assoc-toc
@@ -154,14 +168,16 @@
   (letfn [(nl-before?
             [node-tag]
             {:pre [(keyword? node-tag)]}
-            (and
-             (not (#{:plain-list :feature-list :table} node-tag))
-             (#{:block :headline} (tag->kind node-tag))))
+            (or
+             (#{:list-item} node-tag)
+             (#{:headline} (tag->kind node-tag))))
 
           (nl-after?
             [node-tag]
             {:pre [(keyword? node-tag)]}
-            (#{:block :headline} (tag->kind node-tag)))
+            (or
+             (#{:list-item :plain-list :feature-list} node-tag)
+             (#{:headline} (tag->kind node-tag))))
 
           (nl-between?
             [first-node-tag second-node-tag]
@@ -221,7 +237,7 @@
   (let [{[begin-token end-token] tag} block-container-delims]
     (str begin-token
          ;; NOTE: We don't "hard-code" indentation into sections
-         (indent-str (if (= tag :section) 0 beging-end-indentation)
+         (indent-str (if (= tag :section) 0 begin-end-indentation)
                      (conv children))
          end-token)))
 
@@ -329,14 +345,14 @@
 (defmethod sdn->org :example
   [{value :value}]
   (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n"
-          (indent-str beging-end-indentation value)))
+          (indent-str begin-end-indentation value)))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
   (format "#+BEGIN_SRC %s\n%s#+END_SRC\n"
           language
-          (indent-str beging-end-indentation value)))
+          (indent-str begin-end-indentation value)))
 
 
 (defmethod sdn->org :text
