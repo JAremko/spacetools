@@ -268,22 +268,22 @@ information."
 
 (defun sdnize/export-block (_export-block _contents _info)
   "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil. INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/export-block"))
 
 ;;;; Export Snippet
 
 (defun sdnize/export-snippet (_export-snippet _contents _info)
   "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
+  CONTENTS is nil.  INFO is a plist holding contextual
+  information."
   (sdnize/noimpl "sdnize/export-snippet"))
 
 ;;;; Fixed Width
 
 (defun sdnize/fixed-width (_fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil.  INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/fixed-width"))
 
 ;;;; Footnote definition
@@ -291,7 +291,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun sdnize/footnote-definition
     (_footnote-definition _contents _info)
   "Transcode a FOOTNOTE-DEFINITION element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil.  INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/footnote-definition"))
 
 ;;;; Footnote Reference
@@ -299,15 +299,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun sdnize/footnote-reference
     (_footnote-reference _contents _info)
   "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+  CONTENTS is nil.  INFO is a plist holding contextual information."
   (sdnize/noimpl "sdnize/footnote-reference"))
 
 ;;;; Headline
 
 (defun sdnize/headline (headline contents info)
   "Transcode a HEADLINE element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the headline.  INFO is a plist
-holding contextual information."
+  CONTENTS holds the contents of the headline.  INFO is a plist
+  holding contextual information."
   (let* ((raw-val (org-element-property :raw-value headline))
          (level (org-element-property :level headline))
          (p-level-prop (thread-last headline

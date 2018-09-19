@@ -32,7 +32,7 @@
 (def ^:private toc-max-depth 4)
 
 (def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
-                                  (join (repeatedly 42 (constantly " ")))
+                                  (join (repeatedly 21 (constantly " ")))
                                   toc-max-depth))
 
 (def indirect-nodes
@@ -372,7 +372,7 @@
     (str
      (join (repeat (:level headline) "*"))
      " "
-     (when (= tag :todo) "TODO")
+     (when (= tag :todo) "TODO ")
      value
      "\n"
      (conv (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl headline %) %)
