@@ -165,12 +165,12 @@
   "Like `conv` but without joining into single string."
   [node-seq]
   {:pre [((some-fn vector? nil?) node-seq)]}
+
   (letfn [(nl-before?
             [node-tag]
             {:pre [(keyword? node-tag)]}
-            (and
-             (not (#{:plain-list :feature-list :table} node-tag))
-             (#{:block :headline} (tag->kind node-tag))))
+            (and (not (#{:plain-list :feature-list :table} node-tag))
+                 (#{:block :headline} (tag->kind node-tag))))
 
           (nl-after?
             [node-tag]
@@ -182,11 +182,18 @@
             {:pre [(every? keyword? [first-node-tag second-node-tag])]}
             (= :paragraph first-node-tag second-node-tag))
 
+          (el-between?
+            [first-node-tag second-node-tag]
+            {:pre [(every? keyword? [first-node-tag second-node-tag])]}
+            (and (#{:plain-list :feature-list} first-node-tag)
+                 (= :paragraph second-node-tag)))
+
           (strs-need-sep?
             [s1 s2]
             (let [l-s1-sep? ((disj data/seps \)) (last s1))
                   f-s2-sep? ((disj data/seps \() (first s2))]
               (not (or l-s1-sep? f-s2-sep?))))]
+
     (reduce (fn [acc next]
               (let [h-t (:head-tag (meta acc))
                     b-s (last acc)
@@ -200,6 +207,7 @@
                                (= :text h-t n-t) ""
                                ;; Do not split nothing
                                (not (and b-s n-s)) ""
+                               (el-between? h-t n-t) "\n\n"
                                (nl-between? h-t n-t) "\n"
                                (or (nl-after? h-t) (nl-before? n-t)) "\n"
                                (strs-need-sep? b-s n-s) " "
