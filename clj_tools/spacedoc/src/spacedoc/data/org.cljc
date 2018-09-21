@@ -205,6 +205,8 @@
                         (str (cond
                                ;; fix for ^ and _
                                (= :text h-t n-t) ""
+                               ;; tables have backed-in newlines
+                               (= :table n-t) ""
                                ;; Do not split nothing
                                (not (and b-s n-s)) ""
                                (el-between? h-t n-t) "\n\n"
@@ -296,6 +298,7 @@
 
 (defmethod sdn->org :table
   [table]
+  ;; NOTE: table has leading newlines.
   (let [[cols-w & vrep] (table->vec-rep table)]
     (->> (r/fold (r/monoid #(join "\n" [%1 %2]) str)
                  (r/map (comp (partial format "|%s|")
