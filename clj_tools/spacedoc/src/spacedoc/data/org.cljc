@@ -76,20 +76,19 @@
     s
     (let [ind (apply str (repeat indent-level " "))
           lines (str/split-lines s)
-          cur-ind (reduce #(min %1 (- (count %2) (count (str/triml %2))))
-                          (count s)
-                          (remove str/blank? lines))
-          ws-prefix (apply str (repeat cur-ind " "))]
+          c-d (r/fold (r/monoid #(min %1 (- (count %2) (count (str/triml %2))))
+                                (constantly (count s)))
+                      (remove str/blank? lines))
+          ws-prefix (apply str (repeat c-d " "))]
       (str
-       (r/fold (r/monoid #(str %1
-                               (when (every? (complement str/blank?) [%1 %2])
-                                 "\n")
-                               %2)
-                         str)
-               (r/map (comp #(if (str/blank? %) "\n" %)
-                         #(str ind %)
-                         #(str/replace-first % ws-prefix ""))
-                      lines))
+       (r/fold
+        (r/monoid
+         #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
+         str)
+        (r/map (comp #(if (str/blank? %) "\n" %)
+                  #(str ind %)
+                  #(str/replace-first % ws-prefix ""))
+               lines))
        "\n"))))
 
 
@@ -104,12 +103,13 @@
                                   gid-base))
           (hls->toc [headlines]
             ;; NOTE: Could've use something like state monad.
-            ;;       Cats have it. But it will reduce readability
-            ;;       for no apparent benefits since `atom` doesn't leak.
+            ;;       Cats have it. Or explicitly thread the value.
+            ;;       But it will reduce readability for no apparent benefits
+            ;;       since `atom` doesn't leak.
             (let [*gid->count (atom {})]
               (letfn [(up-*gid->count! [hl]
                         (let [gid-base (hl->gid-base hl)]
-                          ((swap! *gid->count update gid-base #(if % (inc %) 1))
+                          ((swap! *gid->count update gid-base #(inc (or % 0)))
                            gid-base)))
                       (hl->toc-el [{:keys [value gh-id children]}]
                         (n/unordered-list
