@@ -297,15 +297,14 @@
 (defmethod sdn->org :table
   [table]
   (let [[cols-w & vrep] (table->vec-rep table)]
-    (->> vrep
-         (map #(cond (empty? cols-w) "" ;; <- no cols
-                     ;; Empty cols are rulers.
-                     (empty? %) (table-rule-str cols-w)
-                     :else (table-row-str % cols-w)))
-         (map (partial format "|%s|"))
-         (join "\n")
-         (indent table-indentation)
-         (str "\n"))))
+    (->> (r/fold (r/monoid #(join "\n" [%1 %2]) str)
+                 (r/map (comp (partial format "|%s|")
+                           #(cond (empty? cols-w) "" ;; <- no cols
+                                  ;; Empty cols are rulers.
+                                  (empty? %) (table-rule-str cols-w)
+                                  :else (table-row-str % cols-w)))
+                        vrep))
+         (indent table-indentation))))
 
 
 (defn- fmt-cell-content
