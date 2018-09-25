@@ -356,7 +356,10 @@ information."
             (cond (todo? :todo)
                   (description? :description)
                   (t :headline))
-            (sdnize/esc-str raw-val)
+            (sdnize/esc-str
+             (if (plist-get info :with-smart-quotes)
+                 (org-export-activate-smart-quotes raw-val :utf-8 info)
+               raw-val))
             level
             (sdnize/esc-str (sdnize/headline-make-path-id headline))
             contents)))
@@ -606,12 +609,16 @@ contextual information."
 
 ;;;; Plain Text
 
-(defun sdnize/plain-text (text _info)
+(defun sdnize/plain-text (text info)
   "Transcode a TEXT string From Org to Spacemacs SDN.
 TEXT is the string to transcode. INFO is a plist holding
 contextual information."
   (if (not (string= "\n" text))
-      (format "{:tag :text :value \"%s\"}" (sdnize/esc-str text))
+      (thread-last (if (plist-get info :with-smart-quotes)
+                       (org-export-activate-smart-quotes text :utf-8 info)
+                     text)
+        (sdnize/esc-str)
+        (format "{:tag :text :value \"%s\"}"))
     "{:tag :line-break}"))
 
 ;;;; Planning
@@ -847,6 +854,7 @@ FIXME: Figure out where they come from :"
 ROOT-DIR is original documentation root directory."
   (cl-letf* ((sdnize-root-dir (file-truename root-dir))
              (org-src-preserve-indentation t)
+             (org-export-with-smart-quotes t)
              (org-export-with-sub-superscripts nil)
              (default-directory sdnize-root-dir))
     (dolist (in-file file-list)
