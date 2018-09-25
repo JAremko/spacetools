@@ -1,6 +1,6 @@
 (ns spacedoc.data.org
   "Exporting SDN to .org format."
-  (:require [clojure.core.match :refer [match]]
+  (:require [cats.monad.state :as sm]
             [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
@@ -76,22 +76,23 @@
     s
     (let [ind (apply str (repeat indent-level " "))
           lines (str/split-lines s)
-          c-d (r/fold (r/monoid #(min %1 (- (count %2) (count (str/triml %2))))
-                                (constantly (count s)))
-                      (remove str/blank? lines))
+          c-d (r/reduce (r/monoid
+                         #(min %1 (- (count %2) (count (str/triml %2))))
+                         (constantly (count s)))
+                        (remove str/blank? lines))
           ws-prefix (apply str (repeat c-d " "))]
       (->> lines
            (r/map (comp #(if (str/blank? %) "\n" %)
-                     #(str ind %)
-                     #(str/replace-first % ws-prefix "")))
-           (r/fold
+                        #(str ind %)
+                        #(str/replace-first % ws-prefix "")))
+           (r/reduce
             (r/monoid
              #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
              str))
            (format "%s\n")))))
 
 
-(defn- assoc-toc
+(defn- assoc-toc-new
   [{children :children :as root}]
   {:pre [(s/valid? :spacedoc.data.node/root root)]
    :post [(s/valid? :spacedoc.data.node/root %)]}
@@ -139,6 +140,62 @@
       (assoc root :children (vec (concat b-toc [toc] a-toc))))))
 
 
+(defn- assoc-toc-old
+  [{children :children :as root}]
+  {:pre [(s/valid? :spacedoc.data.node/root root)]
+   :post [(s/valid? :spacedoc.data.node/root %)]}
+  (letfn [(hl? [node] (n/headline-tags (:tag node)))
+          (hl->gid-base [headlin] (data/hl-val->gh-id-base (:value headlin)))
+          (gh-id [gid-base cnt] (if (> cnt 1)
+                                  (str gid-base "-" (dec cnt))
+                                  gid-base))
+          (hls->toc [headlines]
+            ;; NOTE: Could've use something like state monad.
+            ;;       Cats have it. Or explicitly thread the value.
+            ;;       But it will reduce readability for no apparent benefits
+            ;;       since `atom` doesn't leak.
+            (let [*gid->count (atom {})]
+              (letfn [(up-*gid->count! [hl]
+                        (let [gid-base (hl->gid-base hl)]
+                          ((swap! *gid->count update gid-base #(inc (or % 0)))
+                           gid-base)))
+                      (hl->toc-el [{:keys [value gh-id children]}]
+                        (n/unordered-list
+                         (vec (list* (n/link gh-id (n/text value))
+                                     (n/line-break)
+                                     (some->> children seq)))))
+                      (inner [depth hl]
+                        (-> hl
+                            (assoc :gh-id
+                                   (gh-id
+                                    (hl->gid-base hl)
+                                    (up-*gid->count! hl)))
+                            (update :children
+                                    #(when (< depth toc-max-depth)
+                                       (some->>
+                                        %
+                                        (filter hl?)
+                                        (seq)
+                                        (mapv (partial inner (inc depth))))))
+                            hl->toc-el))]
+                (mapv (partial inner 1) headlines))))]
+    (let [toc (->> children
+                   (filter hl?)
+                   (hls->toc)
+                   (apply n/section)
+                   (n/headline toc-hl-val))
+          [b-toc a-toc] (split-with (complement hl?) children)]
+      (assoc root :children (vec (concat b-toc [toc] a-toc))))))
+
+
+(defn- assoc-toc
+  [{children :children :as root}]
+  {:pre [(s/valid? :spacedoc.data.node/root root)
+         (= (assoc-toc-old root) (assoc-toc-new root))]
+   :post [(s/valid? :spacedoc.data.node/root %)]}
+  (assoc-toc-old root))
+
+
 (defn- viz-len
   "Like `count` but returns real visual length of a string."
   [^String s]
@@ -157,9 +214,10 @@
 
 
 (defn- conv*
-  "Like `conv` but without joining into single string."
-  [node-seq]
-  {:pre [((some-fn vector? nil?) node-seq)]}
+  "Reduce NODES vector into vector of ORG string representations of the nodes.
+  NOTE: Stringified nodes are properly padded with white spaces and newlines."
+  [nodes]
+  {:pre [((some-fn vector? nil?) nodes)]}
 
   (letfn [(nl-before?
             [node-tag]
@@ -181,47 +239,48 @@
 
           (need-ws?
             [s1 s2]
-            (let [l-s1-sep? ((disj data/seps \) \”) (last s1))
-                  f-s2-sep? ((disj data/seps \( \“) (first s2))]
+            (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
+                  f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
               (not (or l-s1-sep? f-s2-sep?))))]
 
-    (reduce (fn [acc next]
-              (let [h-t (:head-tag (meta acc))
-                    b-s (last acc)
-                    n-s (sdn->org next)
-                    n-t (:tag next)]
-                (with-meta
-                  (conj acc
-                        ;; Figuring out how to separate children
-                        (str (cond
-                               ;; Cases involving first or last child node:
-                               (not (and h-t n-t)) ""
-                               ;; We interpret ^ and _ as a text
-                               ;; instead of `superscript` and `subscript`
-                               ;; so it need to be simply appended to the
-                               ;; next string.
-                               (= :text h-t n-t) ""
-                               ;; tables have backed-in newlines.
-                               (= :table n-t) ""
-                               (el-between? h-t n-t) "\n\n"
-                               (nl-between? h-t n-t) "\n"
-                               (or (nl-after? h-t) (nl-before? n-t)) "\n"
-                               (need-ws? b-s n-s) " "
-                               :else "")
-                             n-s))
-                  {:head-tag n-t})))
-            []
-            node-seq)))
+    (r/reduce
+     (r/monoid
+      (fn [acc [n-t n-s]]
+        (let [h-t (:head-tag (meta acc))
+              b-s (last acc)]
+          (with-meta
+            (conj acc
+                  ;; Figuring out how to separate children
+                  (str (cond
+                         ;; Cases involving first or last child node
+                         ;; or when we're merging accumulators:
+                         (not (and h-t n-t)) ""
+                         ;; We interpret ^ and _ as a text
+                         ;; instead of `superscript` and `subscript`
+                         ;; so it need to be simply appended to the
+                         ;; next string.
+                         (= :text h-t n-t) ""
+                         ;; tables have backed-in newlines.
+                         (= :table n-t) ""
+                         (el-between? h-t n-t) "\n\n"
+                         (nl-between? h-t n-t) "\n"
+                         (or (nl-after? h-t) (nl-before? n-t)) "\n"
+                         (need-ws? b-s n-s) " "
+                         :else "")
+                       n-s))
+            {:head-tag n-t})))
+      vector)
+     (r/map #(vector (:tag %) (sdn->org %)) nodes))))
 
 
 (defn- conv
-  [node-seq]
-  {:pre [((some-fn vector? nil?) node-seq)]}
-  (join (conv* node-seq)))
+  "Reduce NODES vector into `str/join`ed ORG string."
+  [nodes]
+  {:pre [((some-fn vector? nil?) nodes)]}
+  (join (conv* nodes)))
 
 
 ;;;; Groups of nodes (many to one).
-
 
 (defmethod sdn->org :emphasis-container
   [{:keys [tag children]}]
@@ -245,7 +304,6 @@
 
 
 ;;;; Individual nodes (one to one).
-
 
 (defmethod sdn->org :paragraph
   [{children :children}]
@@ -296,10 +354,10 @@
   (let [[cols-w & vrep] (table->vec-rep table)]
     (->> (r/fold (r/monoid #(join "\n" [%1 %2]) str)
                  (r/map (comp (partial format "|%s|")
-                           #(cond (empty? cols-w) "" ;; <- no cols
-                                  ;; Empty cols are rulers.
-                                  (empty? %) (table-rule-str cols-w)
-                                  :else (table-row-str % cols-w)))
+                              #(cond (empty? cols-w) "" ;; <- no cols
+                                     ;; Empty cols are rulers.
+                                     (empty? %) (table-rule-str cols-w)
+                                     :else (table-row-str % cols-w)))
                         vrep))
          (indent table-indentation))))
 

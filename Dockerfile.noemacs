@@ -2,7 +2,10 @@ FROM clojure as clojure
 
 COPY clj_tools/spacedoc /usr/src/app
 
-RUN cd /usr/src/app && lein uberjar
+RUN cd /usr/src/app \
+    && lein deps \
+    && lein git-deps \
+    && uberjar
 
 
 FROM ubuntu as graalvm
@@ -22,6 +25,7 @@ RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
     --no-server \
     -H:+ReportUnsupportedElementsAtRuntime \
     -jar /tmp/sdn.jar
+
 
 FROM ubuntu
 
