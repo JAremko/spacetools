@@ -80,16 +80,15 @@
                                 (constantly (count s)))
                       (remove str/blank? lines))
           ws-prefix (apply str (repeat c-d " "))]
-      (str
-       (r/fold
-        (r/monoid
-         #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
-         str)
-        (r/map (comp #(if (str/blank? %) "\n" %)
-                  #(str ind %)
-                  #(str/replace-first % ws-prefix ""))
-               lines))
-       "\n"))))
+      (->> lines
+           (r/map (comp #(if (str/blank? %) "\n" %)
+                     #(str ind %)
+                     #(str/replace-first % ws-prefix "")))
+           (r/fold
+            (r/monoid
+             #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
+             str))
+           (format "%s\n")))))
 
 
 (defn- assoc-toc
@@ -140,17 +139,13 @@
       (assoc root :children (vec (concat b-toc [toc] a-toc))))))
 
 
-(defn- length
-  "Like `count` but for strings only and accounts for zero-width spaces."
-  [^String s]
-  (count (str/replace s "\u200B" "")))
-
-
 (defn- viz-len
-  "Returns real visual length of a string.
-  TODO: Make it less hacky."
+  "Like `count` but returns real visual length of a string."
   [^String s]
-  (length (str/replace s #"\[.*\[(.*)\]\]" "$1")))
+  (-> s
+      (str/replace #"\[.*\[(.*)\]\]" "$1")
+      (str/replace "\u200B" "")
+      (count)))
 
 
 (defn- tag->kind
