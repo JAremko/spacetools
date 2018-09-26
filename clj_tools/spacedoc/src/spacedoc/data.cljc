@@ -102,6 +102,7 @@
 (defn same-row-length?
   "Returns true if each row of the table has same amount of cells."
   [table-children]
+  {:pre [(every? #(#{:table-row} (:tag %)) table-children)]}
   (let [t-c (remove #(#{:rule} (:type %)) table-children)]
     (or (empty? t-c)
         (apply = (map #(count (:children %)) t-c)))))
@@ -112,6 +113,7 @@
       :children [{:tag :table-cell :children [{:tag :text :value "s"}]}
                  {:tag :table-cell :children [{:tag :text :value "s"}]}]}
      {:tag :table-row
+      :type :rule
       :children [{:tag :table-cell :children [{:tag :text :value "s"}]}]}])
 
 
@@ -119,7 +121,7 @@
 
 (defn hl-val->gh-id-base
   [hl-value]
-  {:pre [(string? hl-value) (not-empty hl-value)]}
+  {:pre [((complement str/blank?) hl-value)]}
   (str "#"
        (-> hl-value
            (str/replace " " "-")
@@ -129,6 +131,7 @@
 
 (defn hl-val->path-id-frag
   [hl-value]
+  {:pre [(string? hl-value)]}
   (-> hl-value
       (str/lower-case)
       (str/replace #"[^\p{Nd}\p{L}\p{Pd}]" " ")
