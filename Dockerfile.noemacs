@@ -2,10 +2,7 @@ FROM clojure as clojure
 
 COPY clj_tools/spacedoc /usr/src/app
 
-RUN cd /usr/src/app \
-    && lein deps \
-    && lein git-deps \
-    && uberjar
+RUN cd /usr/src/app && lein uberjar
 
 
 FROM ubuntu as graalvm

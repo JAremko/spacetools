@@ -1,8 +1,6 @@
 (ns spacedoc.data.org
   "Exporting SDN to .org format."
-  (:require [cats.core :as m]
-            [cats.monad.state :as sm]
-            [clojure.core.reducers :as r]
+  (:require [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
@@ -93,10 +91,7 @@
            (format "%s\n")))))
 
 
-;; (sm/wrap-fn (fn [v acc] (+ acc v)))
-
-
-(defn- assoc-toc-new
+(defn- assoc-toc
   [{children :children :as root}]
   {:pre [(s/valid? :spacedoc.data.node/root root)]
    :post [(s/valid? :spacedoc.data.node/root %)]}
@@ -109,102 +104,44 @@
 
           (up-*gid->count! [*gc hl]
             (let [gid-base (hl->gid-base hl)]
-              ((swap! *gc update gid-base #(inc (or % 0)))
+              ((vswap! *gc update gid-base #(inc (or % 0)))
                gid-base)))
 
           (hl->toc-el [{:keys [toc-wrapper? value gh-id children]}]
             (if toc-wrapper?
-              children
+              (some->> children
+                       (apply n/section)
+                       (n/headline toc-hl-val))
               (n/unordered-list
                (vec (list* (n/link gh-id (n/text value))
                            (n/line-break)
                            (some->> children seq))))))
 
-          (hls->toc-body [headlines]
-            ;; NOTE: Could've use something like state monad.
-            ;;       Cats have it. Or explicitly thread the value.
-            ;;       But it will reduce readability for no apparent benefits
-            ;;       since `atom` doesn't leak.
-            (let [*gid->count (atom {})
-                  inner (fn inner [depth hl]
-                          (-> hl
-                              (assoc :gh-id
-                                     (when-not (:toc-wrapper? hl)
-                                       (gh-id
-                                        (hl->gid-base hl)
-                                        (up-*gid->count! *gid->count hl))))
-                              (update :children
-                                      #(when (< depth toc-max-depth)
-                                         (some->>
-                                          %
-                                          (filter hl?)
-                                          (seq)
-                                          (mapv (partial inner (inc depth))))))
-                              hl->toc-el))]
-              (inner 0 {:toc-wrapper? true :children (vec headlines)})))]
-    (let [toc (->> children
-                   (filter hl?)
-                   (hls->toc-body)
-                   (apply n/section)
-                   (n/headline toc-hl-val))
-          [b-toc a-toc] (split-with (complement hl?) children)]
-      (assoc root :children (vec (concat b-toc [toc] a-toc))))))
-
-
-(defn- assoc-toc-old
-  [{children :children :as root}]
-  {:pre [(s/valid? :spacedoc.data.node/root root)]
-   :post [(s/valid? :spacedoc.data.node/root %)]}
-  (letfn [(hl? [node] (n/headline-tags (:tag node)))
-          (hl->gid-base [headlin] (data/hl-val->gh-id-base (:value headlin)))
-          (gh-id [gid-base cnt] (if (> cnt 1)
-                                  (str gid-base "-" (dec cnt))
-                                  gid-base))
           (hls->toc [headlines]
-            ;; NOTE: Could've use something like state monad.
-            ;;       Cats have it. Or explicitly thread the value.
-            ;;       But it will reduce readability for no apparent benefits
-            ;;       since `atom` doesn't leak.
-            (let [*gid->count (atom {})]
-              (letfn [(up-*gid->count! [hl]
-                        (let [gid-base (hl->gid-base hl)]
-                          ((swap! *gid->count update gid-base #(inc (or % 0)))
-                           gid-base)))
-                      (hl->toc-el [{:keys [value gh-id children]}]
-                        (n/unordered-list
-                         (vec (list* (n/link gh-id (n/text value))
-                                     (n/line-break)
-                                     (some->> children seq)))))
-                      (inner [depth hl]
-                        (-> hl
-                            (assoc :gh-id
-                                   (gh-id
-                                    (hl->gid-base hl)
-                                    (up-*gid->count! hl)))
-                            (update :children
-                                    #(when (< depth toc-max-depth)
-                                       (some->>
-                                        %
-                                        (filter hl?)
-                                        (seq)
-                                        (mapv (partial inner (inc depth))))))
-                            hl->toc-el))]
-                (mapv (partial inner 1) headlines))))]
-    (let [toc (->> children
-                   (filter hl?)
-                   (hls->toc)
-                   (apply n/section)
-                   (n/headline toc-hl-val))
+            ;; NOTE: We use local `volatile!` because with the counter state
+            ;;       threading the code gates much more complex.
+            (let [*gid->count (volatile! {})]
+              ((fn inner [depth hl]
+                 (-> hl
+                     (assoc :gh-id
+                            (when-not (:toc-wrapper? hl)
+                              (gh-id
+                               (hl->gid-base hl)
+                               (up-*gid->count! *gid->count hl))))
+                     (update :children
+                             #(when (< depth toc-max-depth)
+                                (some->>
+                                 %
+                                 (filter hl?)
+                                 (seq)
+                                 (mapv (partial inner (inc depth))))))
+                     hl->toc-el))
+               0
+               {:toc-wrapper? true :children (vec headlines)})))]
+
+    (let [toc (->> children (filter hl?) (hls->toc))
           [b-toc a-toc] (split-with (complement hl?) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))))
-
-
-(defn- assoc-toc
-  [{children :children :as root}]
-  {:pre [(s/valid? :spacedoc.data.node/root root)
-         (= (assoc-toc-old root) (assoc-toc-new root))]
-   :post [(s/valid? :spacedoc.data.node/root %)]}
-  (assoc-toc-new root))
 
 
 (defn- viz-len
