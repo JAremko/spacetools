@@ -60,7 +60,7 @@ sdnize_args=("${first_arg}" "${tmp_dir}" "${@}")
 
 case $action in
 validate)
-    echo $args
+    cd ./spacedoc
     echo_headline "Exporting documentation for validation:"
     emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
     echo_headline "Validating documentation:"
@@ -68,6 +68,7 @@ validate)
     exit $?
     ;;
 format)
+    cd ./spacedoc
     docfmt_args="${@}"
     if [[ -z "${docfmt_args// }" ]]; then
         docfmt_args="${first_arg}"

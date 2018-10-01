@@ -34,9 +34,9 @@ WORKDIR  /opt/spacetools
 
 RUN chmod 775 /usr/local/bin/spacedoc \
               ./run \
-              ./docfmt/docfmt.el \
-              ./sdnize/sdnize.el \
-    && chmod 777 ./docfmt ./sdnize
+              ./spacedoc/prefmt/prefmt.el \
+              ./spacedoc/sdnize/sdnize.el \
+    && chmod 777 ./spacedoc/docfmt ./spacedoc/sdnize
 
 ENTRYPOINT ["/opt/spacetools/run"]
 

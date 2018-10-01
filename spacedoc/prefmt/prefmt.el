@@ -1,6 +1,6 @@
 #!/usr/bin/emacs --script
 ;;
-;;; docfmt.el -- Spacemacs docs formatter runner -*- lexical-binding: t -*-
+;;; prefmt.el -- Spacemacs docs export pre-formatter -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2012-2017 Sylvain Benner & Contributors
 ;;
@@ -8,15 +8,15 @@
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;; This file is not part of GNU Emacs.
 ;;
-;; Note: see `docfmt-help-text' for usage.
+;; Note: see `prefmt-help-text' for usage.
 ;;
 ;;; License: GPLv3
 ;;; Commentary:
 ;;; Code:
 
-(defconst docfmt-help-text
+(defconst prefmt-help-text
   (concat
-   "Spacemacs documentation formatting tool\n"
+   "Spacemacs documentation export pre-formatting tool\n"
    "=======================================\n"
    "Arguments are *.org file paths or directories.\n"
    "If a file path is a directory - it will be searched\n"
@@ -24,34 +24,34 @@
    "Files are formatted in-place.")
   "Help text for the script.")
 
-(declare-function docfmt/apply-all "_worker.el" nil)
-(declare-function docfmt/apply-all-batch "_worker.el" (files))
+(declare-function prefmt/apply-all "_worker.el" nil)
+(declare-function prefmt/apply-all-batch "_worker.el" (files))
 
-(defconst docfmt-run-file-name (or load-file-name buffer-file-name)
-  "Path to run script of \"docfmt\" tool.")
+(defconst prefmt-run-file-name (or load-file-name buffer-file-name)
+  "Path to run script of \"prefmt\" tool.")
 
-(defconst docfmt-run-file-dir
-  (file-name-directory docfmt-run-file-name)
-  "Path to \"docfmt\" tool directory.")
+(defconst prefmt-run-file-dir
+  (file-name-directory prefmt-run-file-name)
+  "Path to \"prefmt\" tool directory.")
 
-(defconst docfmt-worker-el-path
-  (concat docfmt-run-file-dir "_worker.el")
+(defconst prefmt-worker-el-path
+  (concat prefmt-run-file-dir "_worker.el")
   "Path to worker script .el file")
 
-(defconst docfmt-worker-path
-  (concat docfmt-run-file-dir "_worker.elc")
+(defconst prefmt-worker-path
+  (concat prefmt-run-file-dir "_worker.elc")
   "Path to compiled worker script file.")
 
-(defvar docfmt-workers-count nil
+(defvar prefmt-workers-count nil
   "Number of Emacs instances that will be used for formatting.")
-(defvar docfmt-workers-fin 0
+(defvar prefmt-workers-fin 0
   "Number of workers finished.")
-(defvar docfmt-stop-waiting nil
+(defvar prefmt-stop-waiting nil
   "Used for blocking until all formatters have exited.")
 
 ;;; NOTE: Mb move back to the shared file?
 ;; +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-(defun docfmt/make-file-size-path-alist (files)
+(defun prefmt/make-file-size-path-alist (files)
   "Return (<file size> . <abs file path>) alist of FILES."
   (let ((res nil))
     (dolist (file files)
@@ -64,7 +64,7 @@
             res))
     res))
 
-(defun docfmt/get-cpu-count ()
+(defun prefmt/get-cpu-count ()
   "Get number of processor cores or return \"8\" :P"
   (let
       ((res (or (let ((win-cpu-num (getenv "NUMBER_OF_PROCESSORS")))
@@ -84,7 +84,7 @@
       ;; Fallback value.
       8)))
 
-(defun docfmt/find-org-files (paths)
+(defun prefmt/find-org-files (paths)
   "Build list of absolute paths to org files based of PATHS.
 Each path must be path to an org file or a directory.
 If it is directory find all org files in it and append
@@ -102,10 +102,10 @@ to the return value."
      paths)
     ret))
 
-(defun docfmt/files-to-buckets (files n)
+(defun prefmt/files-to-buckets (files n)
   "Split FILES into N lists(task buckets) balancing by file sizes."
   (let ((fps-alist (sort
-                    (docfmt/make-file-size-path-alist
+                    (prefmt/make-file-size-path-alist
                      files)
                     (lambda (e1 e2) (> (car e1) (car e2)))))
         (buckets '()))
@@ -118,9 +118,9 @@ to the return value."
             (cons (+ (caar buckets) (car fps))
                   (push (cdr fps) (cdar buckets)))))
     (mapcar 'cdr buckets)))
-(byte-compile 'docfmt-filse-to-buckets)
+(byte-compile 'prefmt-filse-to-buckets)
 
-(defun docfmt/do-concurrently
+(defun prefmt/do-concurrently
     (files w-count w-path sentinel make-task)
   "Run task concurrently.
 Process FILES using W-COUNT workers(child emacs processes) loaded from W-PATH
@@ -133,7 +133,7 @@ SENTINEL is a worker process sentinel."
     (unless emacs-fp
       (error "Can't find emacs executable"))
     (setq file-buckets
-          (docfmt/files-to-buckets
+          (prefmt/files-to-buckets
            files
            (min w-count
                 (length files))))
@@ -155,14 +155,14 @@ SENTINEL is a worker process sentinel."
                       file-path-bucket))))))
 ;; -----------------------------------------------------------------------------
 
-(defun docfmt/format ()
+(defun prefmt/format ()
   "Format current `org-mode' buffer."
   (interactive)
   (unless (derived-mode-p 'org-mode)
     (user-error "org-mode major mode should be enabled in the file."))
-  (docfmt/apply-all))
+  (prefmt/apply-all))
 
-(defun docfmt/concurrently-sentinel (p e)
+(defun prefmt/concurrently-sentinel (p e)
   (condition-case err
       (let ((buff (process-buffer p)))
         (if (not (eq (process-status p) 'exit))
@@ -178,17 +178,17 @@ SENTINEL is a worker process sentinel."
             (progn
               (message "Process \"%s\" has finished\n" p)
               (when
-                  (= (setq docfmt-workers-fin
-                           (1+ docfmt-workers-fin))
-                     docfmt-workers-count)
-                (setq docfmt-stop-waiting t)))
+                  (= (setq prefmt-workers-fin
+                           (1+ prefmt-workers-fin))
+                     prefmt-workers-count)
+                (setq prefmt-stop-waiting t)))
           (error "Process %s was %s"
                  p e)
-          (setq docfmt-stop-waiting t)))
-    (error (setq docfmt-stop-waiting t)
+          (setq prefmt-stop-waiting t)))
+    (error (setq prefmt-stop-waiting t)
            (error "%s" err))))
 
-(defun docfmt/run (arg-list)
+(defun prefmt/run (arg-list)
   "Main function for running as a script.
 ARG-LIST is an argument list where the fist element is the number of emacs
 process that will be used and
@@ -196,30 +196,30 @@ the rest elements are file paths (absolute or relative to Spacemacs root dir)."
   (when (or (not arg-list)
             (member (car arg-list)
                     '("-h" "help")))
-    (error docfmt-help-text))
-  (setq docfmt-workers-fin 0
-        docfmt-stop-waiting nil)
-  (let* ((files (docfmt/find-org-files arg-list))
+    (error prefmt-help-text))
+  (setq prefmt-workers-fin 0
+        prefmt-stop-waiting nil)
+  (let* ((files (prefmt/find-org-files arg-list))
          (f-length (length files))
-         (w-count (min (docfmt/get-cpu-count) f-length)))
+         (w-count (min (prefmt/get-cpu-count) f-length)))
     (if (= f-length 0)
         (progn
           (message "No files to format.")
           (kill-emacs 0))
-      (byte-compile-file docfmt-worker-el-path)
+      (byte-compile-file prefmt-worker-el-path)
       (if (= w-count 1)
           (progn
-            (load docfmt-worker-path nil t)
-            (docfmt/apply-all-batch files))
-        (docfmt/do-concurrently
+            (load prefmt-worker-path nil t)
+            (prefmt/apply-all-batch files))
+        (prefmt/do-concurrently
          files
-         (setq docfmt-workers-count w-count)
-         docfmt-worker-path
-         'docfmt/concurrently-sentinel
-         (lambda (f) (format "%S" `(docfmt/apply-all-batch ',f))))
-        (while (not docfmt-stop-waiting)
+         (setq prefmt-workers-count w-count)
+         prefmt-worker-path
+         'prefmt/concurrently-sentinel
+         (lambda (f) (format "%S" `(prefmt/apply-all-batch ',f))))
+        (while (not prefmt-stop-waiting)
           (accept-process-output))))))
 
 ;; Script entry point.
 (when (and load-file-name noninteractive)
-  (docfmt/run argv))
+  (prefmt/run argv))
