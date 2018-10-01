@@ -1,6 +1,6 @@
 (defproject spacedoc "0.1.0-SNAPSHOT"
   :description "Documentation tools for Spacemacs"
-  :url "https://github.com/jaremko/spacedoc"
+  :url "https://github.com/jaremko/spacetools/spacedoc"
   :license {:name "GNU General Public License V3"
             :url "https://www.gnu.org/licenses/gpl.html"}
   :plugins [[lein-environ "1.0.0"]]
@@ -13,7 +13,7 @@
   :global-vars {*warn-on-reflection* true
                 *assert* true}
   :target-path "target/%s"
-  :uberjar-name "sdn.jar"
+  :uberjar-name "spacedoc.jar"
   :profiles {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]}
              :test {:env {:gentest-multiplier "3"}
                     :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss4m"]

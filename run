@@ -3,7 +3,8 @@
 cd "$(dirname "$0")"
 
 action="$1"
-first_arg="$2"
+shift
+first_arg="$1"
 shift
 
 print_help () {
@@ -46,38 +47,37 @@ case $action in
     ;;
 esac
 
-if [ ! -d "${first_arg}" ]; then
-    print_help
-    exit 2
-fi
-
 case $@ in
-"")
-    print_help
-    exit 2
-    ;;
 -h|--help)
     print_help
     exit 0
     ;;
 esac
 
+tmp_dir="/tmp/spacetools/"
+rm -rf "${tmp_dir}"
+sdnize_args=("${first_arg}" "${tmp_dir}" "${@}")
+
 case $action in
 validate)
-    rm -rf /opt/spacedoc/emacs_tools/export/target/*
+    echo $args
     echo_headline "Exporting documentation for validation:"
-    emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
+    emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
     echo_headline "Validating documentation:"
-    sdn validate /opt/spacedoc/emacs_tools/export/target/
+    spacedoc validate "${tmp_dir}"
     exit $?
     ;;
 format)
-    echo_headline "Reformatting documentation with Emacs tools(in place):"
-    emacs -batch -l ./emacs_tools/docfmt/run.el -no-site-file -q "$@"
+    docfmt_args="${@}"
+    if [[ -z "${docfmt_args// }" ]]; then
+        docfmt_args="${first_arg}"
+    fi
+    echo_headline "Preforming documentation with Emacs tools for export:"
+    emacs -batch -l ./docfmt/docfmt.el -no-site-file -q "${docfmt_args}"
     echo_headline "Exporting documentation for formatting with Clojure tools:"
-    emacs -batch -l ./emacs_tools/export/run.el -no-site-file -q "$@"
+    emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
     echo_headline "Importing documentation back into .org format:"
-    sdn orgify /opt/spacedoc/emacs_tools/export/target/ "${first_arg}"
+    spacedoc orgify "${tmp_dir}" "${first_arg}"
     exit $?
     ;;
 *)

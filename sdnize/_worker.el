@@ -1,4 +1,4 @@
-;;; _worker.el ---  Spacemacs docs export worker -*- lexical-binding: t -*-
+;;; _worker.el ---  Spacemacs docs SDN export worker -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2012-2018 Sylvain Benner & Contributors
 ;;

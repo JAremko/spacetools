@@ -1,4 +1,4 @@
-;;; _worker.el --- Spacemacs doc formatter worker -*- lexical-binding: t -*-
+;;; _worker.el --- Spacemacs docs formatting worker -*- lexical-binding: t -*-
 ;;
 ;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
@@ -16,30 +16,16 @@
            noninteractive)
   (setq gc-cons-threshold 1000000000))
 
+(require 'org)
+
 (eval-when-compile
   (require 'cl))
-
-(defconst docfmt-lib-dir
-  (file-truename
-   (concat
-    (file-name-directory
-     (or load-file-name
-         buffer-file-name))
-    "../lib/")))
-
-(load (concat docfmt-lib-dir "toc-org.elc")  nil t)
 
 (defconst docfmt-title-regexp "^#\\+TITLE:.*$")
 (defconst docfmt-begin-block-regexp "^#\\+BEGIN.*$")
 (defconst docfmt-end-block-regexp "^#\\+END.*$")
 (defconst docfmt-empty-line-regexp "^[ \t]*$")
 (defconst docfmt-tree-trunk-regexp "^[ 	]*|_")
-(defconst docfmt-toc-heading-head "* Table of Contents")
-(defconst docfmt-toc-heading-tail ":TOC_4_gh:noexport:")
-(defconst docfmt-toc-headline (format
-                               "%-41s%s"
-                               docfmt-toc-heading-head
-                               docfmt-toc-heading-tail))
 
 (defsubst docfmt/rm-empty-lines-at-beg ()
   "Remove newlines at the beginning of the buffer."
@@ -60,24 +46,12 @@
     (replace-match "" nil nil nil 1)
     (forward-line -1)))
 
-(defsubst docfmt/remove-readtheorg-meta ()
-  "Remove '#+HTML_HEAD_EXTRA: ... readtheorg.css\" />'."
-  (goto-char (point-min))
-  (while (re-search-forward "#\\+HTML_HEAD_EXTRA.*readtheorg\\\.css.*" nil t)
-    (replace-match "")))
-
 (defsubst docfmt/multy-nl-with-single ()
   "Replace multiply empty lines with a single empty line."
   (goto-char (point-min))
   (while (re-search-forward "\\(^[[:space:]]*$\\)\n" nil t)
     (replace-match "\n")
     (forward-char)))
-
-(defsubst docfmt/replace-org-toc ()
-  "Replace \":TOC_X_org:\" with \":TOC_4_gh:\"."
-  (goto-char (point-min))
-  (while (re-search-forward toc-org-toc-org-regexp nil t)
-    (replace-match "_4_gh" nil nil nil 2)))
 
 (defsubst docfmt/goto-next-table ()
   "Goto next org table.
@@ -145,17 +119,6 @@ Returns nil if no more tables left."
                       (file-name-directory
                        (buffer-file-name))))))))
 
-(defsubst docfmt/insert-toc ()
-  "Insert toc if the buffer doesn't have one."
-  (goto-char (point-min))
-  (unless (re-search-forward toc-org-toc-org-regexp nil t)
-    (goto-char (point-max))
-    ;; Skip from the end of the buffer to the first headling.
-    (while (re-search-backward org-heading-regexp nil t))
-    (open-line 3)
-    (forward-line 1)
-    (insert docfmt-toc-headline)))
-
 (defsubst docfmt/remove-empty-lines-after-headlines()
   "Remove empty liners after each headline."
   (goto-char (point-min))
@@ -204,12 +167,6 @@ Returns nil if no more tables left."
     (ignore-errors
       (org-table-align))))
 
-(defsubst docfmt/apply-toc ()
-  "Apply current toc-org TAG to TOC."
-  (toc-org-enable)
-  (goto-char (point-min))
-  (toc-org-insert-toc))
-
 (defun docfmt/apply-all ()
   "Format current `org-mode' buffer."
   (let ((old-buff-str (buffer-string))
@@ -217,14 +174,10 @@ Returns nil if no more tables left."
     (cl-loop
      (docfmt/rm-empty-lines-at-beg)
      (docfmt/rm-empty-lines-at-end)
-     (docfmt/remove-readtheorg-meta)
-     (docfmt/replace-org-toc)
      (docfmt/rm-trail-delim-in-hl)
      (docfmt/multy-nl-with-single)
      (docfmt/remote-empty-lines-at-the-beginning)
      (docfmt/insert-title)
-     (docfmt/insert-toc)
-     (docfmt/apply-toc)
      (docfmt/remove-empty-lines-after-headlines)
      (docfmt/insert-empty-line-before-tables)
      (docfmt/insert-empty-line-after-title)

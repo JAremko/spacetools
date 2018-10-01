@@ -1,6 +1,6 @@
 FROM clojure as clojure
 
-COPY clj_tools/spacedoc /usr/src/app
+COPY spacedoc /usr/src/app
 
 RUN cd /usr/src/app && lein uberjar
 
@@ -11,7 +11,7 @@ ENV GRAALVM_V=1.0.0-rc6
 
 WORKDIR /tmp
 
-COPY --from=clojure /usr/src/app/target/uberjar/sdn.jar ./
+COPY --from=clojure /usr/src/app/target/uberjar/spacedoc.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
@@ -21,22 +21,23 @@ RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_
 RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
     --no-server \
     -H:+ReportUnsupportedElementsAtRuntime \
-    -jar /tmp/sdn.jar
+    -jar /tmp/spacedoc.jar
 
 
 FROM ubuntu
 
-COPY --from=graalvm /tmp/sdn /usr/local/bin
+COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
-COPY . /opt/spacedoc
+COPY . /opt/spacetools
 
-RUN chmod 775 /usr/local/bin/sdn \
-              /opt/spacedoc/run \
-              /opt/spacedoc/emacs_tools/docfmt/run.el \
-              /opt/spacedoc/emacs_tools/export/run.el
+WORKDIR  /opt/spacetools
 
-RUN ln -s /opt/spacedoc/emacs_tools/export/target/ /tmp/export
+RUN chmod 775 /usr/local/bin/spacedoc \
+              ./run \
+              ./docfmt/docfmt.el \
+              ./sdnize/sdnize.el \
+    && chmod 777 ./docfmt ./sdnize
 
-ENTRYPOINT ["/opt/spacedoc/run"]
+ENTRYPOINT ["/opt/spacetools/run"]
 
 CMD ["--help"]

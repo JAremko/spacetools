@@ -1,6 +1,6 @@
 #!/usr/bin/emacs --script
 ;;
-;;; run.el -- Spacemacs documentation export runner -*- lexical-binding: t -*-
+;;; sdnize.el -- Spacemacs documentation SDN exporter -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2012-2018 Sylvain Benner & Contributors
 ;;
@@ -24,38 +24,24 @@
    "=======================================\n"
    "First argument is the root directory (usually ~/.emacs.d/).\n"
    "It will be used to transform paths.\n"
+   "Second argument is the target directory.\n"
    "The rest of arguments are \"*.org\" file paths or directories.\n"
    "Directories will be searched for *.org files.\n"
-   "Files will be exported into \"export/target\" directory of the tool.\n"
-   "Script can be called only with the first argument. In this case\n"
+   "Script can be called only with the first two argument. In this case\n"
    "a default list of Spacemacs documentation files will be used.")
   "Help text for the script.")
 
-(declare-function spacetools/find-org-files "shared.el" (paths))
-(declare-function spacetools/get-cpu-count "shared.el" nil)
-(declare-function spacetools/do-concurrently "shared.el" (files
-                                                          w-count
-                                                          w-path
-                                                          sentinel
-                                                          make-task))
-
 (defconst sdnize-run-file-name
   (or load-file-name buffer-file-name)
-  "Path to  run script of \"export\" tool.")
+  "Path to this script.")
 
 (defconst sdnize-run-file-dir
   (file-name-directory sdnize-run-file-name)
-  "Path to \"export\" tool directory.")
+  "Path to the parent directory of this file.")
 
-(defconst sdnize-target-dir
-  (concat sdnize-run-file-dir "target/")
-  "Target directory for \"export\" tool.")
+(defvar sdnize-target-dir ""
+  "Target directory.")
 
-(load
- (expand-file-name
-  "../lib/shared.el"
-  sdnize-run-file-dir)
- nil t)
 (defvar sdnize-root-dir ""
   "Root directory of the original documentation.")
 (defvar sdnize-workers-fin 0
@@ -75,6 +61,112 @@ the export dir.")
     "layers/LAYERS.org")
   "List of Spacemacs directories and ORG files that normally
  shouldn't be exported.")
+
+;;; NOTE: Mb move back to the shared file?
+;; +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+(defun sdnize/make-file-size-path-alist (files)
+  "Return (<file size> . <abs file path>) alist of FILES."
+  (let ((res nil))
+    (dolist (file files)
+      (unless (and (file-readable-p file)
+                   (not (file-directory-p file)))
+        (error "File \"%s\" unwritable or directory"
+               file))
+      (push (cons (float (nth 7 (file-attributes file)))
+                  (expand-file-name file))
+            res))
+    res))
+
+(defun sdnize/get-cpu-count ()
+  "Get number of processor cores or return \"8\" :P"
+  (let
+      ((res (or (let ((win-cpu-num (getenv "NUMBER_OF_PROCESSORS")))
+                  (when win-cpu-num (string-to-number win-cpu-num)))
+                (with-temp-buffer
+                  (ignore-errors
+                    (when (zerop
+                           (call-process "sysctl" nil t nil "-n" "hw.ncpu"))
+                      (string-to-number (buffer-string)))))
+                (when (file-exists-p "/proc/cpuinfo")
+                  (with-temp-buffer
+                    (insert-file-contents "/proc/cpuinfo")
+                    (how-many "^processor[[:space:]]+:"))))))
+    (if (and (numberp res)
+             (> res 0))
+        res
+      ;; Fallback value.
+      8)))
+
+(defun sdnize/find-org-files (paths)
+  "Build list of absolute paths to org files based of PATHS.
+Each path must be path to an org file or a directory.
+If it is directory find all org files in it and append
+to the return value."
+  (let ((ret '()))
+    (mapcar
+     (lambda (path)
+       (let ((p (file-truename path)))
+         (if (file-exists-p p)
+             (if (file-directory-p p)
+                 (dolist (fp (directory-files-recursively p "\\.org$"))
+                   (push fp ret))
+               (push p ret))
+           (error "File: \"%s\" doesn't exist or unreadable." p))))
+     paths)
+    ret))
+
+(defun sdnize/files-to-buckets (files n)
+  "Split FILES into N lists(task buckets) balancing by file sizes."
+  (let ((fps-alist (sort
+                    (sdnize/make-file-size-path-alist
+                     files)
+                    (lambda (e1 e2) (> (car e1) (car e2)))))
+        (buckets '()))
+    (dotimes (_ n) (push (cl-copy-list '(0)) buckets))
+    (dolist (fps fps-alist)
+      (setf buckets (sort
+                     buckets
+                     (lambda (e1 e2) (< (car e1) (car e2))))
+            (car buckets)
+            (cons (+ (caar buckets) (car fps))
+                  (push (cdr fps) (cdar buckets)))))
+    (mapcar 'cdr buckets)))
+(byte-compile 'sdnize-filse-to-buckets)
+
+(defun sdnize/do-concurrently
+    (files w-count w-path sentinel make-task)
+  "Run task concurrently.
+Process FILES using W-COUNT workers(child emacs processes) loaded from W-PATH
+MAKE-TASK is a function that takes single argument (file list) and returns
+string representation of a task that each worker will perform - it will be
+called as \"emacs -l W-PATH --batch -eval <value returned from MAKE-TASK>\"/.
+SENTINEL is a worker process sentinel."
+  (let ((file-buckets '())
+        (emacs-fp (executable-find "emacs")))
+    (unless emacs-fp
+      (error "Can't find emacs executable"))
+    (setq file-buckets
+          (sdnize/files-to-buckets
+           files
+           (min w-count
+                (length files))))
+    (dolist (file-path-bucket file-buckets)
+      (make-process
+       :name
+       "worker"
+       :sentinel
+       sentinel
+       :buffer
+       (generate-new-buffer "workers")
+       :command
+       (list emacs-fp
+             "-Q"
+             "-l" w-path
+             "--batch"
+             "-eval" (funcall
+                      make-task
+                      file-path-bucket))))))
+;; -----------------------------------------------------------------------------
 
 (defun sdnize/copy-file-to-target-dir (file-path)
   "Copy file at FILE-PATH into `sdnize-target-dir'.
@@ -169,26 +261,32 @@ See `sdnize-help-text' for description."
     (error sdnize-help-text))
   (unless (file-directory-p (car arg-list))
     (error "The first argument must be a readable directory."))
+  (let ((targt-dir-name (cadr arg-list)))
+    (if (and targt-dir-name (directory-name-p targt-dir-name))
+        (make-directory targt-dir-name t)
+      (error "The second argument must be directory name \"ends with /\"")))
   (setq sdnize-workers-fin 0
         sdnize-stop-waiting nil)
   (let* ((default-directory sdnize-run-file-dir)
          (w-path (progn (byte-compile-file "_worker.el")
                         (file-truename "_worker.elc")))
          (root-dir (file-truename (file-name-as-directory (pop arg-list))))
+         (target-dir (file-truename (file-name-as-directory (pop arg-list))))
          (files (let ((default-directory root-dir))
-                  (spacetools/find-org-files
+                  (sdnize/find-org-files
                    (or arg-list
                        (sdnize/build-default-list root-dir)))))
          (f-length (length files))
          (w-count
           ;; FIXME: With 1-2  workers it gets extremely slow.
-          (min (max 4 (spacetools/get-cpu-count)) f-length)))
+          (min (max 4 (sdnize/get-cpu-count)) f-length)))
     (if (= f-length 0)
         (progn (message "No files to export.")
                (kill-emacs 0))
       (setq sdnize-worker-count w-count
-            sdnize-root-dir root-dir)
-      (spacetools/do-concurrently
+            sdnize-root-dir root-dir
+            sdnize-target-dir target-dir)
+      (sdnize/do-concurrently
        files
        w-count
        w-path
