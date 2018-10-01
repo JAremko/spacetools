@@ -1,6 +1,6 @@
 FROM clojure as clojure
 
-COPY spacedoc /usr/src/app
+COPY spacedoc/spacedoc /usr/src/app
 
 RUN cd /usr/src/app && lein uberjar
 
