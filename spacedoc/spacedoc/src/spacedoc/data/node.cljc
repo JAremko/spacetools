@@ -386,7 +386,6 @@
 (defmethod block-element :paragraph [_] ::paragraph)
 (defmethod block-element :feature-list [_] ::feature-list)
 (defmethod block-element :plain-list [_] ::plain-list)
-(defmethod block-element :list-item [_] ::list-item)
 (defmethod block-element :quote [_] ::quote)
 (defmethod block-element :src [_] ::src)
 (defmethod block-element :table [_] ::table)
