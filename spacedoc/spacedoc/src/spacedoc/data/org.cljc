@@ -149,7 +149,7 @@
   "Like `count` but returns real visual length of a string."
   [^String s]
   (-> s
-      (str/replace #"\[.*\[(.*)\]\]" "$1")
+      (str/replace #"\[(?:\[[^\[\]]+\]){0,1}\[([^\[\]]+)\]+\]" "$1")
       (str/replace "\u200B" "")
       (count)))
 
