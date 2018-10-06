@@ -75,21 +75,25 @@
   (if (str/blank? s)
     s
     (let [ind (apply str (repeat indent-level " "))
+          trailing-ns (str/replace-first s (str/trim-newline s) "")
           lines (str/split-lines s)
           c-d (r/reduce (r/monoid
                          #(min %1 (- (count %2) (count (str/triml %2))))
                          (constantly (count s)))
                         (remove str/blank? lines))
           ws-prefix (apply str (repeat c-d " "))]
-      (->> lines
-           (r/map (comp #(if (str/blank? %) "\n" %)
-                     #(str ind %)
-                     #(str/replace-first % ws-prefix "")))
-           (r/reduce
-            (r/monoid
-             #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
-             str))
-           (format "%s\n")))))
+      (str
+       (->> lines
+            (r/map (comp #(if (str/blank? %) "\n" %)
+                      #(str ind %)
+                      #(str/replace-first % ws-prefix "")))
+            (r/reduce
+             (r/monoid
+              #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
+              str)))
+       (if (empty? trailing-ns)
+         "\n"
+         trailing-ns)))))
 
 
 (defn- assoc-toc
@@ -162,48 +166,54 @@
            (val)))
 
 
+(defn- sep-inlines
+  [t1 s1 t2 s2]
+  (when (and (every? not-empty [s1 s2])
+             (not (= :text t1 t2)))
+    (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
+          f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
+      (when (not (or l-s1-sep? f-s2-sep?)) " "))))
+
+
+(defn- sep-blocks
+  [p-t t1 t2]
+  (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
+    (match [p-t            t1          t1-k        t2            t2-k     ]
+           [:item-children :paragraph  _           ::end         _        ] ""
+           [:item-children :plain-list _           ::end         _        ] ""
+           [:item-children _           :block      ::end         _        ] "\n"
+           [_              _           _           ::end         _        ] ""
+           [:section       nil         _           :table        _        ] "\n"
+           [_              nil         _           _             _        ] ""
+           [_              _           _           :plain-list   _        ] ""
+           [_              _           _           :feature-list _        ] ""
+           [_              _           :headline   _             _        ] "\n"
+           [_              _           _           _             :headline] "\n"
+           [_              _           :block      _             _        ] "\n"
+           [_              _           _           _             :block   ] "\n"
+           :else nil)))
+
+
 (defn- conv*
   "Reduce CHILDREN vector into vector of ORG string representations inserting
   proper separators (new lies and white spaces).
   P-TAG is parent node tag."
   [p-tag children]
   {:pre [((some-fn vector? nil?) children)]}
-
-  (letfn [(sep-inlines [t1 s1 t2 s2]
-            (when (and (every? not-empty [s1 s2])
-                       (not (= :text t1 t2)))
-              (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
-                    f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
-                (when (not (or l-s1-sep? f-s2-sep?)) " "))))
-
-          (sep-blocks [p-t t1 t2]
-            (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
-              (match [p-t      t1  t1-k        t2            t2-k     ]
-                     [_        _   _           nil           _        ] ""
-                     [:section nil _           :table        _        ] "\n"
-                     [_        nil _           _             _        ] ""
-                     [_        _   _           :plain-list   _        ] ""
-                     [_        _   _           :feature-list _        ] ""
-                     [_        _   :headline   _             _        ] "\n"
-                     [_        _   _           _             :headline] "\n"
-                     [_        _   :block      _             _        ] "\n"
-                     [_        _   _           _             :block   ] "\n"
-                     :else nil)))]
-
-    (r/reduce
-     (r/monoid
-      (fn [acc [n-t n-s]]
-        (let [h-t (:head-tag (meta acc))
-              b-s (last acc)]
-          (with-meta
-            (conj acc
-                  (str (or (sep-inlines h-t b-s n-t n-s)
-                           (sep-blocks p-tag h-t n-t)
-                           "")
-                       n-s))
-            {:head-tag n-t})))
-      vector)
-     (r/map #(vector (:tag %) (sdn->org %)) children))))
+  (r/reduce
+   (r/monoid
+    (fn [acc [n-t n-s]]
+      (let [h-t (:head-tag (meta acc))
+            b-s (last acc)]
+        (with-meta
+          (conj acc
+                (str (or (sep-inlines h-t b-s n-t n-s)
+                         (sep-blocks p-tag h-t n-t)
+                         "")
+                     n-s))
+          {:head-tag n-t})))
+    vector)
+   (r/map #(vector (:tag %) (sdn->org %)) (conj children {:tag ::end}))))
 
 
 (defn- conv
@@ -224,7 +234,7 @@
 
 (defmethod sdn->org :list
   [{:keys [tag children]}]
-  (conv tag children))
+  (str (str/trim-newline (conv tag children)) "\n"))
 
 
 (defmethod sdn->org :block-container
@@ -339,9 +349,7 @@
            (->> children
                 (conv tag)
                 (indent list-indentation)
-                (str/trim-newline)
-                (str/trim))
-           "\n")))
+                (str/triml)))))
 
 
 (defmethod sdn->org :example
@@ -417,3 +425,10 @@
        (:children)
        (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
        (conv tag)))
+
+
+;;;; Pseudo-nodes
+
+(defmethod sdn->org ::end
+  [_]
+  "")
