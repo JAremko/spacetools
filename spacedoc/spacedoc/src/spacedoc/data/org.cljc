@@ -2,6 +2,7 @@
   "Exporting SDN to .org format."
   (:require [clojure.core.match :refer [match]]
             [clojure.core.reducers :as r]
+            [clojure.set :sa :set]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
@@ -44,7 +45,6 @@
                       n/inline-leaf-tags :inline-leaf
                       n/block-tags :block
                       n/headline-tags :headline})
-
 
 (defmulti sdn->org
   (fn [{tag :tag :as node}]
@@ -115,8 +115,8 @@
                        (n/headline toc-hl-val))
               (n/unordered-list
                (vec (list* (n/link gh-id (n/text value))
-                           (n/line-break)
-                           (some->> children seq))))))
+                           (when (seq children)
+                             (list* (n/line-break) children)))))))
 
           (hls->toc [headlines]
             ;; NOTE: We use local `volatile!` because with the counter state
@@ -169,17 +169,25 @@
   [p-tag children]
   {:pre [((some-fn vector? nil?) children)]}
 
-  (letfn [(sep-inline [t1 s1 t2 s2]
+  (letfn [(sep-inlines [t1 s1 t2 s2]
             (when (and (every? not-empty [s1 s2])
                        (not (= :text t1 t2)))
               (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
                     f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
                 (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
-          (sep-block [p-t t1 t2]
+          (sep-blocks [p-t t1 t2]
             (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
-              (match p-t t1 t1-k t2 t2-k
-                     [_  :paragraph   _    :paragraph  _] "\n\n"
+              (match [p-t      t1  t1-k        t2            t2-k     ]
+                     [_        _   _           nil           _        ] ""
+                     [:section nil _           :table        _        ] "\n"
+                     [_        nil _           _             _        ] ""
+                     [_        _   _           :plain-list   _        ] ""
+                     [_        _   _           :feature-list _        ] ""
+                     [_        _   :headline   _             _        ] "\n"
+                     [_        _   _           _             :headline] "\n"
+                     [_        _   :block      _             _        ] "\n"
+                     [_        _   _           _             :block   ] "\n"
                      :else nil)))]
 
     (r/reduce
@@ -189,70 +197,13 @@
               b-s (last acc)]
           (with-meta
             (conj acc
-                  (str (or (sep-inline h-t b-s n-t n-s)
-                           (sep-block p-tag h-t n-t)
+                  (str (or (sep-inlines h-t b-s n-t n-s)
+                           (sep-blocks p-tag h-t n-t)
                            "")
                        n-s))
             {:head-tag n-t})))
       vector)
      (r/map #(vector (:tag %) (sdn->org %)) children))))
-
-#_(defn- conv*
-    "Reduce CHILDREN vector into vector of ORG string representations inserting
-  proper separators (new lies and white spaces)."
-    [node children]
-    {:pre [((some-fn vector? nil?) children)]}
-
-    (letfn [(nl-before?
-              [node-tag]
-              (and (not (#{:plain-list :feature-list :table} node-tag))
-                   (#{:block :headline} (tag->kind node-tag))))
-
-            (nl-after?
-              [node-tag]
-              (#{:block :headline} (tag->kind node-tag)))
-
-            (nl-between?
-              [first-node-tag second-node-tag]
-              (= :paragraph first-node-tag second-node-tag))
-
-            (el-between?
-              [first-node-tag second-node-tag]
-              (and (#{:plain-list :feature-list} first-node-tag)
-                   (= :paragraph second-node-tag)))
-
-            (need-ws?
-              [s1 s2]
-              (when (every? not-empty [s1 s2])
-                (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
-                      f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
-                  (not (or l-s1-sep? f-s2-sep?)))))]
-
-      (r/reduce
-       (r/monoid
-        (fn [acc [n-t n-s]]
-          (let [h-t (:head-tag (meta acc))
-                b-s (last acc)]
-            (with-meta
-              (conj acc
-                    ;; Figuring out how to separate children
-                    (str (cond
-                           ;; We interpret ^ and _ as a text
-                           ;; instead of `superscript` and `subscript`
-                           ;; so it need to be simply appended to the
-                           ;; next string.
-                           (= :text h-t n-t) ""
-                           ;; tables have backed-in newlines.
-                           (= :table n-t) ""
-                           (el-between? h-t n-t) "\n\n"
-                           (nl-between? h-t n-t) "\n"
-                           (or (nl-after? h-t) (nl-before? n-t)) "\n"
-                           (need-ws? b-s n-s) " "
-                           :else "")
-                         n-s))
-              {:head-tag n-t})))
-        vector)
-       (r/map #(vector (:tag %) (sdn->org %)) children))))
 
 
 (defn- conv
@@ -342,8 +293,7 @@
                                       :else (table-row-str % cols-w)))
                             vrep))
              (indent table-indentation)))
-      (str/trim-newline)
-      (str "\n")))
+      (str/replace-first #"^\n" "")))
 
 
 (defn- fmt-cell-content
@@ -386,11 +336,12 @@
            (str/trim b)
            " "
            (when itag (format "%s :: " itag) "")
-           (str/trim (indent list-indentation (conv tag children)))
-           (when (and (= last-child-kind :block)
-                      (not (#{:plain-list :feature-list :table}
-                            last-child-tag)))
-             "\n"))))
+           (->> children
+                (conv tag)
+                (indent list-indentation)
+                (str/trim-newline)
+                (str/trim))
+           "\n")))
 
 
 (defmethod sdn->org :example

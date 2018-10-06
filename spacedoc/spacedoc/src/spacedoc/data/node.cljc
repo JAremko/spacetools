@@ -184,7 +184,6 @@
 (defmethod inline-container :strike-through [_] ::strike-through)
 (defmethod inline-container :subscript [_] ::subscript)
 (defmethod inline-container :superscript [_] ::superscript)
-(defmethod inline-container :paragraph [_] ::paragraph)
 (defmethod inline-container :underline [_] ::underline)
 (s/def ::inline-container (s/multi-spec inline-container :tag))
 

@@ -14,7 +14,8 @@
                 *assert* true}
   :target-path "target/%s"
   :uberjar-name "spacedoc.jar"
-  :profiles {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]}
+  :profiles {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss4m"]
+                   :dependencies [[org.clojure/test.check "0.10.0-alpha3"]]}
              :test {:env {:gentest-multiplier "3"}
                     :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss4m"]
                     ;; NOTE: Added this to get more informative spec fails
