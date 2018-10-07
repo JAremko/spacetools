@@ -14,13 +14,13 @@ print_help () {
   usage: run ACTION [ARGS]...
 
   Actions:
-    validate ROOT [INPUTS]... Validate Spacemacs documentation files.
-                              If only the first argument is supplied
-                              the default list of documentation files
-                              will be used.
-    format   ROOT [INPUTS]... Format Spacemacs documentation files.
-                              If only the first argument is supplied
-                              all files in ROOT folder will be formatted.
+    validoc ROOT [INPUTS]... Validate Spacemacs documentation files.
+                             If only the first argument is supplied
+                             the default list of documentation files
+                             will be used.
+    docfmt  ROOT [INPUTS]... Format Spacemacs documentation files.
+                             If only the first argument is supplied
+                             all files in ROOT folder will be formatted.
 
   Common arguments:
     ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
@@ -59,7 +59,7 @@ rm -rf "${tmp_dir}"
 sdnize_args=("${first_arg}" "${tmp_dir}" "${@}")
 
 case $action in
-    validate)
+    validoc)
         cd ./spacedoc
         echo_headline "Exporting documentation for validation:"
         emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
@@ -67,7 +67,7 @@ case $action in
         spacedoc validate "${tmp_dir}"
         exit $?
         ;;
-    format)
+    docfmt)
         cd ./spacedoc
         prefmt_args="${@}"
         if [[ -z "${prefmt_args// }" ]]; then
