@@ -1,8 +1,8 @@
 ### Spacemacs tools
-*Available at DockerHub as `jare/spacemacs:latest` and `jare/spacemacs:noemacs`*
+*Available at DockerHub as `jare/spacetools:latest` and `jare/spacetools:noemacs`*
 
 ```sh
-Spacemacs documentation tools
+Spacemacs tools
 
 usage: run ACTION [ARGS]...
 
@@ -24,8 +24,8 @@ Common arguments:
 
 Format all files (add `--user <UID>:<GID>` to keep ownership):
 
-`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc format /tmp/docs/`
+`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacetools format /tmp/docs/`
 
 Validate:
 
-`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacedoc validate /tmp/docs/`
+`docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacetools validate /tmp/docs/`

@@ -9,7 +9,7 @@ shift
 
 print_help () {
     read -d '' help <<- EOF
-  Spacemacs documentation tools
+  Spacemacs tools
 
   usage: run ACTION [ARGS]...
 
