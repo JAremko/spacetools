@@ -1,13 +1,13 @@
 (ns spacedoc.data.org-test
-  (:require #_ [clojure.spec.gen.alpha :as gen]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [spacedoc.data :as data]
             [spacedoc.data.org :refer :all]
-            [spacedoc.shared :refer [samples]]))
+            [spacedoc.shared :refer [samples]]
+            [clojure.string :as str]))
 
 
 (defmulti invariants
@@ -22,7 +22,12 @@
                 (format "org-str: \"%s\" must be a String" org-str)))
         :else (:tag node))
       (throw (IllegalArgumentException.
-              (format "node: \"%s\" must be a HashMap" node))))))
+              (format "node: \"%s\" must be a SDN node" node))))))
+
+
+(defmethod invariants :plain-text
+  [{val :value} org-str]
+  (str/includes? org-str val))
 
 
 (defmethod invariants :default

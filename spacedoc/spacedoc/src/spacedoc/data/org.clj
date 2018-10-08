@@ -144,9 +144,10 @@
                0
                {:toc-wrapper? true :children (vec headlines)})))]
 
-    (let [toc (->> children (filter hl?) (hls->toc))
-          [b-toc a-toc] (split-with (complement hl?) children)]
-      (assoc root :children (vec (concat b-toc [toc] a-toc))))))
+    (if-let [toc (some->> children (filter hl?) (hls->toc))]
+      (let [[b-toc a-toc] (split-with (complement hl?) children)]
+        (assoc root :children (vec (concat b-toc [toc] a-toc))))
+      root)))
 
 
 (defn- viz-len
