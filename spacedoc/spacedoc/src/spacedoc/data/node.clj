@@ -488,7 +488,11 @@
                          :into [])
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 3 :max-tries 100})))
-(defnode ::root (s/keys :req-un [:spacedoc.data.node.root/children]))
+(s/def :spacedoc.data.node.root/source ::non-empty-string)
+(s/def :spacedoc.data.node.root/spaceroot ::non-empty-string)
+(defnode* ::root (s/keys :req-un [:spacedoc.data.node.root/children]
+                         :opt-un [:spacedoc.data.node.root/source
+                                  :spacedoc.data.node.root/spaceroot]))
 
 
 ;;;; "handmade" human-friendly constructors
@@ -622,6 +626,20 @@
   {:tag :plain-list
    :type :ordered
    :children (into [] (map-indexed (partial make-list-item :ordered)) items)})
+
+
+(s/fdef root
+  :args (s/cat :children (s/with-gen (s/+ ::root-child)
+                           #(gen/vector (s/gen ::root-child) 1 3)))
+  :ret ::root)
+
+
+(defn root
+  "\"root\" node constructor."
+  [& children]
+  {:pre [(s/valid? :spacedoc.data.node.root/children (vec children))]
+   :post [(s/valid? ::root %)]}
+  {:tag :root :children (vec children)})
 
 
 ;; TODO: Add `:descriptive` list constructor.

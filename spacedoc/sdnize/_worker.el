@@ -389,11 +389,14 @@ holding contextual information."
 
 ;;;; Inner Template
 
-(defun sdnize/inner-template (contents _info)
+(defun sdnize/inner-template (contents info)
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
-  (format "{:tag :root :children [%s]}" contents))
+  (format "{:tag :root :source \"%s\" :spaceroot \"%s\" :children [%s]}"
+          (sdnize/esc-str (file-truename (plist-get info :input-file)))
+          (sdnize/esc-str (file-truename sdnize-root-dir))
+          contents))
 
 ;;;; Italic
 
