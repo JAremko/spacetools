@@ -1,5 +1,5 @@
 ### Spacemacs tools
-*Available at DockerHub as `jare/spacetools:latest` and `jare/spacetools:noemacs`*
+*Available at DockerHub as `jare/spacetools:latest`, `jare/spacetools:noemacs`*
 
 ```sh
 Spacemacs tools

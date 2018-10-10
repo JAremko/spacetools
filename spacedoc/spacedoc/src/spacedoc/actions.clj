@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacedoc.args :refer [*parse-fs]]
-            [spacedoc.data :refer [node-relations-aggregate]]
+            [spacedoc.data :refer [node-relations-aggregate update-tags]]
             [spacedoc.data.org :refer [sdn->org]]
             [spacedoc.io :as sio]))
 
@@ -34,7 +34,10 @@
                            (str/replace
                             (sio/rebase-path src-dir target-dir path)
                             #"(?ix)\.sdn$" ".org")]
-                       (sio/*spit new-path (sdn->org cont))))
+                       (sio/*spit new-path
+                                  (->> cont
+                                       (update-tags src-dir path)
+                                       (sdn->org)))))
                    sdn-fps
                    spacedocs))]
            (format (str "%s .sdn files have been successfully exported "

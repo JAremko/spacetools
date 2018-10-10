@@ -175,3 +175,11 @@
      (assoc headline
             :level hl-level
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
+
+
+(defn update-tags
+  "Update #+TAGS `:spacedoc.data.node/key-word` of the ROOT-NODE.
+  SPACEROOT is the root directory of Spacemacs and FILE is the exported file
+  name. they are used for creating basic tags if non is present."
+  [spaceroot file root-node]
+  root-node)

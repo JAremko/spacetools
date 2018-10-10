@@ -214,7 +214,8 @@
                                 n-s))
                     {:head-tag n-t})))
               (partial transient []))
-             (r/map #(vector (:tag %) (sdn->org %)) (conj children {:tag ::end})))))
+             (r/map #(vector (:tag %) (sdn->org %))
+                    (conj children {:tag ::end})))))
 
 
 (defn- conv
