@@ -201,21 +201,17 @@
   P-TAG is parent node tag."
   [p-tag children]
   {:pre [((some-fn vector? nil?) children)]}
-  (persistent!
-   (r/reduce (r/monoid
-              (fn [acc [n-t n-s]]
-                (let [h-t (:head-tag (meta acc))
-                      b-s (last acc)]
-                  (with-meta
-                    (conj! acc
-                           (str (or (sep-inlines h-t b-s n-t n-s)
-                                    (sep-blocks p-tag h-t n-t)
-                                    "")
-                                n-s))
-                    {:head-tag n-t})))
-              (partial transient []))
-             (r/map #(vector (:tag %) (sdn->org %))
-                    (conj children {:tag ::end})))))
+  (r/reduce (r/monoid
+             (fn [acc [n-t n-s]]
+               (let [{h-t :head-tag h :head} (meta acc)
+                     next (str (or (sep-inlines h-t h n-t n-s)
+                                   (sep-blocks p-tag h-t n-t)
+                                   "")
+                               n-s)]
+                 (with-meta (conj acc next) {:head next :head-tag n-t})))
+             vector)
+            (r/map #(vector (:tag %) (sdn->org %))
+                   (conj children {:tag ::end}))))
 
 
 (defn- conv
