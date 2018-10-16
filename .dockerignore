@@ -1,3 +1,6 @@
-*.elc
 /spacedoc/spacedoc/target/
-
+**/*.elc
+**/.lein-env
+**/.lein-failures
+**/.nrepl-port
+**/#*
