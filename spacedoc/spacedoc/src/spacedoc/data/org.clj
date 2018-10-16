@@ -25,8 +25,6 @@
                                                 "#+END_CENTER\n"]
                                        :section ["" ""]})
 
-(def ^:private list-indentation 2)
-
 (def ^:private begin-end-indentation 2)
 
 (def ^:private table-indentation 0)
@@ -339,14 +337,15 @@
                       (:children)
                       (conv :item-tag))
         last-child-tag (->> children last :tag)
-        last-child-kind (tag->kind last-child-tag)]
+        last-child-kind (tag->kind last-child-tag)
+        pref (str (str/trim b)
+                  " "
+                  (when itag (format "%s :: " itag) ""))]
     (apply str
-           (str/trim b)
-           " "
-           (when itag (format "%s :: " itag) "")
+           pref
            (->> children
                 (conv tag)
-                (indent list-indentation)
+                (indent (count pref))
                 (str/triml)))))
 
 
