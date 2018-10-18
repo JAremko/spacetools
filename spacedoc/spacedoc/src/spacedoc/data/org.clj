@@ -327,7 +327,7 @@
   (format "[[%s]%s]"
           raw-link
           (if (seq children)
-            (format "[%s]" (conv tag children))
+            (format "[%s]" (str/trim (conv tag children)))
             "")))
 
 
