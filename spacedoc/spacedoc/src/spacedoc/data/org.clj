@@ -68,6 +68,13 @@
 
 ;;;; Helpers
 
+(defn fmt-text
+  [text]
+  (-> text
+      (str/replace #"\r+" "")
+      (str/replace #"[ \t]+" " ")))
+
+
 (defn- indent
   [indent-level s]
   (if (str/blank? s)
@@ -101,7 +108,8 @@
 
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
 
-          (hl->gid-base [headlin] (data/hl-val->gh-id-base (:value headlin)))
+          (hl->gid-base [headlin] (data/hl-val->gh-id-base
+                                   (fmt-text (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
 
@@ -169,8 +177,8 @@
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
-    (let [l-s1-sep? ((disj data/seps \) \” \’) (last s1))
-          f-s2-sep? ((disj data/seps \( \“ \‘) (first s2))]
+    (let [l-s1-sep? (data/seps-right (last s1))
+          f-s2-sep? (data/seps-left (first s2))]
       (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
 
@@ -364,7 +372,7 @@
 
 (defmethod sdn->org :text
   [{value :value}]
-  value)
+  (fmt-text value))
 
 
 (defmethod sdn->org :superscript
@@ -391,6 +399,7 @@
   [{:keys [tag value children] :as hl}]
   (let [headline (-> hl
                      (update :path-id #(or % (data/hl-val->path-id-frag value)))
+                     (update :value fmt-text)
                      (update :level #(or % 1)))]
     (str
      (join (repeat (:level headline) "*"))

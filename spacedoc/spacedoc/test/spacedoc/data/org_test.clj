@@ -9,7 +9,6 @@
             [spacedoc.shared :refer [samples]]
             [clojure.string :as str]))
 
-
 (defmulti invariants
   (fn [node org-str]
     (if-let [node-spec (s/get-spec (data/node->spec-k node))]
@@ -25,9 +24,9 @@
               (format "node: \"%s\" must be a SDN node" node))))))
 
 
-(defmethod invariants :plain-text
+(defmethod invariants :text
   [{val :value} org-str]
-  (str/includes? org-str val))
+  (str/includes? org-str (fmt-text val)))
 
 
 (defmethod invariants :default

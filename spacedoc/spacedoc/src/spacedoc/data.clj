@@ -10,6 +10,10 @@
 (def seps
   #{\! \? \: \' \( \) \; \{ \} \, \. \\ \“ \‘ \’ \” \newline \space \tab})
 
+(def seps-right (disj seps \) \” \’))
+
+(def seps-left  (disj seps \( \“ \‘))
+
 (def link-type->prefix {:file "file:"
                         :http "http://"
                         :https "https://"
