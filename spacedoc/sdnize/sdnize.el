@@ -22,6 +22,12 @@
   (concat
    "Spacemacs documentation formatting tool\n"
    "=======================================\n"
+   "Usage: sdnize.el [options] arguments..\n"
+   "\n"
+   "Options:\n"
+   "+copy-assets - copy files referred in the exported .org files.\n"
+   "\n"
+   "Arguments:\n"
    "First argument is the root directory (usually ~/.emacs.d/).\n"
    "It will be used to transform paths.\n"
    "Second argument is the target directory.\n"
@@ -38,6 +44,9 @@
 (defconst sdnize-run-file-dir
   (file-name-directory sdnize-run-file-name)
   "Path to the parent directory of this file.")
+
+(defvar sdnize-copy-assets nil
+  "If not-nil the script will copy files referred in the exported .org files.")
 
 (defvar sdnize-target-dir ""
   "Target directory.")
@@ -201,34 +210,36 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
 
 (defun sdnize/worker-msg-handler (resp)
   "Process payload received for a worker."
-  (let ((type (alist-get 'type resp))
-        ;; Unescape newlines inside payload.
-        (text (replace-regexp-in-string
-               "{{newline}}"
-               "\n"
-               (alist-get 'text resp))))
-    (message "%s"
-             (cond
-              ((string= type "message")
-               text)
-              ((string= type "warning")
-               (concat "\n=============== WARNING ===============\n"
-                       text
-                       "\n=======================================\n"))
-              ((string= type "error")
-               (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
-                       text
-                       "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"))
-              ((string= type "export")
-               (format
-                (concat "File %S has static dependency %S\n"
-                        "=> it will be copied into the export directory")
-                (alist-get 'source resp)
-                (car (push text sdnize-copy-queue))))
-              (t
-               (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
-                       (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
-                       "\n?????????????????????????????????????????\n"))))
+  (let* ((type (alist-get 'type resp))
+         ;; Unescape newlines inside payload.
+         (text (replace-regexp-in-string
+                "{{newline}}"
+                "\n"
+                (alist-get 'text resp)))
+         (msg (cond
+               ((string= type "message")
+                text)
+               ((string= type "warning")
+                (concat "\n=============== WARNING ===============\n"
+                        text
+                        "\n=======================================\n"))
+               ((string= type "error")
+                (concat "\n!!!!!!!!!!!!!!!! ERROR !!!!!!!!!!!!!!!!\n"
+                        text
+                        "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"))
+               ((string= type "export")
+                (if sdnize-copy-assets
+                    (format
+                     (concat "File %S has static dependency %S\n"
+                             "=> it will be copied into the export directory")
+                     (alist-get 'source resp)
+                     (car (push text sdnize-copy-queue)))
+                  ""))
+               (t
+                (concat "\n?????????? UNKNOWN EVENT TYPE ????????????\n"
+                        (format "TYPE:\"%s\" TEXT: \"%s\"" type text)
+                        "\n?????????????????????????????????????????\n")))))
+    (unless (string= msg "") (message msg))
     (unless (member type '("message" "warning" "export")) (kill-emacs 2))))
 
 (defun sdnize/interpret-proc-output (proc buff)
@@ -259,6 +270,13 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
 See `sdnize-help-text' for description."
   (unless arg-list
     (error sdnize-help-text))
+  (let ((f-arg (car arg-list)))
+    (setq sdnize-copy-assets
+          (when (string-prefix-p "+" f-arg)
+            ;; NOTE: Weren't planing to have any more options :P
+            (if (string= f-arg "+copy-assets")
+                (pop arg-list)
+              (error "Unrecognized option: %s" f-arg)))))
   (unless (file-directory-p (car arg-list))
     (error "The first argument must be a readable directory."))
   (let ((targt-dir-name (cadr arg-list)))
