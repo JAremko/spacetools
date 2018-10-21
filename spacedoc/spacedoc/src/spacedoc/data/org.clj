@@ -35,6 +35,17 @@
                                   (join (repeatedly 21 (constantly " ")))
                                   toc-max-depth))
 
+(def ^:private text-rep-map {#"\r+" ""
+                             #"[ \t]+" " "
+                             #"K(?i)ey[ -]*binding" "Key binding"
+                             #"k(?i)ey[ -]*binding" "key binding"})
+
+(def ^:private text-all-reps (->> (keys text-rep-map)
+                                  (map #(str "(" % ")"))
+                                  (interpose "|")
+                                  (apply str)
+                                  (re-pattern)))
+
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
@@ -70,9 +81,24 @@
 
 (defn fmt-text
   [text]
-  (-> text
-      (str/replace #"\r+" "")
-      (str/replace #"[ \t]+" " ")))
+  (let [ret (str/replace
+             text
+             text-all-reps
+             #(reduce-kv (fn [_ k v]
+                           (when (re-matches k (first %))
+                             (reduced v)))
+                         {}
+                         text-rep-map))]
+    (if-not (= ret text)
+      (recur ret)
+      ret)))
+
+
+(defn fmt-hl-val
+  [text]
+  (if (= text toc-hl-val)
+    toc-hl-val
+    (fmt-text (str/trim text))))
 
 
 (defn- indent
@@ -109,7 +135,7 @@
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
 
           (hl->gid-base [headlin] (data/hl-val->gh-id-base
-                                   (fmt-text (:value headlin))))
+                                   (fmt-hl-val (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
 
@@ -124,7 +150,7 @@
                        (apply n/section)
                        (n/headline toc-hl-val))
               (n/unordered-list
-               (vec (list* (n/link gh-id (n/text value))
+               (vec (list* (n/link gh-id (n/text (fmt-hl-val value)))
                            (when (seq children)
                              (list* (n/line-break) children)))))))
 
@@ -396,20 +422,23 @@
 
 
 (defmethod sdn->org :headline
-  [{:keys [tag value children] :as hl}]
-  (let [headline (-> hl
-                     (update :path-id #(or % (data/hl-val->path-id-frag value)))
-                     (update :value fmt-text)
-                     (update :level #(or % 1)))]
-    (str
-     (join (repeat (:level headline) "*"))
-     " "
-     (when (= tag :todo) "TODO ")
-     value
-     "\n"
-     (conv tag
-           (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl headline %) %)
-                 children)))))
+  [{:keys [value children] :as hl}]
+  (let [f-val (fmt-hl-val value)
+        headline (-> hl
+                     (update :path-id #(or % (data/hl-val->path-id-frag f-val)))
+                     (assoc :value f-val)
+                     (update :level #(or % 1)))
+        tag (:tag headline)]
+    (str (join (repeat (:level headline) "*"))
+         " "
+         (when (= tag :todo) "TODO ")
+         f-val
+         "\n"
+         (conv tag
+               (mapv #(if (n/headline-tags (:tag %))
+                        (data/fill-hl headline %)
+                        %)
+                     children)))))
 
 
 (defmethod sdn->org :verbatim
