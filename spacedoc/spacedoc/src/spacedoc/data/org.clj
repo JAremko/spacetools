@@ -35,10 +35,11 @@
                         (join (repeatedly 21 (constantly " ")))
                         toc-max-depth))
 
-(def text-rep-map {#"\r+" ""
-                   #"[ \t]+" " "
-                   #"K(?i)ey[ -]*binding" "Key binding"
-                   #"k(?i)ey[ -]*binding" "key binding"})
+(def text-rep-map
+  {#"\r+" ""
+   #"\t" " "
+   #"[ ]{2,}" " "
+   #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"})
 
 (def custom-id-link-rep-map {#"(?i)key[-]*binding" "key-binding"})
 
@@ -89,11 +90,14 @@
      (let [ret (str/replace
                 t
                 (re-pats-union (keys rep-map))
-                #(reduce-kv (fn [_ k v]
-                              (when (re-matches k (first %))
-                                (reduced v)))
-                            {}
-                            rep-map))]
+                (fn [text-match]
+                  (reduce
+                   (fn [text-frag [pat rep]]
+                     (if (re-matches pat text-frag)
+                       (str/replace text-frag pat rep)
+                       text-frag))
+                   (first text-match)
+                   rep-map)))]
        (if-not (= ret t)
          (recur ret)
          ret)))
