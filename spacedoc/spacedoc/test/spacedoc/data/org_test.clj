@@ -29,6 +29,26 @@
   (str/includes? org-str (fmt-text val)))
 
 
+(defmethod invariants :link
+  [{:keys [raw-link type]} org-str]
+  (str/includes? org-str (fmt-raw-link type raw-link)))
+
+
+(defmethod invariants :headline
+  [{val :value} org-str]
+  (str/includes? org-str (fmt-hl-val val)))
+
+
+(defmethod invariants :description
+  [{val :value} org-str]
+  (str/includes? org-str (fmt-hl-val val)))
+
+
+(defmethod invariants :todo
+  [{val :value} org-str]
+  (str/includes? org-str (fmt-hl-val val)))
+
+
 (defmethod invariants :default
   [node org-str]
   (and (map? node) (string? org-str)))

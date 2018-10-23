@@ -10,50 +10,46 @@
             [spacedoc.data.node :as n]))
 
 
-(def ^:private emphasis-tokens {:bold "*"
-                                :italic "/"
-                                :verbatim "="
-                                :underline "_"
-                                :kbd "~"  ;; Called code in "the classic ORG".
-                                :strike-through "+"})
+(def emphasis-tokens {:bold "*"
+                      :italic "/"
+                      :verbatim "="
+                      :underline "_"
+                      :kbd "~"  ;; Called code in "the classic ORG".
+                      :strike-through "+"})
 
-(def ^:private block-container-delims {:verse ["#+BEGIN_VERSE\n"
-                                               "#+END_VERSE\n"]
-                                       :quote ["#+BEGIN_QUOTE\n"
-                                               "#+END_QUOTE\n"]
-                                       :center ["#+BEGIN_CENTER\n"
-                                                "#+END_CENTER\n"]
-                                       :section ["" ""]})
+(def block-container-delims {:verse ["#+BEGIN_VERSE\n"
+                                     "#+END_VERSE\n"]
+                             :quote ["#+BEGIN_QUOTE\n"
+                                     "#+END_QUOTE\n"]
+                             :center ["#+BEGIN_CENTER\n"
+                                      "#+END_CENTER\n"]
+                             :section ["" ""]})
 
-(def ^:private begin-end-indentation 2)
+(def begin-end-indentation 2)
 
-(def ^:private table-indentation 0)
+(def table-indentation 0)
 
-(def ^:private toc-max-depth 4)
+(def toc-max-depth 4)
 
-(def ^:private toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
-                                  (join (repeatedly 21 (constantly " ")))
-                                  toc-max-depth))
+(def toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
+                        (join (repeatedly 21 (constantly " ")))
+                        toc-max-depth))
 
-(def ^:private text-rep-map {#"\r+" ""
-                             #"[ \t]+" " "
-                             #"K(?i)ey[ -]*binding" "Key binding"
-                             #"k(?i)ey[ -]*binding" "key binding"})
+(def text-rep-map {#"\r+" ""
+                   #"[ \t]+" " "
+                   #"K(?i)ey[ -]*binding" "Key binding"
+                   #"k(?i)ey[ -]*binding" "key binding"})
 
-(def ^:private text-all-reps (->> (keys text-rep-map)
-                                  (map #(str "(" % ")"))
-                                  (interpose "|")
-                                  (apply str)
-                                  (re-pattern)))
+(def custom-id-link-rep-map {#"(?i)key[-]*binding" "key-binding"})
 
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
 
-(def ^:private kinds {n/inline-container-tags :inline-container
-                      n/inline-leaf-tags :inline-leaf
-                      n/block-tags :block
-                      n/headline-tags :headline})
+(def kinds {n/inline-container-tags :inline-container
+            n/inline-leaf-tags :inline-leaf
+            n/block-tags :block
+            n/headline-tags :headline})
 
 (defmulti sdn->org
   (fn [{tag :tag :as node}]
@@ -79,26 +75,46 @@
 
 ;;;; Helpers
 
-(defn fmt-text
-  [text]
-  (let [ret (str/replace
-             text
-             text-all-reps
-             #(reduce-kv (fn [_ k v]
-                           (when (re-matches k (first %))
-                             (reduced v)))
-                         {}
-                         text-rep-map))]
-    (if-not (= ret text)
-      (recur ret)
-      ret)))
+(def re-pats-union (memoize (fn [pats]
+                              (->> pats
+                                   (map #(str "(" % ")"))
+                                   (interpose "|")
+                                   (apply str)
+                                   (re-pattern)))))
+
+
+(defn fmt-str
+  [rep-map text]
+  ((fn [t]
+     (let [ret (str/replace
+                t
+                (re-pats-union (keys rep-map))
+                #(reduce-kv (fn [_ k v]
+                              (when (re-matches k (first %))
+                                (reduced v)))
+                            {}
+                            rep-map))]
+       (if-not (= ret t)
+         (recur ret)
+         ret)))
+   text))
+
+
+(def fmt-text (partial fmt-str text-rep-map))
+
+
+(defn fmt-raw-link
+  [link-type raw-link]
+  (if (= link-type :custom-id)
+    (fmt-str custom-id-link-rep-map raw-link)
+    raw-link))
 
 
 (defn fmt-hl-val
-  [text]
-  (if (= text toc-hl-val)
+  [hl-val]
+  (if (= hl-val toc-hl-val)
     toc-hl-val
-    (fmt-text (str/trim text))))
+    (fmt-str text-rep-map (str/trim hl-val))))
 
 
 (defn- indent
@@ -357,9 +373,9 @@
 
 
 (defmethod sdn->org :link
-  [{:keys [tag raw-link children]}]
+  [{:keys [tag type raw-link children]}]
   (format "[[%s]%s]"
-          raw-link
+          (fmt-raw-link type raw-link)
           (if (seq children)
             (format "[%s]" (str/trim (conv tag children)))
             "")))
