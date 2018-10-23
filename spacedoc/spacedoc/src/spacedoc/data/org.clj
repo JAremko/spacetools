@@ -41,7 +41,7 @@
    #"[ ]{2,}" " "
    #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"})
 
-(def custom-id-link-rep-map {#"(?i)key[-]*binding" "key-binding"})
+(def custom-id-link-rep-map {#"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"})
 
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
@@ -51,6 +51,7 @@
             n/inline-leaf-tags :inline-leaf
             n/block-tags :block
             n/headline-tags :headline})
+
 
 (defmulti sdn->org
   (fn [{tag :tag :as node}]
