@@ -850,6 +850,180 @@ FIXME: Figure out where they come from :"
    (sdnize/final-function-tidy contents)))
 
 
+;;; Documentation normalization
+
+(defconst sdnize-prefmt-title-regexp "^#\\+TITLE:.*$")
+(defconst sdnize-prefmt-begin-block-regexp "^#\\+BEGIN.*$")
+(defconst sdnize-prefmt-end-block-regexp "^#\\+END.*$")
+(defconst sdnize-prefmt-empty-line-regexp "^[ \t]*$")
+(defconst sdnize-prefmt-tree-trunk-regexp "^[ 	]*|_")
+
+(defsubst sdnize/nrmlz-rm-empty-lines-at-beg ()
+  "Remove newlines at the beginning of the buffer."
+  (goto-char (point-min))
+  (while (looking-at-p sdnize-prefmt-empty-line-regexp)
+    (delete-blank-lines)))
+
+(defsubst sdnize/nrmlz-rm-empty-lines-at-end ()
+  "Remove newlines at the ending of the buffer."
+  (goto-char (point-max))
+  (delete-blank-lines)
+  (delete-blank-lines))
+
+(defsubst sdnize/nrmlz-rm-trail-delim-in-hl ()
+  "Remove trailing delimiters in headlines."
+  (goto-char (point-min))
+  (while (re-search-forward "^*+[[:space:]]+.*\\([;,\\.[:space:]]+\\)$" nil t)
+    (replace-match "" nil nil nil 1)
+    (forward-line -1)))
+
+(defsubst sdnize/nrmlz-multy-nl-with-single ()
+  "Replace multiply empty lines with a single empty line."
+  (goto-char (point-min))
+  (while (re-search-forward "\\(^[[:space:]]*$\\)\n" nil t)
+    (replace-match "\n")
+    (forward-char)))
+
+(defsubst sdnize/nrmlz-goto-next-table ()
+  "Goto next org table.
+Returns nil if no more tables left."
+  (cl-loop
+   ;; Skip current table.
+   (goto-char (point-at-bol))
+   (while (and (looking-at-p org-table-any-line-regexp)
+               (not (= (point) (point-max))))
+     (goto-char (point-at-bol))
+     (forward-line))
+   ;; Skip to the next table.
+   (re-search-forward org-table-any-line-regexp nil t)
+   (goto-char (point-at-bol))
+   (unless (looking-at-p sdnize-prefmt-tree-trunk-regexp)
+     (return)))
+  (looking-at-p org-table-any-line-regexp))
+
+(defsubst sdnize/nrmlz-remote-empty-lines-at-the-beginning ()
+  "Remove empty lines at the begging of the buffer."
+  (goto-char (point-min))
+  (while (looking-at-p sdnize-prefmt-empty-line-regexp)
+    (delete-blank-lines)))
+
+(defsubst sdnize/nrmlz-insert-empty-line-after-title ()
+  "Insert an empty line after title."
+  (goto-char (point-min))
+  (when (looking-at-p sdnize-prefmt-title-regexp)
+    (forward-line 1)
+    (unless (looking-at-p sdnize-prefmt-empty-line-regexp)
+      (open-line 1))))
+
+(defsubst sdnize/nrmlz-insert-empty-line-before-begin-block ()
+  "Insert an empty line before begins of blocks."
+  (goto-char (point-max))
+  (while (re-search-backward sdnize-prefmt-begin-block-regexp nil t)
+    (goto-char (point-at-bol))
+    (forward-line -1)
+    (unless (or (looking-at-p sdnize-prefmt-empty-line-regexp)
+                (looking-at-p org-heading-regexp))
+      (forward-line 1)
+      (open-line 1))))
+
+(defsubst sdnize/nrmlz-insert-empty-line-after-end-block ()
+  "Insert an empty line after ends of blocks."
+  (goto-char (point-min))
+  (while (re-search-forward sdnize-prefmt-end-block-regexp nil t)
+    (forward-line 1)
+    (unless (looking-at-p sdnize-prefmt-empty-line-regexp)
+      (open-line 1))))
+
+(defsubst sdnize/nrmlz-insert-empty-line-at-the-end ()
+  "Insert an empty line at the end of the buffer."
+  (goto-char (point-max))
+  (unless (looking-at-p sdnize-prefmt-empty-line-regexp)
+    (open-line 1)))
+
+(defsubst sdnize/nrmlz-insert-title ()
+  "Insert #TITLE:{DIR_NAME} if the buffer doesn't have one."
+  (goto-char (point-min))
+  (unless (looking-at-p sdnize-prefmt-title-regexp)
+    (insert (format "#+TITLE:%s\n"
+                    (file-name-base
+                     (directory-file-name
+                      (file-name-directory
+                       (buffer-file-name))))))))
+
+(defsubst sdnize/nrmlz-remove-empty-lines-after-headlines()
+  "Remove empty liners after each headline."
+  (goto-char (point-min))
+  (while (re-search-forward org-heading-regexp nil t)
+    (unless (= (forward-line) 0)
+      (while (looking-at-p sdnize-prefmt-empty-line-regexp)
+        (delete-blank-lines)))))
+
+(defsubst sdnize/nrmlz-insert-empty-line-before-tables ()
+  "Insert an empty line before each org table."
+  (goto-char (point-min))
+  (while (sdnize/nrmlz-goto-next-table)
+    (forward-line -1)
+    (unless (looking-at-p sdnize-prefmt-empty-line-regexp)
+      (end-of-line)
+      (open-line 1))
+    (forward-line 1)))
+
+(defsubst sdnize/nrmlz-insert-empty-line-after-sections ()
+  "Insert an empty line after each section."
+  (goto-char (point-min))
+  (while (re-search-forward org-heading-regexp nil t)
+    (forward-line -1)
+    (unless (or (looking-at-p sdnize-prefmt-empty-line-regexp)
+                (looking-at-p org-heading-regexp))
+      (end-of-line)
+      (open-line 1))
+    (forward-line 2)))
+
+(defsubst sdnize/nrmlz-insert-empty-line-after-tables ()
+  "Insert an empty line after each table."
+  (goto-char (point-min))
+  (while (sdnize/nrmlz-goto-next-table)
+    ;; Skip current table.
+    (while (looking-at-p org-table-any-line-regexp)
+      (forward-line))
+    (unless (looking-at-p sdnize-prefmt-empty-line-regexp)
+      (goto-char (point-at-bol))
+      (open-line 1)
+      (forward-line))))
+
+(defsubst sdnize/nrmlz-align-tables ()
+  "Align all tables"
+  (goto-char (point-min))
+  (while (sdnize/nrmlz-goto-next-table)
+    (ignore-errors
+      (org-table-align))))
+
+(defun sdnize/nrmlz-apply-all ()
+  "Format current `org-mode' buffer."
+  (let ((old-buff-str (buffer-string))
+        (new-buff-str ""))
+    (cl-loop
+     (sdnize/nrmlz-rm-empty-lines-at-beg)
+     (sdnize/nrmlz-rm-empty-lines-at-end)
+     (sdnize/nrmlz-rm-trail-delim-in-hl)
+     (sdnize/nrmlz-multy-nl-with-single)
+     (sdnize/nrmlz-remote-empty-lines-at-the-beginning)
+     (sdnize/nrmlz-insert-title)
+     (sdnize/nrmlz-remove-empty-lines-after-headlines)
+     (sdnize/nrmlz-insert-empty-line-before-tables)
+     (sdnize/nrmlz-insert-empty-line-after-title)
+     (sdnize/nrmlz-insert-empty-line-after-tables)
+     (sdnize/nrmlz-insert-empty-line-after-sections)
+     (sdnize/nrmlz-insert-empty-line-before-begin-block)
+     (sdnize/nrmlz-insert-empty-line-after-end-block)
+     (sdnize/nrmlz-insert-empty-line-at-the-end)
+     (sdnize/nrmlz-align-tables)
+     (setq new-buff-str (buffer-string))
+     (if (string= old-buff-str new-buff-str)
+         (return)
+       (setq old-buff-str new-buff-str)))))
+
+
 ;;; End-user functions
 
 (defun sdnize/to-sdn (root-dir exp-dir file-list)
@@ -874,6 +1048,7 @@ ROOT-DIR is original documentation root directory."
         (sdnize/message "Exporting \"%s\" into \"%s\"" in-file out-file)
         (with-temp-buffer
           (find-file in-file)
+          (sdnize/nrmlz-apply-all)
           (org-export-to-file 'sdn out-file))
         (if (and (file-readable-p out-file)
                  (> (nth 7 (file-attributes out-file)) 0))

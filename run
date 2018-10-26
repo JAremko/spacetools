@@ -73,8 +73,6 @@ case $action in
         if [[ -z "${prefmt_args// }" ]]; then
             prefmt_args="${first_arg}"
         fi
-        echo_headline "Preforming documentation with Emacs tools for export:"
-        emacs -batch -l ./prefmt/prefmt.el -no-site-file -q "${prefmt_args}"
         echo_headline "Exporting documentation for formatting with SDN tools:"
         emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
         echo_headline "Importing documentation back into .org format:"
