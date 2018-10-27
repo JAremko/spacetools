@@ -1,8 +1,10 @@
 FROM clojure as clojure
 
-COPY spacedoc/spacedoc /usr/src/app
+COPY ./ /usr/src/app/
 
-RUN cd /usr/src/app && lein uberjar
+RUN cd /usr/src/app \
+    && lein deps \
+    && lein polylith build -test
 
 
 FROM ubuntu as graalvm
@@ -11,7 +13,7 @@ ENV GRAALVM_V=1.0.0-rc7
 
 WORKDIR /tmp
 
-COPY --from=clojure /usr/src/app/target/uberjar/spacedoc.jar ./
+COPY --from=clojure /usr/src/app/systems/spacedoc/target/uberjar/spacedoc.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
@@ -28,14 +30,15 @@ FROM ubuntu
 
 COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
-COPY . /opt/spacetools
+COPY ./run /opt/spacetools/run
+COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools
 
-RUN chmod 775 /usr/local/bin/spacedoc \
-              ./run \
-              ./spacedoc/sdnize/sdnize.el \
-    && chmod 777 ./spacedoc/sdnize
+RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
+    && chmod 775 /usr/local/bin/spacedoc \
+                 ./spacedoc/sdnize/sdnize.el \
+                 ./run
 
 ENTRYPOINT ["/opt/spacetools/run"]
 
