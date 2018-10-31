@@ -1,3 +1,0 @@
-# spacedoc system
-
-add documentation here...

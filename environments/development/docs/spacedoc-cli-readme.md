@@ -1,0 +1,1 @@
+../../../bases/spacedoc-cli/readme.md

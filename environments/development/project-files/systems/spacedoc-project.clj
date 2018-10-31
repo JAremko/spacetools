@@ -1,1 +1,0 @@
-../../../../systems/spacedoc/project.clj
