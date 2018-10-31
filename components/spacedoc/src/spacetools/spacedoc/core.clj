@@ -1,5 +1,5 @@
-(ns spacetools.spacedoc-cli.data
-  "General SDN manipulation facilities."
+(ns spacetools.spacedoc.core
+  "SDN manipulation facilities."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
@@ -45,11 +45,11 @@
   ((all-tags) tag))
 
 
-(s/def :spacetools.spacedoc-cli.data.node/known-node known-node?)
+(s/def :spacetools.spacedoc.node/known-node known-node?)
 (defmethod node->spec-k :default [_] ::known-node)
 
 
-(s/def :spacetools.spacedoc-cli.data.node/node (s/multi-spec node->spec-k :tag))
+(s/def :spacetools.spacedoc.node/node (s/multi-spec node->spec-k :tag))
 
 
 (defn link->link-prefix
@@ -84,7 +84,7 @@
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
-(defn relations
+(defn rel
   "Return mapping between nodes and children sets."
   [parent]
   {:pre [(map? parent) (:tag parent)]}
@@ -93,11 +93,11 @@
    (tree-seq :children :children parent)))
 
 
-(defn relations-aggregate
-  "Apply `relations` to PARENTS and `union` the outputs.."
+(defn rels-aggr
+  "Apply `rel` to PARENTS and `union` the outputs.."
   [parents]
   (r/fold (r/monoid (partial merge-with union) hash-map)
-          (r/map relations parents)))
+          (r/map rel parents)))
 
 
 ;;;; Table stuff
@@ -153,10 +153,10 @@
 
 
 (s/def ::filled-headline
-  (s/keys :req-un [:spacetools.spacedoc-cli.data.node.headline/value
-                   :spacetools.spacedoc-cli.data.node.headline/children
-                   :spacetools.spacedoc-cli.data.node.headline/level
-                   :spacetools.spacedoc-cli.data.node.headline/path-id]))
+  (s/keys :req-un [:spacetools.spacedoc.node.headline/value
+                   :spacetools.spacedoc.node.headline/children
+                   :spacetools.spacedoc.node.headline/level
+                   :spacetools.spacedoc.node.headline/path-id]))
 
 
 (defn fill-hl
@@ -174,7 +174,7 @@
 
 
 (defn up-tags
-  "Update #+TAGS `:spacetools.spacedoc-cli.data.node/key-word` of the ROOT-NODE.
+  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
   SPACEROOT is the root directory of Spacemacs and FILE is the exported file
   name. they are used for creating basic tags if non is present."
   [spaceroot file root-node]

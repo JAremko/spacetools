@@ -1,1 +1,1 @@
-../../../bases/spacedoc/readme.md
+../../../components/spacedoc/readme.md

@@ -6,8 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacetools.spacedoc-cli.args :refer [*parse-fs]]
-            [spacetools.spacedoc-cli.data  :as data]
-            [spacetools.spacedoc-cli.data.org :refer [sdn->org]]
+            [spacetools.spacedoc.interface :as sd]
             [spacetools.spacedoc-cli.io :as sio]))
 
 
@@ -36,8 +35,8 @@
                             #"(?ix)\.sdn$" ".org")]
                        (sio/*spit new-path
                                   (->> cont
-                                       (data/up-tags src-dir path)
-                                       (sdn->org)))))
+                                       (sd/up-tags src-dir path)
+                                       (sd/sdn->org)))))
                    sdn-fps
                    docs))]
            (format (str "%s .sdn files have been successfully exported "
@@ -64,9 +63,9 @@
    (m/mlet [sdn-fps (*parse-fs fs)
             docs (->> sdn-fps
                       (pmap (partial sio/*fp->sdn
-                                     :spacetools.spacedoc-cli.data.node/any))
+                                     :spacetools.spacedoc.node/any))
                       (m/sequence))]
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (str/join \newline
-                      (data/relations-aggregate (vec docs)))))))
+                      (sd/rels-aggr (vec docs)))))))

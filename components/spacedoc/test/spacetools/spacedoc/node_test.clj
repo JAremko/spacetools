@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc-cli.data.node-test
+(ns spacetools.spacedoc.node-test
   (:require #_ [clojure.spec.gen.alpha :as gen]
             [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
@@ -6,12 +6,12 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
-            [spacetools.spacedoc-cli.data.node :refer :all]
-            [spacetools.spacedoc-cli.shared :refer [samples make-f-spec-reper]]))
+            [spacetools.spacedoc.node :refer :all]
+            [spacetools.spacedoc.shared :refer [samples make-f-spec-reper]]))
 
 
 (doall
- (for [v (vals (ns-publics 'spacetools.spacedoc-cli.data.node))
+ (for [v (vals (ns-publics 'spacetools.spacedoc.node))
        :let [f-name (str (:name (meta v)))]
        :when (function? (deref v))]
    (eval
@@ -25,7 +25,7 @@
          (testing (str "Node constructor function \"" ~v "\" speced.")
            (is (s/spec? f-spec#)
                (format (str "Public function `%s` doesn't have spec\n"
-                            "All public functions in the `spacetools.spacedoc-cli.data.node`"
+                            "All public functions in the `spacetools.spacedoc.node`"
                             " ns considered node constructors "
                             "and must be speced.\n")
                        ~v))

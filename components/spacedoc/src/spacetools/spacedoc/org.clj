@@ -1,13 +1,13 @@
-(ns spacetools.spacedoc-cli.data.fmt
-  "Formatting utilities for values of SDN nodes."
+(ns spacetools.spacedoc.org
+  "Exporting SDN to .org format."
   (:require [clojure.core.match :refer [match]]
             [clojure.core.reducers :as r]
             [clojure.set :sa :set]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
-            [spacetools.spacedoc-cli.data :as data]
-            [spacetools.spacedoc-cli.data.node :as n]))
+            [spacetools.spacedoc.core :as core]
+            [spacetools.spacedoc.node :as n]))
 
 
 (def emphasis-tokens {:bold "*"
@@ -150,12 +150,12 @@
 
 (defn- assoc-toc
   [{children :children :as root}]
-  {:pre [(s/valid? :spacetools.spacedoc-cli.data.node/root root)]
-   :post [(s/valid? :spacetools.spacedoc-cli.data.node/root %)]}
+  {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
+   :post [(s/valid? :spacetools.spacedoc.node/root %)]}
 
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
 
-          (hl->gid-base [headlin] (data/hl-val->gh-id-base
+          (hl->gid-base [headlin] (core/hl-val->gh-id-base
                                    (fmt-hl-val (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
@@ -224,8 +224,8 @@
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
-    (let [l-s1-sep? (data/seps-right (last s1))
-          f-s2-sep? (data/seps-left (first s2))]
+    (let [l-s1-sep? (core/seps-right (last s1))
+          f-s2-sep? (core/seps-left (first s2))]
       (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
 
@@ -446,7 +446,7 @@
   [{:keys [value children] :as hl}]
   (let [f-val (fmt-hl-val value)
         headline (-> hl
-                     (update :path-id #(or % (data/hl-val->path-id-frag f-val)))
+                     (update :path-id #(or % (core/hl-val->path-id-frag f-val)))
                      (assoc :value f-val)
                      (update :level #(or % 1)))
         tag (:tag headline)]
@@ -457,7 +457,7 @@
          "\n"
          (conv tag
                (mapv #(if (n/headline-tags (:tag %))
-                        (data/fill-hl headline %)
+                        (core/fill-hl headline %)
                         %)
                      children)))))
 
@@ -479,7 +479,7 @@
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if (n/headline-tags (:tag %)) (data/fill-hl %) %))
+       (mapv #(if (n/headline-tags (:tag %)) (core/fill-hl %) %))
        (conv tag)))
 
 

@@ -1,1 +1,0 @@
-../../../components/data/readme.md

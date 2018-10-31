@@ -1,8 +1,8 @@
-(ns spacetools.spacedoc-cli.data.node-impl
+(ns spacetools.spacedoc.node-impl
   "Defnode implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [spacetools.spacedoc-cli.data :as data]))
+            [spacetools.spacedoc.core :as core]))
 
 
 (def unqualified-ident? (complement qualified-ident?))
@@ -73,7 +73,7 @@
     (concat
      `(do)
      `(;; Register node
-       (defmethod data/node->spec-k ~tag [_#] ~k)
+       (defmethod core/node->spec-k ~tag [_#] ~k)
        ;; Define tag spec
        (s/def ~tag-spec-k #{~tag})
        ;; Define node's spec

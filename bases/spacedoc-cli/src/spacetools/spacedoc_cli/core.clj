@@ -15,7 +15,7 @@
    \newline
    ["Spacemacs documentation tools for .SDN files."
     ""
-    ".SDN files are produced by \"spacetools.spacedoc/emacs-tools/export/\"."
+    ".SDN files are produced by \"sdnizer.el\" Emacs script."
     ""
     "Usage: spacetools.spacedoc ACTION [OPTIONS]... [ARGS]..."
     ""
@@ -29,7 +29,7 @@
     "                          SOURCE is parent directory with .SDN files."
     "                          TARGET is target directory for .ORG files."
     "  describe  SPEC          Describe spec by fully qualified keyword."
-    "                          Example :spacetools.spacedoc.data.node/<keyword>"
+    "                          Example :spacetools.spacedoc.node/<keyword>"
     ""]))
 
 

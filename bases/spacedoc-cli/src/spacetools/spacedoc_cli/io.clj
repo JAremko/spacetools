@@ -10,7 +10,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacetools.spacedoc-cli.data :refer [explain-deepest]]))
+            [spacetools.spacedoc.interface :as sd]))
 
 
 (defn absolute
@@ -82,7 +82,7 @@
 (defn *fp->sdn
   "Read and validate .SDN file."
   ([path]
-   (*fp->sdn :spacetools.spacedoc-cli.data.node/root path))
+   (*fp->sdn :spacetools.spacedoc.node/root path))
   ([root-node-spec path]
    (io!
     (exc/try-or-recover
@@ -97,7 +97,7 @@
            (not= :root (:tag obj))
            (throw (Exception. "Non-root top level node in .SDN file."))
            ((complement s/valid?) root-node-spec obj)
-           (throw (ex-info "Validation filed." (explain-deepest obj)))
+           (throw (ex-info "Validation filed." (sd/explain-deepest obj)))
            :else obj)))
      (fn [^Exception err]
        (exc/failure

@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc-cli.shared
+(ns spacetools.spacedoc.shared
   "Shared defs for tests"
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer [report]]
