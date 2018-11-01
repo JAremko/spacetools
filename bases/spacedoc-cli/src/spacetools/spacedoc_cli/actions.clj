@@ -68,4 +68,4 @@
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (str/join \newline
-                      (sd/rels-aggr (vec docs)))))))
+                      (sd/relations (vec docs)))))))

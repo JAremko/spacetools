@@ -84,7 +84,7 @@
         {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
 
 
-(defn rel
+(defn relation
   "Return mapping between nodes and children sets."
   [parent]
   {:pre [(map? parent) (:tag parent)]}
@@ -93,11 +93,11 @@
    (tree-seq :children :children parent)))
 
 
-(defn rels-aggr
-  "Apply `rel` to PARENTS and `union` the outputs.."
+(defn relations
+  "Apply `relation` to PARENTS and `union` the outputs.."
   [parents]
   (r/fold (r/monoid (partial merge-with union) hash-map)
-          (r/map rel parents)))
+          (r/map relation parents)))
 
 
 ;;;; Table stuff

@@ -13,9 +13,9 @@
   (core/up-tags spaceroot file root-node))
 
 
-(defn rels-aggr
+(defn relations
   [parents]
-  (core/rels-aggr parents))
+  (core/relations parents))
 
 
 (defn sdn->org
