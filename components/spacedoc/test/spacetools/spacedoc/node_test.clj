@@ -1,6 +1,5 @@
 (ns spacetools.spacedoc.node-test
-  (:require #_ [clojure.spec.gen.alpha :as gen]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]

@@ -62,7 +62,7 @@
 (def children-tag-s (comp (partial into #{} (map :tag)) :children))
 
 
-(defn- fmt-problem
+(defn fmt-problem
   [node problem]
   {:pre [(map? node) (:tag node) (map? problem)]}
   (str/join \newline
