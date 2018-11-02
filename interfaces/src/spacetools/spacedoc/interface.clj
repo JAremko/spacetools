@@ -1,6 +1,6 @@
 (ns spacetools.spacedoc.interface)
 
-(defn explain-deepest [node])
+;; add your function signatures here...
+(defn add-two [x])
+
 (defn sdn->org [node])
-(defn up-tags [spaceroot file root-node])
-(defn relations [parents])

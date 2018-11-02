@@ -6,8 +6,9 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacetools.spacedoc-cli.args :refer [*parse-fs]]
-            [spacetools.spacedoc.interface :as sd]
-            [spacetools.spacedoc-cli.io :as sio]))
+            [spacetools.spacedoc-cli.io :as sio]
+            [spacetools.spacedoc-util.interface :as sdu]
+            [spacetools.spacedoc.interface :as sd]))
 
 
 (defn *validate
@@ -35,7 +36,7 @@
                             #"(?ix)\.sdn$" ".org")]
                        (sio/*spit new-path
                                   (->> cont
-                                       (sd/up-tags src-dir path)
+                                       (sdu/up-tags src-dir path)
                                        (sd/sdn->org)))))
                    sdn-fps
                    docs))]
@@ -68,4 +69,4 @@
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (str/join \newline
-                      (sd/relations (vec docs)))))))
+                      (sdu/relations (vec docs)))))))

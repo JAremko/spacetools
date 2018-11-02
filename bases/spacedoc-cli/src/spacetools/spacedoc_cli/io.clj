@@ -10,8 +10,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacetools.spacedoc.interface :as sd]))
-
+            [spacetools.spacedoc-util.interface :as sdu]))
 
 (defn absolute
   [path]
@@ -97,7 +96,7 @@
            (not= :root (:tag obj))
            (throw (Exception. "Non-root top level node in .SDN file."))
            ((complement s/valid?) root-node-spec obj)
-           (throw (ex-info "Validation filed." (sd/explain-deepest obj)))
+           (throw (ex-info "Validation filed." (sdu/explain-deepest obj)))
            :else obj)))
      (fn [^Exception err]
        (exc/failure

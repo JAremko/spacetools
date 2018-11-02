@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [clojure.string :as str]
-            [spacetools.spacedoc.core :as core]
+            [spacetools.spacedoc-util.interface :as sdu]
             [spacetools.spacedoc.node :as n]))
 
 
@@ -155,7 +155,7 @@
 
   (letfn [(hl? [node] (n/headline-tags (:tag node)))
 
-          (hl->gid-base [headlin] (core/hl-val->gh-id-base
+          (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
                                    (fmt-hl-val (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
@@ -224,8 +224,8 @@
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
-    (let [l-s1-sep? (core/seps-right (last s1))
-          f-s2-sep? (core/seps-left (first s2))]
+    (let [l-s1-sep? (sdu/seps-right (last s1))
+          f-s2-sep? (sdu/seps-left (first s2))]
       (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
 
@@ -446,7 +446,7 @@
   [{:keys [value children] :as hl}]
   (let [f-val (fmt-hl-val value)
         headline (-> hl
-                     (update :path-id #(or % (core/hl-val->path-id-frag f-val)))
+                     (update :path-id #(or % (sdu/hl-val->path-id-frag f-val)))
                      (assoc :value f-val)
                      (update :level #(or % 1)))
         tag (:tag headline)]
@@ -457,7 +457,7 @@
          "\n"
          (conv tag
                (mapv #(if (n/headline-tags (:tag %))
-                        (core/fill-hl headline %)
+                        (sdu/fill-hl headline %)
                         %)
                      children)))))
 
@@ -479,7 +479,7 @@
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if (n/headline-tags (:tag %)) (core/fill-hl %) %))
+       (mapv #(if (n/headline-tags (:tag %)) (sdu/fill-hl %) %))
        (conv tag)))
 
 

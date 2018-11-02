@@ -7,9 +7,8 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
-            [spacetools.spacedoc.core :as core]
+            [spacetools.spacedoc-util.interface :as sdu]
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]))
-
 
 ;;;; General specs
 
@@ -23,7 +22,7 @@
                             #(gen/string-alphanumeric)))
 
 
-(s/def ::path-id? (s/with-gen core/path-id?
+(s/def ::path-id? (s/with-gen sdu/path-id?
                     #(gen/fmap
                       (fn [[a delm b]] (str/lower-case (str a delm b)))
                       (gen/tuple
@@ -143,9 +142,7 @@
 ;; link
 
 (s/def :spacetools.spacedoc.node.link/path ::non-empty-string)
-(s/def :spacetools.spacedoc.node.link/type (-> core/link-type->prefix
-                                               (keys)
-                                               (set)))
+(s/def :spacetools.spacedoc.node.link/type sdu/link-types)
 (s/def :spacetools.spacedoc.node.link/raw-link
   (s/with-gen (s/and string?
                      #(re-matches
@@ -153,12 +150,12 @@
                         (str "^(?:"
                              (str/join "|"
                                        (map str/re-quote-replacement
-                                            (vals core/link-type->prefix)))
+                                            (vals sdu/link-type->prefix)))
                              ").+$"))
                        %))
     #(gen/fmap (fn [[prefix path]] (str prefix path))
                (gen/tuple
-                (gen/elements (vals core/link-type->prefix))
+                (gen/elements (vals sdu/link-type->prefix))
                 (gen/not-empty (gen/string-alphanumeric))))))
 (s/def :spacetools.spacedoc.node.link/children
   (s/with-gen (s/coll-of ::inline-element
@@ -352,7 +349,7 @@
                                 :kind vector?
                                 :min-count 1
                                 :into [])
-                     core/same-row-length?)
+                     sdu/same-row-length?)
     #(gen/fmap (fn [[cells cells-per-row]]
                  (mapv
                   (fn [row-children]
@@ -446,7 +443,7 @@
 (s/def :spacetools.spacedoc.node.headline/value ::non-empty-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id?)
 (s/def :spacetools.spacedoc.node.headline/level
-  (set (range 1 (inc core/max-headline-depth))))
+  (set (range 1 (inc 5 #_ sdu/max-headline-depth))))
 (s/def :spacetools.spacedoc.node.headline/children
   (s/with-gen (s/coll-of ::headline-child
                          :kind vector?
@@ -481,7 +478,7 @@
 (s/def :spacetools.spacedoc.node.todo/value ::non-empty-string)
 (s/def :spacetools.spacedoc.node.todo/path-id ::path-id?)
 (s/def :spacetools.spacedoc.node.todo/level
-  (set (range 1 (inc core/max-headline-depth))))
+  (set (range 1 (inc 5 #_ sdu/max-headline-depth))))
 (s/def :spacetools.spacedoc.node.todo/children
   (s/with-gen (s/coll-of ::headline-child
                          :min-count 0
@@ -587,13 +584,13 @@
 (defn link
   "\"link\" node constructor."
   [link & children]
-  {:pre  [(core/link->link-prefix link)
+  {:pre  [(sdu/link->link-prefix link)
           (s/valid? :spacetools.spacedoc.node.link/raw-link link)
           (s/valid? :spacetools.spacedoc.node.link/children
                     (vec children))]
    :post [(s/valid? ::link %)]}
-  (let [link-prefix (core/link->link-prefix link)
-        link-type ((map-invert core/link-type->prefix) link-prefix)]
+  (let [link-prefix (sdu/link->link-prefix link)
+        link-type ((map-invert sdu/link-type->prefix) link-prefix)]
     {:tag :link
      :path (str/replace-first link link-prefix "")
      :type link-type

@@ -6,10 +6,4 @@
                  [org.clojure/tools.cli "0.3.7"]
                  [spacetools/interfaces "1.0"]]
   :main spacetools.spacedoc-cli.core
-  :global-vars {*warn-on-reflection* true *assert* true}
-  :profiles {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss8m"]
-                   :dependencies [[org.clojure/test.check
-                                   "0.10.0-alpha3"]]}
-             :test {:env {:gentest-multiplier "3"}
-                    :jvm-opts ["-Xms5G" "-Xmx5G"
-                               "-Xss8m"]}})
+  :aot :all)

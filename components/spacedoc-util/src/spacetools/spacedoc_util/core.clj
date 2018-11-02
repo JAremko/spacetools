@@ -1,5 +1,5 @@
-(ns spacetools.spacedoc.core
-  "SDN manipulation facilities."
+(ns spacetools.spacedoc-util.core
+  "SDN manipulation utilities."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
@@ -19,6 +19,7 @@
                         :custom-id "#"
                         :ftp "ftp://"})
 
+(def link-types (-> link-type->prefix keys set))
 
 (def max-headline-depth 5)
 
@@ -27,6 +28,11 @@
 
 
 (defmulti node->spec-k :tag)
+
+
+(defmacro register-node!
+  [tag spec-k]
+  `(defmethod node->spec-k ~tag [_#] ~spec-k))
 
 
 (defn tag->spec-k

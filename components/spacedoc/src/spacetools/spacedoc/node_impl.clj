@@ -2,7 +2,7 @@
   "Defnode implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [spacetools.spacedoc.core :as core]))
+            [spacetools.spacedoc-util.interface :as sdu]))
 
 
 (def unqualified-ident? (complement qualified-ident?))
@@ -72,8 +72,7 @@
         arg-l (when con? (defnode-spec-args q-ks))]
     (concat
      `(do)
-     `(;; Register node
-       (defmethod core/node->spec-k ~tag [_#] ~k)
+     `((sdu/register-node! ~tag ~k)
        ;; Define tag spec
        (s/def ~tag-spec-k #{~tag})
        ;; Define node's spec

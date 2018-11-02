@@ -4,14 +4,14 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
-            [spacetools.spacedoc.core :as core]
+            [spacetools.spacedoc-util.interface :as sdu]
             [spacetools.spacedoc.org :refer :all]
             [spacetools.spacedoc.shared :refer [samples]]
             [clojure.string :as str]))
 
 (defmulti invariants
   (fn [node org-str]
-    (if-let [node-spec (s/get-spec (core/node->spec-k node))]
+    (if-let [node-spec (s/get-spec (sdu/node->spec-k node))]
       (cond
         ((complement s/valid?) node-spec node)
         (throw (ex-info "Invalid node" (s/explain-data node-spec node)))
@@ -55,7 +55,7 @@
 
 
 (doall
- (for [v (filter (complement indirect-nodes) (core/all-tags))
+ (for [v (filter (complement indirect-nodes) (sdu/all-tags))
        :let [node-name (name v)]]
    (eval
     `(binding [s/*recursion-limit* 2]
@@ -65,7 +65,7 @@
                                "be exported to the org format.")
                           ~node-name)
            (prop/for-all [node# (-> ~v
-                                    (core/tag->spec-k)
+                                    (sdu/tag->spec-k)
                                     (s/get-spec)
                                     (s/gen)
                                     (gen/no-shrink))]
