@@ -1035,6 +1035,7 @@ ROOT-DIR is original documentation root directory."
              (org-src-preserve-indentation t)
              (org-export-with-smart-quotes t)
              (org-export-with-sub-superscripts nil)
+             (create-lockfiles nil)
              (default-directory sdnize-root-dir))
     (dolist (in-file file-list)
       (let* ((out-file (concat exp-dir
