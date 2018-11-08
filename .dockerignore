@@ -1,5 +1,3 @@
-!.dockerignore
-!.gitignore
 **/*.iml
 **/.directory
 **/.idea/**
@@ -22,3 +20,6 @@ Dockerfile.noemacs
 maven-classpath
 maven-classpath.properties
 nbproject/private/
+!.dockerignore
+!.gitignore
+!/**/.gitkeep

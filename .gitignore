@@ -1,5 +1,4 @@
-!.dockerignore
-!.gitignore
+!.polylith
 **/*.iml
 **/.directory
 **/.idea/**
@@ -20,3 +19,6 @@ clojure.iws
 maven-classpath
 maven-classpath.properties
 nbproject/private/
+!.dockerignore
+!.gitignore
+!/**/.gitkeep
