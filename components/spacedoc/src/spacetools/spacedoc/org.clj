@@ -108,11 +108,11 @@
 (def fmt-text (partial fmt-str text-rep-map))
 
 
-(defn fmt-raw-link
-  [link-type raw-link]
+(defn fmt-link
+  [link-type link]
   (if (= link-type :custom-id)
-    (fmt-str custom-id-link-rep-map raw-link)
-    raw-link))
+    (fmt-str custom-id-link-rep-map link)
+    link))
 
 
 (defn fmt-hl-val
@@ -378,9 +378,9 @@
 
 
 (defmethod sdn->org :link
-  [{:keys [tag type raw-link children]}]
+  [{:keys [tag type path children]}]
   (format "[[%s]%s]"
-          (fmt-raw-link type raw-link)
+          (fmt-link type path)
           (if (seq children)
             (format "[%s]" (str/trim (conv tag children)))
             "")))

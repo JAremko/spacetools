@@ -30,8 +30,8 @@
 
 
 (defmethod invariants :link
-  [{:keys [raw-link type]} org-str]
-  (str/includes? org-str (fmt-raw-link type raw-link)))
+  [{:keys [type path]} org-str]
+  (str/includes? org-str (fmt-link type path)))
 
 
 (defmethod invariants :headline

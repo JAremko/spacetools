@@ -141,9 +141,8 @@
 
 ;; link
 
-(s/def :spacetools.spacedoc.node.link/path ::non-empty-string)
 (s/def :spacetools.spacedoc.node.link/type sdu/link-types)
-(s/def :spacetools.spacedoc.node.link/raw-link
+(s/def :spacetools.spacedoc.node.link/path
   (s/with-gen (s/and string?
                      #(re-matches
                        (re-pattern
@@ -164,9 +163,8 @@
                          :into [])
     #(gen/vector (s/gen ::inline-element) 0 3)))
 (defnode* ::link (s/keys :req-un
-                         [:spacetools.spacedoc.node.link/path
-                          :spacetools.spacedoc.node.link/type
-                          :spacetools.spacedoc.node.link/raw-link
+                         [:spacetools.spacedoc.node.link/type
+                          :spacetools.spacedoc.node.link/path
                           :spacetools.spacedoc.node.link/children]))
 
 
@@ -576,7 +574,7 @@
 ;; link
 
 (s/fdef link
-  :args  (s/cat :link :spacetools.spacedoc.node.link/raw-link
+  :args  (s/cat :link :spacetools.spacedoc.node.link/path
                 :children (s/* ::inline-element))
   :ret  ::link)
 
@@ -585,16 +583,15 @@
   "\"link\" node constructor."
   [link & children]
   {:pre  [(sdu/link->link-prefix link)
-          (s/valid? :spacetools.spacedoc.node.link/raw-link link)
+          (s/valid? :spacetools.spacedoc.node.link/path link)
           (s/valid? :spacetools.spacedoc.node.link/children
                     (vec children))]
    :post [(s/valid? ::link %)]}
   (let [link-prefix (sdu/link->link-prefix link)
         link-type ((map-invert sdu/link-type->prefix) link-prefix)]
     {:tag :link
-     :path (str/replace-first link link-prefix "")
      :type link-type
-     :raw-link link
+     :path link
      :children (vec children)}))
 
 

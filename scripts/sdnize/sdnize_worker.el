@@ -482,11 +482,13 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 
 (defconst sdnize/org-link-re ".+\\.org\\(\\(::\\|#\\| \\).*\\)?$")
 
-(defsubst sdnize/fmt-link (path type raw-link desc)
-  (format "{:tag :link :path \"%s\" :type :%s :raw-link \"%s\" :children [%s]}"
-          (sdnize/esc-str path)
+(defsubst sdnize/fmt-link (type path desc)
+  (format "{:tag :link :type :%s :path \"%s\" :children [%s]}"
           (sdnize/esc-str type)
-          (sdnize/esc-str raw-link)
+          (sdnize/esc-str (if (and (string= type "file")
+                                   (not (string-prefix-p "file:" path t)))
+                              (concat "file:" path)
+                            path))
           desc))
 
 (defsubst sdnize/copy-if-asset (file raw-link path)
@@ -553,7 +555,7 @@ INFO is a plist holding contextual information.  See
       (sdnize/copy-if-asset (plist-get info :input-file)
                             raw-link
                             (url-unhex-string path)))
-    (sdnize/fmt-link path type raw-link desc)))
+    (sdnize/fmt-link type raw-link desc)))
 
 ;;;; Node Property
 
