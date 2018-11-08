@@ -9,11 +9,11 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=1.0.0-rc7
+ENV GRAALVM_V=1.0.0-rc9
 
 WORKDIR /tmp
 
-COPY --from=clojure /usr/src/app/systems/spacedoc/target/uberjar/spacedoc.jar ./
+COPY --from=clojure /usr/src/app/systems/spacedoc-cli/target/spacedoc.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
