@@ -26,18 +26,29 @@
 
 (def *node-tag->spek-k (atom {}))
 
+(s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems
+                                    :clojure.spec.alpha/spec
+                                    :clojure.spec.alpha/value]))
+
 
 ;;;; Generic stuff for SDN manipulation
 
 
-(defn register-node!
-  [tag spec-k]
+(defn-spec node? boolean?
+  [node any?]
+  (and (:tag node)
+       (s/valid? (s/map-of keyword? any?) node)))
+
+
+(defn-spec register-node! node?
+  [tag keyword? spec-k qualified-keyword?]
   (swap! *node-tag->spek-k assoc tag spec-k))
 
 
-(defn-spec node->spec-k (s/nilable qualified-keyword?)
-  [node (s/map-of keyword? any?)]
-  (@*node-tag->spek-k (:tag node)))
+(defn-spec node->spec-k qualified-keyword?
+  [node node?]
+  (or (@*node-tag->spek-k (:tag node))
+      :spacetools.spacedoc.node/known-node))
 
 
 (defn-spec tag->spec-k qualified-keyword?
@@ -55,11 +66,12 @@
   ((all-tags) tag))
 
 
-(s/def :spacetools.spacedoc.node/known-node known-node?)
+(s/def :spacetools.spacedoc.node/known-node (s/and node?
+                                                   #((all-tags) (:tag %))))
 
 
-(defn link->link-prefix
-  [path]
+(defn-spec link->link-prefix string?
+  [path string?]
   (->> (vals link-type->prefix)
        (filter (partial str/starts-with? path))
        (first)))
@@ -68,26 +80,31 @@
 (def children-tag-s (comp (partial into #{} (map :tag)) :children))
 
 
-(defn fmt-problem
-  [node problem]
-  {:pre [(map? node) (:tag node) (map? problem)]}
+(defn-spec fmt-problem string?
+  [node node? problem map?]
   (str/join \newline
             (assoc problem
                    :node-tag (:tag node)
                    :spec-form (s/form (node->spec-k node)))))
 
 
-(defn explain-deepest
+(defn-spec explain-deepest (s/nilable (s/keys :req-un [:problems]))
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
   The function returns `nil` If all nodes are valid."
-  [node]
-  {:pre [(map? node) (:tag node)]}
-  (or (first (sequence (keep explain-deepest) (:children node)))
-      (when-let [p (:clojure.spec.alpha/problems
-                    (s/explain-data (node->spec-k node) node))]
-        {:problems (r/reduce str (r/map (partial fmt-problem node) p))})))
+  [node node?]
+  (or (when (nil? node) nil)
+      (when-let [children (:children node)]
+        (first (sequence (keep explain-deepest) children)))
+      (when-not (s/valid? :spacetools.spacedoc.node/known-node node)
+        (s/explain-data :spacetools.spacedoc.node/known-node node))
+      (some->> node
+               (s/explain-data (node->spec-k node))
+               (:clojure.spec.alpha/problems)
+               (r/map (partial fmt-problem node))
+               (r/reduce str)
+               (hash-map :problems))))
 
 
 (defn relation
