@@ -1,13 +1,15 @@
 (ns spacetools.spacedoc.org-test
   (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
+            [orchestra.spec.test :as st]
             [spacetools.spacedoc-util.interface :as sdu]
             [spacetools.spacedoc.org :refer :all]
-            [spacetools.spacedoc.shared :refer [samples]]
-            [clojure.string :as str]))
+            [spacetools.spacedoc.shared :refer [samples]]))
+
 
 (defmulti invariants
   (fn [node org-str]
@@ -52,6 +54,9 @@
 (defmethod invariants :default
   [node org-str]
   (and (map? node) (string? org-str)))
+
+
+(st/instrument)
 
 
 (doall

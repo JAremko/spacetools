@@ -8,7 +8,7 @@
 (def link-types u/link-types)
 (def max-headline-depth u/max-headline-depth)
 (def children-tag-s u/children-tag-s)
-(defmacro register-node! [tag spec-k] `(u/register-node! ~tag ~spec-k))
+(defn register-node! [tag spec-k] (u/register-node! tag spec-k))
 (defn node->spec-k [node] (u/node->spec-k node))
 (defn tag->spec-k [node-tag] (u/tag->spec-k node-tag))
 (defn all-tags [] (u/all-tags))

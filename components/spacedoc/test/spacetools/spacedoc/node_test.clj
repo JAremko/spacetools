@@ -5,8 +5,12 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
+            [orchestra.spec.test :as st]
             [spacetools.spacedoc.node :refer :all]
             [spacetools.spacedoc.shared :refer [samples make-f-spec-reper]]))
+
+
+(st/instrument)
 
 
 (doall

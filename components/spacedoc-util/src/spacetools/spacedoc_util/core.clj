@@ -3,7 +3,8 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [orchestra.core :refer [defn-spec]]))
 
 
 (def seps
@@ -23,39 +24,38 @@
 
 (def max-headline-depth 5)
 
+(def *node-tag->spek-k (atom {}))
+
 
 ;;;; Generic stuff for SDN manipulation
 
 
-(defmulti node->spec-k :tag)
-
-
-(defmacro register-node!
+(defn register-node!
   [tag spec-k]
-  `(defmethod node->spec-k ~tag [_#] ~spec-k))
+  (swap! *node-tag->spek-k assoc tag spec-k))
 
 
-(defn tag->spec-k
-  [node-tag]
-  {:post [(qualified-ident? %)]}
+(defn-spec node->spec-k (s/nilable qualified-keyword?)
+  [node (s/map-of keyword? any?)]
+  (@*node-tag->spek-k (:tag node)))
+
+
+(defn-spec tag->spec-k qualified-keyword?
+  [node-tag keyword?]
   (node->spec-k {:tag node-tag}))
 
 
-(defn all-tags
+(defn-spec all-tags (s/coll-of keyword? :kind set?)
   []
-  (set (remove #{:default} (keys (methods node->spec-k)))))
+  (set (keys @*node-tag->spek-k)))
 
 
-(defn known-node?
-  [tag]
+(defn-spec known-node? (s/nilable keyword?)
+  [tag keyword?]
   ((all-tags) tag))
 
 
 (s/def :spacetools.spacedoc.node/known-node known-node?)
-(defmethod node->spec-k :default [_] ::known-node)
-
-
-(s/def :spacetools.spacedoc.node/node (s/multi-spec node->spec-k :tag))
 
 
 (defn link->link-prefix

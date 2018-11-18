@@ -10,7 +10,7 @@
 (def seps)
 (def seps-left)
 (def seps-right)
-(defmacro register-node! [tag spec-k])
+(defn register-node! [tag spec-k])
 (defn all-tags [])
 (defn explain-deepest [node])
 (defn fill-hl [hl])
