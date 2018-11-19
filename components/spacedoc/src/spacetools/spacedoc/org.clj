@@ -50,7 +50,7 @@
 (def kinds {n/inline-container-tags :inline-container
             n/inline-leaf-tags :inline-leaf
             n/block-tags :block
-            n/headline-tags :headline})
+            n/headlines-tags :headline})
 
 
 (defmulti sdn->org
@@ -60,7 +60,7 @@
             (keyword? tag)]}
     (cond
       ;; Headline node group.
-      (n/headline-tags tag) :headline
+      (n/headlines-tags tag) :headline
 
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
@@ -122,7 +122,7 @@
     (fmt-str text-rep-map (str/trim hl-val))))
 
 
-(defn- indent
+(defn indent
   [indent-level s]
   (if (str/blank? s)
     s
@@ -148,12 +148,12 @@
          trailing-ns)))))
 
 
-(defn- assoc-toc
+(defn assoc-toc
   [{children :children :as root}]
   {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
    :post [(s/valid? :spacetools.spacedoc.node/root %)]}
 
-  (letfn [(hl? [node] (n/headline-tags (:tag node)))
+  (letfn [(hl? [node] (n/headlines-tags (:tag node)))
 
           (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
                                    (fmt-hl-val (:value headlin))))
@@ -203,7 +203,7 @@
       root)))
 
 
-(defn- viz-len
+(defn viz-len
   "Like `count` but returns real visual length of a string."
   [^String s]
   (-> s
@@ -212,7 +212,7 @@
       (count)))
 
 
-(defn- tag->kind
+(defn tag->kind
   [tag]
   (some->> kinds
            (filter #((key %) tag))
@@ -220,7 +220,7 @@
            (val)))
 
 
-(defn- sep-inlines
+(defn sep-inlines
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
@@ -229,7 +229,7 @@
       (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
 
-(defn- sep-blocks
+(defn sep-blocks
   [p-t t1 t2]
   (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
     (match [p-t            t1          t1-k        t2            t2-k     ]
@@ -248,7 +248,7 @@
            :else nil)))
 
 
-(defn- conv*
+(defn conv*
   "Reduce CHILDREN vector into vector of ORG string representations inserting
   proper separators (new lies and white spaces).
   P-TAG is parent node tag."
@@ -267,7 +267,7 @@
                    (conj children {:tag ::end}))))
 
 
-(defn- conv
+(defn conv
   "Reduce CHILDREN vector into `str/join`ed ORG string using `conv*`
   P-TAG is parent node tag."
   [p-tag children]
@@ -323,13 +323,13 @@
     (vec (concat [cols-w] vec-tab))))
 
 
-(defn- table-rule-str
+(defn table-rule-str
   [cols-w]
   {:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
   (join "+" (map #(join (repeat % "-")) cols-w)))
 
 
-(defn- table-row-str
+(defn table-row-str
   [row cols-w]
   {:pre [(vector? row)
          (s/valid? (s/coll-of pos-int?) cols-w)]}
@@ -357,7 +357,7 @@
       (str/replace-first #"^\n" "")))
 
 
-(defn- fmt-cell-content
+(defn fmt-cell-content
   "FIXME: Tables shouldn't have newlines or pipes
   but silently removing them is sub-optimal."
   [t-c-children-str]
@@ -456,8 +456,8 @@
          f-val
          "\n"
          (conv tag
-               (mapv #(if (n/headline-tags (:tag %))
-                        (sdu/fill-hl headline %)
+               (mapv #(if (n/headlines-tags (:tag %))
+                        (sdu/assoc-level-and-path-id headline %)
                         %)
                      children)))))
 
@@ -479,7 +479,9 @@
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if (n/headline-tags (:tag %)) (sdu/fill-hl %) %))
+       (mapv #(if (n/headlines-tags (:tag %))
+                (sdu/assoc-level-and-path-id %)
+                  %))
        (conv tag)))
 
 

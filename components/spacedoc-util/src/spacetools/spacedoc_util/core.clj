@@ -34,6 +34,12 @@
 ;;;; Generic stuff for SDN manipulation
 
 
+(defn-spec non-blank-string? boolean?
+  [s any?]
+  (and (string? s)
+       ((complement str/blank?) s)))
+
+
 (defn-spec node? boolean?
   [node any?]
   (and (:tag node)
@@ -66,8 +72,8 @@
   ((all-tags) tag))
 
 
-(s/def :spacetools.spacedoc.node/known-node (s/and node?
-                                                   #((all-tags) (:tag %))))
+(s/def :spacetools.spacedoc.node/known-node
+  (s/and node? #((all-tags) (:tag %))))
 
 
 (defn-spec link->link-prefix string?
@@ -88,7 +94,9 @@
                    :spec-form (s/form (node->spec-k node)))))
 
 
-(defn-spec explain-deepest (s/nilable (s/keys :req-un [:problems]))
+(s/def ::problems (s/coll-of string? :min-count 1))
+
+(defn-spec explain-deepest (s/nilable (s/keys :req [::problems]))
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
@@ -107,31 +115,32 @@
                (hash-map :problems))))
 
 
-(defn relation
+(defn-spec relation (s/map-of keyword? set?)
   "Return mapping between nodes and children sets."
-  [parent]
-  {:pre [(map? parent) (:tag parent)]}
+  [parent node?]
   (r/reduce
    (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
    (tree-seq :children :children parent)))
 
 
-(defn relations
+(defn-spec relations (s/map-of keyword? set?)
   "Apply `relation` to PARENTS and `union` the outputs.."
-  [parents]
+  [parents (s/coll-of node?)]
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map relation parents)))
 
 
 ;;;; Table stuff
 
-(defn same-row-length?
-  "Returns true if each row of the table has same amount of cells."
-  [table-children]
-  {:pre [(every? #(#{:table-row} (:tag %)) table-children)]}
-  (let [t-c (remove #(#{:rule} (:type %)) table-children)]
+(defn-spec same-row-child-count? boolean?
+  "Returns true if all rows have equal count of children.
+:rule rows are ignored."
+  ;; Note: Can't use row spec predicate here.
+  [rows (s/coll-of (s/and node? #(= :table-row (:tag %))))]
+  (let [t-c (remove #(#{:rule} (:type %)) rows)]
     (or (empty? t-c)
         (apply = (map #(count (:children %)) t-c)))))
+
 
 #_ (same-row-length?
     [{:tag :table-row
@@ -145,9 +154,9 @@
 
 ;;;; Headline stuff
 
-(defn hl-val->gh-id-base
-  [hl-value]
-  {:pre [((complement str/blank?) hl-value)]}
+
+(defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))
+  [hl-value non-blank-string?]
   (str "#"
        (-> hl-value
            (str/replace " " "-")
@@ -155,9 +164,8 @@
            (str/replace #"[^\p{Nd}\p{L}\p{Pd}\p{Pc}]" ""))))
 
 
-(defn hl-val->path-id-frag
-  [hl-value]
-  {:pre [(string? hl-value)]}
+(defn-spec hl-val->path-id-frag non-blank-string?
+  [hl-value non-blank-string?]
   (-> hl-value
       (str/lower-case)
       (str/replace #"[^\p{Nd}\p{L}\p{Pd}]" " ")
@@ -165,40 +173,41 @@
       (str/replace #"\s+" "_")))
 
 
-(defn path-id?
-  [val]
+(defn-spec path-id? boolean?
+  [val any?]
   (and
    (string? val)
-   (re-matches
-    ;; forgive me Father for I have sinned
-    #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-    val)))
+   (some?
+    (re-matches
+     ;; forgive me Father for I have sinned
+     #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+     val))))
 
 
-(s/def ::filled-headline
-  (s/keys :req-un [:spacetools.spacedoc.node.headline/value
-                   :spacetools.spacedoc.node.headline/children
-                   :spacetools.spacedoc.node.headline/level
-                   :spacetools.spacedoc.node.headline/path-id]))
-
-
-(defn fill-hl
-  "Give Headline placeholder a proper tag and fill all necessary key-vals."
-  ([{tag :tag value :value :as headline}]
-   (assoc headline
-          :level 1
-          :path-id (hl-val->path-id-frag value)))
-  ([{p-tag :tag p-level :level p-path-id :path-id :as parent-headline}
-    {tag :tag value :value :as headline}]
-   (let [hl-level (inc p-level)]
-     (assoc headline
+(defn-spec assoc-level-and-path-id node?
+  "Fill node with :level and :path-id"
+  ([node node?]
+   (let [{tag :tag value :value} node]
+     (assoc node
+            :level 1
+            :path-id (hl-val->path-id-frag value))))
+  ([parent-node node? node node?]
+   (let [{p-tag :tag p-level :level p-path-id :path-id} parent-node
+         {tag :tag value :value} node
+         hl-level (inc p-level)]
+     (assoc node
             :level hl-level
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
 
 
-(defn up-tags
+(defn-spec root-node? boolean?
+  [node any?]
+  (s/valid? :spacetools.spacedoc.node/root node))
+
+
+(defn-spec up-tags root-node?
   "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
   SPACEROOT is the root directory of Spacemacs and FILE is the exported file
   name. they are used for creating basic tags if non is present."
-  [spaceroot file root-node]
+  [spaceroot string? file string? root-node root-node?]
   root-node)
