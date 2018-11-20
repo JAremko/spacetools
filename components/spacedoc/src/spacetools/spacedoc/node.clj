@@ -435,8 +435,8 @@
 
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
-(s/def :spacetools.spacedoc.node.headline/level
-  (set (range 1 (inc 4 #_ sdu/max-headline-depth))))
+(s/def :spacetools.spacedoc.node.headline/level (s/and nat-int?
+                                                       sdu/in-hl-level-range?))
 (s/def :spacetools.spacedoc.node.headline/children
   (s/with-gen (s/coll-of ::headline-child
                          :kind vector?
@@ -471,7 +471,7 @@
 (s/def :spacetools.spacedoc.node.todo/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.todo/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.todo/level
-  (set (range 1 (inc 4 #_ sdu/max-headline-depth))))
+  (s/and nat-int? sdu/in-hl-level-range?))
 (s/def :spacetools.spacedoc.node.todo/children
   (s/with-gen (s/coll-of ::headline-child
                          :min-count 0
@@ -491,7 +491,11 @@
 (defmethod headlines :description [_] ::description)
 (defmethod headlines :todo [_] ::todo)
 (defmethod headlines :headline [_] ::headline)
-(def headlines-tags (methods headlines))
+
+(def headlines-tags (set (keys (methods headlines))))
+
+(s/def ::headline-tag headlines-tags)
+
 (s/def ::headlines (s/multi-spec headlines :tag))
 
 

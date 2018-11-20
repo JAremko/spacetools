@@ -28,27 +28,27 @@
 
 (defmethod invariants :text
   [{val :value} org-str]
-  (str/includes? org-str (fmt-text val)))
+  (str/includes? org-str (sdu/fmt-text val)))
 
 
 (defmethod invariants :link
   [{:keys [type path]} org-str]
-  (str/includes? org-str (fmt-link type path)))
+  (str/includes? org-str (sdu/fmt-link type path)))
 
 
 (defmethod invariants :headline
   [{val :value} org-str]
-  (str/includes? org-str (fmt-hl-val val)))
+  (str/includes? org-str (sdu/fmt-hl-val val)))
 
 
 (defmethod invariants :description
   [{val :value} org-str]
-  (str/includes? org-str (fmt-hl-val val)))
+  (str/includes? org-str (sdu/fmt-hl-val val)))
 
 
 (defmethod invariants :todo
   [{val :value} org-str]
-  (str/includes? org-str (fmt-hl-val val)))
+  (str/includes? org-str (sdu/fmt-hl-val val)))
 
 
 (defmethod invariants :default

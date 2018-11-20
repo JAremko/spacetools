@@ -29,20 +29,6 @@
 
 (def table-indentation 0)
 
-(def toc-max-depth 4)
-
-(def toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
-                        (join (repeatedly 21 (constantly " ")))
-                        toc-max-depth))
-
-(def text-rep-map
-  {#"\r+" ""
-   #"\t" " "
-   #"[ ]{2,}" " "
-   #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"})
-
-(def custom-id-link-rep-map {#"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"})
-
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
@@ -77,77 +63,6 @@
 
 ;;;; Helpers
 
-(def re-pats-union (memoize (fn [pats]
-                              (->> pats
-                                   (map #(str "(" % ")"))
-                                   (interpose "|")
-                                   (apply str)
-                                   (re-pattern)))))
-
-
-(defn fmt-str
-  [rep-map text]
-  ((fn [t]
-     (let [ret (str/replace
-                t
-                (re-pats-union (keys rep-map))
-                (fn [text-match]
-                  (reduce
-                   (fn [text-frag [pat rep]]
-                     (if (re-matches pat text-frag)
-                       (str/replace text-frag pat rep)
-                       text-frag))
-                   (first text-match)
-                   rep-map)))]
-       (if-not (= ret t)
-         (recur ret)
-         ret)))
-   text))
-
-
-(def fmt-text (partial fmt-str text-rep-map))
-
-
-(defn fmt-link
-  [link-type link]
-  (if (= link-type :custom-id)
-    (fmt-str custom-id-link-rep-map link)
-    link))
-
-
-(defn fmt-hl-val
-  [hl-val]
-  (if (= hl-val toc-hl-val)
-    toc-hl-val
-    (fmt-str text-rep-map (str/trim hl-val))))
-
-
-(defn indent
-  [indent-level s]
-  (if (str/blank? s)
-    s
-    (let [ind (apply str (repeat indent-level " "))
-          trailing-ns (str/replace-first s (str/trim-newline s) "")
-          lines (str/split-lines s)
-          c-d (r/reduce (r/monoid
-                         #(min %1 (- (count %2) (count (str/triml %2))))
-                         (constantly (count s)))
-                        (remove str/blank? lines))
-          ws-prefix (apply str (repeat c-d " "))]
-      (str
-       (->> lines
-            (r/map (comp #(if (str/blank? %) "\n" %)
-                         #(str ind %)
-                         #(str/replace-first % ws-prefix "")))
-            (r/reduce
-             (r/monoid
-              #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
-              str)))
-       (if (empty? trailing-ns)
-         "\n"
-         trailing-ns)))))
-
-
 (defn assoc-toc
   [{children :children :as root}]
   {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
@@ -156,7 +71,7 @@
   (letfn [(hl? [node] (n/headlines-tags (:tag node)))
 
           (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
-                                   (fmt-hl-val (:value headlin))))
+                                   (sdu/fmt-hl-val (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
 
@@ -169,9 +84,9 @@
             (if toc-wrapper?
               (some->> children
                        (apply n/section)
-                       (n/headline toc-hl-val))
+                       (n/headline sdu/toc-hl-val))
               (n/unordered-list
-               (vec (list* (n/link gh-id (n/text (fmt-hl-val value)))
+               (vec (list* (n/link gh-id (n/text (sdu/fmt-hl-val value)))
                            (when (seq children)
                              (list* (n/line-break) children)))))))
 
@@ -187,7 +102,7 @@
                                (hl->gid-base hl)
                                (up-*gid->count! *gid->count hl))))
                      (update :children
-                             #(when (< depth toc-max-depth)
+                             #(when (< depth sdu/toc-max-depth)
                                 (some->>
                                  %
                                  (filter hl?)
@@ -293,7 +208,7 @@
   (let [{[begin-token end-token] tag} block-container-delims]
     (str begin-token
          ;; NOTE: We don't "hard-code" indentation into sections
-         (indent (if (= tag :section) 0 begin-end-indentation)
+         (sdu/indent (if (= tag :section) 0 begin-end-indentation)
                  (conv tag children))
          end-token)))
 
@@ -353,7 +268,7 @@
                                          (empty? %) (table-rule-str cols-w)
                                          :else (table-row-str % cols-w)))
                             vrep))
-             (indent table-indentation)))
+             (sdu/indent table-indentation)))
       (str/replace-first #"^\n" "")))
 
 
@@ -380,7 +295,7 @@
 (defmethod sdn->org :link
   [{:keys [tag type path children]}]
   (format "[[%s]%s]"
-          (fmt-link type path)
+          (sdu/fmt-link type path)
           (if (seq children)
             (format "[%s]" (str/trim (conv tag children)))
             "")))
@@ -400,26 +315,26 @@
            pref
            (->> children
                 (conv tag)
-                (indent (count pref))
+                (sdu/indent (count pref))
                 (str/triml)))))
 
 
 (defmethod sdn->org :example
   [{value :value}]
   (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n"
-          (indent begin-end-indentation value)))
+          (sdu/indent begin-end-indentation value)))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
   (format "#+BEGIN_SRC %s\n%s#+END_SRC\n"
           language
-          (indent begin-end-indentation value)))
+          (sdu/indent begin-end-indentation value)))
 
 
 (defmethod sdn->org :text
   [{value :value}]
-  (fmt-text value))
+  (sdu/fmt-text value))
 
 
 (defmethod sdn->org :superscript
@@ -444,7 +359,7 @@
 
 (defmethod sdn->org :headline
   [{:keys [value children] :as hl}]
-  (let [f-val (fmt-hl-val value)
+  (let [f-val (sdu/fmt-hl-val value)
         headline (-> hl
                      (update :path-id #(or % (sdu/hl-val->path-id-frag f-val)))
                      (assoc :value f-val)

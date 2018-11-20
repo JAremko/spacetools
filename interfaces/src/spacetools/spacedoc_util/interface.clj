@@ -1,15 +1,11 @@
 (ns spacetools.spacedoc-util.interface)
 
-;; add your function signatures here...
-(defn add-two [x])
-
-(def children-tag-s)
 (def link-type->prefix)
 (def link-types)
-(def max-headline-depth)
 (def seps)
 (def seps-left)
 (def seps-right)
+(defn node->children-tag-s [node])
 (defn register-node! [tag spec-k])
 (defn all-tags [])
 (defn explain-deepest [node])
@@ -30,3 +26,12 @@
 (defn root-node? [node])
 (defn assoc-level-and-path-id [node])
 (defn assoc-level-and-path-id [parent-node node])
+(defn in-hl-level-range? [level])
+
+(def toc-hl-val)
+(def toc-max-depth)
+(defn fmt-hl-val [hl-val])
+(defn fmt-link [link-type link])
+(defn fmt-str [rep-map text])
+(defn fmt-text [text])
+(defn indent [indent-level s])

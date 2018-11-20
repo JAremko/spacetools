@@ -14,6 +14,15 @@
 
 (def seps-left  (disj seps \( \“ \‘))
 
+(def text-rep-map
+  {#"\r+" ""
+   #"\t" " "
+   #"[ ]{2,}" " "
+   ;; Key-binding
+   #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"})
+
+(def custom-id-link-rep-map {#"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"})
+
 (def link-type->prefix {:file "file:"
                         :http "http://"
                         :https "https://"
@@ -30,9 +39,14 @@
                                     :clojure.spec.alpha/spec
                                     :clojure.spec.alpha/value]))
 
+(def toc-max-depth 4)
+
+(def toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
+                        (str/join (repeatedly 21 (constantly " ")))
+                        toc-max-depth))
+
 
 ;;;; Generic stuff for SDN manipulation
-
 
 (defn-spec non-blank-string? boolean?
   [s any?]
@@ -83,7 +97,9 @@
        (first)))
 
 
-(def children-tag-s (comp (partial into #{} (map :tag)) :children))
+(defn node->children-tag-s
+  [node]
+  (into #{} (map :tag) (:children node)))
 
 
 (defn-spec fmt-problem string?
@@ -119,7 +135,8 @@
   "Return mapping between nodes and children sets."
   [parent node?]
   (r/reduce
-   (r/monoid (fn [m n] (update m (:tag n) union (children-tag-s n))) hash-map)
+   (r/monoid (fn [m n] (update m (:tag n) union (node->children-tag-s n)))
+             hash-map)
    (tree-seq :children :children parent)))
 
 
@@ -128,6 +145,100 @@
   [parents (s/coll-of node?)]
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map relation parents)))
+
+
+
+(defn-spec root-node? boolean?
+  [node any?]
+  (s/valid? :spacetools.spacedoc.node/root node))
+
+
+(defn-spec up-tags root-node?
+  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
+  SPACEROOT is the root directory of Spacemacs and FILE is the exported file
+  name. they are used for creating basic tags if non is present."
+  [spaceroot string? file string? root-node root-node?]
+  root-node)
+
+
+;;;; Formatters
+
+(defn-spec regex-pat? boolean?
+  [obj any?]
+  (= (type obj) java.util.regex.Pattern))
+
+
+(def re-pats-union (memoize (fn [pats]
+                              (->> pats
+                                   (map #(str "(" % ")"))
+                                   (interpose "|")
+                                   (apply str)
+                                   (re-pattern)))))
+
+
+(defn-spec fmt-str string?
+  [rep-map (s/map-of regex-pat? string?) text string?]
+  ((fn [t]
+     (let [ret (str/replace
+                t
+                (re-pats-union (keys rep-map))
+                (fn [text-match]
+                  (reduce
+                   (fn [text-frag [pat rep]]
+                     (if (re-matches pat text-frag)
+                       (str/replace text-frag pat rep)
+                       text-frag))
+                   (first text-match)
+                   rep-map)))]
+       (if-not (= ret t)
+         (recur ret)
+         ret)))
+   text))
+
+
+(defn-spec fmt-text string?
+  [text string?]
+  (fmt-str text-rep-map text))
+
+
+(defn-spec fmt-link non-blank-string?
+  [link-type keyword? link non-blank-string?]
+  (if (= link-type :custom-id)
+    (fmt-str custom-id-link-rep-map link)
+    link))
+
+
+(defn-spec fmt-hl-val non-blank-string?
+  [hl-val non-blank-string?]
+  (if (= hl-val toc-hl-val)
+    toc-hl-val
+    (fmt-str text-rep-map (str/trim hl-val))))
+
+
+(defn-spec indent string?
+  [indent-level nat-int? s string?]
+  (if (str/blank? s)
+    s
+    (let [ind (apply str (repeat indent-level " "))
+          trailing-ns (str/replace-first s (str/trim-newline s) "")
+          lines (str/split-lines s)
+          c-d (r/reduce (r/monoid
+                         #(min %1 (- (count %2) (count (str/triml %2))))
+                         (constantly (count s)))
+                        (remove str/blank? lines))
+          ws-prefix (apply str (repeat c-d " "))]
+      (str
+       (->> lines
+            (r/map (comp #(if (str/blank? %) "\n" %)
+                         #(str ind %)
+                         #(str/replace-first % ws-prefix "")))
+            (r/reduce
+             (r/monoid
+              #(str %1 (when (every? (complement str/blank?) [%1 %2]) "\n") %2)
+              str)))
+       (if (empty? trailing-ns)
+         "\n"
+         trailing-ns)))))
 
 
 ;;;; Table stuff
@@ -153,6 +264,10 @@
 
 
 ;;;; Headline stuff
+
+(defn-spec in-hl-level-range? boolean?
+  [level nat-int?]
+  (some? ((set (range 1 (inc max-headline-depth))) level)))
 
 
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))
@@ -198,16 +313,3 @@
      (assoc node
             :level hl-level
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
-
-
-(defn-spec root-node? boolean?
-  [node any?]
-  (s/valid? :spacetools.spacedoc.node/root node))
-
-
-(defn-spec up-tags root-node?
-  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
-  SPACEROOT is the root directory of Spacemacs and FILE is the exported file
-  name. they are used for creating basic tags if non is present."
-  [spaceroot string? file string? root-node root-node?]
-  root-node)
