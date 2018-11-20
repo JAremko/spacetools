@@ -8,6 +8,7 @@
             [spacetools.spacedoc-cli.args :refer [*parse-fs]]
             [spacetools.spacedoc-cli.io :as sio]
             [spacetools.spacedoc-util.interface :as sdu]
+            [spacetools.spacedoc-org.interface :as sdo]
             [spacetools.spacedoc.interface :as sd]))
 
 
@@ -37,7 +38,7 @@
                        (sio/*spit new-path
                                   (->> cont
                                        (sdu/up-tags src-dir path)
-                                       (sd/sdn->org)))))
+                                       (sdo/sdn->org)))))
                    sdn-fps
                    docs))]
            (format (str "%s .sdn files have been successfully exported "

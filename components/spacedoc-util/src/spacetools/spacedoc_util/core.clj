@@ -147,17 +147,11 @@
           (r/map relation parents)))
 
 
-
-(defn-spec root-node? boolean?
-  [node any?]
-  (s/valid? :spacetools.spacedoc.node/root node))
-
-
-(defn-spec up-tags root-node?
+(defn-spec up-tags node?
   "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
   SPACEROOT is the root directory of Spacemacs and FILE is the exported file
   name. they are used for creating basic tags if non is present."
-  [spaceroot string? file string? root-node root-node?]
+  [spaceroot string? file string? root-node node?]
   root-node)
 
 

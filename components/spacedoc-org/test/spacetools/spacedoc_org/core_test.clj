@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc.org-test
+(ns spacetools.spacedoc-org.core-test
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
@@ -7,7 +7,7 @@
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc-util.interface :as sdu]
-            [spacetools.spacedoc.org :refer :all]
+            [spacetools.spacedoc-org.core :refer :all]
             [spacetools.spacedoc.shared :refer [samples]]))
 
 

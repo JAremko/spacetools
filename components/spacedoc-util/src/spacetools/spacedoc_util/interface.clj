@@ -30,7 +30,6 @@
 (defn assoc-level-and-path-id
   ([node] (u/assoc-level-and-path-id node))
   ([parent-node node] (u/assoc-level-and-path-id parent-node node)))
-(defn root-node? [node] (u/root-node? node))
 (defn fmt-str [rep-map text] (u/fmt-str rep-map text))
 (defn fmt-text [text] (u/fmt-text text))
 (defn fmt-link [link-type link] (u/fmt-link link-type link))
