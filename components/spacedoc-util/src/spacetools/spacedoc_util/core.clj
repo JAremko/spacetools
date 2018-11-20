@@ -60,7 +60,7 @@
        (s/valid? (s/map-of keyword? any?) node)))
 
 
-(defn-spec register-node! node?
+(defn-spec register-node! (s/map-of keyword? qualified-keyword?)
   [tag keyword? spec-k qualified-keyword?]
   (swap! *node-tag->spek-k assoc tag spec-k))
 

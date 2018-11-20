@@ -27,7 +27,6 @@
 (defn assoc-level-and-path-id [node])
 (defn assoc-level-and-path-id [parent-node node])
 (defn in-hl-level-range? [level])
-
 (def toc-hl-val)
 (def toc-max-depth)
 (defn fmt-hl-val [hl-val])
@@ -35,3 +34,4 @@
 (defn fmt-str [rep-map text])
 (defn fmt-text [text])
 (defn indent [indent-level s])
+(def max-headline-depth)

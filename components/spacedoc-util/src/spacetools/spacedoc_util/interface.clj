@@ -8,6 +8,7 @@
 (def link-types u/link-types)
 (def toc-max-depth u/toc-max-depth)
 (def toc-hl-val u/toc-hl-val)
+(def max-headline-depth u/max-headline-depth)
 
 (defn node->children-tag-s [node] (u/node->children-tag-s node))
 (defn in-hl-level-range? [level] (u/in-hl-level-range? level))
