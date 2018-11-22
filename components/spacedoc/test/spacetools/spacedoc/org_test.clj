@@ -8,7 +8,7 @@
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.util :as sdu]
             [spacetools.spacedoc.org :refer :all]
-            [spacetools.spacedoc.shared :refer [samples]]))
+            [spacetools.test-util.interface :as tu]))
 
 
 (defmulti invariants
@@ -65,7 +65,7 @@
    (eval
     `(binding [s/*recursion-limit* 2]
        (defspec ~(symbol (str node-name "-node->org-string"))
-         ~(samples 10)
+         ~(tu/samples 10)
          (testing (format (str "Any valid \"%s\" node can "
                                "be exported to the org format.")
                           ~node-name)

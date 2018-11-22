@@ -7,7 +7,7 @@
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.node :refer :all]
-            [spacetools.spacedoc.shared :refer [samples make-f-spec-reper]]))
+            [spacetools.test-util.interface :as tu]))
 
 
 (st/instrument)
@@ -47,8 +47,8 @@
        (when (and f-spec-args# f-spec-ret#)
          (binding [s/*recursion-limit* 2]
            (defspec ~(symbol (str f-name "-gentest"))
-             {:num-tests ~(samples 10)
-              :reporter-fn (make-f-spec-reper f-spec-ret# ~v ~f-name)}
+             {:num-tests ~(tu/samples 10)
+              :reporter-fn (tu/make-f-spec-reper f-spec-ret# ~v ~f-name)}
              (testing "The function always returns valid result"
                (prop/for-all
                 [args# (-> f-spec-args#
