@@ -1,6 +1,7 @@
 **/*.iml
 **/.directory
 **/.idea/**
+**/.#*
 **/pom.xml
 **/target/**
 *.elc
@@ -11,7 +12,6 @@
 .nrepl-port
 .polylith/git.edn
 .polylith/time.edn
-\#*
 artifacts/**
 clojure.ipr
 clojure.iws
