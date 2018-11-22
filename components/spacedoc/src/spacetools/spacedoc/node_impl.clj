@@ -2,6 +2,8 @@
   "Defnode implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [spacetools.spacedoc.config :as conf]
+            [spacetools.spacedoc.core :as core]
             [spacetools.spacedoc.util :as sdu]))
 
 

@@ -4,46 +4,16 @@
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [orchestra.core :refer [defn-spec]]))
+            [orchestra.core :refer [defn-spec]]
+            [spacetools.spacedoc.config :as conf]
+            [spacetools.spacedoc.core :as core]))
 
-
-(def seps
-  #{\! \? \: \' \( \) \; \{ \} \, \. \\ \“ \‘ \’ \” \newline \space \tab})
-
-(def seps-right (disj seps \) \” \’))
-
-(def seps-left  (disj seps \( \“ \‘))
-
-(def text-rep-map
-  {#"\r+" ""
-   #"\t" " "
-   #"[ ]{2,}" " "
-   ;; Key-binding
-   #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"})
-
-(def custom-id-link-rep-map {#"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"})
-
-(def link-type->prefix {:file "file:"
-                        :http "http://"
-                        :https "https://"
-                        :custom-id "#"
-                        :ftp "ftp://"})
-
-(def link-types (-> link-type->prefix keys set))
-
-(def max-headline-depth 5)
 
 (def *node-tag->spek-k (atom {}))
 
 (s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems
                                     :clojure.spec.alpha/spec
                                     :clojure.spec.alpha/value]))
-
-(def toc-max-depth 4)
-
-(def toc-hl-val (format "Table of Contents%s:TOC_%s_gh:noexport:"
-                        (str/join (repeatedly 21 (constantly " ")))
-                        toc-max-depth))
 
 
 ;;;; Generic stuff for SDN manipulation
@@ -92,7 +62,7 @@
 
 (defn-spec link->link-prefix string?
   [path string?]
-  (->> (vals link-type->prefix)
+  (->> (vals conf/link-type->prefix)
        (filter (partial str/starts-with? path))
        (first)))
 
@@ -193,21 +163,21 @@ SRC is the exported file name."
 
 (defn-spec fmt-text string?
   [text string?]
-  (fmt-str text-rep-map text))
+  (fmt-str conf/text-rep-map text))
 
 
 (defn-spec fmt-link non-blank-string?
   [link-type keyword? link non-blank-string?]
   (if (= link-type :custom-id)
-    (fmt-str custom-id-link-rep-map link)
+    (fmt-str conf/custom-id-link-rep-map link)
     link))
 
 
 (defn-spec fmt-hl-val non-blank-string?
   [hl-val non-blank-string?]
-  (if (= hl-val toc-hl-val)
-    toc-hl-val
-    (fmt-str text-rep-map (str/trim hl-val))))
+  (if (= hl-val conf/toc-hl-val)
+    conf/toc-hl-val
+    (fmt-str conf/text-rep-map (str/trim hl-val))))
 
 
 (defn-spec indent string?
@@ -262,7 +232,7 @@ SRC is the exported file name."
 
 (defn-spec in-hl-level-range? boolean?
   [level nat-int?]
-  (some? ((set (range 1 (inc max-headline-depth))) level)))
+  (some? ((set (range 1 (inc conf/max-headline-depth))) level)))
 
 
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))

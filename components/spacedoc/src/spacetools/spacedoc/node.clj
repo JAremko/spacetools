@@ -7,6 +7,8 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
+            [spacetools.spacedoc.config :as conf]
+            [spacetools.spacedoc.core :as core]
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
             [spacetools.spacedoc.util :as sdu]))
 
@@ -141,7 +143,7 @@
 
 ;; link
 
-(s/def :spacetools.spacedoc.node.link/type sdu/link-types)
+(s/def :spacetools.spacedoc.node.link/type conf/link-types)
 (s/def :spacetools.spacedoc.node.link/path
   (s/with-gen (s/and string?
                      #(re-matches
@@ -149,12 +151,12 @@
                         (str "^(?:"
                              (str/join "|"
                                        (map str/re-quote-replacement
-                                            (vals sdu/link-type->prefix)))
+                                            (vals conf/link-type->prefix)))
                              ").+$"))
                        %))
     #(gen/fmap (fn [[prefix path]] (str prefix path))
                (gen/tuple
-                (gen/elements (vals sdu/link-type->prefix))
+                (gen/elements (vals conf/link-type->prefix))
                 (gen/not-empty (gen/string-alphanumeric))))))
 (s/def :spacetools.spacedoc.node.link/children
   (s/with-gen (s/coll-of ::inline-element
@@ -436,7 +438,7 @@
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.headline/level
-  (s/int-in 0 (inc sdu/max-headline-depth)))
+  (s/int-in 1 (inc conf/max-headline-depth)))
 (s/def :spacetools.spacedoc.node.headline/children
   (s/with-gen (s/coll-of ::headline-child
                          :kind vector?
@@ -471,7 +473,7 @@
 (s/def :spacetools.spacedoc.node.todo/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.todo/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.todo/level
-  (s/int-in 1 (inc sdu/max-headline-depth)))
+  (s/int-in 1 (inc conf/max-headline-depth)))
 (s/def :spacetools.spacedoc.node.todo/children
   (s/with-gen (s/coll-of ::headline-child
                          :min-count 0
@@ -597,7 +599,7 @@
                     (vec children))]
    :post [(s/valid? ::link %)]}
   (let [link-prefix (sdu/link->link-prefix link)
-        link-type ((map-invert sdu/link-type->prefix) link-prefix)]
+        link-type ((map-invert conf/link-type->prefix) link-prefix)]
     {:tag :link
      :type link-type
      :path link
