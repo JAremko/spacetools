@@ -7,8 +7,8 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
-            [spacetools.spacedoc-util.interface :as sdu]
-            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]))
+            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
+            [spacetools.spacedoc.util :as sdu]))
 
 ;;;; General specs
 

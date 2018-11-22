@@ -1,13 +1,9 @@
 (ns spacetools.spacedoc.interface
-  (:require [spacetools.spacedoc.node :as n]))
+  (:require [spacetools.spacedoc.org  :as sdo]
+            [spacetools.spacedoc.util :as sdu]))
 
-(def inline-container-tags n/inline-container-tags)
-(def inline-leaf-tags n/inline-leaf-tags)
-(def block-tags n/block-tags)
-(def headlines-tags n/headlines-tags)
-(defn section [& children] (apply n/section children))
-(defn headline [value & children] (apply n/headline value children))
-(defn unordered-list [& items] (apply n/unordered-list items))
-(defn text [value] (n/text value))
-(defn link [link & children] (apply n/link link children))
-(defn line-break [] (n/line-break))
+
+(defn sdn->org [node] (sdo/sdn->org node))
+(defn up-tags [spaceroot src r-node] (sdu/up-tags spaceroot src r-node))
+(defn explain-deepest [node] (sdu/explain-deepest node))
+(defn relations [parents] (sdu/relations parents))

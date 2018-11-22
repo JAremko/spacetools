@@ -1,1 +1,0 @@
-../../../components/spacedoc-util/readme.md

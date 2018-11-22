@@ -10,7 +10,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacetools.spacedoc-util.interface :as sdu]))
+            [spacetools.spacedoc.interface :as sdu]))
 
 (defn absolute
   [path]

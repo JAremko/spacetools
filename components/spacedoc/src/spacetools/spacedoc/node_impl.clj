@@ -2,7 +2,7 @@
   "Defnode implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [spacetools.spacedoc-util.interface :as sdu]))
+            [spacetools.spacedoc.util :as sdu]))
 
 
 (def unqualified-ident? (complement qualified-ident?))

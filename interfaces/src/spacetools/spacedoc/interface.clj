@@ -1,14 +1,7 @@
 (ns spacetools.spacedoc.interface)
 
-(defn sdn->org [node])
 
-(def block-tags)
-(def headlines-tags)
-(def inline-container-tags)
-(def inline-leaf-tags)
-(defn headline [value & children])
-(defn line-break [])
-(defn section [& children])
-(defn text [value])
-(defn unordered-list [& items])
-(defn link [link & children])
+(defn explain-deepest [node])
+(defn relations [parents])
+(defn sdn->org [node])
+(defn up-tags [spaceroot src r-node])

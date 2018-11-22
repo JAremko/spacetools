@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc-org.core
+(ns spacetools.spacedoc.org
 "Exporting SDN to .org format."
 (:require [clojure.core.match :refer [match]]
           [clojure.core.reducers :as r]
@@ -6,8 +6,8 @@
           [clojure.spec.alpha :as s]
           [clojure.string :refer [join]]
           [clojure.string :as str]
-          [spacetools.spacedoc-util.interface :as sdu]
-          [spacetools.spacedoc.interface :as n]))
+          [spacetools.spacedoc.node :as n]
+          [spacetools.spacedoc.util :as sdu]))
 
 
 (def emphasis-tokens {:bold "*"

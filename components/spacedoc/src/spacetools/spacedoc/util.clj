@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc-util.core
+(ns spacetools.spacedoc.util
   "SDN manipulation utilities."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
@@ -148,11 +148,12 @@
 
 
 (defn-spec up-tags node?
-  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the ROOT-NODE.
-  SPACEROOT is the root directory of Spacemacs and FILE is the exported file
-  name. they are used for creating basic tags if non is present."
-  [spaceroot string? file string? root-node node?]
-  root-node)
+  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the R-NODE.
+R-NODE must be `:spacetools.spacedoc.node/root` node.
+SPACEROOT is the root directory of Spacemacs.
+SRC is the exported file name."
+  [spaceroot string? src string? r-node node?]
+  r-node)
 
 
 ;;;; Formatters

@@ -1,3 +1,0 @@
-# spacedoc-util component
-
-add documentation here...

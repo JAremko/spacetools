@@ -7,13 +7,11 @@
             [clojure.string :as str]
             [spacetools.spacedoc-cli.args :refer [*parse-fs]]
             [spacetools.spacedoc-cli.io :as sio]
-            [spacetools.spacedoc-util.interface :as sdu]
-            [spacetools.spacedoc-org.interface :as sdo]
             [spacetools.spacedoc.interface :as sd]))
 
 
 (defn *validate
-  "Validate Spacetools.Spacedoc-Cli files with specs."
+  "Validate Spacemacs documentation files with specs."
   [fs]
   (exc/try-on
    (m/mlet [sdn-fps (*parse-fs fs)
@@ -37,8 +35,8 @@
                             #"(?ix)\.sdn$" ".org")]
                        (sio/*spit new-path
                                   (->> cont
-                                       (sdu/up-tags src-dir path)
-                                       (sdo/sdn->org)))))
+                                       (sd/up-tags src-dir path)
+                                       (sd/sdn->org)))))
                    sdn-fps
                    docs))]
            (format (str "%s .sdn files have been successfully exported "
@@ -70,4 +68,4 @@
            (str
             "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
             (str/join \newline
-                      (sdu/relations (vec docs)))))))
+                      (sd/relations (vec docs)))))))
