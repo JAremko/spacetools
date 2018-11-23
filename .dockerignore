@@ -1,7 +1,7 @@
 **/*.iml
 **/.directory
 **/.idea/**
-**/.#*
+**/.\#*
 **/pom.xml
 **/target/**
 *.elc
