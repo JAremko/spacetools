@@ -6,10 +6,8 @@
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as conf]
-            [spacetools.spacedoc.core :as core]))
+            [spacetools.spacedoc.core :as sc :refer [node?]]))
 
-
-(def *node-tag->spek-k (atom {}))
 
 (s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems
                                     :clojure.spec.alpha/spec
@@ -22,42 +20,6 @@
   [s any?]
   (and (string? s)
        ((complement str/blank?) s)))
-
-
-(defn-spec node? boolean?
-  [node any?]
-  (and (:tag node)
-       (s/valid? (s/map-of keyword? any?) node)))
-
-
-(defn-spec register-node! (s/map-of keyword? qualified-keyword?)
-  [tag keyword? spec-k qualified-keyword?]
-  (swap! *node-tag->spek-k assoc tag spec-k))
-
-
-(defn-spec node->spec-k qualified-keyword?
-  [node node?]
-  (or (@*node-tag->spek-k (:tag node))
-      :spacetools.spacedoc.node/known-node))
-
-
-(defn-spec tag->spec-k qualified-keyword?
-  [node-tag keyword?]
-  (node->spec-k {:tag node-tag}))
-
-
-(defn-spec all-tags (s/coll-of keyword? :kind set?)
-  []
-  (set (keys @*node-tag->spek-k)))
-
-
-(defn-spec known-node? (s/nilable keyword?)
-  [tag keyword?]
-  ((all-tags) tag))
-
-
-(s/def :spacetools.spacedoc.node/known-node
-  (s/and node? #((all-tags) (:tag %))))
 
 
 (defn-spec link->link-prefix string?
@@ -77,7 +39,7 @@
   (str/join \newline
             (assoc problem
                    :node-tag (:tag node)
-                   :spec-form (s/form (node->spec-k node)))))
+                   :spec-form (s/form (sc/node->spec-k node)))))
 
 
 (s/def ::problems (s/coll-of string? :min-count 1))
@@ -94,7 +56,7 @@
       (when-not (s/valid? :spacetools.spacedoc.node/known-node node)
         (s/explain-data :spacetools.spacedoc.node/known-node node))
       (some->> node
-               (s/explain-data (node->spec-k node))
+               (s/explain-data (sc/node->spec-k node))
                (:clojure.spec.alpha/problems)
                (r/map (partial fmt-problem node))
                (r/reduce str)

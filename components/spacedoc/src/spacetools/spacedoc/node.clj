@@ -3,12 +3,12 @@
   All public function in this name-space are node constructors.
   NOTE: Format specific specs are in corresponding name-spaces.
   EXAMPLE: :spacetools.spacedoc.org/toc"
-  (:require [clojure.set :refer [union map-invert]]
+  (:require [clojure.set :refer [map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [spacetools.spacedoc.config :as conf]
-            [spacetools.spacedoc.core :as core]
+            [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
             [spacetools.spacedoc.util :as sdu]))
 
@@ -40,14 +40,11 @@
 
 ;; inline leaf
 
-(defmulti inline-leaf :tag)
-(defmethod inline-leaf :kbd [_] ::kbd)
-(defmethod inline-leaf :line-break [_] ::line-break)
-(defmethod inline-leaf :text [_] ::text)
-(defmethod inline-leaf :verbatim [_] ::verbatim)
-(s/def ::inline-leaf (s/multi-spec inline-leaf :tag))
-
-(def inline-leaf-tags (set (keys (methods inline-leaf))))
+(defmethod sc/inline-leaf :kbd [_] ::kbd)
+(defmethod sc/inline-leaf :line-break [_] ::line-break)
+(defmethod sc/inline-leaf :text [_] ::text)
+(defmethod sc/inline-leaf :verbatim [_] ::verbatim)
+(s/def ::inline-leaf (s/multi-spec sc/inline-leaf :tag))
 
 
 ;; kbd node
@@ -185,18 +182,14 @@
 
 ;; inline container
 
-(defmulti inline-container :tag)
-(defmethod inline-container :bold [_] ::bold)
-(defmethod inline-container :italic [_] ::italic)
-(defmethod inline-container :link [_] ::link)
-(defmethod inline-container :strike-through [_] ::strike-through)
-(defmethod inline-container :subscript [_] ::subscript)
-(defmethod inline-container :superscript [_] ::superscript)
-(defmethod inline-container :underline [_] ::underline)
-(s/def ::inline-container (s/multi-spec inline-container :tag))
-
-(def inline-container-tags (set (keys (methods inline-container))))
-(def inline-tags (set (union inline-leaf-tags inline-container-tags)))
+(defmethod sc/inline-container :bold [_] ::bold)
+(defmethod sc/inline-container :italic [_] ::italic)
+(defmethod sc/inline-container :link [_] ::link)
+(defmethod sc/inline-container :strike-through [_] ::strike-through)
+(defmethod sc/inline-container :subscript [_] ::subscript)
+(defmethod sc/inline-container :superscript [_] ::superscript)
+(defmethod sc/inline-container :underline [_] ::underline)
+(s/def ::inline-container (s/multi-spec sc/inline-container :tag))
 
 
 ;; center node
@@ -398,20 +391,17 @@
 
 ;; block group
 
-(defmulti block-element :tag)
-(defmethod block-element :center [_] ::center)
-(defmethod block-element :example [_] ::example)
-(defmethod block-element :paragraph [_] ::paragraph)
-(defmethod block-element :feature-list [_] ::feature-list)
-(defmethod block-element :plain-list [_] ::plain-list)
-(defmethod block-element :quote [_] ::quote)
-(defmethod block-element :src [_] ::src)
-(defmethod block-element :table [_] ::table)
-(defmethod block-element :verse [_] ::verse)
-(defmethod block-element :key-word [_] ::key-word)
-(s/def ::block-element (s/multi-spec block-element :tag))
-
-(def block-tags (set (keys (methods block-element))))
+(defmethod sc/block-element :center [_] ::center)
+(defmethod sc/block-element :example [_] ::example)
+(defmethod sc/block-element :paragraph [_] ::paragraph)
+(defmethod sc/block-element :feature-list [_] ::feature-list)
+(defmethod sc/block-element :plain-list [_] ::plain-list)
+(defmethod sc/block-element :quote [_] ::quote)
+(defmethod sc/block-element :src [_] ::src)
+(defmethod sc/block-element :table [_] ::table)
+(defmethod sc/block-element :verse [_] ::verse)
+(defmethod sc/block-element :key-word [_] ::key-word)
+(s/def ::block-element (s/multi-spec sc/block-element :tag))
 
 
 ;; section node
@@ -426,11 +416,10 @@
                            [:spacetools.spacedoc.node.section/children]))
 
 
-(defmulti headline-child :tag)
-(defmethod headline-child :todo [_] ::todo)
-(defmethod headline-child :section [_] ::section)
-(defmethod headline-child :headline [_] ::headline)
-(s/def ::headline-child (s/multi-spec headline-child :tag))
+(defmethod sc/headline-child :todo [_] ::todo)
+(defmethod sc/headline-child :section [_] ::section)
+(defmethod sc/headline-child :headline [_] ::headline)
+(s/def ::headline-child (s/multi-spec sc/headline-child :tag))
 
 
 ;; headline
@@ -489,26 +478,22 @@
 
 ;; Headlines
 
-(defmulti headlines :tag)
-(defmethod headlines :description [_] ::description)
-(defmethod headlines :todo [_] ::todo)
-(defmethod headlines :headline [_] ::headline)
+(defmethod sc/headlines :description [_] ::description)
+(defmethod sc/headlines :todo [_] ::todo)
+(defmethod sc/headlines :headline [_] ::headline)
 
-(def headlines-tags (set (keys (methods headlines))))
+(s/def ::headline-tag sc/headlines-tags)
 
-(s/def ::headline-tag headlines-tags)
-
-(s/def ::headlines (s/multi-spec headlines :tag))
+(s/def ::headlines (s/multi-spec sc/headlines :tag))
 
 
 ;; root node
 
-(defmulti  root-child :tag)
-(defmethod root-child :todo [_] ::todo)
-(defmethod root-child :section [_] ::section)
-(defmethod root-child :headline [_] ::headline)
-(defmethod root-child :description [_] ::description)
-(s/def ::root-child (s/multi-spec root-child :tag))
+(defmethod sc/root-child :todo [_] ::todo)
+(defmethod sc/root-child :section [_] ::section)
+(defmethod sc/root-child :headline [_] ::headline)
+(defmethod sc/root-child :description [_] ::description)
+(s/def ::root-child (s/multi-spec sc/root-child :tag))
 (s/def :spacetools.spacedoc.node.root/children
   (s/with-gen (s/coll-of ::root-child
                          :kind vector?

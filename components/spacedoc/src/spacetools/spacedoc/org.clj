@@ -1,15 +1,15 @@
 (ns spacetools.spacedoc.org
-"Exporting SDN to .org format."
-(:require [clojure.core.match :refer [match]]
-          [clojure.core.reducers :as r]
-          [clojure.set :sa :set]
-          [clojure.spec.alpha :as s]
-          [clojure.string :refer [join]]
-          [clojure.string :as str]
-          [spacetools.spacedoc.config :as conf]
-          [spacetools.spacedoc.core :as core]
-          [spacetools.spacedoc.node :as n]
-          [spacetools.spacedoc.util :as sdu]))
+  "Exporting SDN to .org format."
+  (:require [clojure.core.match :refer [match]]
+            [clojure.core.reducers :as r]
+            [clojure.set :sa :set]
+            [clojure.spec.alpha :as s]
+            [clojure.string :refer [join]]
+            [clojure.string :as str]
+            [spacetools.spacedoc.config :as conf]
+            [spacetools.spacedoc.core :as sc]
+            [spacetools.spacedoc.node :as n]
+            [spacetools.spacedoc.util :as sdu]))
 
 
 (def block-container-delims {:verse ["#+BEGIN_VERSE\n"
@@ -24,10 +24,10 @@
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
 
-(def kinds {n/inline-container-tags :inline-container
-            n/inline-leaf-tags :inline-leaf
-            n/block-tags :block
-            n/headlines-tags :headline})
+(def kinds {(sc/inline-container-tags) :inline-container
+            (sc/inline-leaf-tags) :inline-leaf
+            (sc/block-tags) :block
+            (sc/headlines-tags) :headline})
 
 
 (defmulti sdn->org
@@ -37,7 +37,7 @@
             (keyword? tag)]}
     (cond
       ;; Headline node group.
-      (n/headlines-tags tag) :headline
+      ((sc/headlines-tags) tag) :headline
 
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
@@ -59,7 +59,7 @@
   {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
    :post [(s/valid? :spacetools.spacedoc.node/root %)]}
 
-  (letfn [(hl? [node] (n/headlines-tags (:tag node)))
+  (letfn [(hl? [node] ((sc/headlines-tags) (:tag node)))
 
           (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
                                    (sdu/fmt-hl-val (:value headlin))))
@@ -200,7 +200,7 @@
     (str begin-token
          ;; NOTE: We don't "hard-code" indentation into sections
          (sdu/indent (if (= tag :section) 0 conf/begin-end-indentation)
-                 (conv tag children))
+                     (conv tag children))
          end-token)))
 
 
@@ -362,7 +362,7 @@
          f-val
          "\n"
          (conv tag
-               (mapv #(if (n/headlines-tags (:tag %))
+               (mapv #(if ((sc/headlines-tags) (:tag %))
                         (sdu/assoc-level-and-path-id headline %)
                         %)
                      children)))))
@@ -385,9 +385,9 @@
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if (n/headlines-tags (:tag %))
+       (mapv #(if ((sc/headlines-tags) (:tag %))
                 (sdu/assoc-level-and-path-id %)
-                  %))
+                %))
        (conv tag)))
 
 
