@@ -11,54 +11,42 @@
 (def config-file-name "sdn_config.edn")
 
 (def default-config
-  {:global
-   {:separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
-    :separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
-    :text-replacement-map {"\\r+" ""
-                           "\\t" " "
-                           "[ ]{2,}" " "
-                           ;; Key-binding
-                           "(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\\p{Blank}|\\p{Punct}+\\p{Blank}|$)" "$1$2ey binding$3$4"}
-    :custom-id-link-replacement-map {"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"}
-    :link-type->prefix {:file "file:"
-                        :http "http://"
-                        :https "https://"
-                        :custom-id "#"
-                        :ftp "ftp://"}
-    :max-headline-depth 5
-    :toc-max-depth 4
-    :toc-headline-template "Table of Contents                     :TOC_%s_gh:noexport:"}
-   :orgify
-   {:emphasis-tokens {:bold "*"
-                      :italic "/"
-                      :verbatim "="
-                      :underline "_"
-                      :kbd "~"  ;; Called code in the "classic" org.
-                      :strike-through "+"}
-    :begin-end-indentation 2
-    :table-indentation 0}})
+  {:text/separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
+   :text/separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
+   :text/replacement-map {"\\r+" ""
+                          "\\t" " "
+                          "[ ]{2,}" " "
+                          ;; Key-binding
+                          "(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\\p{Blank}|\\p{Punct}+\\p{Blank}|$)" "$1$2ey binding$3$4"}
+   :link/custom-id-replacement-map {"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"}
+   :link/type->prefix {:file "file:"
+                       :http "http://"
+                       :https "https://"
+                       :custom-id "#"
+                       :ftp "ftp://"}
+   :headline/max-depth 5
+   :org/toc-max-depth 4
+   :org/toc-template "Table of Contents                     :TOC_%s_gh:noexport:"
+   :org/emphasis-tokens {:bold "*"
+                     :italic "/"
+                     :verbatim "="
+                     :underline "_"
+                     :kbd "~"  ;; Called code in the "classic" org.
+                     :strike-through "+"}
+   :org/block-indentation 2
+   :org/table-indentation 0})
 
 
-(defn- sync-config
+(defn- sync-configs
   [cfg cfg-f]
   (io! (let [synced-cfg (if (.exists (io/file cfg-f))
-                          (edn/read-string (slurp cfg-f))
+                          (merge default-config (edn/read-string) (slurp cfg-f))
                           cfg)]
          (do (pp/pprint synced-cfg (clojure.java.io/writer cfg-f))
              cfg))))
 
 
-(def config (sync-config default-config config-file-name))
-
-
-(defn- glob-conf
-  [ks]
-  (get-in config (concat [:global] ks)))
-
-
-(defn- orgify-conf
-  [ks]
-  (get-in config (concat [:orgify] ks)))
+(def configs (sync-configs default-config config-file-name))
 
 
 (defn- map-keys
@@ -68,31 +56,31 @@
 
 ;;;; General
 
-(def seps-right (glob-conf [:separators-rigth]))
+(def seps-right (:text/separators-rigth configs))
 
-(def seps-left  (glob-conf [:separators-left]))
+(def seps-left  (:text/separators-left configs))
 
-(def text-rep-map (map-keys re-pattern (glob-conf [:text-replacement-map])))
+(def text-rep-map (map-keys re-pattern (:text/replacement-map configs)))
 
 (def custom-id-link-rep-map (map-keys
                              re-pattern
-                             (glob-conf [:custom-id-link-replacement-map])))
+                             (:link/custom-id-replacement-map configs)))
 
-(def link-type->prefix (glob-conf [:link-type->prefix]))
+(def link-type->prefix (:link/type->prefix configs))
 
 (def link-types (-> link-type->prefix keys set))
 
-(def max-headline-depth (glob-conf [:max-headline-depth]))
+(def max-headline-depth (:headline/max-depth configs))
 
-(def toc-max-depth (glob-conf [:toc-max-depth]))
+(def toc-max-depth (:org/toc-max-depth configs))
 
-(def toc-hl-val (format (glob-conf [:toc-headline-template]) toc-max-depth))
+(def toc-hl-val (format (:org/toc-template configs) toc-max-depth))
 
 
 ;;;; Org
 
-(def emphasis-tokens (orgify-conf [:emphasis-tokens]))
+(def emphasis-tokens (:org/emphasis-tokens configs))
 
-(def begin-end-indentation (orgify-conf [:begin-end-indentation]))
+(def begin-end-indentation (:org/block-indentation configs))
 
-(def table-indentation (orgify-conf [:table-indentation]))
+(def table-indentation (:org/table-indentation configs))
