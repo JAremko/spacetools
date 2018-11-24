@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]))
 
@@ -28,19 +29,69 @@
    :org/toc-max-depth 4
    :org/toc-template "Table of Contents                     :TOC_%s_gh:noexport:"
    :org/emphasis-tokens {:bold "*"
-                     :italic "/"
-                     :verbatim "="
-                     :underline "_"
-                     :kbd "~"  ;; Called code in the "classic" org.
-                     :strike-through "+"}
+                         :italic "/"
+                         :verbatim "="
+                         :underline "_"
+                         :kbd "~"  ;; Called code in the "classic" org.
+                         :strike-through "+"}
    :org/block-indentation 2
    :org/table-indentation 0})
 
+(s/def :text/separators-rigth (s/coll-of string? :kind set?))
 
-(defn- sync-configs
-  [cfg cfg-f]
+(s/def :text/separators-left (s/coll-of string? :kind set?))
+
+(s/def :text/replacement-map (s/map-of string? string?))
+
+(s/def :text/custom-id-replacement-map (s/map-of string? string?))
+
+(s/def :link/type->prefix (s/map-of keyword? string?))
+
+(s/def :headline/max-depth nat-int?)
+
+(s/def :org/toc-max-depth nat-int?)
+
+(s/def :org/toc-template (s/with-gen (s/and string? #(re-matches #".*%s.*" %))
+                            #(gen/fmap (fn [[head tail]] (str head "%s" tail))
+                                       (gen/tuple
+                                        (gen/string-alphanumeric)
+                                        (gen/string-alphanumeric)))))
+
+(s/def :org/emphasis-tokens (s/map-of keyword? string?))
+
+(s/def :org/block-indentation pos-int?)
+
+(s/def :org/table-indentation pos-int?)
+
+(s/def ::configs (s/keys :req [:text/separators-rigth
+                               :text/separators-left
+                               :text/replacement-map
+                               :text/custom-id-replacement-map
+                               :link/type->prefix
+                               :headline/max-depth
+                               :org/toc-max-depth
+                               :org/toc-template
+                               :org/emphasis-tokens
+                               :org/block-indentation
+                               :org/table-indentation]))
+
+(s/def ::configs-from-file (s/keys :op [:text/separators-rigth
+                                        :text/separators-left
+                                        :text/replacement-map
+                                        :text/custom-id-replacement-map
+                                        :link/type->prefix
+                                        :headline/max-depth
+                                        :org/toc-max-depth
+                                        :org/toc-template
+                                        :org/emphasis-tokens
+                                        :org/block-indentation
+                                        :org/table-indentation]))
+
+
+(defn-spec sync-configs ::configs
+  [cfg ::configs cfg-f ::configs-from-file]
   (io! (let [synced-cfg (if (.exists (io/file cfg-f))
-                          (merge default-config (edn/read-string) (slurp cfg-f))
+                          (merge default-config (edn/read-string (slurp cfg-f)))
                           cfg)]
          (do (pp/pprint synced-cfg (clojure.java.io/writer cfg-f))
              cfg))))
