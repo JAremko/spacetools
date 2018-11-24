@@ -1,20 +1,25 @@
-(ns spacetools.spacedoc.gnr-config
+(ns spacetools.spacedoc.config
   "SDN manipulation utilities."
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.pprint :as pp]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]))
 
 
-(def default-configs
-  {:general
+(def config-file-name "sdn_config.edn")
+
+(def default-config
+  {:global
    {:separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
     :separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
-    :text-replacement-map {#"\r+" ""
-                           #"\t" " "
-                           #"[ ]{2,}" " "
+    :text-replacement-map {"\\r+" ""
+                           "\\t" " "
+                           "[ ]{2,}" " "
                            ;; Key-binding
-                           #"(?i)(\p{Blank}|\p{Blank}\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\p{Blank}|\p{Punct}+\p{Blank}|$)" "$1$2ey binding$3$4"}
-    :custom-id-link-replacement-map {#"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"}
+                           "(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\\p{Blank}|\\p{Punct}+\\p{Blank}|$)" "$1$2ey binding$3$4"}
+    :custom-id-link-replacement-map {"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"}
     :link-type->prefix {:file "file:"
                         :http "http://"
                         :https "https://"
@@ -34,38 +39,54 @@
     :table-indentation 0}})
 
 
-(def configs default-configs)
+(defn- sync-config
+  [cfg cfg-f]
+  (io! (let [synced-cfg (if (.exists (io/file cfg-f))
+                          (edn/read-string (slurp cfg-f))
+                          cfg)]
+         (do (pp/pprint synced-cfg (clojure.java.io/writer cfg-f))
+             cfg))))
 
 
-(defn-spec gnr-conf (s/map-of keyword? any?)
-  [ks (s/coll-of keyword?)]
-  (get-in configs (concat [:general] ks)))
+(def config (sync-config default-config config-file-name))
 
 
-(defn-spec orgify-conf (s/map-of keyword? any?)
-  [ks (s/coll-of keyword?)]
-  (get-in configs (concat [:orgify] ks)))
+(defn- glob-conf
+  [ks]
+  (get-in config (concat [:global] ks)))
+
+
+(defn- orgify-conf
+  [ks]
+  (get-in config (concat [:orgify] ks)))
+
+
+(defn- map-keys
+  [f map]
+  (reduce-kv (fn [m k v] (assoc m (f k) v)) {} map))
 
 
 ;;;; General
 
-(def seps-right (gnr-conf [:separators-rigth]))
+(def seps-right (glob-conf [:separators-rigth]))
 
-(def seps-left  (gnr-conf [:separators-left]))
+(def seps-left  (glob-conf [:separators-left]))
 
-(def text-rep-map (gnr-conf [:text-replacemant-map]))
+(def text-rep-map (map-keys re-pattern (glob-conf [:text-replacement-map])))
 
-(def custom-id-link-rep-map (gnr-conf [:custom-id-link-replacement-map]))
+(def custom-id-link-rep-map (map-keys
+                             re-pattern
+                             (glob-conf [:custom-id-link-replacement-map])))
 
-(def link-type->prefix (gnr-conf [:link-type->prefix]))
+(def link-type->prefix (glob-conf [:link-type->prefix]))
 
 (def link-types (-> link-type->prefix keys set))
 
-(def max-headline-depth (gnr-conf [:max-headline-depth]))
+(def max-headline-depth (glob-conf [:max-headline-depth]))
 
-(def toc-max-depth (gnr-conf [:toc-max-depth]))
+(def toc-max-depth (glob-conf [:toc-max-depth]))
 
-(def toc-hl-val (format (gnr-conf [:toc-headline-template]) toc-max-depth))
+(def toc-hl-val (format (glob-conf [:toc-headline-template]) toc-max-depth))
 
 
 ;;;; Org

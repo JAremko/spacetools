@@ -3,8 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer [report]]
             [clojure.test.check.clojure-test :refer [default-reporter-fn]]
-            [environ.core :refer [env]]
-            [orchestra.core :refer [defn-spec]]))
+            [environ.core :refer [env]]))
 
 
 (def gen-mult (delay
@@ -16,20 +15,15 @@
                  g-m)))
 
 
-(defn-spec samples nat-int?
+(defn samples
   "Multiplies BASE-SAMPLE-COUNT by `gen-mult` and returns it as `pos-int?`."
-  [base-sample-count nat-int?]
+  [base-sample-count]
   (max 1 (int (* @gen-mult base-sample-count))))
 
 
-(defn-spec function? boolean?
-  [f any?]
-  (= (type f) clojure.lang.IFn))
-
-
-(defn-spec make-f-spec-reper function?
+(defn make-f-spec-reper
   "Like `default-reporter-fn` but for spec reports."
-  [ret-spec s/spec? f qualified-symbol? f-name string?]
+  [ret-spec f f-name]
   (fn spec-rep-fn
     [{type :type [fn-args] :smallest :as args}]
     (case type
