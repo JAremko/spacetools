@@ -5,7 +5,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.spacedoc.config :as conf]
+            [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc :refer [node?]]))
 
 
@@ -24,7 +24,7 @@
 
 (defn-spec link->link-prefix string?
   [path string?]
-  (->> (vals conf/link-type->prefix)
+  (->> (vals (cfg/link-type->prefix))
        (filter (partial str/starts-with? path))
        (first)))
 
@@ -125,21 +125,21 @@ SRC is the exported file name."
 
 (defn-spec fmt-text string?
   [text string?]
-  (fmt-str conf/text-rep-map text))
+  (fmt-str (cfg/text-rep-map) text))
 
 
 (defn-spec fmt-link non-blank-string?
   [link-type keyword? link non-blank-string?]
   (if (= link-type :custom-id)
-    (fmt-str conf/custom-id-link-rep-map link)
+    (fmt-str (cfg/custom-id-link-rep-map) link)
     link))
 
 
 (defn-spec fmt-hl-val non-blank-string?
   [hl-val non-blank-string?]
-  (if (= hl-val conf/toc-hl-val)
-    conf/toc-hl-val
-    (fmt-str conf/text-rep-map (str/trim hl-val))))
+  (if (= hl-val (cfg/toc-hl-val))
+    (cfg/toc-hl-val)
+    (fmt-str (cfg/text-rep-map) (str/trim hl-val))))
 
 
 (defn-spec indent string?
@@ -194,7 +194,7 @@ SRC is the exported file name."
 
 (defn-spec in-hl-level-range? boolean?
   [level nat-int?]
-  (some? ((set (range 1 (inc conf/max-headline-depth))) level)))
+  (some? ((set (range 1 (inc (cfg/max-headline-depth)))) level)))
 
 
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))

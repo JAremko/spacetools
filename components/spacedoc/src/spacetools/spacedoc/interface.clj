@@ -1,5 +1,6 @@
 (ns spacetools.spacedoc.interface
-  (:require [spacetools.spacedoc.org  :as sdo]
+  (:require [spacetools.spacedoc.config :as cfg]
+            [spacetools.spacedoc.org  :as sdo]
             [spacetools.spacedoc.util :as sdu]))
 
 
@@ -7,3 +8,6 @@
 (defn up-tags [spaceroot src r-node] (sdu/up-tags spaceroot src r-node))
 (defn explain-deepest [node] (sdu/explain-deepest node))
 (defn relations [parents] (sdu/relations parents))
+(defn valid-configs? [configs] (cfg/valid-configs? configs))
+(defn valid-overrides? [configs] (cfg/valid-overrides? configs))
+(defn override-configs! [overrides] (cfg/override-configs! overrides))

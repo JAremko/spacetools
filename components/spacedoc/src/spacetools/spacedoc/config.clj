@@ -37,9 +37,9 @@
    :org/block-indentation 2
    :org/table-indentation 0})
 
-(s/def :text/separators-rigth (s/coll-of string? :kind set?))
+(s/def :text/separators-rigth (s/coll-of char? :kind set?))
 
-(s/def :text/separators-left (s/coll-of string? :kind set?))
+(s/def :text/separators-left (s/coll-of char? :kind set?))
 
 (s/def :text/replacement-map (s/map-of string? string?))
 
@@ -52,16 +52,16 @@
 (s/def :org/toc-max-depth nat-int?)
 
 (s/def :org/toc-template (s/with-gen (s/and string? #(re-matches #".*%s.*" %))
-                            #(gen/fmap (fn [[head tail]] (str head "%s" tail))
-                                       (gen/tuple
-                                        (gen/string-alphanumeric)
-                                        (gen/string-alphanumeric)))))
+                           #(gen/fmap (fn [[head tail]] (str head "%s" tail))
+                                      (gen/tuple
+                                       (gen/string-alphanumeric)
+                                       (gen/string-alphanumeric)))))
 
 (s/def :org/emphasis-tokens (s/map-of keyword? string?))
 
-(s/def :org/block-indentation pos-int?)
+(s/def :org/block-indentation nat-int?)
 
-(s/def :org/table-indentation pos-int?)
+(s/def :org/table-indentation nat-int?)
 
 (s/def ::configs (s/keys :req [:text/separators-rigth
                                :text/separators-left
@@ -75,21 +75,21 @@
                                :org/block-indentation
                                :org/table-indentation]))
 
-(s/def ::configs-from-file (s/keys :op [:text/separators-rigth
-                                        :text/separators-left
-                                        :text/replacement-map
-                                        :text/custom-id-replacement-map
-                                        :link/type->prefix
-                                        :headline/max-depth
-                                        :org/toc-max-depth
-                                        :org/toc-template
-                                        :org/emphasis-tokens
-                                        :org/block-indentation
-                                        :org/table-indentation]))
+(s/def ::overriding-configs (s/keys :op [:text/separators-rigth
+                                         :text/separators-left
+                                         :text/replacement-map
+                                         :text/custom-id-replacement-map
+                                         :link/type->prefix
+                                         :headline/max-depth
+                                         :org/toc-max-depth
+                                         :org/toc-template
+                                         :org/emphasis-tokens
+                                         :org/block-indentation
+                                         :org/table-indentation]))
 
 
 (defn-spec sync-configs ::configs
-  [cfg ::configs cfg-f ::configs-from-file]
+  [cfg ::configs cfg-f ::overriding-configs]
   (io! (let [synced-cfg (if (.exists (io/file cfg-f))
                           (merge default-config (edn/read-string (slurp cfg-f)))
                           cfg)]
@@ -97,41 +97,95 @@
              cfg))))
 
 
-(def configs (sync-configs default-config config-file-name))
+(def *configs (atom default-config))
 
 
-(defn- map-keys
+(defn-spec valid-configs? boolean?
+  [configs ::configs]
+  (s/valid? ::configs configs))
+
+
+(defn-spec valid-overrides? boolean?
+  [configs ::overriding-configs]
+  (s/valid? ::overriding-configs configs))
+
+
+(defn-spec override-configs! ::configs
+  [overrides ::overriding-configs]
+  (swap! *configs merge overrides))
+
+
+(defn map-keys
   [f map]
   (reduce-kv (fn [m k v] (assoc m (f k) v)) {} map))
 
 
+(defn regexp?
+  [re]
+  (= (type re) java.util.regex.Pattern))
+
+
 ;;;; General
 
-(def seps-right (:text/separators-rigth configs))
+(defn-spec seps-right :text/separators-rigth
+  []
+  (:text/separators-rigth @*configs))
 
-(def seps-left  (:text/separators-left configs))
 
-(def text-rep-map (map-keys re-pattern (:text/replacement-map configs)))
+(defn-spec seps-left :text/separators-left
+  []
+  (:text/separators-left @*configs))
 
-(def custom-id-link-rep-map (map-keys
-                             re-pattern
-                             (:link/custom-id-replacement-map configs)))
 
-(def link-type->prefix (:link/type->prefix configs))
+(defn-spec text-rep-map (s/map-of regexp? string?)
+  []
+  (map-keys re-pattern (:text/replacement-map @*configs)))
 
-(def link-types (-> link-type->prefix keys set))
 
-(def max-headline-depth (:headline/max-depth configs))
+(defn-spec custom-id-link-rep-map (s/map-of regexp? string?)
+  []
+  (map-keys
+   re-pattern
+   (:link/custom-id-replacement-map @*configs)))
 
-(def toc-max-depth (:org/toc-max-depth configs))
 
-(def toc-hl-val (format (:org/toc-template configs) toc-max-depth))
+(defn-spec link-type->prefix :link/type->prefix
+  []
+  (:link/type->prefix @*configs))
+
+
+(defn-spec link-types (s/coll-of keyword? :kind set?)
+  []
+  (-> (link-type->prefix) keys set))
+
+
+(defn-spec max-headline-depth :headline/max-depth
+  []
+  (:headline/max-depth @*configs))
+
+
+(defn-spec toc-max-depth :org/toc-max-depth
+  []
+  (:org/toc-max-depth @*configs))
+
+
+(defn-spec toc-hl-val string?
+  []
+  (format (:org/toc-template @*configs) toc-max-depth))
 
 
 ;;;; Org
 
-(def emphasis-tokens (:org/emphasis-tokens configs))
+(defn-spec emphasis-tokens :org/emphasis-tokens
+  []
+  (:org/emphasis-tokens @*configs))
 
-(def begin-end-indentation (:org/block-indentation configs))
 
-(def table-indentation (:org/table-indentation configs))
+(defn-spec begin-end-indentation :org/block-indentation
+  []
+  (:org/block-indentation @*configs))
+
+
+(defn-spec table-indentation :org/table-indentation
+  []
+  (:org/table-indentation @*configs))

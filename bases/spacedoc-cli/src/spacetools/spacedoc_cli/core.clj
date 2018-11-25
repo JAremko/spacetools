@@ -5,7 +5,7 @@
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]]
             [spacetools.spacedoc-cli.actions :as ac]
-            [spacetools.spacedoc-cli.args :refer [*parse]]
+            [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
             [spacetools.spacedoc-cli.io :refer [try-m->output]])
   (:gen-class))
 
@@ -51,7 +51,8 @@
 (defn -main [& args]
   (try-m->output
    (mlet
-    [{:keys [help summary action a-args]} (*parse args ops)]
+    [{:keys [help summary action a-args]} (*parse args ops)
+     _ (*configure!)]
     (if help
       (usage summary)
       (match

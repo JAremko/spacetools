@@ -2,11 +2,9 @@
   "Exporting SDN to .org format."
   (:require [clojure.core.match :refer [match]]
             [clojure.core.reducers :as r]
-            [clojure.set :sa :set]
             [clojure.spec.alpha :as s]
-            [clojure.string :refer [join]]
-            [clojure.string :as str]
-            [spacetools.spacedoc.config :as conf]
+            [clojure.string :as str :refer [join]]
+            [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :as sdu]))
@@ -75,7 +73,7 @@
             (if toc-wrapper?
               (some->> children
                        (apply n/section)
-                       (n/headline conf/toc-hl-val))
+                       (n/headline (cfg/toc-hl-val)))
               (n/unordered-list
                (vec (list* (n/link gh-id (n/text (sdu/fmt-hl-val value)))
                            (when (seq children)
@@ -93,7 +91,7 @@
                                (hl->gid-base hl)
                                (up-*gid->count! *gid->count hl))))
                      (update :children
-                             #(when (< depth conf/toc-max-depth)
+                             #(when (< depth (cfg/toc-max-depth))
                                 (some->>
                                  %
                                  (filter hl?)
@@ -130,8 +128,8 @@
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
-    (let [l-s1-sep? (conf/seps-right (last s1))
-          f-s2-sep? (conf/seps-left (first s2))]
+    (let [l-s1-sep? ((cfg/seps-right) (last s1))
+          f-s2-sep? ((cfg/seps-left) (first s2))]
       (when (not (or l-s1-sep? f-s2-sep?)) " "))))
 
 
@@ -185,7 +183,7 @@
 
 (defmethod sdn->org :emphasis-container
   [{:keys [tag children]}]
-  (let [token (conf/emphasis-tokens tag)]
+  (let [token ((cfg/emphasis-tokens) tag)]
     (str token (conv tag children) token)))
 
 
@@ -199,7 +197,7 @@
   (let [{[begin-token end-token] tag} block-container-delims]
     (str begin-token
          ;; NOTE: We don't "hard-code" indentation into sections
-         (sdu/indent (if (= tag :section) 0 conf/begin-end-indentation)
+         (sdu/indent (if (= tag :section) 0 (cfg/begin-end-indentation))
                      (conv tag children))
          end-token)))
 
@@ -259,7 +257,7 @@
                                          (empty? %) (table-rule-str cols-w)
                                          :else (table-row-str % cols-w)))
                             vrep))
-             (sdu/indent conf/table-indentation)))
+             (sdu/indent (cfg/table-indentation))))
       (str/replace-first #"^\n" "")))
 
 
@@ -313,14 +311,14 @@
 (defmethod sdn->org :example
   [{value :value}]
   (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n"
-          (sdu/indent conf/begin-end-indentation value)))
+          (sdu/indent (cfg/begin-end-indentation) value)))
 
 
 (defmethod sdn->org :src
   [{:keys [language value]}]
   (format "#+BEGIN_SRC %s\n%s#+END_SRC\n"
           language
-          (sdu/indent conf/begin-end-indentation value)))
+          (sdu/indent (cfg/begin-end-indentation) value)))
 
 
 (defmethod sdn->org :text
@@ -370,13 +368,13 @@
 
 (defmethod sdn->org :verbatim
   [{:keys [tag value]}]
-  (let [token (conf/emphasis-tokens tag)]
+  (let [token ((cfg/emphasis-tokens) tag)]
     (str token value token)))
 
 
 (defmethod sdn->org :kbd
   [{:keys [tag value]}]
-  (let [token (conf/emphasis-tokens tag)]
+  (let [token ((cfg/emphasis-tokens) tag)]
     (str token (join " " value) token)))
 
 

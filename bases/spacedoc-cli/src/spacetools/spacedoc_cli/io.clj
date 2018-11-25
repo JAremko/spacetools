@@ -143,3 +143,47 @@
         (println-err
          (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
         (println-ok output))))))
+
+
+(defn edn-file?
+  [path]
+  (io!
+   (and (.isFile (io/file path))
+        (re-matches #"(?i).*\.edn$" (str path))
+        true)))
+
+
+(defn *slurp-cfg-overrides
+  [overrides-fp]
+  (io!
+   (exc/try-or-recover
+    (when (edn-file? overrides-fp)
+      (let [cfg-ovr (-> overrides-fp slurp edn/read-string)]
+        (if (sdu/valid-overrides? cfg-ovr)
+          cfg-ovr
+          (throw
+           (ex-info
+            "Invalid overrides"
+            {:explanation (s/explain-data
+                           :spacetools.spacedoc.config/overriding-configs
+                           cfg-ovr)})))))
+    (fn [^Exception err]
+      (exc/failure
+       (ex-info "Can't read configuration overrides file"
+                {:path overrides-fp :error err}))))))
+
+
+(defn *spit
+  "Like `spit` but also creates parent directories.
+  Output is wrapped in try monad."
+  [path content]
+  (io!
+   (exc/try-or-recover
+    (let [a-path (absolute path)
+          parent-dir (.getParent (io/file a-path))]
+      (mkdir parent-dir)
+      (spit path content)
+      a-path)
+    (fn [^Exception err]
+      (exc/failure
+       (ex-info "Can't write file" {:path path}))))))

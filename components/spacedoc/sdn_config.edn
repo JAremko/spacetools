@@ -1,4 +1,17 @@
-{:global
+{:link/custom-id-replacement-map
+ {"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)"
+  "$1key-binding$2$3"},
+ :text/separators-rigth
+ #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?},
+ :org/toc-max-depth 4,
+ :org/emphasis-tokens
+ {:bold "*",
+  :italic "/",
+  :verbatim "=",
+  :underline "_",
+  :kbd "~",
+  :strike-through "+"},
+ :global
  {:separators-rigth
   #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?},
   :separators-left
@@ -22,6 +35,17 @@
   :toc-max-depth 4,
   :toc-headline-template
   "Table of Contents                     :TOC_%s_gh:noexport:"},
+ :text/separators-left
+ #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?},
+ :org/table-indentation 0,
+ :org/block-indentation 2,
+ :link/type->prefix
+ {:file "file:",
+  :http "http://",
+  :https "https://",
+  :custom-id "#",
+  :ftp "ftp://"},
+ :headline/max-depth 5,
  :orgify
  {:emphasis-tokens
   {:bold "*",
@@ -31,4 +55,12 @@
    :kbd "~",
    :strike-through "+"},
   :begin-end-indentation 2,
-  :table-indentation 0}}
+  :table-indentation 0},
+ :text/replacement-map
+ {"\\r+" "",
+  "\\t" " ",
+  "[ ]{2,}" " ",
+  "(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\\p{Blank}|\\p{Punct}+\\p{Blank}|$)"
+  "$1$2ey binding$3$4"},
+ :org/toc-template
+ "Table of Contents                     :TOC_%s_gh:noexport:"}

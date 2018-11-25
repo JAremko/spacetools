@@ -5,7 +5,13 @@
             [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacetools.spacedoc-cli.io :as sio]))
+            [spacetools.spacedoc-cli.io :as sio]
+            [spacetools.spacedoc.interface :as sdu]))
+
+
+(def overrides-file-name
+  "File name of the configuration overrides."
+  "sdn_overrides.edn")
 
 
 (defn- *flatten-fps
@@ -55,3 +61,9 @@
               :summary summary
               :action (first arguments)
               :a-args (vec (rest arguments)))))))
+
+
+(defn *configure!
+  []
+  (m/mlet [cfg-overrides (sio/*slurp-cfg-overrides overrides-file-name)]
+  (sdu/override-configs! cfg-overrides)))
