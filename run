@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 cd "$(dirname "$0")"
 
@@ -61,6 +60,7 @@ sdnize_args=("${first_arg}" "${tmp_dir}" "${@}")
 
 case $action in
     validoc)
+        set -e
         cd ./spacedoc
         echo_headline "Exporting documentation for validation:"
         emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
@@ -69,6 +69,7 @@ case $action in
         exit $?
         ;;
     docfmt)
+        set -e
         cd ./spacedoc
         prefmt_args="${@}"
         if [[ -z "${prefmt_args// }" ]]; then
