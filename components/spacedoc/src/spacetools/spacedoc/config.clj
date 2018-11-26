@@ -171,7 +171,7 @@
 
 (defn-spec toc-hl-val string?
   []
-  (format (:org/toc-template @*configs) toc-max-depth))
+  (format (:org/toc-template @*configs) (toc-max-depth)))
 
 
 ;;;; Org
