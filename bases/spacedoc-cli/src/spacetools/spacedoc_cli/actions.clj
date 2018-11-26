@@ -13,36 +13,29 @@
 (defn *validate
   "Validate Spacemacs documentation files with specs."
   [fs]
-  (exc/try-on
-   (m/mlet [sdn-fps (*parse-fs fs)
-            docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
-           (format "%s Documentation files have been successfully validated."
-                   (count docs)))))
+  (m/mlet
+   [sdn-fps (*parse-fs fs)
+    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
+   (m/return (format "%s Documentation files have been successfully validated."
+                     (count docs)))))
 
 
 (defn *orgify
   "Export .SDN files to TARGET-DIR as .ORG files."
   [src-dir target-dir fs]
-  (exc/try-on
-   (m/mlet [sdn-fps (*parse-fs fs)
-            docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
-            orgs (m/sequence
-                  (pmap
-                   (fn [path cont]
-                     (let [new-path
-                           (str/replace
-                            (sio/rebase-path src-dir target-dir path)
-                            #"(?ix)\.sdn$" ".org")]
-                       (sio/*spit new-path
-                                  (->> cont
-                                       (sd/up-tags src-dir path)
-                                       (sd/sdn->org)))))
-                   sdn-fps
-                   docs))]
-           (format (str "%s .sdn files have been successfully exported "
-                        "to \"%s\" directory as .org files")
-                   (count orgs)
-                   (sio/absolute target-dir)))))
+  (letfn [(org-path [edn-path]
+            (str/replace (sio/rebase-path src-dir target-dir edn-path)
+                         #"(?ix)\.sdn$" ".org"))
+          (export-to-org [fp content]
+            (sio/*spit (org-path fp)
+                       (->> content (sd/up-tags src-dir fp) (sd/sdn->org))))]
+    (m/mlet [sdn-fps (*parse-fs fs)
+             docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
+             orgs (m/sequence (pmap export-to-org sdn-fps docs))]
+            (m/return (format (str "%s .sdn files have been successfully "
+                                   "exported to \"%s\" directory as .org files")
+                              (count orgs)
+                              (sio/absolute target-dir))))))
 
 
 (defn *describe-spec
@@ -59,13 +52,9 @@
 (defn *relations
   "Output nodes relations in SDN files."
   [fs]
-  (exc/try-on
-   (m/mlet [sdn-fps (*parse-fs fs)
-            docs (->> sdn-fps
-                      (pmap (partial sio/*fp->sdn
-                                     :spacetools.spacedoc.node/any))
-                      (m/sequence))]
-           (str
-            "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
-            (str/join \newline
-                      (sd/relations (vec docs)))))))
+  (m/mlet [sdn-fps (*parse-fs fs)
+           docs (->> sdn-fps
+                     (pmap (partial sio/*fp->sdn :spacetools.spacedoc.node/any))
+                     (m/sequence))]
+          (m/return (str "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
+                         (str/join \newline (sd/relations (vec docs)))))))

@@ -65,7 +65,6 @@
 
 (defn *configure!
   []
-  (exc/try-on
-   (m/mlet
-    [cfg-overrides (sio/*slurp-cfg-overrides overrides-file-name)]
-    (when cfg-overrides (sdu/override-configs! cfg-overrides)))))
+  (m/mlet
+   [cfg-overrides (sio/*slurp-cfg-overrides overrides-file-name)]
+   (m/return (when cfg-overrides (sdu/override-configs! cfg-overrides)))))
