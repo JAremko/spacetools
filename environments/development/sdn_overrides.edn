@@ -26,7 +26,8 @@
  {"\\r+" "",
   "\\t" " ",
   "[ ]{2,}" " ",
-  "(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey[-_]*binding(s{0,1})(\\p{Blank}|\\p{Punct}+\\p{Blank}|$)"
-  "$1$2ey binding$3$4"},
+  "(?:(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey)(?:(?:(?i)[-_]*b)| B)(?:(?i)inding)((?i)s{0,1}(?:\\p{Blank}|\\p{Punct}+\\p{Blank}|\\p{Punct}+$|$))"
+  "$1$2ey binding$3",
+  "((?i)k)ey bindingS" "$1ey bindings"},
  :org/toc-template
  "Table of Contents                     :TOC_%s_gh:noexport:"}

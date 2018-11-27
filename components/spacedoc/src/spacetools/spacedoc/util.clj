@@ -131,7 +131,7 @@ SRC is the exported file name."
 (defn-spec fmt-link non-blank-string?
   [link-type keyword? link non-blank-string?]
   (if (= link-type :custom-id)
-    (fmt-str (cfg/custom-id-link-rep-map) link)
+    (fmt-str (cfg/custom-id-link-rep-map) (str/lower-case link))
     link))
 
 
