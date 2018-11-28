@@ -1,4 +1,4 @@
- (ns spacetools.spacedoc-io.core
+(ns spacetools.spacedoc-io.core
   "File-system I/O module.
   Functions that can fail return `cats.monad.exception`.
   Actually I/O wrapped in `io!`."

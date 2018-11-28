@@ -2,10 +2,10 @@
   :description "CLI tools for Spacemacs documentation."
   :plugins [[lein-environ "1.0.0"]]
   :dependencies [[orchestra "2018.09.10-1"]
-                 [funcool/cats "2.2.0"]
+                 [funcool/cats "2.3.1"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [org.clojure/tools.cli "0.3.7"]]
+                 [org.clojure/tools.cli "0.4.1"]]
   :main spacetools.spacedoc-cli.core
   :uberjar-name "spacedoc.jar"
   :global-vars {*warn-on-reflection* true *assert* true}
