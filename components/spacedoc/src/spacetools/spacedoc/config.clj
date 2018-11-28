@@ -122,8 +122,8 @@
 
 
 (defn regexp?
-  [re]
-  (= (type re) java.util.regex.Pattern))
+  [re-pat]
+  (instance? java.util.regex.Pattern re-pat))
 
 
 ;;;; General

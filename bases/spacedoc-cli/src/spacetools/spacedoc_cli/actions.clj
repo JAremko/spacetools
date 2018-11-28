@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacetools.spacedoc-cli.args :refer [*parse-fs]]
-            [spacetools.spacedoc-cli.io :as sio]
+            [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :as sd]))
 
 

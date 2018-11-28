@@ -1,5 +1,6 @@
 (ns spacetools.spacedoc.interface)
 
+
 (defn explain-deepest [node])
 (defn relations [parents])
 (defn sdn->org [node])
@@ -7,3 +8,4 @@
 (defn override-configs! [overrides])
 (defn valid-configs? [configs])
 (defn valid-overrides? [configs])
+(defn node? [node])

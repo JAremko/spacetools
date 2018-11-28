@@ -92,7 +92,7 @@ SRC is the exported file name."
 
 (defn-spec regex-pat? boolean?
   [obj any?]
-  (= (type obj) java.util.regex.Pattern))
+  (instance? java.util.regex.Pattern obj))
 
 
 (def re-pats-union (memoize (fn [pats]

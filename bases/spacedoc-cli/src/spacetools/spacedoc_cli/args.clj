@@ -5,7 +5,7 @@
             [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.tools.cli :refer [parse-opts]]
-            [spacetools.spacedoc-cli.io :as sio]
+            [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :as sdu]))
 
 

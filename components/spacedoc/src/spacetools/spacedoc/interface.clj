@@ -1,5 +1,6 @@
 (ns spacetools.spacedoc.interface
   (:require [spacetools.spacedoc.config :as cfg]
+            [spacetools.spacedoc.core  :as sdc]
             [spacetools.spacedoc.org  :as sdo]
             [spacetools.spacedoc.util :as sdu]))
 
@@ -11,3 +12,4 @@
 (defn valid-configs? [configs] (cfg/valid-configs? configs))
 (defn valid-overrides? [configs] (cfg/valid-overrides? configs))
 (defn override-configs! [overrides] (cfg/override-configs! overrides))
+(defn node? [node] (sdc/node? node))

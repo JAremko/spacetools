@@ -6,7 +6,7 @@
             [clojure.string :refer [join]]
             [spacetools.spacedoc-cli.actions :as ac]
             [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
-            [spacetools.spacedoc-cli.io :refer [try-m->output]])
+            [spacetools.spacedoc-io.interface :refer [try-m->output]])
   (:gen-class))
 
 

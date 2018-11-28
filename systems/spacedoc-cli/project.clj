@@ -1,8 +1,7 @@
 (defproject spacetools/spacedoc-cli "0.1.0-SNAPSHOT"
   :description "CLI tools for Spacemacs documentation."
   :plugins [[lein-environ "1.0.0"]]
-  :dependencies [[environ "1.1.0"]
-                 [orchestra "2018.09.10-1"]
+  :dependencies [[orchestra "2018.09.10-1"]
                  [funcool/cats "2.2.0"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
@@ -12,7 +11,8 @@
   :global-vars {*warn-on-reflection* true *assert* true}
   :profiles
   {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss8m"]
-         :dependencies [[org.clojure/test.check "0.10.0-alpha3"]]}
+         :dependencies [[org.clojure/test.check
+                         "0.10.0-alpha3"]]}
    :test {:env {:gentest-multiplier "3"}
           :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss8m"]}
    :uberjar
