@@ -5,14 +5,15 @@
                  [funcool/cats "2.3.1"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
+                 [nio2 "0.2.1"]
                  [org.clojure/tools.cli "0.4.1"]]
   :main spacetools.spacedoc-cli.core
   :uberjar-name "spacedoc.jar"
   :global-vars {*warn-on-reflection* true *assert* true}
   :profiles
   {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss8m"]
-         :dependencies [[org.clojure/test.check
-                         "0.10.0-alpha3"]]}
+         :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
+                        [com.google.jimfs/jimfs "1.1"]]}
    :test {:env {:gentest-multiplier "3"}
           :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss8m"]}
    :uberjar

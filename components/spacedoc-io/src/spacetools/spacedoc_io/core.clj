@@ -7,15 +7,56 @@
             [clojure.core.reducers :as r]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [nio2.core :as nio]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.spacedoc.interface :as sdu]))
+            [spacetools.spacedoc.interface :as sdu])
+  (:import (java.nio.file Path)
+           (java.io File)))
+
+
+(def filesystem (nio/default-fs))
+
+
+(defn-spec path? boolean?
+  [path any?]
+  (instance? Path path))
+
+
+(defn-spec file-or-dir? boolean?
+  [file any?]
+  (instance? File file))
+
+
+(defn-spec file-ref? boolean?
+  [f-ref any?]
+  ((some-fn string? path? file-or-dir?) f-ref))
+
+
+(defn-spec str->path path?
+  [s string?]
+  (nio/path filesystem s))
+
+
+(defn-spec any->path (s/nilable path?)
+  [f-ref file-ref?]
+  ((condp #(%1 %2) f-ref
+     string? str->path
+     file-or-dir? (comp str->path str)
+     path? identity
+     (constantly nil))
+   f-ref))
+
+
+(defn-spec directory? boolean?
+  [file any?]
+  (io! (some-> file (any->path) (nio/dir?))))
 
 
 (defn-spec file? boolean?
   [file any?]
-  (instance? java.io.File file))
+  (io! (some-> file (any->path) (nio/file?))))
 
 
 (defn-spec error? boolean?
@@ -23,81 +64,50 @@
   (instance? Throwable err))
 
 
-(s/def ::file-or-string (s/or :file-path string? :file file?))
+(defn-spec regexp? boolean?
+  [re-pat any?]
+  (instance? java.util.regex.Pattern re-pat))
 
 
-(defn-spec absolute file?
-  [path ::file-or-string]
-  (io! (.getCanonicalFile (.getAbsoluteFile (io/file path)))))
-
-
-(defn-spec mkdir boolean?
-  "Make directory tree.
-  Returns true if actually created something."
-  [path ::file-or-string]
-  (io! (.mkdirs (io/file path))))
-
-
-(defn-spec rebase-path file?
-  [old-base ::file-or-string new-base ::file-or-string path ::file-or-string]
-  (io!
-   (let [a-ob (str (absolute old-base))
-         a-nb (str (absolute new-base))
-         a-p (str (absolute path))]
-     (io/file (str/replace-first a-p a-ob a-nb)))))
-
-
-(defn-spec *spit exc/exception?
-  "Like `spit` but also creates parent directories.
-  Output is wrapped in try monad."
-  [path ::file-or-string content any?]
-  (io!
-   (exc/try-or-recover
-    (let [a-path (absolute path)
-          parent-dir (.getParent (io/file a-path))]
-      (mkdir parent-dir)
-      (spit path content)
-      a-path)
-    (fn [^Exception err]
-      (exc/failure
-       (ex-info "Can't write file" {:path path}))))))
+(defn-spec file-with-ext? boolean?
+  [ext-pat regexp? path file-ref?]
+  (when-let [fp (any->path path)]
+    (and (nio/file? fp)
+         (some->> fp (str) (re-matches ext-pat) (some?)))))
 
 
 (defn-spec sdn-file? boolean?
-  [path ::file-or-string]
-  (io!
-   (and (.isFile (io/file path))
-        (re-matches #"(?i).*\.sdn$" (str path))
-        true)))
+  [path file-ref?]
+  (file-with-ext? #"(?i).*\.sdn$" path))
 
 
-(defn-spec directory? boolean?
-  [path ::file-or-string]
-  (io!
-   (when-let [f (io/file path)]
-     (.isDirectory f))))
+(defn-spec edn-file? boolean?
+  [path file-ref?]
+  (file-with-ext? #"(?i).*\.edn$" path))
 
 
-(defn-spec *sdn-fps-in-dir exc/exception?
-  [input-dir-path ::file-or-string]
-  (io!
-   (exc/try-on
-    (if-not (directory? input-dir-path)
-      (exc/failure (ex-info "File isn't a directory"
-                            {:file input-dir-path}))
-      (into #{}
-            (comp
-             (map #(.getCanonicalPath (io/file %)))
-             (map str)
-             (filter sdn-file?))
-            (file-seq (io/file input-dir-path)))))))
+(defn-spec absolute path?
+  [path file-ref?]
+  (io! (-> path
+           (any->path)
+           (nio/file)
+           (.getAbsoluteFile)
+           (.getCanonicalPath)
+           (str->path))))
+
+
+(defn-spec rebase-path path?
+  [old-base file-ref? new-base file-ref? path file-ref?]
+  (io! (let [[a-ob a-nb a-p] (map (comp str absolute any->path)
+                                  [old-base new-base path])]
+         (nio/file (str->path (str/replace-first a-p a-ob a-nb))))))
 
 
 (defn-spec *fp->sdn exc/exception?
   "Read and validate .SDN file."
-  ([path ::file-or-string]
+  ([path ::file-path]
    (*fp->sdn :spacetools.spacedoc.node/root path))
-  ([root-node-spec s/spec? path ::file-or-string]
+  ([root-node-spec s/spec? path ::file-path]
    (io!
     (exc/try-or-recover
      (with-open [input (->> path
@@ -159,16 +169,8 @@
         (println-ok output))))))
 
 
-(defn-spec edn-file? boolean?
-  [path ::file-or-string]
-  (io!
-   (and (.isFile (io/file path))
-        (re-matches #"(?i).*\.edn$" (str path))
-        true)))
-
-
 (defn-spec *slurp-cfg-overrides exc/exception?
-  [overrides-fp ::file-or-string]
+  [overrides-fp ::file-path]
   (io!
    (exc/try-or-recover
     (when (edn-file? overrides-fp)
@@ -185,3 +187,34 @@
       (exc/failure
        (ex-info "Can't read configuration overrides file"
                 {:path overrides-fp :error err}))))))
+
+
+(defn-spec *spit exc/exception?
+  "Like `spit` but also creates parent directories.
+  Output is wrapped in try monad."
+  [path ::file-path content any?]
+  (io!
+   (exc/try-or-recover
+    (let [a-path (absolute path)
+          parent-dir (.getParent (io/file a-path))]
+      (.mkdirs (io/file parent-dir))
+      (spit path content)
+      a-path)
+    (fn [^Exception err]
+      (exc/failure
+       (ex-info "Can't write file" {:path path}))))))
+
+
+(defn-spec *sdn-fps-in-dir exc/exception?
+  [input-dir-path ::file-path]
+  (io!
+   (exc/try-on
+    (if-not (directory? input-dir-path)
+      (exc/failure (ex-info "File isn't a directory"
+                            {:file input-dir-path}))
+      (into #{}
+            (comp
+             (map #(.getCanonicalPath (io/file %)))
+             (map str)
+             (filter sdn-file?))
+            (file-seq (io/file input-dir-path)))))))

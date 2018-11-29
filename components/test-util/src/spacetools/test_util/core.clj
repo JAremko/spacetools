@@ -3,8 +3,23 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer [report]]
             [clojure.test.check.clojure-test :refer [default-reporter-fn]]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]]
+            [orchestra.core :refer [defn-spec]])
+  (:import  [com.google.common.jimfs Configuration Jimfs]))
 
+
+(defn-spec filesystem? boolean?
+  [fs any?]
+  (instance? com.google.common.jimfs.JimfsFileSystem fs))
+
+
+(defn new-fs
+  []
+
+  )
+
+
+(Jimfs/newFileSystem (Configuration/unix))
 
 (def gen-mult (delay
                (let [g-m (or (when-let [g-m-str (env :gentest-multiplier)]
