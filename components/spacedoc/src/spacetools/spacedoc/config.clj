@@ -1,8 +1,6 @@
 (ns spacetools.spacedoc.config
   "SDN manipulation utilities."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.pprint :as pp]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
@@ -87,15 +85,6 @@
                                          :org/emphasis-tokens
                                          :org/block-indentation
                                          :org/table-indentation]))
-
-
-(defn-spec sync-configs ::configs
-  [cfg ::configs cfg-f ::overriding-configs]
-  (io! (let [synced-cfg (if (.exists (io/file cfg-f))
-                          (merge default-config (edn/read-string (slurp cfg-f)))
-                          cfg)]
-         (do (pp/pprint synced-cfg (clojure.java.io/writer cfg-f))
-             cfg))))
 
 
 (def *configs (atom default-config))

@@ -103,46 +103,54 @@
          (nio/file (str->path (str/replace-first a-p a-ob a-nb))))))
 
 
-(defn-spec *fp->sdn exc/exception?
+(defn-spec exception-of? boolean?
+  "Returns true if `exc/failure` or `exc/success` wraps value satisfying pred."
+  [pred fn?]
+  (fn [*val]
+    (and (exc/exception? *val)
+         (if (exc/success? *val)
+           (m/bind *val pred)
+           true))))
+
+
+(defn-spec *fp->sdn (exception-of? map?)
   "Read and validate .SDN file."
-  ([path ::file-path]
+  ([path file-ref?]
    (*fp->sdn :spacetools.spacedoc.node/root path))
-  ([root-node-spec s/spec? path ::file-path]
-   (io!
-    (exc/try-or-recover
-     (with-open [input (->> path
-                            (io/file)
-                            (io/reader)
-                            (java.io.PushbackReader.))]
-       (let [[obj fin] (repeatedly 2 (partial edn/read {:eof :fin} input))]
-         (cond
-           (not= :fin fin)
-           (throw (Exception. ".SDN file should contain single root form."))
-           (not= :root (:tag obj))
-           (throw (Exception. "Non-root top level node in .SDN file."))
-           ((complement s/valid?) root-node-spec obj)
-           (throw (ex-info "Validation filed." (sdu/explain-deepest obj)))
-           :else obj)))
-     (fn [^Exception err]
-       (exc/failure
-        (ex-info (.getMessage err) (if-let [ed (ex-data err)]
-                                     (assoc ed :file path)
-                                     {:file path}))))))))
+  ([root-node-spec s/spec? path file-ref?]
+   (io! (exc/try-or-recover
+         (with-open [input (->> path
+                                any->path
+                                (nio/buffered-reader)
+                                (io/reader)
+                                (java.io.PushbackReader.))]
+           (let [[obj fin] (repeatedly 2 (partial edn/read {:eof :fin} input))]
+             (cond
+               (not= :fin fin)
+               (throw (Exception. ".SDN file should contain single root form."))
+               (not= :root (:tag obj))
+               (throw (Exception. "Non-root top level node in .SDN file."))
+               ((complement s/valid?) root-node-spec obj)
+               (throw (ex-info "Validation filed." (sdu/explain-deepest obj)))
+               :else obj)))
+         (fn [^Exception err]
+           (exc/failure
+            (ex-info (.getMessage err) (if-let [ed (ex-data err)]
+                                         (assoc ed :file path)
+                                         {:file path}))))))))
 
 
-(defn-spec println-err nat-int?
+(defn-spec output-err nat-int?
   [& msg (s/* string?)]
-  (io!
-   (binding [*out* *err*]
-     (println (str/join msg))
-     2)))
+  (io! (binding [*out* *err*]
+         (println (str/join msg))
+         2)))
 
 
-(defn-spec println-ok nat-int?
+(defn-spec output-ok nat-int?
   [& msg (s/* string?)]
-  (io!
-   (println (str/join msg))
-   0))
+  (io! (println (str/join msg))
+       0))
 
 
 (defn-spec err->msg string?
@@ -159,62 +167,69 @@
 
 (defn-spec try-m->output nil?
   "Prints output to stderr or stdout and `System/exit` with code 0 or 2"
-  [*output exc/exception?]
-  (io!
-   (System/exit
-    (let [output (m/extract *output)]
-      (if (exc/failure? *output)
-        (println-err
-         (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
-        (println-ok output))))))
+  [*output (exception-of? any?)]
+  (io! (System/exit
+        (let [output (m/extract *output)]
+          (if (exc/failure? *output)
+            (output-err
+             (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
+            (output-ok (str output)))))))
 
 
-(defn-spec *slurp-cfg-overrides exc/exception?
-  [overrides-fp ::file-path]
-  (io!
-   (exc/try-or-recover
-    (when (edn-file? overrides-fp)
-      (let [cfg-ovr (-> overrides-fp slurp edn/read-string)]
-        (if (sdu/valid-overrides? cfg-ovr)
-          cfg-ovr
-          (throw
-           (ex-info
-            "Invalid overrides"
-            {:explanation (s/explain-data
-                           :spacetools.spacedoc.config/overriding-configs
-                           cfg-ovr)})))))
-    (fn [^Exception err]
-      (exc/failure
-       (ex-info "Can't read configuration overrides file"
-                {:path overrides-fp :error err}))))))
+(defn-spec *read-cfg-overrides (exception-of? map?)
+  [path file-ref?]
+  (io! (exc/try-or-recover
+        (when (edn-file? path)
+          (with-open [input (->> path
+                                 any->path
+                                 (nio/buffered-reader)
+                                 (io/reader)
+                                 (java.io.PushbackReader.))]
+            (let [cfg-ovr (edn/read input)]
+              (if (sdu/valid-overrides? cfg-ovr)
+                cfg-ovr
+                (throw
+                 (ex-info
+                  "Invalid overrides"
+                  {:explanation (s/explain-data
+                                 :spacetools.spacedoc.config/overriding-configs
+                                 cfg-ovr)}))))))
+        (fn [^Exception err]
+          (exc/failure (ex-info "Can't read configuration overrides file"
+                                {:path path :error err}))))))
 
 
-(defn-spec *spit exc/exception?
+(defn-spec *spit (exception-of? any?)
   "Like `spit` but also creates parent directories.
   Output is wrapped in try monad."
-  [path ::file-path content any?]
-  (io!
-   (exc/try-or-recover
-    (let [a-path (absolute path)
-          parent-dir (.getParent (io/file a-path))]
-      (.mkdirs (io/file parent-dir))
-      (spit path content)
-      a-path)
-    (fn [^Exception err]
-      (exc/failure
-       (ex-info "Can't write file" {:path path}))))))
+  [path file-ref? content any?]
+  (io! (exc/try-or-recover
+        (let [p (any->path path)
+              a-path (absolute p)
+              parent-dir (nio/parent a-path)]
+          (nio/create-dirs parent-dir)
+          (with-open [output (->> p (nio/buffered-writer) (io/writer))]
+            (.write output (str content)))
+          a-path)
+        (fn [^Exception err]
+          (exc/failure
+           (ex-info "Can't write file" {:path path}))))))
 
 
-(defn-spec *sdn-fps-in-dir exc/exception?
-  [input-dir-path ::file-path]
-  (io!
-   (exc/try-on
-    (if-not (directory? input-dir-path)
-      (exc/failure (ex-info "File isn't a directory"
-                            {:file input-dir-path}))
-      (into #{}
-            (comp
-             (map #(.getCanonicalPath (io/file %)))
-             (map str)
-             (filter sdn-file?))
-            (file-seq (io/file input-dir-path)))))))
+(defn-spec *sdn-fps-in-dir (exception-of? set?)
+  [path file-ref?]
+  (io! (exc/try-on
+        (let [p (any->path path)]
+          (if (directory? p)
+            (into #{}
+                  (comp
+                   (map (partial absolute))
+                   (filter sdn-file?)
+                   (map str))
+                  (file-seq (nio/file p)))
+            (throw
+             ((cond
+                (not (nio/exists? p)) (partial ex-info "File doesn't exists")
+                (nio/file? p) (partial ex-info "File isn't a directory")
+                (nio/readable? p) (partial ex-info "Directory isn't readable"))
+              {:file p})))))))
