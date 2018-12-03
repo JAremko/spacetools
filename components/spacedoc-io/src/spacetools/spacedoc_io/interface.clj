@@ -9,7 +9,5 @@
 (defn directory? [path] (io/directory? path))
 (defn *sdn-fps-in-dir [input-dir-path] (io/*sdn-fps-in-dir input-dir-path))
 (defn *fp->sdn [path] (io/*fp->sdn path))
-(defn output-err [& msg] (apply io/output-err msg))
-(defn output-ok [& msg] (apply io/output-ok msg))
 (defn try-m->output [*output] (io/try-m->output *output))
 (defn *read-cfg-overrides [overrides-fp] (io/*read-cfg-overrides overrides-fp))

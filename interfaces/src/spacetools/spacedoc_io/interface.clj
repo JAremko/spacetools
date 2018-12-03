@@ -9,8 +9,6 @@
 (defn directory? [path])
 (defn edn-file? [path])
 (defn mkdir [path])
-(defn output-err [& msg])
-(defn output-ok [& msg])
 (defn rebase-path [old-base new-base path])
 (defn sdn-file? [path])
 (defn try-m->output [*output])

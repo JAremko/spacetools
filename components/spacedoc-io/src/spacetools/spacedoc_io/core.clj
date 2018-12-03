@@ -103,13 +103,15 @@
          (nio/file (str->path (str/replace-first a-p a-ob a-nb))))))
 
 
-(defn-spec exception-of? boolean?
-  "Returns true if `exc/failure` or `exc/success` wraps value satisfying pred."
-  [pred fn?]
-  (fn [*val]
-    (and (exc/exception? *val)
-         (if (exc/success? *val)
-           (m/bind *val pred)
+(defmacro exception-of?
+  "Returns predicate function for testing exception monad value.
+  The predicate returns true if the monad contains `exc/failure`
+  or if `exc/success` wraps value satisfying PRED predicate."
+  [pred]
+  `(fn [*val#]
+    (and (exc/exception? *val#)
+         (if (exc/success? *val#)
+           (m/bind *val# ~pred)
            true))))
 
 
