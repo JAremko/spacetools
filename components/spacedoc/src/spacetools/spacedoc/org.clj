@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.org
-  "Exporting SDN to .org format."
+  "Exporting to .org format."
   (:require [clojure.core.match :refer [match]]
             [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]

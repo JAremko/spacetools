@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.util
-  "SDN manipulation utilities."
+  "Shared helpers name-space."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]

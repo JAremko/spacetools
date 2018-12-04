@@ -1,8 +1,5 @@
 (ns spacetools.spacedoc.node
-  "Shared SDN node generators.
-  All public function in this name-space are node constructors.
-  NOTE: Format specific specs are in corresponding name-spaces.
-  EXAMPLE: :spacetools.spacedoc.org/toc"
+  "Node specs and constructors. All public functions are constructors."
   (:require [clojure.set :refer [map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]

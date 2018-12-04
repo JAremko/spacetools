@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.node-impl
-  "Defnode implementation. Highly meh."
+  "`defnode` and `defnode*` implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [spacetools.spacedoc.core :as sc]))

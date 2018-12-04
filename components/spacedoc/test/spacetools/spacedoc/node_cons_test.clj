@@ -1,4 +1,6 @@
-(ns spacetools.spacedoc.node-test
+(ns spacetools.spacedoc.node-cons-test
+  "All public function in `spacetools.spacedoc.node` ns are node constructors.
+  So we simply select them and generate tests based on node specs."
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
@@ -11,7 +13,6 @@
 
 
 (st/instrument)
-
 
 (doall
  (for [v (vals (ns-publics 'spacetools.spacedoc.node))

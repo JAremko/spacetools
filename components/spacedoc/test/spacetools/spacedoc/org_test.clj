@@ -1,4 +1,5 @@
 (ns spacetools.spacedoc.org
+  "Testing export to .org format."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]

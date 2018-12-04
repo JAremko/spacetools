@@ -1,7 +1,5 @@
 (ns spacetools.spacedoc-io.core
-  "File-system I/O module.
-  Functions that can fail return `cats.monad.exception`.
-  Actually I/O wrapped in `io!`."
+  "File-system I/O. Functions that can fail return `cats.monad.exception`."
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]
@@ -29,9 +27,14 @@
   (instance? File file))
 
 
+(s/def ::file-ref (s/or :string-path (s/and string? (complement str/blank?))
+                        :path path?
+                        :file-or-dir file-or-dir?))
+
 (defn-spec file-ref? boolean?
+  "Returns true if F-REF is one of file reference types or a string."
   [f-ref any?]
-  ((some-fn string? path? file-or-dir?) f-ref))
+  (s/valid? ::file-ref f-ref))
 
 
 (defn-spec str->path path?
@@ -39,24 +42,26 @@
   (nio/path filesystem s))
 
 
-(defn-spec any->path (s/nilable path?)
+(defn-spec file-ref->path path?
+  "Construct `Path` for a file reference."
   [f-ref file-ref?]
   ((condp #(%1 %2) f-ref
      string? str->path
      file-or-dir? (comp str->path str)
      path? identity
-     (constantly nil))
+     (throw (ex-info "Argument isn't a file reference."
+                     {:arg f-ref :arg-type (type f-ref)})))
    f-ref))
 
 
 (defn-spec directory? boolean?
   [file any?]
-  (io! (some-> file (any->path) (nio/dir?))))
+  (io! (some-> file (file-ref->path) (nio/dir?))))
 
 
 (defn-spec file? boolean?
   [file any?]
-  (io! (some-> file (any->path) (nio/file?))))
+  (io! (some-> file (file-ref->path) (nio/file?))))
 
 
 (defn-spec error? boolean?
@@ -71,7 +76,7 @@
 
 (defn-spec file-with-ext? boolean?
   [ext-pat regexp? path file-ref?]
-  (when-let [fp (any->path path)]
+  (when-let [fp (file-ref->path path)]
     (and (nio/file? fp)
          (some->> fp (str) (re-matches ext-pat) (some?)))))
 
@@ -89,7 +94,7 @@
 (defn-spec absolute path?
   [path file-ref?]
   (io! (-> path
-           (any->path)
+           (file-ref->path)
            (nio/file)
            (.getAbsoluteFile)
            (.getCanonicalPath)
@@ -98,7 +103,7 @@
 
 (defn-spec rebase-path path?
   [old-base file-ref? new-base file-ref? path file-ref?]
-  (io! (let [[a-ob a-nb a-p] (map (comp str absolute any->path)
+  (io! (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
                                   [old-base new-base path])]
          (nio/file (str->path (str/replace-first a-p a-ob a-nb))))))
 
@@ -109,10 +114,10 @@
   or if `exc/success` wraps value satisfying PRED predicate."
   [pred]
   `(fn [*val#]
-    (and (exc/exception? *val#)
-         (if (exc/success? *val#)
-           (m/bind *val# ~pred)
-           true))))
+     (and (exc/exception? *val#)
+          (if (exc/success? *val#)
+            (m/bind *val# ~pred)
+            true))))
 
 
 (defn-spec *fp->sdn (exception-of? map?)
@@ -122,7 +127,7 @@
   ([root-node-spec s/spec? path file-ref?]
    (io! (exc/try-or-recover
          (with-open [input (->> path
-                                any->path
+                                file-ref->path
                                 (nio/buffered-reader)
                                 (io/reader)
                                 (java.io.PushbackReader.))]
@@ -156,6 +161,7 @@
 
 
 (defn-spec err->msg string?
+  "Format error message."
   [^Throwable err error?]
   (let [{:keys [cause data]} (Throwable->map err)]
     (str/join \newline
@@ -179,11 +185,12 @@
 
 
 (defn-spec *read-cfg-overrides (exception-of? map?)
+  "Read configuration overrides from a PATH file"
   [path file-ref?]
   (io! (exc/try-or-recover
         (when (edn-file? path)
           (with-open [input (->> path
-                                 any->path
+                                 file-ref->path
                                  (nio/buffered-reader)
                                  (io/reader)
                                  (java.io.PushbackReader.))]
@@ -206,7 +213,7 @@
   Output is wrapped in try monad."
   [path file-ref? content any?]
   (io! (exc/try-or-recover
-        (let [p (any->path path)
+        (let [p (file-ref->path path)
               a-path (absolute p)
               parent-dir (nio/parent a-path)]
           (nio/create-dirs parent-dir)
@@ -221,7 +228,7 @@
 (defn-spec *sdn-fps-in-dir (exception-of? set?)
   [path file-ref?]
   (io! (exc/try-on
-        (let [p (any->path path)]
+        (let [p (file-ref->path path)]
           (if (directory? p)
             (into #{}
                   (comp

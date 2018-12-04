@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.config
-  "SDN manipulation utilities."
+  "Global configurations."
   (:require [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]

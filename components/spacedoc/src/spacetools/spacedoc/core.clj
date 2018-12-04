@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.core
-  "SDN manipulation utilities."
+  "Mainly `defmulti`s that other parts of the component populate."
   (:require [clojure.set :refer [union map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
@@ -13,7 +13,11 @@
 
 (defn-spec all-tags (s/coll-of keyword? :kind set?)
   []
-  (dissoc (methods node->spec-k) :default))
+  (some-> node->spec-k
+          (methods)
+          (dissoc :default)
+          (keys)
+          (set)))
 
 
 (defn-spec node? boolean?
