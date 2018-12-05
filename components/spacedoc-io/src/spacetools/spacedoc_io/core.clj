@@ -18,16 +18,19 @@
 
 
 (defn-spec path? boolean?
+  "Returns true if PATH is a `Path` instance."
   [path any?]
   (instance? Path path))
 
 
 (defn-spec file-or-dir? boolean?
+  "Returns true if FILE is a `File` instance."
   [file any?]
   (instance? File file))
 
 
-(s/def ::file-ref (s/or :string-path (s/and string? (complement str/blank?))
+(s/def ::file-ref (s/or :string-path (s/and string?
+                                            (complement str/blank?))
                         :path path?
                         :file-or-dir file-or-dir?))
 
@@ -38,12 +41,13 @@
 
 
 (defn-spec str->path path?
+  "Construct `Path` form a `String`."
   [s string?]
   (nio/path filesystem s))
 
 
 (defn-spec file-ref->path path?
-  "Construct `Path` for a file reference."
+  "Construct `Path` from a file reference."
   [f-ref file-ref?]
   ((condp #(%1 %2) f-ref
      string? str->path
@@ -55,43 +59,56 @@
 
 
 (defn-spec directory? boolean?
+  "Returns true if FILE is a directory."
   [file any?]
-  (io! (some-> file (file-ref->path) (nio/dir?))))
+  (io! (when (file-ref? file)
+         (some-> file (file-ref->path) (nio/dir?)))))
 
 
 (defn-spec file? boolean?
+  "Returns true if FILE is a file but not a directory."
   [file any?]
-  (io! (some-> file (file-ref->path) (nio/file?))))
+  (io! (when (file-ref? file)
+        (some-> file (file-ref->path) (nio/file?)))))
 
 
 (defn-spec error? boolean?
+  "Returns true if ERR is a `Throwable` instance."
   [err any?]
   (instance? Throwable err))
 
 
 (defn-spec regexp? boolean?
+  "Returns true if RE-PAT is a regular extension."
   [re-pat any?]
   (instance? java.util.regex.Pattern re-pat))
 
 
 (defn-spec file-with-ext? boolean?
-  [ext-pat regexp? path file-ref?]
-  (when-let [fp (file-ref->path path)]
-    (and (nio/file? fp)
-         (some->> fp (str) (re-matches ext-pat) (some?)))))
+  "Returns true if PATH is a file with extension matching EXT-PAT."
+  [ext-pat regexp? path any?]
+  (when (file? path)
+    (let [fp (file-ref->path path)]
+      (some->> fp
+               (str)
+               (re-matches ext-pat)
+               (some?)))))
 
 
 (defn-spec sdn-file? boolean?
+  "Returns true if PATH is a file with .sdn extension."
   [path file-ref?]
   (file-with-ext? #"(?i).*\.sdn$" path))
 
 
 (defn-spec edn-file? boolean?
+  "Returns true if PATH is a file with expression matching EXT-PAT."
   [path file-ref?]
   (file-with-ext? #"(?i).*\.edn$" path))
 
 
 (defn-spec absolute path?
+  "Returns true if PATH is a file with expression matching EXT-PAT."
   [path file-ref?]
   (io! (-> path
            (file-ref->path)
