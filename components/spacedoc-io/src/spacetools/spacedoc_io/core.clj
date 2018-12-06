@@ -18,15 +18,15 @@
 
 
 (defn-spec path? boolean?
-  "Returns true if PATH is a `Path` instance."
-  [path any?]
-  (instance? Path path))
+  "Returns true if X is a `Path` instance."
+  [x any?]
+  (instance? Path x))
 
 
 (defn-spec file-or-dir? boolean?
-  "Returns true if FILE is a `File` instance."
-  [file any?]
-  (instance? File file))
+  "Returns true if X is a `File` instance."
+  [x any?]
+  (instance? File x))
 
 
 (s/def ::file-ref (s/or :string-path (s/and string?
@@ -35,9 +35,9 @@
                         :file-or-dir file-or-dir?))
 
 (defn-spec file-ref? boolean?
-  "Returns true if F-REF is one of file reference types or a string."
-  [f-ref any?]
-  (s/valid? ::file-ref f-ref))
+  "Returns true if X is one of file reference types or a string."
+  [x any?]
+  (s/valid? ::file-ref x))
 
 
 (defn-spec str->path path?
@@ -59,36 +59,36 @@
 
 
 (defn-spec directory? boolean?
-  "Returns true if FILE is a directory."
-  [file any?]
-  (io! (when (file-ref? file)
-         (some-> file (file-ref->path) (nio/dir?)))))
+  "Returns true if X is a directory."
+  [x any?]
+  (io! (when (file-ref? x)
+         (some-> x (file-ref->path) (nio/dir?)))))
 
 
 (defn-spec file? boolean?
-  "Returns true if FILE is a file but not a directory."
-  [file any?]
-  (io! (when (file-ref? file)
-        (some-> file (file-ref->path) (nio/file?)))))
+  "Returns true if X is a file but not a directory."
+  [x any?]
+  (io! (when (file-ref? x)
+        (some-> x (file-ref->path) (nio/file?)))))
 
 
 (defn-spec error? boolean?
-  "Returns true if ERR is a `Throwable` instance."
-  [err any?]
-  (instance? Throwable err))
+  "Returns true if X is a `Throwable` instance."
+  [x any?]
+  (instance? Throwable x))
 
 
 (defn-spec regexp? boolean?
-  "Returns true if RE-PAT is a regular extension."
-  [re-pat any?]
-  (instance? java.util.regex.Pattern re-pat))
+  "Returns true if X is a regular expression pattern."
+  [x any?]
+  (instance? java.util.regex.Pattern x))
 
 
 (defn-spec file-with-ext? boolean?
-  "Returns true if PATH is a file with extension matching EXT-PAT."
-  [ext-pat regexp? path any?]
-  (when (file? path)
-    (let [fp (file-ref->path path)]
+  "Returns true if X is a `::file-ref` with extension matching EXT-PAT."
+  [ext-pat regexp? x any?]
+  (when (file? x)
+    (let [fp (file-ref->path x)]
       (some->> fp
                (str)
                (re-matches ext-pat)
@@ -96,19 +96,19 @@
 
 
 (defn-spec sdn-file? boolean?
-  "Returns true if PATH is a file with .sdn extension."
-  [path file-ref?]
-  (file-with-ext? #"(?i).*\.sdn$" path))
+  "Returns true if X is a `::file-ref` with .sdn extension."
+  [x any?]
+  (file-with-ext? #"(?i).*\.sdn$" x))
 
 
 (defn-spec edn-file? boolean?
-  "Returns true if PATH is a file with expression matching EXT-PAT."
-  [path file-ref?]
-  (file-with-ext? #"(?i).*\.edn$" path))
+  "Returns true if X is a `::file-ref` with .edn expression."
+  [x any?]
+  (file-with-ext? #"(?i).*\.edn$" x))
 
 
 (defn-spec absolute path?
-  "Returns true if PATH is a file with expression matching EXT-PAT."
+  "Return absolute version of the PATH."
   [path file-ref?]
   (io! (-> path
            (file-ref->path)
@@ -119,6 +119,7 @@
 
 
 (defn-spec rebase-path path?
+  "Rebase PATH from OLD-BASE to NEW-BASE."
   [old-base file-ref? new-base file-ref? path file-ref?]
   (io! (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
                                   [old-base new-base path])]
@@ -126,7 +127,7 @@
 
 
 (defmacro exception-of?
-  "Returns predicate function for testing exception monad value.
+  "Construct predicate function for testing exception monad value.
   The predicate returns true if the monad contains `exc/failure`
   or if `exc/success` wraps value satisfying PRED predicate."
   [pred]
@@ -165,6 +166,7 @@
 
 
 (defn-spec output-err nat-int?
+  "Print out MSG es into stderr and return 2."
   [& msg (s/* string?)]
   (io! (binding [*out* *err*]
          (println (str/join msg))
@@ -172,13 +174,14 @@
 
 
 (defn-spec output-ok nat-int?
+  "Print out MSG es into stdout and return 0."
   [& msg (s/* string?)]
   (io! (println (str/join msg))
        0))
 
 
 (defn-spec err->msg string?
-  "Format error message."
+  "Format error message ERR."
   [^Throwable err error?]
   (let [{:keys [cause data]} (Throwable->map err)]
     (str/join \newline
@@ -191,7 +194,7 @@
 
 
 (defn-spec try-m->output nil?
-  "Prints output to stderr or stdout and `System/exit` with code 0 or 2"
+  "Print *OUTPUT value to stderr or stdout and `System/exit` with code 0 or 2."
   [*output (exception-of? any?)]
   (io! (System/exit
         (let [output (m/extract *output)]
@@ -202,7 +205,7 @@
 
 
 (defn-spec *read-cfg-overrides (exception-of? map?)
-  "Read configuration overrides from a PATH file"
+  "Read and validate configuration overrides from a PATH file."
   [path file-ref?]
   (io! (exc/try-or-recover
         (when (edn-file? path)
@@ -226,8 +229,7 @@
 
 
 (defn-spec *spit (exception-of? any?)
-  "Like `spit` but also creates parent directories.
-  Output is wrapped in try monad."
+  "Spit CONTENT into PATH file and returns path wrapped into `exc/exception`."
   [path file-ref? content any?]
   (io! (exc/try-or-recover
         (let [p (file-ref->path path)
@@ -243,6 +245,7 @@
 
 
 (defn-spec *sdn-fps-in-dir (exception-of? set?)
+  "Return absolute paths of .sdn files in PATH directory."
   [path file-ref?]
   (io! (exc/try-on
         (let [p (file-ref->path path)]

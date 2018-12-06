@@ -17,24 +17,28 @@
 ;;;; Generic stuff for SDN manipulation
 
 (defn-spec non-blank-string? boolean?
-  [s any?]
-  (and (string? s)
-       ((complement str/blank?) s)))
+  "Return true if X is a string and it contains non-blank characters."
+  [x any?]
+  (and (string? x)
+       ((complement str/blank?) x)))
 
 
 (defn-spec link->link-prefix string?
+  "Given full link return corresponding prefix(usually protocol + ://)."
   [path string?]
   (->> (vals (cfg/link-type->prefix))
        (filter (partial str/starts-with? path))
        (first)))
 
 
-(defn node->children-tag-s
-  [node]
+(defn-spec node->children-tag-s keyword?
+  "Return tags of the NODE direct children(non recursive)."
+  [node node?]
   (into #{} (map :tag) (:children node)))
 
 
 (defn-spec fmt-problem string?
+  "Format `:clojure.spec.alpha/problems` into string."
   [node node? problem map?]
   (str/join \newline
             (assoc problem
@@ -91,44 +95,46 @@ SRC is the exported file name."
 ;;;; Formatters
 
 (defn-spec regex-pat? boolean?
-  [obj any?]
-  (instance? java.util.regex.Pattern obj))
+  "Returns true if X is a regex pattern."
+  [x any?]
+  (instance? java.util.regex.Pattern x))
 
 
-(def re-pats-union (memoize (fn [pats]
-                              (->> pats
-                                   (map #(str "(" % ")"))
-                                   (interpose "|")
-                                   (apply str)
-                                   (re-pattern)))))
+(def re-pats-union
+  "Given regex pattern seq, return \"or\" union regexp pattern."
+  (memoize (fn [re-pats]
+             (->> re-pats
+                  (map #(str "(" % ")"))
+                  (interpose "|")
+                  (apply str)
+                  (re-pattern)))))
 
 
 (defn-spec fmt-str string?
-  [rep-map (s/map-of regex-pat? string?) text string?]
-  ((fn [t]
-     (let [ret (str/replace
-                t
-                (re-pats-union (keys rep-map))
-                (fn [text-match]
-                  (reduce
-                   (fn [text-frag [pat rep]]
-                     (if (re-matches pat text-frag)
-                       (str/replace text-frag pat rep)
-                       text-frag))
-                   (first text-match)
-                   rep-map)))]
-       (if-not (= ret t)
-         (recur ret)
-         ret)))
-   text))
-
-
-(defn-spec fmt-text string?
-  [text string?]
-  (fmt-str (cfg/text-rep-map) text))
+  "Format TEXT using REP-MAP(defaults to `cfg/text-rep-map`) replacement map."
+  ([text string?]
+   (fmt-str (cfg/text-rep-map) text))
+  ([rep-map (s/map-of regex-pat? string?) text string?]
+   ((fn [t]
+      (let [ret (str/replace
+                 t
+                 (re-pats-union (keys rep-map))
+                 (fn [text-match]
+                   (reduce
+                    (fn [text-frag [pat rep]]
+                      (if (re-matches pat text-frag)
+                        (str/replace text-frag pat rep)
+                        text-frag))
+                    (first text-match)
+                    rep-map)))]
+        (if-not (= ret t)
+          (recur ret)
+          ret)))
+    text)))
 
 
 (defn-spec fmt-link non-blank-string?
+  "Format link value based on LINK-TYPE."
   [link-type keyword? link non-blank-string?]
   (if (= link-type :custom-id)
     (fmt-str (cfg/custom-id-link-rep-map) (str/lower-case link))
@@ -136,6 +142,7 @@ SRC is the exported file name."
 
 
 (defn-spec fmt-hl-val non-blank-string?
+  "Format headline value string."
   [hl-val non-blank-string?]
   (if (= hl-val (cfg/toc-hl-val))
     (cfg/toc-hl-val)
@@ -143,6 +150,7 @@ SRC is the exported file name."
 
 
 (defn-spec indent string?
+  "Indent lines in string S with INDENT-LEVEL indentation."
   [indent-level nat-int? s string?]
   (if (str/blank? s)
     s
@@ -193,11 +201,14 @@ SRC is the exported file name."
 ;;;; Headline stuff
 
 (defn-spec in-hl-level-range? boolean?
+  "Returns true if LEVEL is in [1..`cfg/max-headline-depth`] range."
   [level nat-int?]
   (some? ((set (range 1 (inc (cfg/max-headline-depth)))) level)))
 
 
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))
+  "Given HL-VALUE headline value return github style id base.
+Base means that the value doesn't have -N post-fix used to resolve collisions."
   [hl-value non-blank-string?]
   (str "#"
        (-> hl-value
@@ -207,6 +218,8 @@ SRC is the exported file name."
 
 
 (defn-spec hl-val->path-id-frag non-blank-string?
+  "Given HL-VALUE headline value return path-id style id fragment.
+Fragments are  particular headline values in the \"/\" separated chain."
   [hl-value non-blank-string?]
   (-> hl-value
       (str/lower-case)
@@ -216,14 +229,15 @@ SRC is the exported file name."
 
 
 (defn-spec path-id? boolean?
-  [val any?]
+  "Return true if X is a path-id."
+  [x any?]
   (and
-   (string? val)
+   (string? x)
    (some?
     (re-matches
      ;; forgive me Father for I have sinned
      #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-     val))))
+     x))))
 
 
 (defn-spec assoc-level-and-path-id node?

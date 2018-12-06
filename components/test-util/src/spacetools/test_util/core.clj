@@ -4,18 +4,20 @@
             [clojure.test :refer [report]]
             [clojure.test.check.clojure-test :refer [default-reporter-fn]]
             [environ.core :refer [env]]
-            [nio2.core :as nio2]
+            [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]])
   (:import  [com.google.common.jimfs Jimfs Configuration]))
 
 
-(def gen-mult (delay
-               (let [g-m (or (when-let [g-m-str (env :gentest-multiplier)]
-                               (let [g-m (read-string g-m-str)]
-                                 (when (pos? g-m) g-m)))
-                             1)]
-                 (prn (format "Gentest sample's count multiplier is (%s)" g-m))
-                 g-m)))
+(def gen-mult
+  "Multiplier for generative testing."
+  (delay
+   (let [g-m (or (when-let [g-m-str (env :gentest-multiplier)]
+                   (let [g-m (read-string g-m-str)]
+                     (when (pos? g-m) g-m)))
+                 1)]
+     (prn (format "Gentest sample's count multiplier is (%s)" g-m))
+     g-m)))
 
 
 (defn-spec samples pos-int?
@@ -42,8 +44,9 @@
 
 
 (defn-spec filesystem? boolean?
-  [f-sys any?]
-  (instance? com.google.common.jimfs.JimfsFileSystem f-sys))
+  "Return true if X is a filesystem."
+  [x any?]
+  (instance? com.google.common.jimfs.JimfsFileSystem x))
 
 
 ;;; straight from https://github.com/potetm/nio2/blob/master/test/nio2/jimfs.clj
@@ -71,10 +74,13 @@
 
 
 (defn-spec create-fs filesystem?
+  "Create in-memory filesystem.
+STRUCT is a recursive vector of files/directories.
+OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
   ([struct vector?]
    (create-fs struct :unix))
   ([struct vector? os-kw keyword?]
    (let [config (os-kw configurations)
          fs (init-fs config)]
-     (nio2/create-fs-tree! fs (fs-root config) struct)
+     (nio/create-fs-tree! fs (fs-root config) struct)
      fs)))

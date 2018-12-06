@@ -594,6 +594,7 @@
 ;; plain-list
 
 (defn- make-list-item
+  "Create list item node."
   [item-type idx item]
   {:tag :list-item
    :type item-type

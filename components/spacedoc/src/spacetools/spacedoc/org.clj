@@ -323,7 +323,7 @@
 
 (defmethod sdn->org :text
   [{value :value}]
-  (sdu/fmt-text value))
+  (sdu/fmt-str value))
 
 
 (defmethod sdn->org :superscript

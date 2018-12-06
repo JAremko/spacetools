@@ -30,7 +30,7 @@
 
 (defmethod invariants :text
   [{val :value} org-str]
-  (str/includes? org-str (sdu/fmt-text val)))
+  (str/includes? org-str (sdu/fmt-str val)))
 
 
 (defmethod invariants :link

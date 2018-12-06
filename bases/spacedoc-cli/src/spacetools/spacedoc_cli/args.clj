@@ -15,6 +15,7 @@
 
 
 (defn- *flatten-fps
+  "Flatten sequence of .sdn files and directories(searched for .sdn files)."
   [paths]
   (exc/try-on
    (r/fold
@@ -30,6 +31,7 @@
 
 
 (defn *parse-fs
+  "Parse input sequence of .sdn files and directories(searched for .sdn files)."
   [input]
   (exc/try-on
    (cond (empty? input)
@@ -40,6 +42,7 @@
          (string? input)
          (*parse-fs [input])
 
+         ;; INPUT contains something that isn't path of .sdn file or a directory.
          (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input))
          (exc/failure
           (ex-info "all inputs must be .SDN files or readable directories."
@@ -64,6 +67,7 @@
 
 
 (defn *configure!
+  "Configure spacedoc with overrides from `sdu/config-file-name` file."
   []
   (m/mlet
    [cfg-overrides (sio/*read-cfg-overrides overrides-file-name)]
