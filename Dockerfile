@@ -9,7 +9,7 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=1.0.0-rc9
+ENV GRAALVM_V=1.0.0-rc10
 
 WORKDIR /tmp
 
