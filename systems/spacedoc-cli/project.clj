@@ -18,9 +18,12 @@
           :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss8m"]}
    :uberjar
    {:aot :all
-    :jvm-opts
-    ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
-     "-Dclojure.compiler.direct-linking=true" "-Xms1G"
-     "-Xmx1G"]
+    :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
+               ;; Enable it when OpenJDK 11 will actually contain java 11
+               ;; "-XX:+UnlockExperimentalVMOptions"
+               ;; "-XX:+UseEpsilonGC"
+               "-Dclojure.compiler.direct-linking=true"
+               "-Xms1G"
+               "-Xmx1G"]
     :global-vars {*assert* false}}}
   :aot :all)

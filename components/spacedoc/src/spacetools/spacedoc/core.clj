@@ -6,12 +6,15 @@
             [orchestra.core :refer [defn-spec]]))
 
 
-(defmulti node->spec-k :tag)
+(defmulti node->spec-k
+  "Given node return fully qualified spec key for it."
+  :tag)
 
 (defmethod node->spec-k :default [_] :spacetools.spacedoc.node/known-node)
 
 
 (defn-spec all-tags (s/coll-of keyword? :kind set?)
+  "Return all node tags."
   []
   (some-> node->spec-k
           (methods)
@@ -21,36 +24,44 @@
 
 
 (defn-spec node? boolean?
-  [node any?]
-  (and (:tag node)
-       (s/valid? (s/map-of keyword? any?) node)))
+  "Return true if X is a node."
+  [x any?]
+  (and (:tag x)
+       (s/valid? (s/map-of keyword? any?) x)))
 
 
-(defn-spec known-node? (s/nilable keyword?)
-  [node node?]
-  ((all-tags) (:tag node)))
-
+(defn-spec known-node? boolean?
+  "Return true if X is a known node."
+  [x node?]
+  (some? ((all-tags) (:tag x))))
 
 (s/def :spacetools.spacedoc.node/known-node known-node?)
 
 
 (defn-spec tag->spec-k qualified-keyword?
+  "Given node tag return fully qualified spec key for it."
   [node-tag keyword?]
   (node->spec-k {:tag node-tag}))
 
 
-(defmulti inline-leaf :tag)
+(defmulti inline-leaf
+  "Given inline leaf node return corresponding spec key."
+  :tag)
+
 
 
 (s/def ::set-of-keys (s/coll-of keyword? :kind set? :into #{}))
 
 
 (defn-spec inline-leaf-tags ::set-of-keys
+  "Return all inline leaf node tags."
   []
   (set (keys (methods inline-leaf))))
 
 
-(defmulti inline-container :tag)
+(defmulti inline-container
+  "Given inline container node return corresponding spec key."
+  :tag)
 
 
 (defn-spec inline-container-tags ::set-of-keys

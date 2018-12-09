@@ -21,6 +21,7 @@ RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_
     && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
 RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
+    --expert-options-all \
     --no-server \
     -H:+ReportUnsupportedElementsAtRuntime \
     -jar /tmp/spacedoc.jar
