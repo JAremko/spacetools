@@ -26,8 +26,7 @@
 (defn-spec node? boolean?
   "Return true if X is a node."
   [x any?]
-  (and (:tag x)
-       (s/valid? (s/map-of keyword? any?) x)))
+  (s/valid? ::any-node x))
 
 
 (defn-spec known-node? boolean?
@@ -65,32 +64,44 @@
 
 
 (defn-spec inline-container-tags ::set-of-keys
+  "All inline containers tags."
   []
   (set (keys (methods inline-container))))
 
 
 (defn-spec inline-tags ::set-of-keys
+  "All inline elements tags (inline leafs and inline containers)."
   []
   (set (union inline-leaf-tags inline-container-tags)))
 
 
-(defmulti block-element :tag)
+(defmulti block-element
+  "Given block node return corresponding spec key."
+  :tag)
 
 
 (defn-spec block-tags ::set-of-keys
+  "All block node tags."
   []
   (set (keys (methods block-element))))
 
 
-(defmulti headline-child :tag)
+(defmulti headline-child
+  "Given headline child node return corresponding spec key."
+  :tag)
 
 
-(defmulti headlines :tag)
+(defmulti headlines
+  "Given headline node return corresponding spec key."
+  :tag)
 
 
 (defn-spec headlines-tags ::set-of-keys
+  "All node tags belonging to headline group."
   []
   (set (keys (methods headlines))))
 
 
-(defmulti  root-child :tag)
+(defmulti root-child
+  "Given root node child return corresponding spec key."
+  :tag)

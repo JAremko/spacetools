@@ -30,10 +30,19 @@
                       (gen/string-alphanumeric)))))
 
 
-(s/def ::any any?)
-
-
 ;;;; Node specs
+
+
+;; Any node should satisfy this spec
+
+(s/def :spacetools.spacedoc.node.any-node/tag keyword?)
+(s/def :spacetools.spacedoc.node.any-node/children (s/coll-of
+                                                    ::any-node
+                                                    :kind vector?))
+(s/def ::any-node (s/keys
+                   :req-un [:spacetools.spacedoc.node.any-node/tag]
+                   :opt-un [:spacetools.spacedoc.node.any-node/children]))
+
 
 ;; inline leaf
 
