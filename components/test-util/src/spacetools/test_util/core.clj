@@ -28,7 +28,7 @@
 
 (defn-spec make-f-spec-reper fn?
   "Like `default-reporter-fn` but for spec reports."
-  [ret-spec s/spec? f fn? f-name qualified-ident?]
+  [ret-spec s/spec? f var? f-name string?]
   (fn spec-rep-fn
     [{type :type [fn-args] :smallest :as args}]
     (case type
@@ -49,8 +49,6 @@
   (instance? com.google.common.jimfs.JimfsFileSystem x))
 
 
-;;; straight from https://github.com/potetm/nio2/blob/master/test/nio2/jimfs.clj
-
 (defprotocol IConfiguration
   (os [_])
   (init-fs [_])
@@ -62,7 +60,7 @@
   (os [_]
     os)
   (init-fs [_]
-    (Jimfs/newFileSystem (init-config)))
+    (Jimfs/newFileSystem ^Configuration (init-config)))
   (fs-root [_]
     rootfs))
 

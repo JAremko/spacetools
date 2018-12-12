@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc-cli.core
-  "Spacemacs documentation tools for .SDN files."
+  "Tools for Spacemacs documentation files in .sdn format."
   (:require [cats.core :refer [mlet]]
             [cats.monad.exception :refer [failure]]
             [clojure.core.match :refer [match]]
@@ -13,11 +13,11 @@
 (defn usage [options-summary]
   (join
    \newline
-   ["Spacemacs documentation tools for .SDN files."
+   ["Tools for Spacemacs documentation files in .sdn format."
     ""
     ".SDN files are produced by \"sdnizer.el\" Emacs script."
     ""
-    "Usage: spacetools.spacedoc ACTION [OPTIONS]... [ARGS]..."
+    "Usage: ACTION [OPTIONS]... [ARGS]..."
     ""
     "Options:"
     options-summary

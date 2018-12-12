@@ -8,4 +8,6 @@
 (defn override-configs! [overrides])
 (defn valid-configs? [configs])
 (defn valid-overrides? [configs])
-(defn node? [node])
+(defn node? [x])
+
+(def config-file-name)

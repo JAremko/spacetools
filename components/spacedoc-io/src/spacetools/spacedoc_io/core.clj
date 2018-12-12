@@ -193,10 +193,18 @@
                 (or (:problems data) (seq data) "<none>")]))))
 
 
+(defn exit
+  "Call `System/exit` with status-code.
+  NOTE: Useful for mocking."
+  [status-code]
+  (io! ;; :)
+   (System/exit status-code)))
+
+
 (defn-spec try-m->output nil?
   "Print *OUTPUT value to stderr or stdout and `System/exit` with code 0 or 2."
   [*output (exception-of? any?)]
-  (io! (System/exit
+  (io! (exit
         (let [output (m/extract *output)]
           (if (exc/failure? *output)
             (output-err

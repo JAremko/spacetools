@@ -11,11 +11,11 @@
   :uberjar-name "spacedoc.jar"
   :global-vars {*warn-on-reflection* true *assert* true}
   :profiles
-  {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss8m"]
+  {:dev {:jvm-opts ["-Xms1G" "-Xmx5G" "-Xss8m"]
          :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
                         [com.google.jimfs/jimfs "1.1"]]}
    :test {:env {:gentest-multiplier "3"}
-          :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss8m"]}
+          :jvm-opts ["-Xmn5G" "-Xss8m"]}
    :uberjar
    {:aot :all
     :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
@@ -24,7 +24,6 @@
                ;; "-XX:+UnlockExperimentalVMOptions"
                ;; "-XX:+UseEpsilonGC"
                "-Dclojure.compiler.direct-linking=true"
-               "-Xms1G"
-               "-Xmx1G"]
+               "-Xmn3G"]
     :global-vars {*assert* false}}}
   :aot :all)

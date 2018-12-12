@@ -1,10 +1,12 @@
 FROM clojure as clojure
 
+ENV GENTEST_MULTIPLIER 1
+
 COPY ./ /usr/src/app/
 
 RUN cd /usr/src/app \
-    && lein deps \
-    && lein polylith build -test
+  && lein deps \
+  && lein polylith build
 
 
 FROM ubuntu as graalvm
@@ -21,9 +23,9 @@ RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_
     && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
 RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
-    --expert-options-all \
     --no-server \
     -H:+ReportUnsupportedElementsAtRuntime \
+    -H:InitialCollectionPolicy='com.oracle.svm.core.genscavenge.CollectionPolicy$NeverCollect' \
     -jar /tmp/spacedoc.jar
 
 
@@ -36,9 +38,12 @@ COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools
 
+RUN emacs --batch --eval '(byte-compile-file "spacedoc/sdnize/sdnize.el")'
+
 RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
     && chmod 775 /usr/local/bin/spacedoc \
                  ./spacedoc/sdnize/sdnize.el \
+                 ./spacedoc/sdnize/sdnize.elc \
                  ./run
 
 ENTRYPOINT ["/opt/spacetools/run"]

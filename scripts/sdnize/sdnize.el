@@ -112,7 +112,7 @@ Each path must be path to an org file or a directory.
 If it is directory find all org files in it and append
 to the return value."
   (let ((ret '()))
-    (mapcar
+    (mapc
      (lambda (path)
        (let ((p (file-truename path)))
          (if (file-exists-p p)
@@ -286,8 +286,7 @@ See `sdnize-help-text' for description."
   (setq sdnize-workers-fin 0
         sdnize-stop-waiting nil)
   (let* ((default-directory sdnize-run-file-dir)
-         (w-path (progn (byte-compile-file "sdnize_worker.el")
-                        (file-truename "sdnize_worker.elc")))
+         (w-path (file-truename "sdnize_worker.elc"))
          (root-dir (file-truename (file-name-as-directory (pop arg-list))))
          (target-dir (file-truename (file-name-as-directory (pop arg-list))))
          (files (let ((default-directory root-dir))
@@ -301,6 +300,9 @@ See `sdnize-help-text' for description."
     (if (= f-length 0)
         (progn (message "No files to export.")
                (kill-emacs 0))
+      (unless (or (file-exists-p w-path)
+                  (byte-compile-file "sdnize_worker.el"))
+        (error "Failed to byte compile worker script."))
       (setq sdnize-worker-count w-count
             sdnize-root-dir root-dir
             sdnize-target-dir target-dir)
