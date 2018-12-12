@@ -11,7 +11,6 @@
                  [org.clojure/test.check "0.10.0-alpha3"]
                  [org.clojure/tools.cli "0.4.1"]]
   :global-vars {*warn-on-reflection* true *assert* true}
-  :profiles {:dev {:jvm-opts ["-Xms2G" "-Xmx2G" "-Xss8m"]}
-             :test {:env {:gentest-multiplier "3"}
-                    :jvm-opts ["-Xms5G" "-Xmx5G" "-Xss8m"]}}
+  :profiles {:dev {:jvm-opts ["-Xmn4G" "-Xss8m"]}
+             :test {:env {:gentest-multiplier "3"}}}
   :aot :all)
