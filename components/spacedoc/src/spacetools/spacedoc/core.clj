@@ -26,7 +26,7 @@
 (defn-spec node? boolean?
   "Return true if X is a node."
   [x any?]
-  (s/valid? ::any-node x))
+  (s/valid? :spacetools.spacedoc.node/any-node x))
 
 
 (defn-spec known-node? boolean?
