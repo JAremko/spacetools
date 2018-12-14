@@ -66,6 +66,7 @@
 
 
 (def configurations
+  " Operation system specific configurations."
   {:unix (->OsConfiguration :unix #(Configuration/unix) "/")
    :osx (->OsConfiguration :osx #(Configuration/osX) "/")
    :windows (->OsConfiguration :windows #(Configuration/windows) "C:\\")})
@@ -74,6 +75,7 @@
 (defn-spec create-fs filesystem?
   "Create in-memory filesystem.
 STRUCT is a recursive vector of files/directories.
+For example: [[:path [:to [:file-a] [:file-b]]]].
 OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
   ([struct vector?]
    (create-fs struct :unix))

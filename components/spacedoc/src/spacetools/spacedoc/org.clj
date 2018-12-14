@@ -10,25 +10,30 @@
             [spacetools.spacedoc.util :as sdu]))
 
 
-(def block-container-delims {:verse ["#+BEGIN_VERSE\n"
-                                     "#+END_VERSE\n"]
-                             :quote ["#+BEGIN_QUOTE\n"
-                                     "#+END_QUOTE\n"]
-                             :center ["#+BEGIN_CENTER\n"
-                                      "#+END_CENTER\n"]
-                             :section ["" ""]})
+(def block-container-delims
+  "Delimiters surrounding block elements."
+  {:verse ["#+BEGIN_VERSE\n"
+           "#+END_VERSE\n"]
+   :quote ["#+BEGIN_QUOTE\n"
+           "#+END_QUOTE\n"]
+   :center ["#+BEGIN_CENTER\n"
+            "#+END_CENTER\n"]
+   :section ["" ""]})
 
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
 
-(def kinds {(sc/inline-container-tags) :inline-container
-            (sc/inline-leaf-tags) :inline-leaf
-            (sc/block-tags) :block
-            (sc/headlines-tags) :headline})
+(def kinds
+  "Node families. Used mainly to figure out how to split nodes."
+  {(sc/inline-container-tags) :inline-container
+   (sc/inline-leaf-tags) :inline-leaf
+   (sc/block-tags) :block
+   (sc/headlines-tags) :headline})
 
 
 (defmulti sdn->org
+  "Given node return its org-mode text representation."
   (fn [{tag :tag :as node}]
     {:pre  [((complement indirect-nodes) tag)
             (map? node)
@@ -53,6 +58,7 @@
 ;;;; Helpers
 
 (defn assoc-toc
+  "Add Table of content based on headlines present in the ROOT node."
   [{children :children :as root}]
   {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
    :post [(s/valid? :spacetools.spacedoc.node/root %)]}
@@ -117,6 +123,7 @@
 
 
 (defn tag->kind
+  "Given node tag return its family. See `kinds`."
   [tag]
   (some->> kinds
            (filter #((key %) tag))
@@ -125,6 +132,7 @@
 
 
 (defn sep-inlines
+  "Separate inline elements."
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
              (not (= :text t1 t2)))
@@ -134,6 +142,7 @@
 
 
 (defn sep-blocks
+  "Separate block elements."
   [p-t t1 t2]
   (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
     (match [p-t            t1          t1-k        t2            t2-k     ]
@@ -210,6 +219,7 @@
 
 
 (defn table->vec-rep
+  "Return vector representation of table ROWS."
   [{rows :children}]
   {:pre [((some-fn vector? nil?) rows)]}
   (let [vec-tab (mapv
@@ -227,23 +237,25 @@
     (vec (concat [cols-w] vec-tab))))
 
 
-(defn table-rule-str
-  [cols-w]
-  {:pre [(s/valid? (s/coll-of pos-int?) cols-w)]}
-  (join "+" (map #(join (repeat % "-")) cols-w)))
+(defn table-ruler-str
+  "Generate WIDTH wide table ruler."
+  [width]
+  {:pre [(s/valid? (s/coll-of pos-int?) width)]}
+  (join "+" (map #(join (repeat % "-")) width)))
 
 
 (defn table-row-str
-  [row cols-w]
+  "Join table cells of ROW into string."
+  [row width]
   {:pre [(vector? row)
-         (s/valid? (s/coll-of pos-int?) cols-w)]}
+         (s/valid? (s/coll-of pos-int?) width)]}
   (join "|"
         (map (fn [column-width cell-str]
                (str cell-str
                     (join (repeat (- column-width
                                      (viz-len cell-str))
                                   " "))))
-             cols-w
+             width
              row)))
 
 
@@ -254,7 +266,7 @@
                      (r/map (comp (partial format "|%s|")
                                   #(cond (empty? cols-w) "" ;; <- no cols
                                          ;; Empty cols are rulers.
-                                         (empty? %) (table-rule-str cols-w)
+                                         (empty? %) (table-ruler-str cols-w)
                                          :else (table-row-str % cols-w)))
                             vrep))
              (sdu/indent (cfg/table-indentation))))
