@@ -4,6 +4,7 @@
             [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.string :as str :refer [join]]
+            [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :as n]
@@ -19,6 +20,7 @@
    :center ["#+BEGIN_CENTER\n"
             "#+END_CENTER\n"]
    :section ["" ""]})
+
 
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
@@ -57,12 +59,9 @@
 
 ;;;; Helpers
 
-(defn assoc-toc
+(defn-spec assoc-toc :spacetools.spacedoc.node/root
   "Add Table of content based on headlines present in the ROOT node."
-  [{children :children :as root}]
-  {:pre [(s/valid? :spacetools.spacedoc.node/root root)]
-   :post [(s/valid? :spacetools.spacedoc.node/root %)]}
-
+  [{children :children :as root} :spacetools.spacedoc.node/root]
   (letfn [(hl? [node] ((sc/headlines-tags) (:tag node)))
 
           (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
@@ -237,25 +236,22 @@
     (vec (concat [cols-w] vec-tab))))
 
 
-(defn table-ruler-str
+(defn-spec table-ruler string?
   "Generate WIDTH wide table ruler."
-  [width]
-  {:pre [(s/valid? (s/coll-of pos-int?) width)]}
-  (join "+" (map #(join (repeat % "-")) width)))
+  [cell-width (s/coll-of nat-int?)]
+  (join "+" (map #(join (repeat % "-")) cell-width)))
 
 
-(defn table-row-str
+(defn-spec table-row string?
   "Join table cells of ROW into string."
-  [row width]
-  {:pre [(vector? row)
-         (s/valid? (s/coll-of pos-int?) width)]}
+  [row (s/coll-of string?) cell-width (s/coll-of pos-int?)]
   (join "|"
         (map (fn [column-width cell-str]
                (str cell-str
                     (join (repeat (- column-width
                                      (viz-len cell-str))
                                   " "))))
-             width
+             cell-width
              row)))
 
 
@@ -266,8 +262,8 @@
                      (r/map (comp (partial format "|%s|")
                                   #(cond (empty? cols-w) "" ;; <- no cols
                                          ;; Empty cols are rulers.
-                                         (empty? %) (table-ruler-str cols-w)
-                                         :else (table-row-str % cols-w)))
+                                         (empty? %) (table-ruler cols-w)
+                                         :else (table-row % cols-w)))
                             vrep))
              (sdu/indent (cfg/table-indentation))))
       (str/replace-first #"^\n" "")))

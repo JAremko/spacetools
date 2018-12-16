@@ -9,5 +9,4 @@
 (defn valid-configs? [configs])
 (defn valid-overrides? [configs])
 (defn node? [x])
-
 (def config-file-name)
