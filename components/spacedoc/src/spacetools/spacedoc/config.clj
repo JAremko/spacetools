@@ -7,9 +7,12 @@
             [orchestra.core :refer [defn-spec]]))
 
 
-(def config-file-name "sdn_config.edn")
+(def config-file-name
+  "File name of configurations overrides file."
+  "sdn_overrides.edn")
 
 (def default-config
+  "Default configurations."
   {:text/separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
    :text/separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
    :text/replacement-map {"\\r+" ""
@@ -87,79 +90,92 @@
                                          :org/table-indentation]))
 
 
-(def *configs (atom default-config))
+(def *configs
+  "Configuration atom."
+  (atom default-config))
 
 
 (defn-spec valid-configs? boolean?
+  "Return true if CONFIGS is valid."
   [configs ::configs]
   (s/valid? ::configs configs))
 
 
 (defn-spec valid-overrides? boolean?
+  "Return true if CONFIGS is valid override configuration.
+Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   [configs ::overriding-configs]
   (s/valid? ::overriding-configs configs))
 
 
 (defn-spec override-configs! ::configs
+  "Apply OVERRIDES to the current  configuration atom."
   [overrides ::overriding-configs]
   (swap! *configs merge overrides))
 
 
-(defn map-keys
-  [f map]
-  (reduce-kv (fn [m k v] (assoc m (f k) v)) {} map))
-
-
-(defn regexp?
-  [re-pat]
+(defn-spec regexp? boolean?
+  "Return true if RE-PAT is a regex pattern."
+  [re-pat any?]
   (instance? java.util.regex.Pattern re-pat))
 
 
 ;;;; General
 
 (defn-spec seps-right :text/separators-rigth
+  "Return right separators."
   []
   (:text/separators-rigth @*configs))
 
 
 (defn-spec seps-left :text/separators-left
+  "Return left separators."
   []
   (:text/separators-left @*configs))
 
 
 (defn-spec text-rep-map (s/map-of regexp? string?)
+  "Return text replacement map."
   []
-  (map-keys re-pattern (:text/replacement-map @*configs)))
+  (reduce-kv (fn [m k v] (assoc m (re-pattern k) v))
+             {}
+             (:text/replacement-map @*configs)))
 
 
 (defn-spec custom-id-link-rep-map (s/map-of regexp? string?)
+  "Return custom-id links replacement map."
   []
-  (map-keys
-   re-pattern
-   (:link/custom-id-replacement-map @*configs)))
+  (reduce-kv (fn [m k v] (assoc m (re-pattern k) v))
+             {}
+             (:link/custom-id-replacement-map @*configs)))
 
 
 (defn-spec link-type->prefix :link/type->prefix
+  "Given link type return corresponding prefix."
   []
   (:link/type->prefix @*configs))
 
 
 (defn-spec link-types (s/coll-of keyword? :kind set?)
+  "Return all types of links."
   []
   (-> (link-type->prefix) keys set))
 
 
 (defn-spec max-headline-depth :headline/max-depth
+  "Return max depth(level) that headline can have."
   []
   (:headline/max-depth @*configs))
 
 
 (defn-spec toc-max-depth :org/toc-max-depth
+  "Return depth after which TOC entries cut-off."
   []
   (:org/toc-max-depth @*configs))
 
 
 (defn-spec toc-hl-val string?
+  "Return standard headline for a TOC."
   []
   (format (:org/toc-template @*configs) (toc-max-depth)))
 
@@ -167,15 +183,18 @@
 ;;;; Org
 
 (defn-spec emphasis-tokens :org/emphasis-tokens
+  "Return emphasis tokens of org-mode."
   []
   (:org/emphasis-tokens @*configs))
 
 
 (defn-spec begin-end-indentation :org/block-indentation
+  "Return indentation of org-mode BEGIN-END blocks."
   []
   (:org/block-indentation @*configs))
 
 
 (defn-spec table-indentation :org/table-indentation
+  "Return indentation of org-mode tables."
   []
   (:org/table-indentation @*configs))
