@@ -59,12 +59,34 @@
 
 ;;;; Helpers
 
-(defn-spec assoc-toc :spacetools.spacedoc.node/root
-  "Add Table of content based on headlines present in the ROOT node."
-  [{children :children :as root} :spacetools.spacedoc.node/root]
-  (letfn [(hl? [node] ((sc/headlines-tags) (:tag node)))
+(s/def ::toc-entry
+  (s/with-gen (s/coll-of ::block-element
+                         :kind vector?
+                         :min-count 1
+                         :into [])
+    #(gen/vector (s/gen ::block-element) 1 2)))
+(s/def ::toc-org-wrapper (s/keys :req-un
+                                 [:spacetools.spacedoc.org.toc.entry/children]))
+(s/def :spacetools.spacedoc.org.toc/children (s/coll-of ::toc-org-wrapper
+                                                        :kind vector?
+                                                        :max-count 1
+                                                        :into []))
+(s/def :spacetools.spacedoc.org.toc/value
+  #(= (cfg/toc-hl-val) %))
+(s/def :spacetools.spacedoc.org.toc/path-id
+  #(= (sdu/hl-val->path-id-frag (cfg/toc-hl-val)) %))
+(s/def :spacetools.spacedoc.org.toc/level 1)
+(s/def ::toc-org (s/keys :req-un [:spacetools.spacedoc.org.toc/value
+                                  :spacetools.spacedoc.org.toc/children]
+                         :opt-un [:spacetools.spacedoc.org.toc/level
+                                  :spacetools.spacedoc.org.toc/path-id]))
 
-          (hl->gid-base [headlin] (sdu/hl-val->gh-id-base
+
+(defn-spec gen-toc (s/nilable ::toc-org)
+  "Generate table of content for ROOT node.
+Return nil if ROOT node doesn't have any headlines."
+  [{children :children :as root} :spacetools.spacedoc.node/root]
+  (letfn [(hl->gid-base [headlin] (sdu/hl-val->gh-id-base
                                    (sdu/fmt-hl-val (:value headlin))))
 
           (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
@@ -99,17 +121,25 @@
                              #(when (< depth (cfg/toc-max-depth))
                                 (some->>
                                  %
-                                 (filter hl?)
+                                 (filter sdu/hl?)
                                  (seq)
                                  (mapv (partial inner (inc depth))))))
                      hl->toc-el))
                0
                {:toc-wrapper? true :children (vec headlines)})))]
 
-    (if-let [toc (some->> children (filter hl?) (hls->toc))]
-      (let [[b-toc a-toc] (split-with (complement hl?) children)]
-        (assoc root :children (vec (concat b-toc [toc] a-toc))))
-      root)))
+    (some->> children
+             (filter sdu/hl?)
+             (hls->toc))))
+
+
+(defn-spec assoc-toc :spacetools.spacedoc.node/root
+  "Add Table of content based on headlines present in the ROOT node."
+  [{children :children :as root} :spacetools.spacedoc.node/root]
+  (if-let [toc (gen-toc root)]
+    (let [[b-toc a-toc] (split-with (complement (partial sdu/hl?)) children)]
+      (assoc root :children (vec (concat b-toc [toc] a-toc))))
+    root))
 
 
 (defn viz-len

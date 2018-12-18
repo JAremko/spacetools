@@ -9,6 +9,7 @@
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
             [spacetools.spacedoc.util :as sdu]))
 
+
 ;;;; General specs
 
 ;; NOTE: Some lines may be empty but not all of them.
@@ -506,7 +507,6 @@
 (s/def :spacetools.spacedoc.node.root/children
   (s/with-gen (s/coll-of ::root-child
                          :kind vector?
-                         :min-count 1
                          :distinct true
                          :into [])
     #(gen/vector-distinct (s/gen ::root-child)
@@ -519,7 +519,6 @@
 
 
 ;;;; "handmade" human-friendly constructors
-
 
 ;; headline
 

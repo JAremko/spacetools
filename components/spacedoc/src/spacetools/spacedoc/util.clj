@@ -254,3 +254,8 @@ Fragments are  particular headline values in the \"/\" separated chain."
      (assoc node
             :level hl-level
             :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
+
+
+(defn-spec hl? boolean?
+  [node any?]
+  (some? ((sc/headlines-tags) (:tag node))))
