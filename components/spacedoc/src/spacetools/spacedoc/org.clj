@@ -57,30 +57,99 @@
       :else tag)))
 
 
-;;;; Helpers
+;;;;  TOC spec and constructor
 
-(s/def ::toc-entry
-  (s/with-gen (s/coll-of ::block-element
-                         :kind vector?
-                         :min-count 1
-                         :into [])
-    #(gen/vector (s/gen ::block-element) 1 2)))
-(s/def ::toc-org-wrapper (s/keys :req-un
-                                 [:spacetools.spacedoc.org.toc.entry/children]))
-(s/def :spacetools.spacedoc.org.toc/children (s/coll-of ::toc-org-wrapper
-                                                        :kind vector?
-                                                        :max-count 1
-                                                        :into []))
+;; TOC leaf (GitHub style link to a local headline)
+
+(s/def :spacetools.spacedoc.org.toc.leaf/tag #{:link})
+(s/def :spacetools.spacedoc.org.toc.leaf/type #{:custom-id})
+(s/def :spacetools.spacedoc.org.toc.leaf/path
+  :spacetools.spacedoc.node.link/path)
+(s/def :spacetools.spacedoc.org.toc.leaf/children
+  (s/coll-of :text :spacetools.spacedoc.node/text
+             :kind vector?
+             :min-count 1
+             :into []))
+(s/def ::toc-leaf (s/keys :req-un
+                          [:spacetools.spacedoc.org.toc.leaf/tag
+                           :spacetools.spacedoc.org.toc.leaf/type
+                           :spacetools.spacedoc.org.toc.leaf/path
+                           :spacetools.spacedoc.org.toc.leaf/children]))
+
+;; TOC item children wrapper (item-children)
+
+(s/def :spacetools.spacedoc.org.toc.item-children/tag #{:item-children})
+(s/def :spacetools.spacedoc.org.item-children/children
+  (s/coll-of (s/or :branch ::toc-branch
+                   :leaf ::toc-leaf)
+             :kind vector?
+             :min-count 1
+             :into []))
+(s/def ::toc-item-children
+  (s/keys :req-un [:spacetools.spacedoc.org.toc.item-children/tag
+                   :spacetools.spacedoc.org.item-children/children]))
+
+;; TOC item (unordered list item)
+
+(s/def :spacetools.spacedoc.org.toc.item/tag #{:list-item})
+(s/def :spacetools.spacedoc.org.toc.item/type #{:unordered})
+(s/def :spacetools.spacedoc.org.toc.item/bullet #{"- "})
+(s/def :spacetools.spacedoc.org.toc.item/checkbox nil?)
+(s/def :spacetools.spacedoc.org.toc.item/children (s/coll-of ::toc-item-children
+                                                             :kind vector?
+                                                             :min-count 1
+                                                             :into []))
+(s/def ::toc-item (s/keys :req-un
+                          [:spacetools.spacedoc.org.toc.item/tag
+                           :spacetools.spacedoc.org.toc.item/type
+                           :spacetools.spacedoc.org.toc.item/bullet
+                           :spacetools.spacedoc.org.toc.item/checkbox
+                           :spacetools.spacedoc.org.toc.item/children]))
+
+
+;; TOC branch (unordered list)
+
+(s/def :spacetools.spacedoc.org.toc.branch/tag #{:plain-list})
+(s/def :spacetools.spacedoc.org.toc.branch/type #{:unordered})
+(s/def :spacetools.spacedoc.org.toc.branch/children (s/coll-of ::toc-item
+                                                              :kind vector?
+                                                              :min-count 1
+                                                              :into []))
+(s/def ::toc-branch
+  (s/keys :req-un [:spacetools.spacedoc.org.toc.branch/tag
+                   :spacetools.spacedoc.org.toc.branch/type
+                   :spacetools.spacedoc.org.toc.branch/children]))
+
+
+;; TOC items wrapper (section)
+
+(s/def :spacetools.spacedoc.org.toc.wrapper/tag #{:section})
+(s/def :spacetools.spacedoc.org.toc.wrapper/children (s/coll-of ::toc-branch
+                                                                :kind vector?
+                                                                :min-count 1
+                                                                :into []))
+(s/def ::toc-wrapper (s/keys :req-un
+                             [:spacetools.spacedoc.org.toc.wrapper/tag
+                              :spacetools.spacedoc.org.toc.wrapper/children]))
+
+;; TOC (headline)
+
+(s/def :spacetools.spacedoc.org.toc/tag #{:headline})
+(s/def :spacetools.spacedoc.org.toc/children
+  (s/coll-of ::toc-wrapper
+             :kind vector?
+             :max-count 1
+             :into []))
 (s/def :spacetools.spacedoc.org.toc/value
   #(= (cfg/toc-hl-val) %))
 (s/def :spacetools.spacedoc.org.toc/path-id
   #(= (sdu/hl-val->path-id-frag (cfg/toc-hl-val)) %))
 (s/def :spacetools.spacedoc.org.toc/level 1)
-(s/def ::toc-org (s/keys :req-un [:spacetools.spacedoc.org.toc/value
+(s/def ::toc-org (s/keys :req-un [:spacetools.spacedoc.org.toc/tag
+                                  :spacetools.spacedoc.org.toc/value
                                   :spacetools.spacedoc.org.toc/children]
                          :opt-un [:spacetools.spacedoc.org.toc/level
                                   :spacetools.spacedoc.org.toc/path-id]))
-
 
 (defn-spec gen-toc (s/nilable ::toc-org)
   "Generate table of content for ROOT node.
@@ -141,6 +210,8 @@ Return nil if ROOT node doesn't have any headlines."
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
     root))
 
+
+;;;; Helpers
 
 (defn viz-len
   "Like `count` but returns real visual length of a string."

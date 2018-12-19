@@ -664,13 +664,14 @@
                            #(gen/vector (s/gen ::root-child) 1 3)))
   :ret ::root)
 
-
 (defn root
   "\"root\" node constructor."
   [& children]
   {:pre [(s/valid? :spacetools.spacedoc.node.root/children (vec children))]
    :post [(s/valid? ::root %)]}
-  {:tag :root :children (vec children)})
+  {:tag :root :children (if (some? children)
+                          (vec children)
+                          [])})
 
 
 ;; TODO: Add `:descriptive` list constructor.
