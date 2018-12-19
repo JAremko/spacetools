@@ -240,22 +240,36 @@ Fragments are  particular headline values in the \"/\" separated chain."
      x))))
 
 
-(defn-spec assoc-level-and-path-id node?
+(defn-spec valid-node? boolean?
+  "Return true if NODE is a valid node."
+  [node any?]
+  (s/valid? (sc/node->spec-k node) node))
+
+
+(defn-spec hl? boolean?
+  "Return true if NODE is a headline."
+  [node any?]
+  (some? ((sc/headlines-tags) (:tag node))))
+
+
+(defn-spec valid-hl? boolean?
+  "Return true if NODE is a valid headline."
+  [node any?]
+  (or (and (hl? node)
+           (valid-node? node))))
+
+
+(defn-spec assoc-level-and-path-id valid-hl?
   "Fill node with :level and :path-id"
-  ([node node?]
+  ([node hl?]
    (let [{tag :tag value :value} node]
      (assoc node
             :level 1
             :path-id (hl-val->path-id-frag value))))
-  ([parent-node node? node node?]
-   (let [{p-tag :tag p-level :level p-path-id :path-id} parent-node
-         {tag :tag value :value} node
-         hl-level (inc p-level)]
+  ([parent-node hl? node hl?]
+   (let [{tag :tag value :value} node
+         hl-level (inc (:level parent-node))]
      (assoc node
             :level hl-level
-            :path-id (str p-path-id "/" (hl-val->path-id-frag value))))))
-
-
-(defn-spec hl? boolean?
-  [node any?]
-  (some? ((sc/headlines-tags) (:tag node))))
+            :path-id (str (:path-id parent-node)
+                          "/" (hl-val->path-id-frag value))))))

@@ -39,7 +39,9 @@
 (s/def :spacetools.spacedoc.node.any-node/tag keyword?)
 (s/def :spacetools.spacedoc.node.any-node/children (s/coll-of
                                                     ::any-node
-                                                    :kind vector?))
+                                                    :min-count 0
+                                                    :kind vector?
+                                                    :into []))
 (s/def ::any-node (s/keys
                    :req-un [:spacetools.spacedoc.node.any-node/tag]
                    :opt-un [:spacetools.spacedoc.node.any-node/children]))
@@ -257,9 +259,12 @@
   ::non-blank-string)
 (s/def :spacetools.spacedoc.node.list-item/checkbox
   (s/nilable #{:trans :off :on}))
-(s/def :spacetools.spacedoc.node.list-item/children
+(s/def :spacetools.spacedoc.node.list-item/children-list
   (s/cat :children ::item-children
          :tag (s/? ::item-tag)))
+(s/def :spacetools.spacedoc.node.list-item/children
+  (s/with-gen :spacetools.spacedoc.node.list-item/children-list
+    #(gen/fmap vec (s/gen :spacetools.spacedoc.node.list-item/children-list))))
 (defnode ::list-item (s/keys :req-un
                              [:spacetools.spacedoc.node.list-item/type
                               :spacetools.spacedoc.node.list-item/bullet
@@ -432,10 +437,11 @@
 
 ;; headline
 
+
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.headline/level
-  (s/with-gen (s/and int? #(<= % (cfg/max-headline-depth)))
+  (s/with-gen (s/and pos-int? #(<= % (cfg/max-headline-depth)))
     #(gen/choose 1 (cfg/max-headline-depth))))
 (s/def :spacetools.spacedoc.node.headline/children
   (s/with-gen (s/coll-of ::headline-child
@@ -471,7 +477,7 @@
 (s/def :spacetools.spacedoc.node.todo/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.todo/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.todo/level
-  (s/with-gen (s/and int? #(<= % (cfg/max-headline-depth)))
+  (s/with-gen (s/and pos-int? #(<= % (cfg/max-headline-depth)))
     #(gen/choose 1 (cfg/max-headline-depth))))
 (s/def :spacetools.spacedoc.node.todo/children
   (s/with-gen (s/coll-of ::headline-child

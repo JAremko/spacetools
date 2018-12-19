@@ -66,7 +66,7 @@
 (s/def :spacetools.spacedoc.org.toc.leaf/path
   :spacetools.spacedoc.node.link/path)
 (s/def :spacetools.spacedoc.org.toc.leaf/children
-  (s/coll-of :text :spacetools.spacedoc.node/text
+  (s/coll-of :spacetools.spacedoc.node/text
              :kind vector?
              :min-count 1
              :into []))
@@ -80,11 +80,11 @@
 
 (s/def :spacetools.spacedoc.org.toc.item-children/tag #{:item-children})
 (s/def :spacetools.spacedoc.org.item-children/children
-  (s/coll-of (s/or :branch ::toc-branch
-                   :leaf ::toc-leaf)
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/cat
+   :headline-link ::toc-leaf
+   :sub-headlines-links (s/?
+                         (s/cat :line-break :spacetools.spacedoc.node/line-break
+                                :brench (s/+ ::toc-branch)))))
 (s/def ::toc-item-children
   (s/keys :req-un [:spacetools.spacedoc.org.toc.item-children/tag
                    :spacetools.spacedoc.org.item-children/children]))
@@ -112,9 +112,9 @@
 (s/def :spacetools.spacedoc.org.toc.branch/tag #{:plain-list})
 (s/def :spacetools.spacedoc.org.toc.branch/type #{:unordered})
 (s/def :spacetools.spacedoc.org.toc.branch/children (s/coll-of ::toc-item
-                                                              :kind vector?
-                                                              :min-count 1
-                                                              :into []))
+                                                               :kind vector?
+                                                               :min-count 1
+                                                               :into []))
 (s/def ::toc-branch
   (s/keys :req-un [:spacetools.spacedoc.org.toc.branch/tag
                    :spacetools.spacedoc.org.toc.branch/type
@@ -145,13 +145,13 @@
 (s/def :spacetools.spacedoc.org.toc/path-id
   #(= (sdu/hl-val->path-id-frag (cfg/toc-hl-val)) %))
 (s/def :spacetools.spacedoc.org.toc/level 1)
-(s/def ::toc-org (s/keys :req-un [:spacetools.spacedoc.org.toc/tag
-                                  :spacetools.spacedoc.org.toc/value
-                                  :spacetools.spacedoc.org.toc/children]
-                         :opt-un [:spacetools.spacedoc.org.toc/level
-                                  :spacetools.spacedoc.org.toc/path-id]))
+(s/def ::toc (s/keys :req-un [:spacetools.spacedoc.org.toc/tag
+                              :spacetools.spacedoc.org.toc/value
+                              :spacetools.spacedoc.org.toc/children]
+                     :opt-un [:spacetools.spacedoc.org.toc/level
+                              :spacetools.spacedoc.org.toc/path-id]))
 
-(defn-spec gen-toc (s/nilable ::toc-org)
+(defn-spec gen-toc (s/nilable ::toc)
   "Generate table of content for ROOT node.
 Return nil if ROOT node doesn't have any headlines."
   [{children :children :as root} :spacetools.spacedoc.node/root]
@@ -469,7 +469,7 @@ Return nil if ROOT node doesn't have any headlines."
          f-val
          "\n"
          (conv tag
-               (mapv #(if ((sc/headlines-tags) (:tag %))
+               (mapv #(if (sdu/hl? %)
                         (sdu/assoc-level-and-path-id headline %)
                         %)
                      children)))))
@@ -492,7 +492,7 @@ Return nil if ROOT node doesn't have any headlines."
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if ((sc/headlines-tags) (:tag %))
+       (mapv #(if (sdu/hl? %)
                 (sdu/assoc-level-and-path-id %)
                 %))
        (conv tag)))
