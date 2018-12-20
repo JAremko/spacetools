@@ -250,7 +250,7 @@ Fragments are  particular headline values in the \"/\" separated chain."
 (defn-spec hl? boolean?
   "Return true if NODE is a headline."
   [node any?]
-  (some? ((sc/headlines-tags) (:tag node))))
+  (= (:tag node) :headline))
 
 
 (defn-spec hl->depth pos-int?
@@ -272,7 +272,8 @@ Value of `:level` ignored."
            (valid-node? node))))
 
 
-(defn-spec assoc-level-and-path-id valid-hl?
+;; TODO: Fix "over nesting" for headlines
+(defn-spec assoc-level-and-path-id node? #_ valid-hl?
   "Fill node with :level and :path-id"
   ([node hl?]
    (let [{tag :tag value :value} node]

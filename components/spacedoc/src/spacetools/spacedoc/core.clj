@@ -91,17 +91,6 @@
   :tag)
 
 
-(defmulti headlines
-  "Given headline node return corresponding spec key."
-  :tag)
-
-
-(defn-spec headlines-tags ::set-of-keys
-  "All node tags belonging to headline group."
-  []
-  (set (keys (methods headlines))))
-
-
 (defmulti root-child
   "Given root node child return corresponding spec key."
   :tag)

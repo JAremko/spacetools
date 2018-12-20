@@ -21,7 +21,6 @@
             "#+END_CENTER\n"]
    :section ["" ""]})
 
-
 (def indirect-nodes
   "These nodes can be converted only in their parent context."
   #{:item-children :item-tag :table-row :table-cell})
@@ -30,8 +29,7 @@
   "Node families. Used mainly to figure out how to split nodes."
   {(sc/inline-container-tags) :inline-container
    (sc/inline-leaf-tags) :inline-leaf
-   (sc/block-tags) :block
-   (sc/headlines-tags) :headline})
+   (sc/block-tags) :block})
 
 
 (defmulti sdn->org
@@ -41,9 +39,6 @@
             (map? node)
             (keyword? tag)]}
     (cond
-      ;; Headline node group.
-      ((sc/headlines-tags) tag) :headline
-
       ;; List node group.
       (#{:feature-list :plain-list} tag) :list
 
@@ -135,6 +130,7 @@
 ;; TOC (headline)
 
 (s/def :spacetools.spacedoc.org.toc/tag #{:headline})
+(s/def :spacetools.spacedoc.org.toc/kind #{:headline})
 (s/def :spacetools.spacedoc.org.toc/children
   (s/coll-of ::toc-wrapper
              :kind vector?
@@ -146,6 +142,7 @@
   #(= (sdu/hl-val->path-id-frag (cfg/toc-hl-val)) %))
 (s/def :spacetools.spacedoc.org.toc/level 1)
 (s/def ::toc (s/keys :req-un [:spacetools.spacedoc.org.toc/tag
+                              :spacetools.spacedoc.org.toc/kind
                               :spacetools.spacedoc.org.toc/value
                               :spacetools.spacedoc.org.toc/children]
                      :opt-un [:spacetools.spacedoc.org.toc/level
@@ -254,7 +251,7 @@ Return nil if ROOT node doesn't have any headlines."
            [_              nil         _           _             _        ] ""
            [_              _           _           :plain-list   _        ] ""
            [_              _           _           :feature-list _        ] ""
-           [_              _           :headline   _             _        ] "\n"
+           [:headline      _           _           _             _        ] "\n"
            [_              _           _           _             :headline] "\n"
            [_              _           :block      _             _        ] "\n"
            [_              _           _           _             :block   ] "\n"
@@ -462,13 +459,13 @@ Return nil if ROOT node doesn't have any headlines."
                      (update :path-id #(or % (sdu/hl-val->path-id-frag f-val)))
                      (assoc :value f-val)
                      (update :level #(or % 1)))
-        tag (:tag headline)]
+        kind (:kind headline)]
     (str (join (repeat (:level headline) "*"))
          " "
-         (when (= tag :todo) "TODO ")
+         (when (= kind :todo) "TODO ")
          f-val
          "\n"
-         (conv tag
+         (conv :headline
                (mapv #(if (sdu/hl? %)
                         (sdu/assoc-level-and-path-id headline %)
                         %)

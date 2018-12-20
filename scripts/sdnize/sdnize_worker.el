@@ -348,7 +348,8 @@ information."
     (plist-put info :path-ids (push path-id path-ids))
     (when description? (plist-put info :file-has-description? 'true))
 
-    (format (concat "{:tag %s "
+    (format (concat "{:tag :headline "
+                    ":kind %s "
                     ":value \"%s\" "
                     ":level %s "
                     ":path-id \"%s\" "

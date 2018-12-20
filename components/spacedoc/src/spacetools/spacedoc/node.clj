@@ -429,14 +429,13 @@
                            [:spacetools.spacedoc.node.section/children]))
 
 
-(defmethod sc/headline-child :todo [_] ::todo)
+;; headline
+
 (defmethod sc/headline-child :section [_] ::section)
 (defmethod sc/headline-child :headline [_] ::headline)
 (s/def ::headline-child (s/multi-spec sc/headline-child :tag))
 
-
-;; headline
-
+(s/def :spacetools.spacedoc.node.headline/kind #{:headline :description :todo})
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.headline/level
@@ -451,63 +450,48 @@
     #(gen/vector-distinct (s/gen ::headline-child)
                           {:min-elements 1 :max-elements 2 :max-tries 100})))
 (defnode* ::headline
-  (s/keys :req-un [:spacetools.spacedoc.node.headline/value
+  (s/keys :req-un [:spacetools.spacedoc.node.headline/kind
+                   :spacetools.spacedoc.node.headline/value
                    :spacetools.spacedoc.node.headline/children]
           :opt-un [:spacetools.spacedoc.node.headline/level
                    :spacetools.spacedoc.node.headline/path-id]))
 
 
-;; description node
+;; Description meta node
 
-(s/def :spacetools.spacedoc.node.description/value #{"Description"})
-(s/def :spacetools.spacedoc.node.description/path-id #{"description"})
-(s/def :spacetools.spacedoc.node.description/level #{1})
-(s/def :spacetools.spacedoc.node.description/children
-  :spacetools.spacedoc.node.headline/children)
-(defnode* ::description
-  (s/keys :req-un [:spacetools.spacedoc.node.description/value
-                   :spacetools.spacedoc.node.description/path-id
-                   :spacetools.spacedoc.node.description/level
-                   :spacetools.spacedoc.node.description/children]))
+(s/def :spacetools.spacedoc.node.meta.description/value #{"Description"})
+(s/def :spacetools.spacedoc.node.meta.description/kind #{:description})
+(s/def :spacetools.spacedoc.node.meta.description/path-id #{"description"})
+(s/def :spacetools.spacedoc.node.meta.description/level #{1})
+(s/def :spacetools.spacedoc.node.meta/description
+  (s/merge ::headline
+           (s/keys :req-un [:spacetools.spacedoc.node.meta.description/value
+                            :spacetools.spacedoc.node.meta.description/kind
+                            :spacetools.spacedoc.node.meta.description/path-id
+                            :spacetools.spacedoc.node.meta.description/level])))
 
 
-;; todo node
+;; todo meta node
 
-(s/def :spacetools.spacedoc.node.todo/value ::non-blank-string)
-(s/def :spacetools.spacedoc.node.todo/path-id ::path-id)
-(s/def :spacetools.spacedoc.node.todo/level
-  (s/with-gen (s/and pos-int? #(<= % (cfg/max-headline-depth)))
-    #(gen/choose 1 (cfg/max-headline-depth))))
-(s/def :spacetools.spacedoc.node.todo/children
+(s/def :spacetools.spacedoc.node.meta.todo/kind #{:todo})
+(s/def :spacetools.spacedoc.node.meta.todo/children
   (s/with-gen (s/coll-of ::headline-child
                          :min-count 0
                          :kind vector?
                          :into [])
     #(gen/vector (s/gen ::headline-child) 0 2)))
-(defnode* ::todo
-  (s/keys :req-un [:spacetools.spacedoc.node.todo/value]
-          :opt-un [:spacetools.spacedoc.node.todo/level
-                   :spacetools.spacedoc.node.todo/path-id
-                   :spacetools.spacedoc.node.todo/children]))
-
-
-;; Headlines
-
-(defmethod sc/headlines :description [_] ::description)
-(defmethod sc/headlines :todo [_] ::todo)
-(defmethod sc/headlines :headline [_] ::headline)
-
-(s/def ::headline-tag sc/headlines-tags)
-
-(s/def ::headlines (s/multi-spec sc/headlines :tag))
+(s/def :spacetools.spacedoc.node.meta/todo
+  (s/keys :req-un [:spacetools.spacedoc.node.headline/tag
+                   :spacetools.spacedoc.node.meta.todo/kind
+                   :spacetools.spacedoc.node.meta.todo/children]
+          :opt-un [:spacetools.spacedoc.node.headline/level
+                   :spacetools.spacedoc.node.headline/path-id]))
 
 
 ;; root node
 
-(defmethod sc/root-child :todo [_] ::todo)
 (defmethod sc/root-child :section [_] ::section)
 (defmethod sc/root-child :headline [_] ::headline)
-(defmethod sc/root-child :description [_] ::description)
 (s/def ::root-child (s/multi-spec sc/root-child :tag))
 (s/def :spacetools.spacedoc.node.root/children
   (s/with-gen (s/coll-of ::root-child
@@ -525,7 +509,7 @@
 
 ;;;; "handmade" human-friendly constructors
 
-;; headline
+;; headline node
 
 (s/fdef headline
   :args  (s/cat :value :spacetools.spacedoc.node.headline/value
@@ -540,40 +524,41 @@
          (s/valid? :spacetools.spacedoc.node.headline/children
                    (vec children))]
    :post [(s/valid? ::headline %)]}
-  {:tag :headline :value value :children (vec children)})
+  {:tag :headline :kind :headline :value value :children (vec children)})
 
 
-;; todo
+;; todo meta node
 
 (s/fdef todo
-  :args (s/cat :value :spacetools.spacedoc.node.todo/value
+  :args (s/cat :value :spacetools.spacedoc.node.headline/value
                :children (s/* ::headline-child))
-  :ret  ::todo)
+  :ret  :spacetools.spacedoc.node.meta/todo)
 
 
 (defn todo
   "\"todo\" node constructor."
   [value & children]
-  {:pre [(s/valid? :spacetools.spacedoc.node.todo/value value)
-         (s/valid? :spacetools.spacedoc.node.todo/children (vec children))]
-   :post [(s/valid? ::todo %)]}
-  {:tag :todo :value value :children (vec children)})
+  {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
+         (s/valid? :spacetools.spacedoc.node.meta.todo/children (vec children))]
+  #_ :post #_ [(s/valid? :spacetools.spacedoc.node.meta/todo %)]}
+  {:tag :headline :kind :todo :value value :children (vec children)})
 
 
-;; description
+;; description meta node
 
 (s/fdef description
   :args  (s/cat :children (s/+ ::headline-child))
-  :ret  ::description)
+  :ret  :spacetools.spacedoc.node.meta/description)
 
 
 (defn description
   "\"description\" node constructor."
   [& children]
-  {:pre [(s/valid? :spacetools.spacedoc.node.description/children
+  {:pre [(s/valid? :spacetools.spacedoc.node.headline/children
                    (vec children))]
-   :post [(s/valid? ::description %)]}
-  {:tag :description
+   :post [(s/valid? :spacetools.spacedoc.node.meta/description %)]}
+  {:tag :headline
+   :kind :description
    :value "Description"
    :level 1
    :path-id "description"
