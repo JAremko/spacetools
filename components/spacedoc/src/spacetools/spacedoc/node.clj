@@ -437,7 +437,6 @@
 
 ;; headline
 
-
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
 (s/def :spacetools.spacedoc.node.headline/level

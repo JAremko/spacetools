@@ -2,6 +2,7 @@
   "Shared helpers name-space."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
+            [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
@@ -250,6 +251,18 @@ Fragments are  particular headline values in the \"/\" separated chain."
   "Return true if NODE is a headline."
   [node any?]
   (some? ((sc/headlines-tags) (:tag node))))
+
+
+(defn-spec hl->depth pos-int?
+  "Return how deeply children of HL go.
+Value of `:level` ignored."
+  [hl hl?]
+  ((fn rec [depth node]
+     (if (hl? node)
+       (inc (r/reduce (r/monoid max (constantly 0))
+                      (r/map (partial rec depth) (:children node))))
+       depth))
+   0 hl))
 
 
 (defn-spec valid-hl? boolean?
