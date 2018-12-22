@@ -273,7 +273,7 @@ Value of `:level` ignored."
 
 
 ;; TODO: Fix "over nesting" for headlines
-(defn-spec assoc-level-and-path-id node? #_ valid-hl?
+(defn-spec assoc-level-and-path-id valid-hl?
   "Fill node with :level and :path-id"
   ([node hl?]
    (let [{tag :tag value :value} node]

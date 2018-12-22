@@ -434,7 +434,6 @@
 (defmethod sc/headline-child :section [_] ::section)
 (defmethod sc/headline-child :headline [_] ::headline)
 (s/def ::headline-child (s/multi-spec sc/headline-child :tag))
-
 (s/def :spacetools.spacedoc.node.headline/kind #{:headline :description :todo})
 (s/def :spacetools.spacedoc.node.headline/value ::non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/path-id ::path-id)
@@ -455,6 +454,17 @@
                    :spacetools.spacedoc.node.headline/children]
           :opt-un [:spacetools.spacedoc.node.headline/level
                    :spacetools.spacedoc.node.headline/path-id]))
+
+;; TODO: Rework this with a new defnode implementation
+(s/def ::headline
+  (s/and
+   (s/keys :req-un [:spacetools.spacedoc.node.headline/tag
+                    :spacetools.spacedoc.node.headline/kind
+                    :spacetools.spacedoc.node.headline/value
+                    :spacetools.spacedoc.node.headline/children]
+           :opt-un [:spacetools.spacedoc.node.headline/level
+                    :spacetools.spacedoc.node.headline/path-id])
+   #(<= (sdu/hl->depth %) (cfg/max-headline-depth))))
 
 
 ;; Description meta node
@@ -540,7 +550,7 @@
   [value & children]
   {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
          (s/valid? :spacetools.spacedoc.node.meta.todo/children (vec children))]
-  #_ :post #_ [(s/valid? :spacetools.spacedoc.node.meta/todo %)]}
+   :post [(s/valid? :spacetools.spacedoc.node.meta/todo %)]}
   {:tag :headline :kind :todo :value value :children (vec children)})
 
 
