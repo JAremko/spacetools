@@ -443,7 +443,6 @@
 
 ;; headline
 
-
 (defmethod sc/headline-child :section [_] ::section)
 (defmethod sc/headline-child :headline [_]
   :spacetools.spacedoc.headline*/descendent-headline)
@@ -469,7 +468,11 @@
 
 ;; Handy in gen-testing headline constructors.
 (s/def :spacetools.spacedoc.headline*/descendent-headline
-  (s/and :spacetools.spacedoc.headline*/base
+  (s/and (s/with-gen :spacetools.spacedoc.headline*/base
+           #(gen/fmap (fn fix-empty [hl] (if (empty? (:children hl))
+                                          (assoc hl :todo? true)
+                                          hl))
+                      (s/gen :spacetools.spacedoc.headline*/base)))
          (fn not-too-deep? [hl] (< (sdu/hl->depth hl)
                                   (dec (cfg/max-headline-depth))))
          (fn todo-or-has-children? [hl] (or (:todo? hl)
@@ -480,7 +483,11 @@
 (s/def :spacetools.spacedoc.node.headline/tag #{:headline})
 ;; TODO: Make it doable with `defnode` macro.
 (s/def ::headline
-  (s/and :spacetools.spacedoc.headline*/base
+  (s/and (s/with-gen :spacetools.spacedoc.headline*/base
+           #(gen/fmap (fn fix-empty [hl] (if (empty? (:children hl))
+                                          (assoc hl :todo? true)
+                                          hl))
+                      (s/gen :spacetools.spacedoc.headline*/base)))
          (fn not-too-deep? [hl] (< (sdu/hl->depth hl)
                                   (cfg/max-headline-depth)))
          (fn todo-or-has-children? [hl] (or (:todo? hl)
@@ -657,6 +664,9 @@
                           (vec children)
                           [])})
 
+
+
+;; (s/exercise-fn `root 1)
 
 ;; TODO: Add `:descriptive` list constructor.
 ;; `:descriptive` lists have `::list-item`s with optional `::item-tag`.
