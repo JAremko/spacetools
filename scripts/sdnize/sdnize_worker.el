@@ -349,19 +349,15 @@ information."
     (when description? (plist-put info :file-has-description? 'true))
 
     (format (concat "{:tag :headline "
-                    ":kind %s "
+                    ":todo? %s "
                     ":value \"%s\" "
-                    ":level %s "
                     ":path-id \"%s\" "
                     ":children [%s]}")
-            (cond (todo? :todo)
-                  (description? :description)
-                  (t :headline))
+            (if todo? "true" "false")
             (sdnize/esc-str
              (if (plist-get info :with-smart-quotes)
                  (org-export-activate-smart-quotes raw-val :utf-8 info)
                raw-val))
-            level
             (sdnize/esc-str (sdnize/headline-make-path-id headline))
             contents)))
 

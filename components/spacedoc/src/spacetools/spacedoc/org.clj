@@ -8,7 +8,7 @@
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.util :as sdu :refer [hl? valid-hl?]]))
 
 
 (def block-container-delims
@@ -130,7 +130,7 @@
 ;; TOC (headline)
 
 (s/def :spacetools.spacedoc.org.toc/tag #{:headline})
-(s/def :spacetools.spacedoc.org.toc/kind #{:headline})
+(s/def :spacetools.spacedoc.org.toc/todo? false?)
 (s/def :spacetools.spacedoc.org.toc/children
   (s/coll-of ::toc-wrapper
              :kind vector?
@@ -138,15 +138,11 @@
              :into []))
 (s/def :spacetools.spacedoc.org.toc/value
   #(= (cfg/toc-hl-val) %))
-(s/def :spacetools.spacedoc.org.toc/path-id
-  #(= (sdu/hl-val->path-id-frag (cfg/toc-hl-val)) %))
-(s/def :spacetools.spacedoc.org.toc/level 1)
 (s/def ::toc (s/keys :req-un [:spacetools.spacedoc.org.toc/tag
-                              :spacetools.spacedoc.org.toc/kind
+                              :spacetools.spacedoc.org.toc/todo?
                               :spacetools.spacedoc.org.toc/value
-                              :spacetools.spacedoc.org.toc/children]
-                     :opt-un [:spacetools.spacedoc.org.toc/level
-                              :spacetools.spacedoc.org.toc/path-id]))
+                              :spacetools.spacedoc.org.toc/children]))
+
 
 (defn-spec gen-toc (s/nilable ::toc)
   "Generate table of content for ROOT node.
@@ -187,7 +183,7 @@ Return nil if ROOT node doesn't have any headlines."
                              #(when (< depth (cfg/toc-max-depth))
                                 (some->>
                                  %
-                                 (filter sdu/hl?)
+                                 (filter hl?)
                                  (seq)
                                  (mapv (partial inner (inc depth))))))
                      hl->toc-el))
@@ -195,7 +191,7 @@ Return nil if ROOT node doesn't have any headlines."
                {:toc-wrapper? true :children (vec headlines)})))]
 
     (some->> children
-             (filter sdu/hl?)
+             (filter hl?)
              (hls->toc))))
 
 
@@ -203,12 +199,29 @@ Return nil if ROOT node doesn't have any headlines."
   "Add Table of content based on headlines present in the ROOT node."
   [{children :children :as root} :spacetools.spacedoc.node/root]
   (if-let [toc (gen-toc root)]
-    (let [[b-toc a-toc] (split-with (complement (partial sdu/hl?)) children)]
+    (let [[b-toc a-toc] (split-with (complement (partial hl?)) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
     root))
 
 
 ;;;; Helpers
+
+
+(defn-spec assoc-level-and-path-id valid-hl?
+  "Fill node with :level and :path-id"
+  ([node hl?]
+   (let [{tag :tag value :value} node]
+     (assoc node
+            :level 1
+            :path-id (sdu/hl-val->path-id-frag value))))
+  ([parent-node hl? node hl?]
+   (let [{tag :tag value :value} node
+         hl-level (inc (:level parent-node))]
+     (assoc node
+            :level hl-level
+            :path-id (str (:path-id parent-node)
+                          "/" (sdu/hl-val->path-id-frag value))))))
+
 
 (defn viz-len
   "Like `count` but returns real visual length of a string."
@@ -453,22 +466,19 @@ Return nil if ROOT node doesn't have any headlines."
 
 
 (defmethod sdn->org :headline
-  [{:keys [value children] :as hl}]
+  [{:keys [value children todo?] :as hl}]
   (let [f-val (sdu/fmt-hl-val value)
         headline (-> hl
                      (update :path-id #(or % (sdu/hl-val->path-id-frag f-val)))
                      (assoc :value f-val)
-                     (update :level #(or % 1)))
-        kind (:kind headline)]
+                     (update :level #(or % 1)))]
     (str (join (repeat (:level headline) "*"))
          " "
-         (when (= kind :todo) "TODO ")
+         (when todo? "TODO ")
          f-val
          "\n"
          (conv :headline
-               (mapv #(if (sdu/hl? %)
-                        (sdu/assoc-level-and-path-id headline %)
-                        %)
+               (mapv #(if (sdu/hl? %) (assoc-level-and-path-id headline %) %)
                      children)))))
 
 
@@ -489,9 +499,7 @@ Return nil if ROOT node doesn't have any headlines."
   (->> root
        (assoc-toc)
        (:children)
-       (mapv #(if (sdu/hl? %)
-                (sdu/assoc-level-and-path-id %)
-                %))
+       (mapv #(if (sdu/hl? %) (assoc-level-and-path-id %) %))
        (conv tag)))
 
 

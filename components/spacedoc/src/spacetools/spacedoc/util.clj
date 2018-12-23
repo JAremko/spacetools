@@ -254,8 +254,7 @@ Fragments are  particular headline values in the \"/\" separated chain."
 
 
 (defn-spec hl->depth pos-int?
-  "Return how deeply children of HL go.
-Value of `:level` ignored."
+  "Return how deeply children of HL go."
   [hl hl?]
   ((fn rec [depth node]
      (if (hl? node)
@@ -270,20 +269,3 @@ Value of `:level` ignored."
   [node any?]
   (or (and (hl? node)
            (valid-node? node))))
-
-
-;; TODO: Fix "over nesting" for headlines
-(defn-spec assoc-level-and-path-id valid-hl?
-  "Fill node with :level and :path-id"
-  ([node hl?]
-   (let [{tag :tag value :value} node]
-     (assoc node
-            :level 1
-            :path-id (hl-val->path-id-frag value))))
-  ([parent-node hl? node hl?]
-   (let [{tag :tag value :value} node
-         hl-level (inc (:level parent-node))]
-     (assoc node
-            :level hl-level
-            :path-id (str (:path-id parent-node)
-                          "/" (hl-val->path-id-frag value))))))
