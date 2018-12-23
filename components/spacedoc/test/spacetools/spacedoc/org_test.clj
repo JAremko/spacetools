@@ -43,16 +43,6 @@
   (str/includes? org-str (sdu/fmt-hl-val val)))
 
 
-(defmethod invariants :description
-  [{val :value} org-str]
-  (str/includes? org-str (sdu/fmt-hl-val val)))
-
-
-(defmethod invariants :todo
-  [{val :value} org-str]
-  (str/includes? org-str (sdu/fmt-hl-val val)))
-
-
 (defmethod invariants :default
   [node org-str]
   (and (map? node) (string? org-str)))

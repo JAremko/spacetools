@@ -443,6 +443,7 @@
 
 ;; headline
 
+
 (defmethod sc/headline-child :section [_] ::section)
 (defmethod sc/headline-child :headline [_]
   :spacetools.spacedoc.headline*/descendent-headline)
@@ -462,6 +463,7 @@
 
 (s/def :spacetools.spacedoc.headline*/base
   (s/keys :req-un [:spacetools.spacedoc.node.headline/tag
+                   :spacetools.spacedoc.node.headline/value
                    :spacetools.spacedoc.node.headline/todo?
                    :spacetools.spacedoc.node.headline/children]))
 
