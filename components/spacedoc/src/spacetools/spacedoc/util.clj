@@ -189,16 +189,6 @@ SRC is the exported file name."
         (apply = (map #(count (:children %)) t-c)))))
 
 
-#_ (same-row-length?
-    [{:tag :table-row
-      :type :rule
-      :children [{:tag :table-cell :children [{:tag :text :value "s"}]}
-                 {:tag :table-cell :children [{:tag :text :value "s"}]}]}
-     {:tag :table-row
-      :type :rule
-      :children [{:tag :table-cell :children [{:tag :text :value "s"}]}]}])
-
-
 ;;;; Headline stuff
 
 (defn-spec in-hl-level-range? boolean?
@@ -269,3 +259,33 @@ Fragments are  particular headline values in the \"/\" separated chain."
   [node any?]
   (or (and (hl? node)
            (valid-node? node))))
+
+
+;; (defn-spec hl->list ::paragraph
+;;   "Turn HL headline into paragraph."
+;;   [{:keys [value children todo?] :as hl hl?}])
+
+
+(defn-spec flatten-hl valid-hl?
+  "Flatten HL headline children by converting them into section.
+if LEVEL provided - flatten every headline \"deeper\" than it."
+  [level (s/and pos-int? #(<= % (cfg/max-headline-depth))) hl hl?]
+  ((fn rec [depth {:keys [value children todo?] :as node}]
+     (if (hl? node)
+       (let [children (mapv (partial rec (inc depth)) children)]
+         (if (>= depth level)
+          {:tag :section
+           :children [{:tag :paragraph
+                       :children (r/reduce
+                                  (partial apply vector)
+                                  [{:tag :text
+                                    :value (str (if todo? "TODO: " "") value)}
+                                   {:tag :line-break}]
+                                  (r/map
+                                   #(if (= :section (:tag %))
+                                      (:children %)
+                                      [%])
+                                   children))}]}
+          (assoc node :children children)))
+       node))
+   0 hl))
