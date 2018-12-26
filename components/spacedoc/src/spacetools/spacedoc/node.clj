@@ -8,44 +8,9 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]))
-
-
-;;;; Value specs
-
-;; NOTE: Some lines may be empty but not all of them.
-(s/def :spacetools.spacedoc.node.val/non-blank-lines
-  (s/with-gen (s/and string? (complement str/blank?))
-    #(gen/fmap str
-               (gen/tuple
-                (gen/string-alphanumeric)
-                (gen/elements ["\n" ""])
-                (gen/string-alphanumeric
-                 (gen/elements ["\n" ""])
-                 (gen/string-alphanumeric))))))
-
-
-(s/def :spacetools.spacedoc.node.val/non-blank-string
-  (s/and string? (complement str/blank?)))
-
-
-(s/def :spacetools.spacedoc.node.val/path-id
-  (s/with-gen
-    (s/and
-     string?
-     #(re-matches
-       ;; forgive me Father for I have sinned
-       #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-       %))
-    #(gen/fmap
-      (fn [[a delm b]] (str/lower-case (str a delm b)))
-      (gen/tuple
-       (gen/string-alphanumeric)
-       (gen/elements ["/" ""])
-       (gen/string-alphanumeric)))))
-
-
-;;;; Node specs
+            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
+            [spacetools.spacedoc.node.util :as nu]
+            [spacetools.spacedoc.node.val-spec :as vs]))
 
 
 ;; Any node should satisfy this spec
@@ -73,11 +38,11 @@
 ;; kbd node
 
 (s/def :spacetools.spacedoc.node.kbd/value
-  (s/with-gen (s/coll-of :spacetools.spacedoc.node.val/non-blank-string
+  (s/with-gen (s/coll-of ::vs/non-blank-string
                          :kind vector?
                          :min-count 1
                          :into [])
-    #(gen/vector (s/gen :spacetools.spacedoc.node.val/non-blank-string) 1 3)))
+    #(gen/vector (s/gen ::vs/non-blank-string) 1 3)))
 
 
 (defnode ::kbd (s/keys :req-un [:spacetools.spacedoc.node.kbd/value]))
@@ -96,8 +61,7 @@
 
 ;; verbatim node
 
-(s/def :spacetools.spacedoc.node.verbatim/value
-  :spacetools.spacedoc.node.val/non-blank-lines)
+(s/def :spacetools.spacedoc.node.verbatim/value ::vs/non-blank-lines)
 (defnode ::verbatim (s/keys :req-un [:spacetools.spacedoc.node.verbatim/value]))
 
 
@@ -231,8 +195,7 @@
 
 ;; example node
 
-(s/def :spacetools.spacedoc.node.example/value
-  :spacetools.spacedoc.node.val/non-blank-lines)
+(s/def :spacetools.spacedoc.node.example/value ::vs/non-blank-lines)
 (defnode ::example (s/keys :req-un [:spacetools.spacedoc.node.example/value]))
 
 
@@ -269,8 +232,7 @@
 
 (s/def :spacetools.spacedoc.node.list-item/type
   #{:ordered :unordered :descriptive})
-(s/def :spacetools.spacedoc.node.list-item/bullet
-  :spacetools.spacedoc.node.val/non-blank-string)
+(s/def :spacetools.spacedoc.node.list-item/bullet ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.list-item/checkbox
   (s/nilable #{:trans :off :on}))
 (s/def :spacetools.spacedoc.node.list-item*/children-list
@@ -329,10 +291,8 @@
 
 ;; src node
 
-(s/def :spacetools.spacedoc.node.src/language
-  :spacetools.spacedoc.node.val/non-blank-string)
-(s/def :spacetools.spacedoc.node.src/value
-  :spacetools.spacedoc.node.val/non-blank-lines)
+(s/def :spacetools.spacedoc.node.src/language ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.src/value ::vs/non-blank-lines)
 (defnode ::src (s/keys :req-un [:spacetools.spacedoc.node.src/language
                                 :spacetools.spacedoc.node.src/value]))
 
@@ -416,10 +376,8 @@
 
 ;; key-word node
 
-(s/def :spacetools.spacedoc.node.key-word/key
-  :spacetools.spacedoc.node.val/non-blank-string)
-(s/def :spacetools.spacedoc.node.key-word/value
-  :spacetools.spacedoc.node.val/non-blank-string)
+(s/def :spacetools.spacedoc.node.key-word/key ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.key-word/value ::vs/non-blank-string)
 (defnode ::key-word (s/keys :req-un [:spacetools.spacedoc.node.key-word/key
                                      :spacetools.spacedoc.node.key-word/value]))
 
@@ -458,8 +416,7 @@
   :spacetools.spacedoc.headline*/descendent-headline)
 (s/def ::headline-child (s/multi-spec sc/headline-child :tag))
 (s/def :spacetools.spacedoc.node.headline/todo? boolean?)
-(s/def :spacetools.spacedoc.node.headline/value
-  :spacetools.spacedoc.node.val/non-blank-string)
+(s/def :spacetools.spacedoc.node.headline/value ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.headline/children
   (s/with-gen (s/coll-of ::headline-child
                          :kind vector?
@@ -469,60 +426,19 @@
     #(gen/vector-distinct (s/gen ::headline-child)
                           {:min-elements 1 :max-elements 2 :max-tries 100})))
 
-
 (s/def :spacetools.spacedoc.headline*/base
   (s/keys :req-un [:spacetools.spacedoc.node.headline/tag
                    :spacetools.spacedoc.node.headline/value
                    :spacetools.spacedoc.node.headline/todo?
                    :spacetools.spacedoc.node.headline/children]))
 
-
-(defn- headline?
-  [node]
-  (= (:tag node) :headline))
-
-
-(defn- headline->depth
-  "Return how deeply children of HEADLINE go."
-  [headline]
-  ((fn rec [depth node]
-     (if (headline? node)
-       (inc (r/reduce (r/monoid max (constantly 0))
-                      (r/map (partial rec depth) (:children node))))
-       depth))
-   0 headline))
-
-
-(defn- clamp-children
-  "Delete HL headline children that are deeper than LEVEL."
-  [level headline]
-  ((fn rec [depth {:keys [value children todo?] :as node}]
-     (assoc node :children
-            (if (and (headline? node) (>= depth level))
-              []
-              (mapv (partial rec (inc depth)) children))))
-   1 headline))
-
-
-(defn- mark-empty-as-todo
-  "Mark HEADLINE as todo if i doesn't have children."
-  [headline]
-  (if (empty? (:children headline))
-    (assoc headline :todo? true)
-    headline))
-
-
 ;; Handy in gen-testing headline constructors.
 (s/def :spacetools.spacedoc.headline*/descendent-headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap
-             (comp mark-empty-as-todo
-                   (partial clamp-children (dec (cfg/max-headline-depth))))
-             (s/gen :spacetools.spacedoc.headline*/base)))
-         (fn not-too-deep? [hl] (< (headline->depth hl)
-                                  (dec (cfg/max-headline-depth))))
-         (fn todo-or-has-children? [hl] (or (:todo? hl)
-                                           (seq (:children hl))))))
+           #(gen/fmap (partial nu/fmt-headline (dec (cfg/max-headline-depth)))
+                      (s/gen :spacetools.spacedoc.headline*/base)))
+         #(<= (nu/headline->depth %) (dec (cfg/max-headline-depth)))
+         nu/todo-or-has-children?))
 
 
 ;; Has to do it manually (for now):
@@ -531,14 +447,10 @@
 ;; TODO: Make it doable with `defnode` macro.
 (s/def ::headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap
-             (comp mark-empty-as-todo
-                   (partial clamp-children (cfg/max-headline-depth)))
-             (s/gen :spacetools.spacedoc.headline*/base)))
-         (fn not-too-deep? [hl] (< (headline->depth hl)
-                                  (cfg/max-headline-depth)))
-         (fn todo-or-has-children? [hl] (or (:todo? hl)
-                                           (seq (:children hl))))))
+           #(gen/fmap (partial nu/fmt-headline (cfg/max-headline-depth))
+                      (s/gen :spacetools.spacedoc.headline*/base)))
+         #(<= (nu/headline->depth %) (cfg/max-headline-depth))
+         nu/todo-or-has-children?))
 
 
 ;; root node
@@ -553,10 +465,8 @@
                          :into [])
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
-(s/def :spacetools.spacedoc.node.root/source
-  :spacetools.spacedoc.node.val/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/spaceroot
-  :spacetools.spacedoc.node.val/non-blank-string)
+(s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/children]
                          :opt-un [:spacetools.spacedoc.node.root/source
                                   :spacetools.spacedoc.node.root/spaceroot]))
@@ -600,7 +510,7 @@
 
 (defn-spec headline ::headline
   "\"headline\" node constructor."
-  [value :spacetools.spacedoc.node.val/non-blank-string
+  [value ::vs/non-blank-string
    & children (s/with-gen (s/+ ::headline-child)
                 #(gen/vector-distinct (s/gen ::headline-child)
                                       {:min-elements 1 :max-elements 3}))]
@@ -615,7 +525,7 @@
 
 (defn-spec todo :spacetools.spacedoc.node.meta/todo
   "\"todo\" node constructor."
-  [value :spacetools.spacedoc.node.val/non-blank-string
+  [value ::vs/non-blank-string
    & children (s/with-gen (s/* ::headline-child)
                 #(gen/vector-distinct (s/gen ::headline-child)
                                       {:min-elements 0 :max-elements 3}))]
@@ -640,23 +550,15 @@
 
 ;; link
 
-(defn- link->link-prefix
-  "Given full link return corresponding prefix(usually protocol + ://)."
-  [path]
-  (->> (vals (cfg/link-type->prefix))
-       (filter (partial str/starts-with? path))
-       (first)))
-
-
 (defn-spec link ::link
   "\"link\" node constructor."
   [link :spacetools.spacedoc.node.link/path & children (s/* ::inline-element)]
-  {:pre  [(link->link-prefix link)
+  {:pre  [(nu/link->link-prefix link)
           (s/valid? :spacetools.spacedoc.node.link/path link)
           (s/valid? :spacetools.spacedoc.node.link/children
                     (vec children))]
    :post [(s/valid? ::link %)]}
-  (let [link-prefix (link->link-prefix link)
+  (let [link-prefix (nu/link->link-prefix link)
         link-type ((map-invert (cfg/link-type->prefix)) link-prefix)]
     {:tag :link
      :type link-type
@@ -665,16 +567,6 @@
 
 
 ;; plain-list
-
-(defn- make-list-item
-  "Create list item node."
-  [item-type idx item]
-  {:tag :list-item
-   :type item-type
-   :bullet (if (= item-type :unordered) "- " (str (inc idx) ". "))
-   :checkbox nil
-   :children [{:tag :item-children :children item}]})
-
 
 (defn-spec unordered-list ::plain-list
   "Unordered \"plain-list\" node constructor.
@@ -690,7 +582,7 @@
    :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :unordered
-   :children (into [] (map-indexed (partial make-list-item :unordered)) items)})
+   :children (into [] (map-indexed (partial nu/list-item :unordered)) items)})
 
 
 (defn-spec ordered-list ::plain-list
@@ -707,7 +599,7 @@
    :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :ordered
-   :children (into [] (map-indexed (partial make-list-item :ordered)) items)})
+   :children (into [] (map-indexed (partial nu/list-item :ordered)) items)})
 
 
 (defn-spec root ::root
