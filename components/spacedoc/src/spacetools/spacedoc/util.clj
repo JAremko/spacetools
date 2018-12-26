@@ -3,6 +3,7 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.core.reducers :as r]
+            [spacetools.spacedoc.node :as n]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
@@ -22,14 +23,6 @@
   [x any?]
   (and (string? x)
        ((complement str/blank?) x)))
-
-
-(defn-spec link->link-prefix string?
-  "Given full link return corresponding prefix(usually protocol + ://)."
-  [path string?]
-  (->> (vals (cfg/link-type->prefix))
-       (filter (partial str/starts-with? path))
-       (first)))
 
 
 (defn-spec node->children-tag-s keyword?
@@ -219,18 +212,6 @@ Fragments are  particular headline values in the \"/\" separated chain."
       (str/replace #"\s+" "_")))
 
 
-(defn-spec path-id? boolean?
-  "Return true if X is a path-id."
-  [x any?]
-  (and
-   (string? x)
-   (some?
-    (re-matches
-     ;; forgive me Father for I have sinned
-     #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-     x))))
-
-
 (defn-spec valid-node? boolean?
   "Return true if NODE is a valid node."
   [node any?]
@@ -241,17 +222,6 @@ Fragments are  particular headline values in the \"/\" separated chain."
   "Return true if NODE is a headline."
   [node any?]
   (= (:tag node) :headline))
-
-
-(defn-spec hl->depth pos-int?
-  "Return how deeply children of HL go."
-  [hl hl?]
-  ((fn rec [depth node]
-     (if (hl? node)
-       (inc (r/reduce (r/monoid max (constantly 0))
-                      (r/map (partial rec depth) (:children node))))
-       depth))
-   0 hl))
 
 
 (defn-spec valid-hl? boolean?

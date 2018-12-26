@@ -1,14 +1,14 @@
 (ns spacetools.spacedoc.node
   "Node specs and constructors. All public functions are constructors."
-  (:require [clojure.set :refer [map-invert]]
+  (:require [clojure.core.reducers :as r]
+            [clojure.set :refer [map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.node-impl :refer [defnode defnode*]]))
 
 
 ;;;; Value specs
@@ -26,11 +26,17 @@
 
 
 (s/def :spacetools.spacedoc.node.val/non-blank-string
-  (s/and string? sdu/non-blank-string?))
+  (s/and string? (complement str/blank?)))
 
 
 (s/def :spacetools.spacedoc.node.val/path-id
-  (s/with-gen (s/and string? sdu/path-id?)
+  (s/with-gen
+    (s/and
+     string?
+     #(re-matches
+       ;; forgive me Father for I have sinned
+       #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+       %))
     #(gen/fmap
       (fn [[a delm b]] (str/lower-case (str a delm b)))
       (gen/tuple
@@ -365,7 +371,11 @@
                                 :kind vector?
                                 :min-count 1
                                 :into [])
-                     sdu/same-row-child-count?)
+                     (fn same-row-child-count?
+                       [rows]
+                       (let [t-c (remove #(#{:rule} (:type %)) rows)]
+                         (or (empty? t-c)
+                             (apply = (map #(count (:children %)) t-c))))))
     #(gen/fmap (fn [[cells cells-per-row]]
                  (mapv
                   (fn [row-children]
@@ -466,17 +476,54 @@
                    :spacetools.spacedoc.node.headline/todo?
                    :spacetools.spacedoc.node.headline/children]))
 
+
+(defn- headline?
+  [node]
+  (= (:tag node) :headline))
+
+
+(defn- headline->depth
+  "Return how deeply children of HEADLINE go."
+  [headline]
+  ((fn rec [depth node]
+     (if (headline? node)
+       (inc (r/reduce (r/monoid max (constantly 0))
+                      (r/map (partial rec depth) (:children node))))
+       depth))
+   0 headline))
+
+
+(defn- clamp-children
+  "Delete HL headline children that are deeper than LEVEL."
+  [level headline]
+  ((fn rec [depth {:keys [value children todo?] :as node}]
+     (assoc node :children
+            (if (and (headline? node) (>= depth level))
+              []
+              (mapv (partial rec (inc depth)) children))))
+   1 headline))
+
+
+(defn- mark-empty-as-todo
+  "Mark HEADLINE as todo if i doesn't have children."
+  [headline]
+  (if (empty? (:children headline))
+    (assoc headline :todo? true)
+    headline))
+
+
 ;; Handy in gen-testing headline constructors.
 (s/def :spacetools.spacedoc.headline*/descendent-headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap (fn fix-empty [hl] (if (empty? (:children hl))
-                                          (assoc hl :todo? true)
-                                          hl))
-                      (s/gen :spacetools.spacedoc.headline*/base)))
-         (fn not-too-deep? [hl] (< (sdu/hl->depth hl)
+           #(gen/fmap
+             (comp mark-empty-as-todo
+                   (partial clamp-children (dec (cfg/max-headline-depth))))
+             (s/gen :spacetools.spacedoc.headline*/base)))
+         (fn not-too-deep? [hl] (< (headline->depth hl)
                                   (dec (cfg/max-headline-depth))))
          (fn todo-or-has-children? [hl] (or (:todo? hl)
                                            (seq (:children hl))))))
+
 
 ;; Has to do it manually (for now):
 (defmethod sc/node->spec-k :headline [_] ::headline)
@@ -484,11 +531,11 @@
 ;; TODO: Make it doable with `defnode` macro.
 (s/def ::headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap (fn fix-empty [hl] (if (empty? (:children hl))
-                                          (assoc hl :todo? true)
-                                          hl))
-                      (s/gen :spacetools.spacedoc.headline*/base)))
-         (fn not-too-deep? [hl] (< (sdu/hl->depth hl)
+           #(gen/fmap
+             (comp mark-empty-as-todo
+                   (partial clamp-children (cfg/max-headline-depth)))
+             (s/gen :spacetools.spacedoc.headline*/base)))
+         (fn not-too-deep? [hl] (< (headline->depth hl)
                                   (cfg/max-headline-depth)))
          (fn todo-or-has-children? [hl] (or (:todo? hl)
                                            (seq (:children hl))))))
@@ -505,7 +552,7 @@
                          :distinct true
                          :into [])
     #(gen/vector-distinct (s/gen ::root-child)
-                          {:min-elements 1 :max-elements 3 :max-tries 100})))
+                          {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/source
   :spacetools.spacedoc.node.val/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot
@@ -551,12 +598,12 @@
 
 ;; headline node
 
-
 (defn-spec headline ::headline
   "\"headline\" node constructor."
   [value :spacetools.spacedoc.node.val/non-blank-string
    & children (s/with-gen (s/+ ::headline-child)
-                #(gen/vector (s/gen ::headline-child) 1 3))]
+                #(gen/vector-distinct (s/gen ::headline-child)
+                                      {:min-elements 1 :max-elements 3}))]
   {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
          (s/valid? :spacetools.spacedoc.node.meta.hl.nonempty/children
                    (vec children))]
@@ -566,12 +613,12 @@
 
 ;; todo meta node
 
-
 (defn-spec todo :spacetools.spacedoc.node.meta/todo
   "\"todo\" node constructor."
   [value :spacetools.spacedoc.node.val/non-blank-string
    & children (s/with-gen (s/* ::headline-child)
-                #(gen/vector (s/gen ::headline-child) 0 3))]
+                #(gen/vector-distinct (s/gen ::headline-child)
+                                      {:min-elements 0 :max-elements 3}))]
   {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
          (s/valid? :spacetools.spacedoc.node.headline/children (vec children))]
    :post [(s/valid? :spacetools.spacedoc.node.meta/todo %)]}
@@ -583,7 +630,8 @@
 (defn-spec description :spacetools.spacedoc.node.meta/description
   "\"description\" node constructor."
   [& children (s/with-gen (s/+ ::headline-child)
-                #(gen/vector (s/gen ::headline-child) 1 3))]
+                #(gen/vector-distinct (s/gen ::headline-child)
+                                      {:min-elements 1 :max-elements 3}))]
   {:pre [(s/valid? :spacetools.spacedoc.node.meta.hl.nonempty/children
                    (vec children))]
    :post [(s/valid? :spacetools.spacedoc.node.meta/description %)]}
@@ -592,15 +640,23 @@
 
 ;; link
 
+(defn- link->link-prefix
+  "Given full link return corresponding prefix(usually protocol + ://)."
+  [path]
+  (->> (vals (cfg/link-type->prefix))
+       (filter (partial str/starts-with? path))
+       (first)))
+
+
 (defn-spec link ::link
   "\"link\" node constructor."
   [link :spacetools.spacedoc.node.link/path & children (s/* ::inline-element)]
-  {:pre  [(sdu/link->link-prefix link)
+  {:pre  [(link->link-prefix link)
           (s/valid? :spacetools.spacedoc.node.link/path link)
           (s/valid? :spacetools.spacedoc.node.link/children
                     (vec children))]
    :post [(s/valid? ::link %)]}
-  (let [link-prefix (sdu/link->link-prefix link)
+  (let [link-prefix (link->link-prefix link)
         link-type ((map-invert (cfg/link-type->prefix)) link-prefix)]
     {:tag :link
      :type link-type
@@ -656,17 +712,13 @@
 
 (defn-spec root ::root
   "\"root\" node constructor."
-  [& children (s/with-gen (s/+ :spacetools.spacedoc.node.root/children)
-                #(gen/vector (s/gen ::root-child) 1 3))]
+  [& children (s/with-gen (s/+ ::root-child)
+                #(gen/vector-distinct (s/gen ::root-child)
+                                      {:min-elements 1 :max-elements 3}))]
   {:pre [(s/valid? :spacetools.spacedoc.node.root/children (vec children))]
    :post [(s/valid? ::root %)]}
-  {:tag :root :children (if (some? children)
-                          (vec children)
-                          [])})
+  {:tag :root :children (vec children)})
 
-
-
-;; (s/exercise-fn `root 1)
 
 ;; TODO: Add `:descriptive` list constructor.
 ;; `:descriptive` lists have `::list-item`s with optional `::item-tag`.
