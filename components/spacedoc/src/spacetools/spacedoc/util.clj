@@ -274,18 +274,19 @@ if LEVEL provided - flatten every headline \"deeper\" than it."
      (if (hl? node)
        (let [children (mapv (partial rec (inc depth)) children)]
          (if (>= depth level)
-          {:tag :section
-           :children [{:tag :paragraph
-                       :children (r/reduce
-                                  (partial apply vector)
-                                  [{:tag :text
-                                    :value (str (if todo? "TODO: " "") value)}
-                                   {:tag :line-break}]
-                                  (r/map
-                                   #(if (= :section (:tag %))
-                                      (:children %)
-                                      [%])
-                                   children))}]}
-          (assoc node :children children)))
+           {:tag :section
+            :children [{:tag :paragraph
+                        :children (vec
+                                   (r/reduce
+                                    concat
+                                    [{:tag :text
+                                      :value (str (if todo? "TODO: " "") value)}
+                                     {:tag :line-break}]
+                                    (r/map
+                                     #(if (= :section (:tag %))
+                                        (:children %)
+                                        [%])
+                                     children)))}]}
+           (assoc node :children children)))
        node))
    0 hl))
