@@ -3,7 +3,7 @@
   :plugins [[lein-environ "1.0.0"]]
   :dependencies [[orchestra "2018.09.10-1"]
                  [funcool/cats "2.3.1"]
-                 [org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojure "1.10.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [nio2 "0.2.1"]
                  [org.clojure/tools.cli "0.4.1"]]

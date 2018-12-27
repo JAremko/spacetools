@@ -6,7 +6,7 @@
                  [funcool/cats "2.3.1"]
                  [nio2 "0.2.1"]
                  [orchestra "2018.09.10-1"]
-                 [org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojure "1.10.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/test.check "0.10.0-alpha3"]
                  [org.clojure/tools.cli "0.4.1"]]

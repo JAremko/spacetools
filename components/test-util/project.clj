@@ -5,7 +5,7 @@
                  [orchestra "2018.09.10-1"]
                  [com.google.jimfs/jimfs "1.1"]
                  [com.google.jimfs/jimfs "1.1"]
-                 [org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojure "1.10.0"]
                  [org.clojure/test.check "0.10.0-alpha3"]
                  [spacetools/interfaces "1.0"]]
   :aot :all)
