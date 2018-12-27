@@ -264,11 +264,12 @@ Return nil if ROOT node doesn't have any headlines."
            [_              nil         _           _             _        ] ""
            [_              _           _           :plain-list   _        ] ""
            [_              _           _           :feature-list _        ] ""
-           [:headline      _           _           _             _        ] "\n"
+           [_              :headline   _           _             _        ] "\n"
            [_              _           _           _             :headline] "\n"
            [_              _           :block      _             _        ] "\n"
            [_              _           _           _             :block   ] "\n"
            :else nil)))
+
 
 
 (defn conv*
@@ -506,13 +507,3 @@ Return nil if ROOT node doesn't have any headlines."
 ;;;; Pseudo-nodes
 
 (defmethod sdn->org ::end [_] "")
-
-
-;; (sdn->org
-;;  (sdu/flatten-hl
-;;   2
-;;   (n/headline "A1"
-;;               (n/section (n/paragraph (n/text "top-text")))
-;;               (n/headline "B1" (n/section (n/paragraph (n/text "foo-text"))))
-;;               (n/headline "B2" (n/headline "C1" (n/section (n/paragraph (n/text "deepest-text")))))
-;;               (n/headline "B3" (n/section (n/paragraph (n/text "bar-text")))))))
