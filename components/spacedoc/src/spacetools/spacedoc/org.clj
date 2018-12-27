@@ -265,7 +265,7 @@ Return nil if ROOT node doesn't have any headlines."
            [_              _           _           :plain-list   _        ] ""
            [_              _           _           :feature-list _        ] ""
            [_              :headline   _           _             _        ] "\n"
-           [_              _           _           _             :headline] "\n"
+           [_              _           _           :headline     _        ] "\n"
            [_              _           :block      _             _        ] "\n"
            [_              _           _           _             :block   ] "\n"
            :else nil)))
