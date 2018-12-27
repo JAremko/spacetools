@@ -5,4 +5,4 @@
             :url "https://www.gnu.org/licenses/gpl.html"}
   :plugins [[polylith/lein-polylith "0.1.1"]]
   :polylith {:top-namespace "spacetools"
-             :clojure-version "1.10.0"})
+             :clojure-version "1.9.0"})
