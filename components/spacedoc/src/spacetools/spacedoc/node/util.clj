@@ -12,6 +12,7 @@
 (def headline-gen
   "Headline spec generator."
   #(s/gen :spacetools.spacedoc.node/headline))
+;; => #'spacetools.spacedoc.node.util/headline-gen
 
 
 (defn-spec headline? boolean?
@@ -20,12 +21,12 @@
   (= (:tag x) :headline))
 
 
-(s/def ::headline? (s/with-gen headline? headline-gen))
+(s/def headline? (s/with-gen headline? headline-gen))
 
 
 (defn-spec headline->depth pos-int?
   "return how deeply children of headline go."
-  [headline ::headline?]
+  [headline `headline?]
   ((fn rec [depth node]
      (if (headline? node)
        (inc (r/reduce (r/monoid max (constantly 0))
@@ -34,9 +35,9 @@
    0 headline))
 
 
-(defn-spec clamp-headline-children ::headline?
+(defn-spec clamp-headline-children `headline?
   "delete hl headline children that are deeper than level."
-  [level pos-int? headline ::headline?]
+  [level pos-int? headline `headline?]
   ((fn rec [depth {:keys [value children todo?] :as node}]
      (assoc node :children
             (if (and (headline? node) (>= depth level))
@@ -45,23 +46,23 @@
    1 headline))
 
 
-(defn-spec mark-empty-as-todo ::headline?
+(defn-spec mark-empty-as-todo `headline?
   "mark headline as todo if i doesn't have children."
-  [headline ::headline?]
+  [headline `headline?]
   (if (empty? (:children headline))
     (assoc headline :todo? true)
     headline))
 
 
-(defn-spec fmt-headline ::headline?
+(defn-spec fmt-headline `headline?
   "Used to fix generated headlines so they will pass spec checks."
-  [max-level pos-int? headline ::headline?]
+  [max-level pos-int? headline `headline?]
   (->> headline (clamp-headline-children max-level) (mark-empty-as-todo)))
 
 
 (defn-spec todo-or-has-children? boolean?
   "HEADLINE node should have children or value of `:todo?` should be `true`."
-  [headline ::headline?] (or (:todo? headline) (seq (:children headline))))
+  [headline `headline?] (or (:todo? headline) (seq (:children headline))))
 
 
 (defn-spec link->link-prefix string?

@@ -5,13 +5,13 @@
             [clojure.core.reducers :as r]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [nio2.core :as nio]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.interface :as sdu])
-  (:import (java.nio.file Path)
-           (java.io File)))
+  (:import (java.io File)
+           (java.nio.file Path)))
 
 
 (def filesystem (nio/default-fs))
@@ -29,8 +29,7 @@
   (instance? File x))
 
 
-(s/def ::file-ref (s/or :string-path (s/and string?
-                                            (complement str/blank?))
+(s/def ::file-ref (s/or :string-path (s/and string? (complement str/blank?))
                         :path path?
                         :file-or-dir file-or-dir?))
 
@@ -89,10 +88,7 @@
   [ext-pat regexp? x any?]
   (when (file? x)
     (let [fp (file-ref->path x)]
-      (some->> fp
-               (str)
-               (re-matches ext-pat)
-               (some?)))))
+      (some->> fp (str) (re-matches ext-pat) (some?)))))
 
 
 (defn-spec sdn-file? boolean?
@@ -160,9 +156,7 @@
                :else obj)))
          (fn [^Exception err]
            (exc/failure
-            (ex-info (.getMessage err) (if-let [ed (ex-data err)]
-                                         (assoc ed :file path)
-                                         {:file path}))))))))
+            (ex-info (.getMessage err) (merge {:file path} (ex-data err)))))))))
 
 
 (defn-spec output-err nat-int?
@@ -259,10 +253,7 @@
         (let [p (file-ref->path path)]
           (if (directory? p)
             (into #{}
-                  (comp
-                   (map (partial absolute))
-                   (filter sdn-file?)
-                   (map str))
+                  (comp (map (partial absolute)) (filter sdn-file?) (map str))
                   (file-seq (nio/file p)))
             (throw
              ((cond
