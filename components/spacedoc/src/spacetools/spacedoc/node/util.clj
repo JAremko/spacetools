@@ -9,19 +9,11 @@
             [spacetools.spacedoc.core :as sc]))
 
 
-(def headline-gen
-  "Headline spec generator."
-  #(s/gen :spacetools.spacedoc.node/headline))
-;; => #'spacetools.spacedoc.node.util/headline-gen
-
-
 (defn-spec headline? boolean?
   "Return true if NODE is headline."
-  [x (s/with-gen any? #(gen/one-of [(s/gen any?) (headline-gen)]))]
+  [x (s/with-gen any?
+       #(gen/one-of [(s/gen any?) (s/gen :spacetools.spacedoc.node/headline)]))]
   (= (:tag x) :headline))
-
-
-(s/def headline? (s/with-gen headline? headline-gen))
 
 
 (defn-spec headline->depth pos-int?
