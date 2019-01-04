@@ -21,8 +21,7 @@
 (defn-spec non-blank-string? boolean?
   "Return true if X is a string and it contains non-blank characters."
   [x any?]
-  (and (string? x)
-       ((complement str/blank?) x)))
+  (and (string? x) ((complement str/blank?) x)))
 
 
 (defn-spec node->children-tag-s keyword?

@@ -54,7 +54,9 @@
 
 (defn-spec todo-or-has-children? boolean?
   "HEADLINE node should have children or value of `:todo?` should be `true`."
-  [headline `headline?] (or (:todo? headline) (seq (:children headline))))
+  [headline `headline?]
+  (or (:todo? headline)
+      ((complement empty?) (:children headline))))
 
 
 (defn-spec link->link-prefix string?

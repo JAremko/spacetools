@@ -61,14 +61,14 @@
   "Returns true if X is a directory."
   [x any?]
   (io! (when (file-ref? x)
-         (some-> x (file-ref->path) (nio/dir?)))))
+         (some-> x (file-ref->path) (nio/dir?) (some?)))))
 
 
 (defn-spec file? boolean?
   "Returns true if X is a file but not a directory."
   [x any?]
   (io! (when (file-ref? x)
-        (some-> x (file-ref->path) (nio/file?)))))
+         (some-> x (file-ref->path) (nio/file?) (some?)))))
 
 
 (defn-spec error? boolean?
