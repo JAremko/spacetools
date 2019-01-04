@@ -411,6 +411,8 @@
 
 ;; headline
 
+(s/def :spacetools.spacedoc.node.headline/tag #{:headline})
+
 (defmethod sc/headline-child :section [_] ::section)
 (defmethod sc/headline-child :headline [_]
   :spacetools.spacedoc.headline*/descendent-headline)
@@ -443,7 +445,6 @@
 
 ;; Has to do it manually (for now):
 (defmethod sc/node->spec-k :headline [_] ::headline)
-(s/def :spacetools.spacedoc.node.headline/tag #{:headline})
 ;; TODO: Make it doable with `defnode` macro.
 (s/def ::headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
