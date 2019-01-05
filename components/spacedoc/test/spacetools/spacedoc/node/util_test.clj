@@ -1,7 +1,8 @@
 (ns spacetools.spacedoc.node.util-test
   "All public function in `spacetools.spacedoc.node` ns are node constructors.
   So we simply select them and generate tests based on node specs."
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.core.reducers :as r]
+            [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -41,6 +42,27 @@
                        ~v f-spec-desc#))))))))
 
 
+(defn-spec depth->headline :spacetools.spacedoc.node/headline
+  "Make headline dummy of given DEPTH and WIDTH."
+  [depth pos-int? width pos-int?]
+  ((fn rec [cur-depth cur-node]
+     (assoc cur-node
+            :children
+     (if (< cur-depth depth)
+              (r/reduce (r/monoid conj vector)
+                        (->> {:tag :headline
+                              :value (format "headline of depth: [%s]" cur-depth)
+                              :children []}
+                             (repeat)
+                             (take width)
+                             (r/map (partial rec (inc cur-depth)))))
+              (->> {:tag :headline :value "bottom" :todo? true :children []}
+                   (repeat)
+                   (take width)
+                   (vec)))))
+   1 {:tag :headline :value "root"}))
+
+
 ;; (when (and f-spec-args# f-spec-ret#)
 ;;   (binding [s/*recursion-limit* 2]
 ;;     (defspec ~(symbol (str f-name "-gentest"))
@@ -50,3 +72,5 @@
 ;;         (prop/for-all
 ;;          [args# (-> f-spec-args# (s/gen) (gen/no-shrink))]
 ;;          (s/valid? f-spec-ret# (apply ~v args#)))))))
+
+

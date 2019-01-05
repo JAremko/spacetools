@@ -554,17 +554,35 @@
 (defn-spec link ::link
   "\"link\" node constructor."
   [link :spacetools.spacedoc.node.link/path & children (s/* ::inline-element)]
-  {:pre  [(nu/link->link-prefix link)
-          (s/valid? :spacetools.spacedoc.node.link/path link)
+  {:pre  [(s/valid? :spacetools.spacedoc.node.link/path link)
           (s/valid? :spacetools.spacedoc.node.link/children
                     (vec children))]
    :post [(s/valid? ::link %)]}
-  (let [link-prefix (nu/link->link-prefix link)
+  (let [link-prefix (->> (vals (cfg/link-type->prefix))
+                         (filter (partial str/starts-with? link))
+                         (first))
         link-type ((map-invert (cfg/link-type->prefix)) link-prefix)]
     {:tag :link
      :type link-type
      :path link
      :children (vec children)}))
+
+
+;; list-item
+
+(defn-spec list-item ::list-item
+  "create list item node."
+  [item-type #{:ordered :unordered}
+   idx nat-int?
+   & children (s/with-gen (s/+ :spacetools.spacedoc.node.item-children/child)
+                #(gen/vector
+                  (s/gen :spacetools.spacedoc.node.item-children/child)
+                  1 3))]
+  {:tag :list-item
+   :type item-type
+   :bullet (if (= item-type :unordered) "- " (str (inc idx) ". "))
+   :checkbox nil
+   :children [{:tag :item-children :children (vec children)}]})
 
 
 ;; plain-list
@@ -583,7 +601,7 @@
    :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :unordered
-   :children (into [] (map-indexed (partial nu/list-item :unordered)) items)})
+   :children (vec (map-indexed (partial apply list-item :unordered) items))})
 
 
 (defn-spec ordered-list ::plain-list
@@ -600,7 +618,7 @@
    :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :ordered
-   :children (into [] (map-indexed (partial nu/list-item :ordered)) items)})
+   :children (vec (map-indexed (partial apply list-item :ordered) items))})
 
 
 (defn-spec root ::root

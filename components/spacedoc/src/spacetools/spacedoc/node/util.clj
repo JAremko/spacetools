@@ -9,6 +9,8 @@
             [spacetools.spacedoc.core :as sc]))
 
 
+;;;; Headline utils
+
 (defn-spec headline? boolean?
   "Return true if NODE is headline."
   [x any?]
@@ -54,27 +56,4 @@
 (defn-spec todo-or-has-children? boolean?
   "HEADLINE node should have children or value of `:todo?` should be `true`."
   [headline headline?]
-  (or (:todo? headline)
-      ((complement empty?) (:children headline))))
-
-
-(defn-spec link->link-prefix string?
-  "given full link return corresponding prefix(usually protocol + ://)."
-  [path (s/and string? (complement str/blank?))]
-  (->> (vals (cfg/link-type->prefix))
-       (filter (partial str/starts-with? path))
-       (first)))
-
-
-;; NOTE: Had to wrap output spec in `s/valid?` because we don't have
-;;       the spec yet (and `defn-spec` queries it).
-(defn-spec list-item #(s/valid? :spacetools.spacedoc.node/list-item %)
-  "create list item node."
-  [item-type #{:ordered :unordered}
-   idx nat-int?
-   item (s/+ :spacetools.spacedoc.node.item-children/child)]
-  {:tag :list-item
-   :type item-type
-   :bullet (if (= item-type :unordered) "- " (str (inc idx) ". "))
-   :checkbox nil
-   :children [{:tag :item-children :children (vec item)}]})
+  (or (:todo? headline) ((complement empty?) (:children headline))))
