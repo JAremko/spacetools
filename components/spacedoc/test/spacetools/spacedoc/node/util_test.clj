@@ -84,13 +84,17 @@
      (testing "headline? test"
        (is (headline? headline)
            "Valid headline is headline."))
+     (testing "todo-or-has-children? test"
+       (is (todo-or-has-children? headline)
+           "Valid headline should have children or b marked as todo."))
      (testing "headline->depth test"
        (is (>= (cfg/max-headline-depth) (headline->depth headline) 1)
            "Valid headline depth should be in acceptable range."))
      (testing "clamp-headline-children test"
-       (let [[removed added same] (diff headline (clamp-headline-children
-                                                  (inc (cfg/max-headline-depth))
-                                                  headline))]
+       (let [[removed added same] (diff headline
+                                        (clamp-headline-children
+                                         (inc (cfg/max-headline-depth))
+                                         headline))]
          (is (every? nil? [removed added])
              "Clamping children to level over upper bound should do nothing."))
        (is (nil? (hl-problems (clamp-headline-children
@@ -102,20 +106,23 @@
                 (filter headline?)
                 (empty?))
            "headline clamped to 1 level shouldn't have headline children.")
-       (let [[removed added same] (diff headline (clamp-headline-children
-                                                  (headline->depth headline)
-                                                  headline))]
+       (let [[removed added same] (diff headline
+                                        (clamp-headline-children
+                                         (headline->depth headline)
+                                         headline))]
          (is (every? nil? [removed added])
-             "headline clamped to its original level should be the same."))))))
-
-;; (when (and f-spec-args# f-spec-ret#)
-;;   (binding [s/*recursion-limit* 2]
-;;     (defspec ~(symbol (str f-name "-gentest"))
-;;       {:num-tests ~(tu/samples 10)
-;;        :reporter-fn (tu/make-f-spec-reper f-spec-ret# ~v ~f-name)}
-;;       (testing "The function always returns valid result"
-;;         (prop/for-all
-;;          [args# (-> f-spec-args# (s/gen) (gen/no-shrink))]
-;;          (s/valid? f-spec-ret# (apply ~v args#)))))))
-
-
+             "headline clamped to its original level should be the same.")))
+     (testing "mark-empty-as-todo test"
+       (let [empty-headline (assoc headline :children [])]
+         (is (:todo? (mark-empty-as-todo empty-headline))
+             "Empty headline should be marked as todo.")))
+     (testing "fmt-headline test"
+       (let [empty-headline (assoc headline :children [])]
+         (is (empty? (hl-problems (fmt-headline 1 empty-headline)))
+             "Formatting empty headline should make it valid."))
+       (let [[removed added same] (diff headline
+                                        (fmt-headline
+                                         (headline->depth headline)
+                                         headline))]
+         (is (every? nil? [removed added])
+             "Formatting valid headline should do nothing."))))))

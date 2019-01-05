@@ -34,7 +34,7 @@
   ((fn rec [depth {:keys [value children todo?] :as node}]
      (assoc node :children
             (if (and (headline? node) (>= depth level))
-              (remove headline? children)
+              (->> children (remove headline?) (vec))
               (mapv (partial rec (inc depth)) children))))
    1 headline))
 
