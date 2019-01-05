@@ -18,7 +18,7 @@
 
 
 (defn-spec headline->depth pos-int?
-  "return how deeply children of headline go."
+  "Return the depth of the most nested child headline."
   [headline headline?]
   ((fn rec [depth node]
      (if (headline? node)
@@ -29,12 +29,12 @@
 
 
 (defn-spec clamp-headline-children headline?
-  "delete hl headline children that are deeper than level."
+  "delete child headlines of HEADLINE that are deeper than LEVEL."
   [level pos-int? headline headline?]
   ((fn rec [depth {:keys [value children todo?] :as node}]
      (assoc node :children
             (if (and (headline? node) (>= depth level))
-              []
+              (remove headline? children)
               (mapv (partial rec (inc depth)) children))))
    1 headline))
 
