@@ -14,6 +14,9 @@
 
 (st/instrument)
 
+
+;; Grab all public functions in `spacetools.spacedoc.node`
+;; and their specs. Then run it through generative testing.
 (doall
  (for [v (vals (ns-publics 'spacetools.spacedoc.node))
        :let [f-name (str (:name (meta v)))]

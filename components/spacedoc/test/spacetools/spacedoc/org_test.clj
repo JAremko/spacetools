@@ -14,6 +14,8 @@
 
 
 (defmulti invariants
+  "Given tested NODE and its ORG-STR(org string representation), returns true
+  if the data stays consistent between formats."
   (fn [node org-str]
     (if-let [node-spec (s/get-spec (sc/node->spec-k node))]
       (cond
