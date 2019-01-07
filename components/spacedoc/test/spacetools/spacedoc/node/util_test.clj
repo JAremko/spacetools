@@ -19,30 +19,39 @@
 
 (defn-spec depth->headline :spacetools.spacedoc.node/headline
   "Make headline dummy of given DEPTH and WIDTH."
-  [depth nat-int? width nat-int?]
-  (letfn [(hl-tmpl [level]
-            {:tag :headline
-             :todo? false
-             :value (format "headline of depth: [%s]" level)
-             :children []})
-          (btm-tmpl [width]
-            (->> {:tag :headline :value "edge" :todo? true :children []}
-                 (repeat)
-                 (take width)
-                 (vec)))]
-    (if (or (<= depth 1) (< width 1))
-      (first (btm-tmpl 1))
-      ((fn rec [cur-d cur-node]
-         (assoc cur-node
-                :children
-                (if (< cur-d depth)
-                  (r/reduce (r/monoid conj vector)
-                            (->> (hl-tmpl cur-d)
-                                 (repeat)
-                                 (take width)
-                                 (r/map (partial rec (inc cur-d)))))
-                  (btm-tmpl width))))
-       2 {:tag :headline :todo? false :value "edge"}))))
+  ([depth nat-int?] (depth->headline depth 1))
+  ([depth nat-int? width nat-int?]
+   (letfn [(root-tmpl [todo?]
+             {:tag :headline :todo? todo? :value "root" :children []})
+           (hl-tmpl [level]
+             {:tag :headline
+              :todo? false
+              :value (format "headline of depth: [%s]" level)
+              :children []})
+           (btm-tmpl [width]
+             (->> {:tag :headline :value "bottom" :todo? true :children []}
+                  (repeat)
+                  (take width)
+                  (vec)))]
+     (if (or (<= depth 1) (< width 1))
+       (root-tmpl true)
+       ((fn rec [cur-d cur-node]
+          (assoc cur-node
+                 :children
+                 (vec (map-indexed (fn [indx hl]
+                                     (update hl
+                                             :value
+                                             (partial format "%s index: [%s]")
+                                             indx))
+                                   (if (< cur-d depth)
+                                     (r/reduce
+                                      (r/monoid conj vector)
+                                      (->> (hl-tmpl cur-d)
+                                           (repeat)
+                                           (take width)
+                                           (r/map (partial rec (inc cur-d)))))
+                                     (btm-tmpl width))))))
+        2 (root-tmpl false))))))
 
 
 (defn-spec hl-problems (s/nilable (s/coll-of map? :min-count 1))
@@ -60,7 +69,9 @@
 (deftest headline-utility-value-test
   (testing "headline? function"
     (testing "Headlines are headlines."
-      (is (every? headline? [(-> "foo"
+      (is (every? headline? [(depth->headline 1)
+                             (depth->headline 2)
+                             (-> "foo"
                                  (n/todo))
                              (->> "bar"
                                   (n/text)
@@ -77,9 +88,13 @@
                    (n/src "bar" "baz")
                    (n/italic (n/text "qux"))]))))
   (testing "headline->depth function"
-    (is (= (headline->depth (n/headline "foo" (n/todo "bar")))
+    (is (= (headline->depth (depth->headline 2 1))
+           (headline->depth (depth->headline 2 2))
+           (headline->depth (depth->headline 2 3))
            2))
-    (is (= (headline->depth (n/todo "foo"))
+    (is (= (headline->depth (depth->headline 1 1))
+           (headline->depth (depth->headline 1 2))
+           (headline->depth (depth->headline 1 3))
            1)))
   (testing "clamp-headline-children function"
     (let [hl-2-lvl (n/todo "foo" (n/todo "bar"))
