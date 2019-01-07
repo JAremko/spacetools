@@ -46,7 +46,7 @@
 (defn-spec filesystem? boolean?
   "Return true if X is a filesystem."
   [x any?]
-  (instance? com.google.common.jimfs.JimfsFileSystem x))
+  (instance? java.nio.file.FileSystem x))
 
 
 (defprotocol IConfiguration
