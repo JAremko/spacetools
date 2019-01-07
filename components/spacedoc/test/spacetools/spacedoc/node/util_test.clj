@@ -33,25 +33,26 @@
                   (repeat)
                   (take width)
                   (vec)))]
-     (if (or (<= depth 1) (< width 1))
-       (root-tmpl true)
+     (if (and (> depth 1) (pos-int? width))
        ((fn rec [cur-d cur-node]
-          (assoc cur-node
-                 :children
-                 (vec (map-indexed (fn [indx hl]
-                                     (update hl
-                                             :value
-                                             (partial format "%s index: [%s]")
-                                             indx))
-                                   (if (< cur-d depth)
-                                     (r/reduce
-                                      (r/monoid conj vector)
-                                      (->> (hl-tmpl cur-d)
-                                           (repeat)
-                                           (take width)
-                                           (r/map (partial rec (inc cur-d)))))
-                                     (btm-tmpl width))))))
-        2 (root-tmpl false))))))
+          (let [children (if (< cur-d depth)
+                           (r/reduce
+                            (r/monoid conj vector)
+                            (->> (hl-tmpl cur-d)
+                                 (repeat)
+                                 (take width)
+                                 (r/map (partial rec (inc cur-d)))))
+                           (btm-tmpl width))]
+            (->> children
+                 (map-indexed (fn [indx hl]
+                                (update hl
+                                        :value
+                                        (partial format "%s index: [%s]")
+                                        indx)))
+                 (vec)
+                 (assoc cur-node :children))))
+        2 (root-tmpl false))
+       (root-tmpl true)))))
 
 
 (defn-spec hl-problems (s/nilable (s/coll-of map? :min-count 1))
@@ -67,34 +68,38 @@
 ;; Those are pretty naive but fast tests just to make sure that stuff isn't
 ;; obviously broken. We use generative testing to catch non-trivial errors.
 (deftest headline-utility-value-test
-  (testing "headline? function"
-    (testing "Headlines are headlines."
-      (is (every? headline? [(depth->headline 1)
-                             (depth->headline 2)
-                             (-> "foo"
-                                 (n/todo))
-                             (->> "bar"
-                                  (n/text)
-                                  (n/paragraph)
-                                  (n/section)
-                                  (n/headline "baz"))
-                             (-> (n/text "qux")
-                                 (n/paragraph)
-                                 (n/section)
-                                 (n/description))])))
-    (testing "Other nodes aren't headlines"
-      (is (every? (complement headline?)
-                  [(n/text "foo")
-                   (n/src "bar" "baz")
-                   (n/italic (n/text "qux"))]))))
+  (let [headlines [(depth->headline 1)
+                   (depth->headline 2)
+                   (-> "foo"
+                       (n/todo))
+                   (->> "bar"
+                        (n/text)
+                        (n/paragraph)
+                        (n/section)
+                        (n/headline "baz"))
+                   (-> (n/text "qux")
+                       (n/paragraph)
+                       (n/section)
+                       (n/description))]
+        not-headlines [(n/text "foo")
+                       (n/src "bar" "baz")
+                       (n/italic (n/text "qux"))]]
+    (testing "headline? function"
+      (testing "Headlines are headlines."
+        (is (every? headline? headlines)))
+      (testing "Other nodes aren't headlines"
+        (is (every? (complement headline?) not-headlines))))
+    (testing "todo-or-has-children? function"
+      (is (every? todo-or-has-children? headlines))
+      (is (not (todo-or-has-children? (assoc (n/headline "foo" (n/todo "bar"))
+                                             :children []))))
+      (is (not (todo-or-has-children? (assoc (n/todo "foo") :todo? false))))))
   (testing "headline->depth function"
     (is (= (headline->depth (depth->headline 2 1))
            (headline->depth (depth->headline 2 2))
-           (headline->depth (depth->headline 2 3))
            2))
     (is (= (headline->depth (depth->headline 1 1))
            (headline->depth (depth->headline 1 2))
-           (headline->depth (depth->headline 1 3))
            1)))
   (testing "clamp-headline-children function"
     (let [hl-2-lvl (n/todo "foo" (n/todo "bar"))
@@ -104,18 +109,25 @@
              hl-2-lvl))
       (is (= (clamp-headline-children 1 hl-2-lvl)
              hl-1-lvl))))
-  (testing "mark-empty-as-todo function"
-    (let [hl-2-lvl (depth->headline 2 1)
-          hl-1-lvl-trimmed (assoc hl-2-lvl :children [])
-          hl-1-lvl-todo (depth->headline 1 1)]
-      (testing "Sanity"
-        (is (not= hl-2-lvl hl-1-lvl-todo))
-        (is (not= hl-2-lvl hl-1-lvl-trimmed))
-        (is (not= hl-1-lvl-todo hl-1-lvl-trimmed)))
+  (let [hl-2-lvl (depth->headline 2 1)
+        hl-1-lvl-trimmed (assoc hl-2-lvl :children [])
+        hl-1-lvl-todo (depth->headline 1 1)]
+    (testing "Headline equality sanity"
+      (is (not= hl-2-lvl hl-1-lvl-todo))
+      (is (not= hl-2-lvl hl-1-lvl-trimmed))
+      (is (not= hl-1-lvl-todo hl-1-lvl-trimmed)))
+    (testing "mark-empty-as-todo function"
       (is (= (mark-empty-as-todo hl-1-lvl-trimmed)
              hl-1-lvl-todo))
       (is (= (mark-empty-as-todo hl-2-lvl)
-             hl-2-lvl)))))
+             hl-2-lvl)))
+    (testing "fmt-headline function"
+      (is (= (fmt-headline 2 hl-2-lvl)
+             hl-2-lvl))
+      (is (= (fmt-headline 1 hl-2-lvl)
+             hl-1-lvl-todo))
+      (is (= (fmt-headline 1 hl-1-lvl-trimmed)
+             hl-1-lvl-todo)))))
 
 
 ;; Make sure that all public functions in `spacetools.spacedoc.node.util`
@@ -132,7 +144,7 @@
 
        ;; All public functions properly speced?
        (deftest ~(symbol (str f-name "-has-spec"))
-         (testing (str "Public function \"" ~v "\" properly speced.")
+         (testing (str "Public function \"" ~v "\" properly speced")
            (is (s/spec? f-spec#)
                (format (str "Public function \"%s`\" doesn't have spec.\n") ~v))
            (is (s/spec? f-spec-args#)
