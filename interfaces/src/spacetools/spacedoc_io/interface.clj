@@ -1,7 +1,5 @@
 (ns spacetools.spacedoc-io.interface)
 
-
-(def config-file-name)
 (defn *fp->sdn [path])
 (defn *sdn-fps-in-dir [input-dir-path])
 (defn *read-cfg-overrides [overrides-fp])

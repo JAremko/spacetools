@@ -1,16 +1,70 @@
-(ns spacetools.spacedoc-io.core-test
+(ns spacetools.spacedoc-io.interface-test
   (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc-io.interface :refer :all]
+            [spacetools.spacedoc-io.core :refer [filesystem]]
+            [spacetools.spacedoc-io.interface :as io]
             [spacetools.test-util.interface :as tu]))
 
 
-;; (st/instrument)
+(defmacro testing-io
+  "Testing IO functions with fresh \"in-memory\" file-system.
+  NAME is the name of the test (goes to `testing`).
+  Each element of TEST-FORMS has the shape: [STRUCT OS BODY] where:
+  STRUCT is the file system initial structure - see `tu/create-fs`.
+  OS is the operation system used in the test and mast be one of the
+  keywords: `:unix` `:osx` `:windows`. BODY is the `testing` macro body."
+  [name & test-forms]
+  (conj (for [test-form test-forms
+              :let [[struct os & body] test-form]]
+          `(testing (format "Testing \"%s\" I/O function on \"%s\" OS"
+                            ~name
+                            (str/capitalize (name ~os)))
+             (with-redefs [filesystem (tu/create-fs ~struct  ~os)]
+               ~@body)))
+        'do))
+
+
+(st/instrument)
+
+
+;; We're testing only interface of the component.
+(deftest spacedoc-io
+  (testing-io "absolute"
+              [[] :unix
+               (is (= "/work/bar" (str (io/absolute "bar"))))]
+              [[] :osx
+               (is (= "/work/bar" (str (io/absolute "bar"))))]
+              [[] :windows
+               (is (= "C:\\work\\bar" (str (io/absolute "bar"))))])
+
+  ;; (testing-io "rebase-path" [] :unix
+  ;;             )
+  ;; (testing-io "rebase-path" [] :unix
+  ;;             )
+  ;; (testing-io "rebase-path" [] :unix
+  ;;             )
+  ;; (testing-io "*spit" [] :unix
+  ;;             )
+  ;; (testing-io "sdn-file?" [] :unix
+  ;;             )
+  ;; (testing-io "directory?" [] :unix
+  ;;             )
+  ;; (testing-io "*sdn-fps-in-dir" [] :unix
+  ;;             )
+  ;; (testing-io "*fp->sdn" [] :unix
+  ;;             )
+  ;; (testing-io "try-m->output" [] :unix
+  ;;             )
+  ;; (testing-io "*read-cfg-overrides" [] :unix
+              ;;             )
+              )
+;; => #'spacetools.spacedoc-io.interface-test/spacedoc-io
 
 
 ;; (doall

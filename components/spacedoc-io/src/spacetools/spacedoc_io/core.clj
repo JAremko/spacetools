@@ -61,14 +61,14 @@
   "Returns true if X is a directory."
   [x any?]
   (io! (when (file-ref? x)
-         (some-> x (file-ref->path) (nio/dir?) (some?)))))
+         (some-> x (file-ref->path) (nio/dir?)))))
 
 
 (defn-spec file? boolean?
   "Returns true if X is a file but not a directory."
   [x any?]
   (io! (when (file-ref? x)
-         (some-> x (file-ref->path) (nio/file?) (some?)))))
+         (some-> x (file-ref->path) (nio/file?)))))
 
 
 (defn-spec error? boolean?
@@ -106,12 +106,7 @@
 (defn-spec absolute path?
   "Return absolute version of the PATH."
   [path file-ref?]
-  (io! (-> path
-           (file-ref->path)
-           (nio/file)
-           (.getAbsoluteFile)
-           (.getCanonicalPath)
-           (str->path))))
+  (io! (-> path (file-ref->path) (nio/absolute))))
 
 
 (defn-spec rebase-path path?
@@ -119,7 +114,7 @@
   [old-base file-ref? new-base file-ref? path file-ref?]
   (io! (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
                                   [old-base new-base path])]
-         (nio/file (str->path (str/replace-first a-p a-ob a-nb))))))
+         (str->path (str/replace-first a-p a-ob a-nb)))))
 
 
 (defmacro exception-of?
@@ -254,7 +249,9 @@
           (if (directory? p)
             (into #{}
                   (comp (map (partial absolute)) (filter sdn-file?) (map str))
-                  (file-seq (nio/file p)))
+                  (tree-seq nio/dir?
+                            #(-> % nio/dir-stream (.iterator) (iterator-seq))
+                            p))
             (throw
              ((cond
                 (not (nio/exists? p)) (partial ex-info "File doesn't exists")

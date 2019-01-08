@@ -50,7 +50,7 @@
        ;; [gentest] All node constructors produce valid values?
        (when (and f-spec-args# f-spec-ret#)
          (binding [s/*recursion-limit* 2]
-           (defspec ~(symbol (str f-name "-gentest"))
+           (defspec ~(symbol (str f-name "-gen"))
              {:num-tests ~(tu/samples 10)
               :reporter-fn (tu/make-f-spec-reper f-spec-ret# ~v ~f-name)}
              (testing "The function always returns valid result"

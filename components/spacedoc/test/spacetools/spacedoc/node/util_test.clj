@@ -67,7 +67,7 @@
 
 ;; Those are pretty naive but fast tests just to make sure that stuff isn't
 ;; obviously broken. We use generative testing to catch non-trivial errors.
-(deftest headline-utility-value-test
+(deftest headline-utility
   (let [headlines [(depth->headline 1)
                    (depth->headline 2)
                    (-> "foo"
@@ -157,8 +157,8 @@
                        ~v f-spec-desc#))))))))
 
 
-(deftest headline-utility-gentest
-  (defspec valid-headline-gentest
+(deftest headline-utility-gen
+  (defspec valid-headline-gen
     {:num-tests (tu/samples 10)}
     (prop/for-all
      [headline (gen/no-shrink (s/gen :spacetools.spacedoc.node/headline))]

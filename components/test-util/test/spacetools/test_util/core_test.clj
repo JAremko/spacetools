@@ -11,9 +11,9 @@
 
 
 ;; This component consists primary out of thin wrapper over well tested
-;; third party code so the tests below focus on making sure that the
-;; wrapping done right.
-(deftest  test-util-test
+;; third party code so the tests below are focused on making sure that the
+;; wiring done right.
+(deftest  test-util
   (testing "samples function"
     (is (pos-int? (tu/samples 1)))
     (is (zero? (rem (tu/samples 3) 3))))
