@@ -15,13 +15,13 @@
 (defmacro testing-io
   "Testing IO functions with fresh \"in-memory\" file-system.
   NAME is the name of the test (goes to `testing`).
-  Each element of TEST-FORMS has the shape: [STRUCT OS BODY] where:
   STRUCT is the file system initial structure - see `tu/create-fs`.
+  Each element of TEST-FORMS has the shape: [OS BODY] where:
   OS is the operation system used in the test and mast be one of the
   keywords: `:unix` `:osx` `:windows`. BODY is the `testing` macro body."
-  [name & test-forms]
+  [name struct & test-forms]
   (conj (for [test-form test-forms
-              :let [[struct os & body] test-form]]
+              :let [[os & body] test-form]]
           `(testing (format "Testing \"%s\" I/O function on \"%s\" OS"
                             ~name
                             (str/capitalize (name ~os)))
@@ -35,12 +35,12 @@
 
 ;; We're testing only interface of the component.
 (deftest spacedoc-io
-  (testing-io "absolute"
-              [[] :unix
+  (testing-io "absolute" []
+              [:unix
                (is (= "/work/bar" (str (io/absolute "bar"))))]
-              [[] :osx
+              [:osx
                (is (= "/work/bar" (str (io/absolute "bar"))))]
-              [[] :windows
+              [:windows
                (is (= "C:\\work\\bar" (str (io/absolute "bar"))))])
 
   ;; (testing-io "rebase-path" [] :unix
@@ -62,8 +62,8 @@
   ;; (testing-io "try-m->output" [] :unix
   ;;             )
   ;; (testing-io "*read-cfg-overrides" [] :unix
-              ;;             )
-              )
+  ;;             )
+  )
 ;; => #'spacetools.spacedoc-io.interface-test/spacedoc-io
 
 
