@@ -7,7 +7,7 @@
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [nio2 "0.2.1"]
                  [org.clojure/tools.cli "0.4.1"]]
-  :main spacetools.spacedoc-cli.core
+  :main spacetools.spacedoc-cli.run
   :uberjar-name "spacedoc.jar"
   :global-vars {*warn-on-reflection* true *assert* true}
   :profiles {:dev {:jvm-opts ["-Xss8m"]

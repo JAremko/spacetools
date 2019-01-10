@@ -5,5 +5,5 @@
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/tools.cli "0.4.1"]
                  [spacetools/interfaces "1.0"]]
-  :main spacetools.spacedoc-cli.core
+  :main spacetools.spacedoc-cli.run
   :aot :all)
