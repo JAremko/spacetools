@@ -21,6 +21,7 @@
     (is (pos-int? (tu/samples 1)))
     (is (zero? (rem (tu/samples 3) 3)))))
 
+
 (deftest make-f-spec-reper-fn
   (testing "make-f-spec-reper function"
     (is (function? (tu/make-f-spec-reper
@@ -28,10 +29,12 @@
                     #'spacetools.test-util.core/make-f-spec-reper
                     "foo")))))
 
+
 (deftest create-fs-fn
   (testing "create-fs function"
     (is (every? tu/filesystem? (map (partial tu/create-fs [])
                                     [:unix :osx :windows])))))
+
 
 (deftest filesystem-io
   (testing "Im memory file system (jimfs) I/O [UNIX]"
@@ -82,6 +85,7 @@
       (is (= (nio/read-all-lines (nio/path fs "C:\\path\\to\\text-file-b"))
              ["line 1" "line 2"]))
       (is (nio/dir? (nio/path fs "C:\\path\\to"))))))
+
 
 (deftest testing-io-macro
   (testing "testing-io macro"

@@ -7,6 +7,7 @@
             [orchestra.spec.test :as st]
             [spacetools.spacedoc-io.interface :refer [filesystem]]
             [spacetools.spacedoc-io.interface :as io]
+            [spacetools.spacedoc.config :as sc]
             [spacetools.spacedoc.node :as sn]
             [spacetools.test-util.interface :as tu :refer [testing-io]]))
 
@@ -144,34 +145,70 @@
                       @(io/*sdn-fps-in-dir "C:\\")))]))
 
 
-(deftest *fp->sdn
+(deftest *fp->sdn-fn
   (let [valid-sdn (-> (sn/todo "foo")
                       (sn/root)
                       (str))]
     (testing-io "*fp->sdn function" [[:foo.sdn valid-sdn]
                                      [:bar.sdn "{:foo :bar}"]
-                                     [:baz.qux valid-sdn]]
+                                     [:baz.txt valid-sdn]
+                                     [:qux.sdn (str valid-sdn valid-sdn)]]
                 [:unix
                  (is (exc/success? (io/*fp->sdn "/foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "/baz.qux")))
-                 (is (= valid-sdn (str @(io/*fp->sdn "/baz.qux"))))
+                 (is (exc/success? (io/*fp->sdn "/baz.txt")))
+                 (is (= valid-sdn (str @(io/*fp->sdn "/baz.txt"))))
+                 (is (exc/failure? (io/*fp->sdn "/qux.sdn")))
                  (is (exc/failure? (io/*fp->sdn "/")))
                  (is (exc/failure? (io/*fp->sdn "/bar.sdn")))]
                 [:osx
                  (is (exc/success? (io/*fp->sdn "/foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "/baz.qux")))
-                 (is (= valid-sdn (str @(io/*fp->sdn "/baz.qux"))))
+                 (is (exc/success? (io/*fp->sdn "/baz.txt")))
+                 (is (= valid-sdn (str @(io/*fp->sdn "/baz.txt"))))
+                 (is (exc/failure? (io/*fp->sdn "/qux.sdn")))
                  (is (exc/failure? (io/*fp->sdn "/")))
                  (is (exc/failure? (io/*fp->sdn "/bar.sdn")))]
                 [:windows
                  (is (exc/success? (io/*fp->sdn "C:\\foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "C:\\baz.qux")))
-                 (is (= valid-sdn (str @(io/*fp->sdn "C:\\baz.qux"))))
+                 (is (exc/success? (io/*fp->sdn "C:\\baz.txt")))
+                 (is (= valid-sdn (str @(io/*fp->sdn "C:\\baz.txt"))))
+                 (is (exc/failure? (io/*fp->sdn "C:\\qux.sdn")))
                  (is (exc/failure? (io/*fp->sdn "C:\\")))
                  (is (exc/failure? (io/*fp->sdn "C:\\bar.sdn")))])))
 
 
-;; (testing-io "try-m->output" [] :unix
-;;             )
-;; (testing-io "*read-cfg-overrides" [] :unix
-;;             )
+(deftest *read-cfg-overrides-fn
+  (testing-io "*read-cfg-overrides function" [[:foo.edn (str sc/default-config)]
+                                              [:bar.edn "{:foo :bar}"]]
+              [:unix
+               (is (exc/success? (io/*read-cfg-overrides "/foo.edn")))
+               (is (s/valid? :spacetools.spacedoc.config/overriding-configs
+                             @(io/*read-cfg-overrides "/foo.edn")))
+               (is (exc/exception? (io/*read-cfg-overrides "/")))
+               (is (exc/exception? (io/*read-cfg-overrides "/bar.edn")))]
+              [:osx
+               (is (exc/success? (io/*read-cfg-overrides "/foo.edn")))
+               (is (s/valid? :spacetools.spacedoc.config/overriding-configs
+                             @(io/*read-cfg-overrides "/foo.edn")))
+               (is (exc/exception? (io/*read-cfg-overrides "/")))
+               (is (exc/exception? (io/*read-cfg-overrides "/bar.edn")))]
+              [:windows
+               (is (exc/success? (io/*read-cfg-overrides "C:\\foo.edn")))
+               (is (s/valid? :spacetools.spacedoc.config/overriding-configs
+                             @(io/*read-cfg-overrides "C:\\foo.edn")))
+               (is (exc/exception? (io/*read-cfg-overrides "C:\\")))
+               (is (exc/exception? (io/*read-cfg-overrides "C:\\bar.edn")))]))
+
+
+(deftest try-m->output-fn
+  (testing "Testing try-m->output function"
+    (let [ok-out (new java.io.StringWriter)
+          err-out (new java.io.StringWriter)]
+      (binding [*out* ok-out
+                *err* err-out]
+        (with-redefs-fn {#'spacetools.spacedoc-io.core/exit (constantly nil)}
+          #(do (io/try-m->output (exc/success "foo"))
+               (io/try-m->output (exc/failure (ex-info "bar" {})))
+               (is (str/includes? (str ok-out) "foo"))
+               (is (not (str/includes? (str ok-out) "bar")))
+               (is (str/includes? (str err-out) "bar"))
+               (is (not (str/includes? (str err-out) "foo")))))))))

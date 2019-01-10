@@ -211,7 +211,7 @@
   "Read and validate configuration overrides from a PATH file."
   [path file-ref?]
   (io! (exc/try-or-recover
-        (when (edn-file? path)
+        (if (edn-file? path)
           (with-open [input (->> path
                                  file-ref->path
                                  (nio/buffered-reader)
@@ -225,7 +225,8 @@
                   "Invalid overrides"
                   {:explanation (s/explain-data
                                  :spacetools.spacedoc.config/overriding-configs
-                                 cfg-ovr)}))))))
+                                 cfg-ovr)})))))
+          (ex-info (format "Not an edn-file" {:path (str path)})))
         (fn [^Exception err]
           (exc/failure (ex-info "Can't read configuration overrides file"
                                 {:path path :error err}))))))
