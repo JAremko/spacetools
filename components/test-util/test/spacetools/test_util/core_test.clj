@@ -4,7 +4,7 @@
             [clojure.test :refer :all]
             [nio2.core :as nio]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc-io.interface :refer [filesystem]]
+            [spacetools.spacedoc-io.core :refer [filesystem]]
             [spacetools.test-util.core :as tu]))
 
 

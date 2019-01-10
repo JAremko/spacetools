@@ -1,6 +1,6 @@
 (ns spacetools.spacedoc-io.interface)
 
-(def filesystem io/filesystem)
+(def filesystem)
 (defn *fp->sdn [path])
 (defn *sdn-fps-in-dir [input-dir-path])
 (defn *read-cfg-overrides [overrides-fp])
