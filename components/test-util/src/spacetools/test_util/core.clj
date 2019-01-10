@@ -1,11 +1,14 @@
 (ns spacetools.test-util.core
   "Shared utility for testing stuff."
   (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [clojure.test :refer [report]]
+            [clojure.test :refer [testing]]
             [clojure.test.check.clojure-test :refer [default-reporter-fn]]
             [environ.core :refer [env]]
             [nio2.core :as nio]
-            [orchestra.core :refer [defn-spec]])
+            [orchestra.core :refer [defn-spec]]
+            [spacetools.spacedoc-io.interface :as sio])
   (:import  [com.google.common.jimfs Jimfs Configuration]))
 
 
@@ -84,3 +87,22 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
          fs (init-fs config)]
      (nio/create-fs-tree! fs (fs-root config) struct)
      fs)))
+
+
+(defmacro testing-io
+  "Testing IO functions with fresh \"in-memory\" file-system.
+  NAME is the name of the test (goes to `testing`).
+  STRUCT is the file system initial structure - see `tu/create-fs`.
+  Each element of TEST-FORMS has the shape: [OS BODY] where:
+  OS is the operation system used in the test and mast be one of the
+  keywords: `:unix` `:osx` `:windows`. BODY is the `testing` macro body."
+  [name struct & test-forms]
+  (conj (for [test-form test-forms
+              :let [[os & body] test-form]]
+          `(testing (format "Testing %s with in-memory %s filesystem"
+                            ~name
+                            (str/capitalize (name ~os)))
+             (with-redefs [spacetools.spacedoc-io.core/filesystem
+                           (create-fs ~struct  ~os)]
+               ~@body)))
+        'do))

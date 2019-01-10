@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc-cli.core
+(ns spacetools.spacedoc-cli.run
   "Tools for Spacemacs documentation files in .sdn format."
   (:require [cats.core :refer [mlet]]
             [cats.monad.exception :refer [failure]]

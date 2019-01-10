@@ -60,15 +60,15 @@
 (defn-spec directory? boolean?
   "Returns true if X is a directory."
   [x any?]
-  (io! (when (file-ref? x)
-         (some-> x (file-ref->path) (nio/dir?)))))
+  (io! (and (file-ref? x)
+            (some-> x (file-ref->path) (nio/dir?)))))
 
 
 (defn-spec file? boolean?
   "Returns true if X is a file but not a directory."
   [x any?]
-  (io! (when (file-ref? x)
-         (some-> x (file-ref->path) (nio/file?)))))
+  (io! (and (file-ref? x)
+            (some-> x (file-ref->path) (nio/file?)))))
 
 
 (defn-spec error? boolean?
@@ -86,9 +86,10 @@
 (defn-spec file-with-ext? boolean?
   "Returns true if X is a `::file-ref` with extension matching EXT-PAT."
   [ext-pat regexp? x any?]
-  (when (file? x)
-    (let [fp (file-ref->path x)]
-      (some->> fp (str) (re-matches ext-pat) (some?)))))
+  (some?
+   (when (file? x)
+     (let [fp (file-ref->path x)]
+       (some->> fp (str) (re-matches ext-pat))))))
 
 
 (defn-spec sdn-file? boolean?

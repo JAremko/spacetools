@@ -4,3 +4,4 @@
 (defn samples [base-sample-count])
 (defn create-fs [struct])
 (defn create-fs [struct os-kw])
+(defmacro testing-io [name struct & test-forms] `(tu/testing-io ,name ,struct ,test-forms))

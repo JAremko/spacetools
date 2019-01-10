@@ -2,6 +2,7 @@
   (:require [spacetools.spacedoc-io.core :as io]))
 
 
+(def filesystem io/filesystem)
 (defn absolute [path] (io/absolute path))
 (defn rebase-path [old-base new-base path] (io/rebase-path old-base new-base path))
 (defn *spit [path content] (io/*spit path content))
