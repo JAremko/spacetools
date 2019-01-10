@@ -121,12 +121,16 @@
 (defmacro exception-of?
   "Construct predicate function for testing exception monad value.
   The predicate returns true if the monad contains `exc/failure`
-  or if `exc/success` wraps value satisfying PRED predicate."
+  or if `exc/success` wraps value satisfying PRED predicate.
+  PRED also can be a spec or qualified-ident referencing a spec."
   [pred]
   `(fn [*val#]
      (and (exc/exception? *val#)
           (if (exc/success? *val#)
-            (m/bind *val# ~pred)
+            (m/bind *val# #(if (or (qualified-ident? ~pred)
+                                   (s/spec? ~pred))
+                             (s/valid? ~pred %)
+                             (~pred %)))
             true))))
 
 
@@ -134,7 +138,8 @@
   "Read and validate .SDN file."
   ([path file-ref?]
    (*fp->sdn :spacetools.spacedoc.node/root path))
-  ([root-node-spec s/spec? path file-ref?]
+  ([root-node-spec (s/or :spec s/spec? :spec-ref qualified-ident?)
+    path file-ref?]
    (io! (exc/try-or-recover
          (with-open [input (->> path
                                 file-ref->path
@@ -242,7 +247,10 @@
            (ex-info "Can't write file" {:path path}))))))
 
 
-(defn-spec *sdn-fps-in-dir (exception-of? set?)
+(defn-spec *sdn-fps-in-dir (exception-of?
+                            (s/coll-of (s/and string?
+                                              (complement str/blank?))
+                                       :kind set?))
   "Return absolute paths of .sdn files in PATH directory."
   [path file-ref?]
   (io! (exc/try-on

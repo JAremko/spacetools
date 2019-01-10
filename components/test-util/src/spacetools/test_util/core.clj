@@ -102,7 +102,8 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
           `(testing (format "Testing %s with in-memory %s filesystem"
                             ~name
                             (str/capitalize (name ~os)))
-             (with-redefs [spacetools.spacedoc-io.core/filesystem
-                           (create-fs ~struct  ~os)]
-               ~@body)))
+             (let [fs# (create-fs ~struct ~os)]
+               (with-redefs [spacetools.spacedoc-io.core/filesystem fs#
+                             spacetools.spacedoc-io.interface/filesystem fs#]
+                 ~@body))))
         'do))
