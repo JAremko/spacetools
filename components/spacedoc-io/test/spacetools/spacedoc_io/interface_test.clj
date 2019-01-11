@@ -94,6 +94,31 @@
                (is (not (io/sdn-file? "C:\\foo\\qux.sdn")))]))
 
 
+(deftest edn-file?-fn
+  (testing-io "edn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
+              [:unix
+               (is (io/edn-file? "/foo/baz.edn"))
+               (is (not (io/edn-file? 42)))
+               (is (not (io/edn-file? "/qux")))
+               (is (not (io/edn-file? "/foo")))
+               (is (not (io/edn-file? "/foo/bar.sdn")))
+               (is (not (io/edn-file? "/foo/qux.edn")))]
+              [:osx
+               (is (io/edn-file? "/foo/baz.edn"))
+               (is (not (io/edn-file? 42)))
+               (is (not (io/edn-file? "/qux")))
+               (is (not (io/edn-file? "/foo")))
+               (is (not (io/edn-file? "/foo/bar.sdn")))
+               (is (not (io/edn-file? "/foo/qux.edn")))]
+              [:windows
+               (is (io/edn-file? "C:\\foo\\baz.edn"))
+               (is (not (io/edn-file? 42)))
+               (is (not (io/edn-file? "C:\\qux")))
+               (is (not (io/edn-file? "C:\\foo")))
+               (is (not (io/edn-file? "C:\\foo\\bar.sdn")))
+               (is (not (io/edn-file? "C:\\foo\\qux.edn")))]))
+
+
 (deftest drectory?-fn
   (testing-io "directory? function" [[:foo [:bar]]]
               [:unix

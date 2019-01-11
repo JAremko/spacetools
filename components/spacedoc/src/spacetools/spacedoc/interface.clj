@@ -6,11 +6,35 @@
 
 
 (def config-file-name cfg/config-file-name)
-(defn sdn->org [node] (sdo/sdn->org node))
-(defn up-tags [spaceroot src r-node] (sdu/up-tags spaceroot src r-node))
-(defn explain-deepest [node] (sdu/explain-deepest node))
-(defn relations [parents] (sdu/relations parents))
-(defn valid-configs? [configs] (cfg/valid-configs? configs))
-(defn valid-overrides? [configs] (cfg/valid-overrides? configs))
-(defn override-configs! [overrides] (cfg/override-configs! overrides))
-(defn node? [x] (sdc/node? x))
+
+(defn sdn->org
+  [node]
+  (sdo/sdn->org node))
+
+(defn up-tags
+  [spaceroot src r-node]
+  (sdu/up-tags spaceroot src r-node))
+
+(defn explain-deepest
+  [node]
+  (sdu/explain-deepest node))
+
+(defn relations
+  [parents]
+  (sdu/relations parents))
+
+(defn valid-configs?
+  [configs]
+  (cfg/valid-configs? configs))
+
+(defn valid-overrides?
+  [configs]
+  (cfg/valid-overrides? configs))
+
+(defn override-configs!
+  [overrides]
+  (cfg/override-configs! overrides))
+
+(defn node?
+  [x]
+  (sdc/node? x))

@@ -99,6 +99,12 @@
 
 
 (defn-spec edn-file? boolean?
+  "Returns true if X is a `::file-ref` with .edn extension."
+  [x any?]
+  (file-with-ext? #"(?i).*\.edn$" x))
+
+
+(defn-spec edn-file? boolean?
   "Returns true if X is a `::file-ref` with .edn expression."
   [x any?]
   (file-with-ext? #"(?i).*\.edn$" x))
@@ -226,7 +232,7 @@
                   {:explanation (s/explain-data
                                  :spacetools.spacedoc.config/overriding-configs
                                  cfg-ovr)})))))
-          (ex-info (format "Not an edn-file" {:path (str path)})))
+          (ex-info "Not an edn-file" {:path (str path)}))
         (fn [^Exception err]
           (exc/failure (ex-info "Can't read configuration overrides file"
                                 {:path path :error err}))))))

@@ -70,5 +70,7 @@
   "Configure spacedoc with overrides from `sdu/config-file-name` file."
   []
   (m/mlet
-   [cfg-overrides (sio/*read-cfg-overrides overrides-file-name)]
+   [cfg-overrides (if (sio/edn-file? overrides-file-name)
+                    (sio/*read-cfg-overrides overrides-file-name)
+                    (exc/success {}))]
    (m/return (when cfg-overrides (sdu/override-configs! cfg-overrides)))))
