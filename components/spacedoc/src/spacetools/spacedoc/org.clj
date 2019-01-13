@@ -199,7 +199,7 @@ Return nil if ROOT node doesn't have any headlines."
   "Add Table of content based on headlines present in the ROOT node."
   [{children :children :as root} :spacetools.spacedoc.node/root]
   (if-let [toc (gen-toc root)]
-    (let [[b-toc a-toc] (split-with (complement (partial hl?)) children)]
+    (let [[b-toc a-toc] (split-with (complement hl?) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
     root))
 
@@ -245,10 +245,10 @@ Return nil if ROOT node doesn't have any headlines."
   "Separate inline elements."
   [t1 s1 t2 s2]
   (when (and (every? not-empty [s1 s2])
-             (not (= :text t1 t2)))
+             (not=  :text t1 t2))
     (let [l-s1-sep? ((cfg/seps-right) (last s1))
           f-s2-sep? ((cfg/seps-left) (first s2))]
-      (when (not (or l-s1-sep? f-s2-sep?)) " "))))
+      (when-not (or l-s1-sep? f-s2-sep?) " "))))
 
 
 (defn sep-blocks
@@ -369,16 +369,18 @@ Return nil if ROOT node doesn't have any headlines."
 
 (defmethod sdn->org :table
   [table]
-  (-> (let [[cols-w & vrep] (table->vec-rep table)]
-        (->> (r/fold (r/monoid #(join "\n" [%1 %2]) str)
-                     (r/map (comp (partial format "|%s|")
-                                  #(cond (empty? cols-w) "" ;; <- no cols
-                                         ;; Empty cols are rulers.
-                                         (empty? %) (table-ruler cols-w)
-                                         :else (table-row % cols-w)))
-                            vrep))
-             (sdu/indent (cfg/table-indentation))))
-      (str/replace-first #"^\n" "")))
+  (str/replace-first
+   #"^\n"
+   ""
+   (let [[cols-w & vrep] (table->vec-rep table)]
+     (sdu/indent (cfg/table-indentation)
+                 (r/fold (r/monoid #(join "\n" [%1 %2]) str)
+                         (r/map (comp (partial format "|%s|")
+                                      #(cond (empty? cols-w) "" ;; <- no cols
+                                             ;; Empty cols are rulers.
+                                             (empty? %) (table-ruler cols-w)
+                                             :else (table-row % cols-w)))
+                                vrep))))))
 
 
 (defn fmt-cell-content
@@ -419,7 +421,7 @@ Return nil if ROOT node doesn't have any headlines."
         last-child-kind (tag->kind last-child-tag)
         pref (str (str/trim b)
                   " "
-                  (when itag (format "%s :: " itag) ""))]
+                  (when itag (format "%s :: " itag)))]
     (apply str
            pref
            (->> children

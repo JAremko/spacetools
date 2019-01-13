@@ -99,12 +99,6 @@
 
 
 (defn-spec edn-file? boolean?
-  "Returns true if X is a `::file-ref` with .edn extension."
-  [x any?]
-  (file-with-ext? #"(?i).*\.edn$" x))
-
-
-(defn-spec edn-file? boolean?
   "Returns true if X is a `::file-ref` with .edn expression."
   [x any?]
   (file-with-ext? #"(?i).*\.edn$" x))
@@ -264,7 +258,7 @@
         (let [p (file-ref->path path)]
           (if (directory? p)
             (into #{}
-                  (comp (map (partial absolute)) (filter sdn-file?) (map str))
+                  (comp (map absolute) (filter sdn-file?) (map str))
                   (tree-seq nio/dir?
                             #(-> % nio/dir-stream (.iterator) (iterator-seq))
                             p))

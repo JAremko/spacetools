@@ -147,14 +147,14 @@ SRC is the exported file name."
   [indent-level nat-int? s string?]
   (if (str/blank? s)
     s
-    (let [ind (apply str (repeat indent-level " "))
+    (let [ind (str/join (repeat indent-level " "))
           trailing-ns (str/replace-first s (str/trim-newline s) "")
           lines (str/split-lines s)
           c-d (r/reduce (r/monoid
                          #(min %1 (- (count %2) (count (str/triml %2))))
                          (constantly (count s)))
                         (remove str/blank? lines))
-          ws-prefix (apply str (repeat c-d " "))]
+          ws-prefix (str/join (repeat c-d " "))]
       (str
        (->> lines
             (r/map (comp #(if (str/blank? %) "\n" %)
@@ -226,8 +226,8 @@ Fragments are  particular headline values in the \"/\" separated chain."
 (defn-spec valid-hl? boolean?
   "Return true if NODE is a valid headline."
   [node any?]
-  (or (and (hl? node)
-           (valid-node? node))))
+  (and (hl? node)
+       (valid-node? node)))
 
 
 ;; (defn-spec hl->list ::paragraph
