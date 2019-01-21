@@ -14,6 +14,7 @@
   "sdn_overrides.edn")
 
 
+;; TODO: Move to IO
 (defn- *flatten-fps
   "Flatten sequence of .sdn files and directories(searched for .sdn files)."
   [paths]
