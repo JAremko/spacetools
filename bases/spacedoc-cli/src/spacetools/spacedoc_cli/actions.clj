@@ -5,7 +5,7 @@
             [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [spacetools.spacedoc-cli.args :refer [*parse-fs]]
+            [spacetools.spacedoc-cli.args :refer [*parse-input-files]]
             [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :as sd]))
 
@@ -14,7 +14,7 @@
   "Validate Spacemacs documentation files with specs."
   [fs]
   (m/mlet
-   [sdn-fps (*parse-fs fs)
+   [sdn-fps (*parse-input-files fs)
     docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
    (m/return (format "%s Documentation files have been successfully validated."
                      (count docs)))))
@@ -29,7 +29,7 @@
           (export-to-org [fp content]
             (sio/*spit (org-path fp)
                        (->> content (sd/up-tags src-dir fp) (sd/sdn->org))))]
-    (m/mlet [sdn-fps (*parse-fs fs)
+    (m/mlet [sdn-fps (*parse-input-files fs)
              docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
              orgs (m/sequence (pmap export-to-org sdn-fps docs))]
             (m/return (format (str "%s .sdn files have been successfully "
@@ -52,7 +52,7 @@
 (defn *relations
   "Output nodes relations in SDN files."
   [fs]
-  (m/mlet [sdn-fps (*parse-fs fs)
+  (m/mlet [sdn-fps (*parse-input-files fs)
            docs (->> sdn-fps
                      (pmap (partial sio/*fp->sdn :spacetools.spacedoc.node/any))
                      (m/sequence))]

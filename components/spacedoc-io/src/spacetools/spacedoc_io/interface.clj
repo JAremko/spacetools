@@ -28,10 +28,6 @@
   [x]
   (io/directory? x))
 
-(defn *sdn-fps-in-dir
-  [input-dir-path]
-  (io/*sdn-fps-in-dir input-dir-path))
-
 (defn *fp->sdn
   [path]
   (io/*fp->sdn path))
@@ -43,3 +39,7 @@
 (defn *read-cfg-overrides
   [overrides-fp]
   (io/*read-cfg-overrides overrides-fp))
+
+(defn *flatten-fps
+  [ext paths]
+  (io/*flatten-fps ext paths))

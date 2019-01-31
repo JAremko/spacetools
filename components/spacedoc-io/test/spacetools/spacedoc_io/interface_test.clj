@@ -138,36 +138,36 @@
                (is (not (io/directory? "C:\\foo\\bar")))]))
 
 
-(deftest *sdn-fps-in-dir-fn
-  (testing-io "*sdn-fps-in-dir function" [[:foo.sdn]
-                                          [:foo.edn]
-                                          [:bar {:type :dir}]
-                                          [:baz
-                                           [:qux.sdn]]]
-              [:unix
-               (is (exc/success? (io/*sdn-fps-in-dir "/")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
-               (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
-               (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
-               (is (= #{"/foo.sdn" "/baz/qux.sdn"}
-                      @(io/*sdn-fps-in-dir "/")))]
-              [:osx
-               (is (exc/success? (io/*sdn-fps-in-dir "/")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
-               (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
-               (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
-               (is (= #{"/foo.sdn" "/baz/qux.sdn"}
-                      @(io/*sdn-fps-in-dir "/")))]
-              [:windows
-               (is (exc/success? (io/*sdn-fps-in-dir "C:\\")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "C:\\foo.sdn")))
-               (is (exc/failure? (io/*sdn-fps-in-dir "C:\\qux")))
-               (is (= #{} @(io/*sdn-fps-in-dir "C:\\bar")))
-               (is (= #{"C:\\baz\\qux.sdn"} @(io/*sdn-fps-in-dir "C:\\baz")))
-               (is (= #{"C:\\foo.sdn" "C:\\baz\\qux.sdn"}
-                      @(io/*sdn-fps-in-dir "C:\\")))]))
+;; (deftest *sdn-fps-in-dir-fn
+;;   (testing-io "*sdn-fps-in-dir function" [[:foo.sdn]
+;;                                           [:foo.edn]
+;;                                           [:bar {:type :dir}]
+;;                                           [:baz
+;;                                            [:qux.sdn]]]
+;;               [:unix
+;;                (is (exc/success? (io/*sdn-fps-in-dir "/")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
+;;                (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
+;;                (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
+;;                (is (= #{"/foo.sdn" "/baz/qux.sdn"}
+;;                       @(io/*sdn-fps-in-dir "/")))]
+;;               [:osx
+;;                (is (exc/success? (io/*sdn-fps-in-dir "/")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
+;;                (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
+;;                (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
+;;                (is (= #{"/foo.sdn" "/baz/qux.sdn"}
+;;                       @(io/*sdn-fps-in-dir "/")))]
+;;               [:windows
+;;                (is (exc/success? (io/*sdn-fps-in-dir "C:\\")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "C:\\foo.sdn")))
+;;                (is (exc/failure? (io/*sdn-fps-in-dir "C:\\qux")))
+;;                (is (= #{} @(io/*sdn-fps-in-dir "C:\\bar")))
+;;                (is (= #{"C:\\baz\\qux.sdn"} @(io/*sdn-fps-in-dir "C:\\baz")))
+;;                (is (= #{"C:\\foo.sdn" "C:\\baz\\qux.sdn"}
+;;                       @(io/*sdn-fps-in-dir "C:\\")))]))
 
 
 (deftest *fp->sdn-fn

@@ -3,7 +3,6 @@
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]
-            [clojure.set :refer [union]]
             [clojure.tools.cli :refer [parse-opts]]
             [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :as sdu]))
@@ -12,45 +11,6 @@
 (def overrides-file-name
   "File name of the configuration overrides."
   "sdn_overrides.edn")
-
-
-;; TODO: Move to IO
-(defn- *flatten-fps
-  "Flatten sequence of .sdn files and directories(searched for .sdn files)."
-  [paths]
-  (exc/try-on
-   (r/fold
-    (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
-    (r/map
-     #(cond
-        (sio/sdn-file? %) (exc/success (hash-set %))
-        (sio/directory? %) (sio/*sdn-fps-in-dir %)
-        :else (exc/failure (ex-info
-                            "File isn't a .sdn file or a readable directory."
-                            {:file %})))
-     paths))))
-
-
-(defn *parse-fs
-  "Parse input sequence of .sdn files and directories(searched for .sdn files)."
-  [input]
-  (exc/try-on
-   (cond (empty? input)
-         (exc/failure
-          (ex-info "At least one input must be specified for this action."
-                   {:input input}))
-
-         (string? input)
-         (*parse-fs [input])
-
-         ;; INPUT contains something that isn't path of .sdn file or a directory.
-         (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input))
-         (exc/failure
-          (ex-info "all inputs must be .SDN files or readable directories."
-                   {:input input}))
-
-         :else
-         (*flatten-fps (set input)))))
 
 
 (defn *parse
@@ -65,6 +25,28 @@
               :summary summary
               :action (first arguments)
               :a-args (vec (rest arguments)))))))
+
+
+(defn *parse-input-files
+  "Parse INPUT-FILES sequence of .sdn files and dirs (searched for .sdn files)."
+  [input-files]
+  (exc/try-on
+   (cond (empty? input-files)
+         (exc/failure
+          (ex-info "At least one input file must be specified for this action."
+                   {:input-files input-files}))
+
+         (string? input-files)
+         (*parse-input-files [input-files])
+
+         ;; Not all input files are paths of .sdn file or readable directories.
+         (first (remove #(or (sio/sdn-file? %) (sio/directory? %)) input-files))
+         (exc/failure
+          (ex-info "all input files must be .SDN files or readable directories."
+                   {:input-files input-files}))
+
+         :else
+         (sio/*flatten-fps (set input-files)))))
 
 
 (defn *configure!

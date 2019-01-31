@@ -2,7 +2,6 @@
 
 (def filesystem)
 (defn *fp->sdn [path])
-(defn *sdn-fps-in-dir [input-dir-path])
 (defn *read-cfg-overrides [overrides-fp])
 (defn *spit [path content])
 (defn absolute [path])
@@ -12,3 +11,4 @@
 (defn sdn-file? [x])
 (defn edn-file? [x])
 (defn try-m->output [*output])
+(defn *flatten-fps [ext paths])

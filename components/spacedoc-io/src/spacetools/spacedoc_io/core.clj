@@ -5,6 +5,7 @@
             [clojure.core.reducers :as r]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [nio2.core :as nio]
@@ -83,25 +84,28 @@
   (instance? java.util.regex.Pattern x))
 
 
+(s/def ::ext (s/and string? #(str/starts-with? % ".")))
+
 (defn-spec file-with-ext? boolean?
-  "Returns true if X is a `::file-ref` with extension matching EXT-PAT."
-  [ext-pat regexp? x any?]
-  (some?
+  "Returns true if X is a `::file-ref` with extension EXT.
+NOTE: EXT must include .(dot)"
+  [ext ::ext x any?]
+  (true?
    (when (file? x)
      (let [fp (file-ref->path x)]
-       (some->> fp (str) (re-matches ext-pat))))))
+       (some-> fp (str) (str/ends-with? ext))))))
 
 
 (defn-spec sdn-file? boolean?
   "Returns true if X is a `::file-ref` with .sdn extension."
   [x any?]
-  (file-with-ext? #"(?i).*\.sdn$" x))
+  (file-with-ext? ".sdn" x))
 
 
 (defn-spec edn-file? boolean?
   "Returns true if X is a `::file-ref` with .edn expression."
   [x any?]
-  (file-with-ext? #"(?i).*\.edn$" x))
+  (file-with-ext? ".edn" x))
 
 
 (defn-spec absolute path?
@@ -248,17 +252,22 @@
            (ex-info "Can't write file" {:path path}))))))
 
 
-(defn-spec *sdn-fps-in-dir (exception-of?
-                            (s/coll-of (s/and string?
-                                              (complement str/blank?))
-                                       :kind set?))
-  "Return absolute paths of .sdn files in PATH directory."
-  [path file-ref?]
+(defn-spec *fps-in-dir (exception-of?
+                        (s/coll-of (s/and string?
+                                          (complement str/blank?))
+                                   :kind set?
+                                   :min-count 0
+                                   :distinct true))
+  "Return absolute paths of files with EXT extension in PATH directory.
+NOTE: EXT must include dot."
+  [ext ::ext path file-ref?]
   (io! (exc/try-on
         (let [p (file-ref->path path)]
           (if (directory? p)
             (into #{}
-                  (comp (map absolute) (filter sdn-file?) (map str))
+                  (comp (map absolute)
+                        (filter (partial file-with-ext? ext))
+                        (map str))
                   (tree-seq nio/dir?
                             #(-> % nio/dir-stream (.iterator) (iterator-seq))
                             p))
@@ -267,4 +276,27 @@
                 (not (nio/exists? p)) (partial ex-info "File doesn't exists")
                 (nio/file? p) (partial ex-info "File isn't a directory")
                 (nio/readable? p) (partial ex-info "Directory isn't readable"))
-              {:file p})))))))
+              {:extension ext :file p})))))))
+
+
+(defn-spec *flatten-fps (exception-of?
+                         (s/coll-of (s/and string?
+                                           (complement str/blank?))
+                                    :kind set?
+                                    :min-count 0
+                                    :distinct true))
+  "Flatten sequence of EXT file PATHS and directories(searched for files).
+  EXT is a file extension (including dot)."
+  [ext ::ext paths (s/coll-of file-ref? :min-count 0)]
+  (exc/try-on
+   (r/fold
+    (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))
+    (r/map
+     #(cond
+        (file-with-ext? ext %) (exc/success (hash-set %))
+        (directory? %) (*fps-in-dir ext %)
+        :else (exc/failure
+               (ex-info
+                "File doesn't have EXT extension or isn't a readable directory."
+                {:extension ext :file %})))
+     paths))))
