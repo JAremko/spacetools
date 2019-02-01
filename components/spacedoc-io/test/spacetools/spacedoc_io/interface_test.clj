@@ -138,36 +138,63 @@
                (is (not (io/directory? "C:\\foo\\bar")))]))
 
 
-;; (deftest *sdn-fps-in-dir-fn
-;;   (testing-io "*sdn-fps-in-dir function" [[:foo.sdn]
-;;                                           [:foo.edn]
-;;                                           [:bar {:type :dir}]
-;;                                           [:baz
-;;                                            [:qux.sdn]]]
-;;               [:unix
-;;                (is (exc/success? (io/*sdn-fps-in-dir "/")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
-;;                (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
-;;                (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
-;;                (is (= #{"/foo.sdn" "/baz/qux.sdn"}
-;;                       @(io/*sdn-fps-in-dir "/")))]
-;;               [:osx
-;;                (is (exc/success? (io/*sdn-fps-in-dir "/")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "/foo.sdn")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "/qux")))
-;;                (is (= #{} @(io/*sdn-fps-in-dir "/bar")))
-;;                (is (= #{"/baz/qux.sdn"} @(io/*sdn-fps-in-dir "/baz")))
-;;                (is (= #{"/foo.sdn" "/baz/qux.sdn"}
-;;                       @(io/*sdn-fps-in-dir "/")))]
-;;               [:windows
-;;                (is (exc/success? (io/*sdn-fps-in-dir "C:\\")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "C:\\foo.sdn")))
-;;                (is (exc/failure? (io/*sdn-fps-in-dir "C:\\qux")))
-;;                (is (= #{} @(io/*sdn-fps-in-dir "C:\\bar")))
-;;                (is (= #{"C:\\baz\\qux.sdn"} @(io/*sdn-fps-in-dir "C:\\baz")))
-;;                (is (= #{"C:\\foo.sdn" "C:\\baz\\qux.sdn"}
-;;                       @(io/*sdn-fps-in-dir "C:\\")))]))
+(deftest *flatten-fps
+  (testing-io
+   "*flatten-fps function" [[:foo.sdn]
+                            [:foo.edn]
+                            [:bar {:type :dir}]
+                            [:baz
+                             [:qux.sdn]]]
+   [:unix
+    (is (exc/success? (io/*flatten-fps ".sdn" [])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".edn" ["/foo.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
+    (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
+    (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
+    (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
+   [:osx
+    (is (exc/success? (io/*flatten-fps ".sdn" [])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".edn" ["/foo.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
+    (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
+    (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
+    (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
+   [:windows
+    (is (exc/success? (io/*flatten-fps ".sdn" [])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
+    (is (exc/success? (io/*flatten-fps ".edn" ["C:\\foo.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\foo\\bar"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\bar.edn"])))
+    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo\\bar"])))
+    (is (= #{"C:\\foo.sdn"} @(io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
+    (is (= @(io/*flatten-fps ".sdn" ["C:\\"])
+           @(io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
+    (is (= #{"C:\\foo.sdn" "C:\\baz\\qux.sdn"}
+           @(io/*flatten-fps ".sdn" ["C:\\"])))
+    (is (= #{"C:\\foo.edn"} @(io/*flatten-fps ".edn" ["C:\\"])))
+    (is (= #{} @(io/*flatten-fps ".sdn" ["C:\\bar"])))]))
 
 
 (deftest *fp->sdn-fn

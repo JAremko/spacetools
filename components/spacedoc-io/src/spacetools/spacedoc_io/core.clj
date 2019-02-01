@@ -296,7 +296,7 @@ NOTE: EXT must include dot."
         (file-with-ext? ext %) (exc/success (hash-set %))
         (directory? %) (*fps-in-dir ext %)
         :else (exc/failure
-               (ex-info
-                "File doesn't have EXT extension or isn't a readable directory."
-                {:extension ext :file %})))
+               (ex-info (str "File doesn't have proper extension"
+                             " or isn't a readable directory.")
+                        {:expected-extension ext :file %})))
      paths))))
