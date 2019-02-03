@@ -43,3 +43,7 @@
 (defn *flatten-fps
   [ext paths]
   (io/*flatten-fps ext paths))
+
+(defmacro exception-of?
+  [pred]
+  `(io/exception-of? ~pred))

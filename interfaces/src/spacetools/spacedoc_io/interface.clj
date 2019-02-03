@@ -12,3 +12,4 @@
 (defn edn-file? [x])
 (defn try-m->output [*output])
 (defn *flatten-fps [ext paths])
+(defmacro exception-of? [pred])

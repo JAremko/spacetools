@@ -15,6 +15,15 @@
 (st/instrument)
 
 
+(deftest exception-of-macro
+  (testing "exception-of macro"
+    (is ((io/exception-of? string?) (exc/success "foo")))
+    (is ((io/exception-of? string?) (exc/failure (ex-info "foo" {}))))
+    (is (not ((io/exception-of? string?) (exc/success 42))))
+    (is ((io/exception-of? (s/map-of keyword? string?))
+         (exc/success {:foo 42})))))
+
+
 (deftest absolute-fn
   (testing-io "absolute function" []
               [:unix
@@ -56,7 +65,7 @@
 (deftest *spit-fn
   (testing-io "*spit function" []
               [:unix
-               (is (and (exc/success? (io/*spit "/foo/bar" "foo\nbar"))))
+               (is (exc/success? (io/*spit "/foo/bar" "foo\nbar")))
                (is (= (nio/read-all-lines (nio/path filesystem "/foo/bar"))
                       ["foo" "bar"]))]
               [:osx
