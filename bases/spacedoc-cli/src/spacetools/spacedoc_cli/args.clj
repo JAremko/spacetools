@@ -29,9 +29,9 @@
               :a-args (vec (rest arguments)))))))
 
 
-(defn *parse-input-files
+(defn-spec *parse-input-files (sio/exception-of? (s/coll-of string? :kind set?))
   "Parse INPUT-FILES sequence of .sdn files and dirs (searched for .sdn files)."
-  [input-files]
+  [input-files (s/coll-of string? :min-count 1)]
   (exc/try-on
    (cond (empty? input-files)
          (exc/failure
