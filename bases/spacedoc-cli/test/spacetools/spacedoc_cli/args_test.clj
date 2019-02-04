@@ -11,15 +11,36 @@
 
 (st/instrument)
 
-;; (args/*parse ["d"] [])
-
 
 (deftest *parse-fn
-  (testing "*parse function"
-    (is (exc/success? (args/*parse [""] [])))))
+  (testing "*parse function."
+    (is (exc/success? (args/*parse [""] [])))
+    (is (exc/success? (args/*parse ["foo"] [])))
+    (is (exc/success? (args/*parse ["foo" "bar"] [])))
+    (exc/success? (args/*parse ["foo" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/success? (args/*parse ["-b" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/success? (args/*parse ["--baz" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/failure? (args/*parse ["-baz" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/failure? (args/*parse ["-f" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/failure? (args/*parse ["--foo" "bar"]
+                               [["-b" "--baz" "Bazing."]]))
+    (exc/failure? (args/*parse ["-foo"] []))
+    (testing "Parsing of arguments with a flag."
+      (let [{:keys [useless action a-args]}
+            @(args/*parse ["doing" "stuff" "--useless"]
+                          [["-u" "--useless" "Doing useless stuff?"]])]
+        (is (true? useless))
+        (is (= action "doing"))
+        (is (= a-args ["stuff"]))))))
 
-;; (deftest *parse-input-files
-;;   (testing-io "" []
+
+;; (deftest *parse-input-files-fn
+;;   (testing-io "*parse-input-files function" []
 ;;               [:unix
 ;;                (is (= "/work/bar" (str (io/absolute "bar"))))]
 ;;               [:osx
@@ -29,7 +50,7 @@
 
 
 ;; (deftest *confibure-fn
-;;   (testing-io "" []
+;;   (testing-io "*configure function" []
 ;;               [:unix
 ;;                (is (= "/work/bar" (str (io/absolute "bar"))))]
 ;;               [:osx

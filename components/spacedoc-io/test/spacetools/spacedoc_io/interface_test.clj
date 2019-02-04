@@ -20,8 +20,7 @@
     (is ((io/exception-of? string?) (exc/success "foo")))
     (is ((io/exception-of? string?) (exc/failure (ex-info "foo" {}))))
     (is (not ((io/exception-of? string?) (exc/success 42))))
-    (is ((io/exception-of? (s/map-of keyword? string?))
-         (exc/success {:foo 42})))))
+    (is ((io/exception-of? (s/map-of keyword? int?)) (exc/success {:foo 42})))))
 
 
 (deftest absolute-fn
