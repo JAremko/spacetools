@@ -77,6 +77,31 @@
                       ["foo" "bar"]))]))
 
 
+(deftest file?-fn
+  (testing-io "file? function" [[:foo [:bar.sdn] [:baz.edn]]]
+              [:unix
+               (is (io/file? "/foo/bar.sdn"))
+               (is (io/file? "/foo/baz.edn"))
+               (is (not (io/file? 42)))
+               (is (not (io/file? "/qux")))
+               (is (not (io/file? "/foo")))
+               (is (not (io/file? "/foo/qux.sdn")))]
+              [:osx
+               (is (io/file? "/foo/bar.sdn"))
+               (is (io/file? "/foo/baz.edn"))
+               (is (not (io/file? 42)))
+               (is (not (io/file? "/qux")))
+               (is (not (io/file? "/foo")))
+               (is (not (io/file? "/foo/qux.sdn")))]
+              [:windows
+               (is (io/file? "C:\\foo\\bar.sdn"))
+               (is (io/file? "C:\\foo\\baz.edn"))
+               (is (not (io/file? 42)))
+               (is (not (io/file? "C:\\qux")))
+               (is (not (io/file? "C:\\foo")))
+               (is (not (io/file? "C:\\foo\\qux.sdn")))]))
+
+
 (deftest sdn-file?-fn
   (testing-io "sdn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix

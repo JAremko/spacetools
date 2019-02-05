@@ -3,11 +3,11 @@
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]
+            [clojure.spec.alpha :as s]
             [clojure.tools.cli :refer [parse-opts]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc-io.interface :as sio]
-            [spacetools.spacedoc.interface :as sdu]
-            [clojure.spec.alpha :as s]))
+            [spacetools.spacedoc.interface :refer [override-configs!]]))
 
 
 (def overrides-file-name
@@ -51,11 +51,11 @@
          (sio/*flatten-fps ".sdn" (set input-files)))))
 
 
-(defn *configure!
-  "Configure spacedoc with overrides from `sdu/config-file-name` file."
-  []
+(defn-spec *configure! (sio/exception-of? (s/map-of qualified-keyword? any?))
+  "Configure spacedoc with overrides from CONFIG-FILE file."
+  [config-file string?]
   (m/mlet
-   [cfg-overrides (if (sio/edn-file? overrides-file-name)
-                    (sio/*read-cfg-overrides overrides-file-name)
+   [cfg-overrides (if (sio/file? config-file)
+                    (sio/*read-cfg-overrides config-file)
                     (exc/success {}))]
-   (m/return (when cfg-overrides (sdu/override-configs! cfg-overrides)))))
+   (m/return (override-configs! cfg-overrides))))

@@ -16,6 +16,10 @@
   [path content]
   (io/*spit path content))
 
+(defn file?
+  [x]
+  (io/file? x))
+
 (defn sdn-file?
   [x]
   (io/sdn-file? x))

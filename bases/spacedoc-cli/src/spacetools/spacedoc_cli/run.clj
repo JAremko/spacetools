@@ -6,7 +6,8 @@
             [clojure.string :refer [join]]
             [spacetools.spacedoc-cli.actions :as ac]
             [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
-            [spacetools.spacedoc-io.interface :refer [try-m->output]])
+            [spacetools.spacedoc-io.interface :refer [try-m->output]]
+            [spacetools.spacedoc.interface :refer [config-file-name]])
   (:gen-class))
 
 
@@ -52,7 +53,7 @@
   (try-m->output
    (mlet
     [{:keys [help summary action a-args]} (*parse args ops)
-     _ (*configure!)]
+     _ (*configure! config-file-name)]
     (if help
       (usage summary)
       (match

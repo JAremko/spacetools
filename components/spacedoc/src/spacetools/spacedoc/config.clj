@@ -45,7 +45,7 @@
 
 (s/def :text/replacement-map (s/map-of string? string?))
 
-(s/def :text/custom-id-replacement-map (s/map-of string? string?))
+(s/def :link/custom-id-replacement-map (s/map-of string? string?))
 
 (s/def :link/type->prefix (s/map-of keyword? string?))
 
@@ -68,7 +68,7 @@
 (s/def ::configs (s/keys :req [:text/separators-rigth
                                :text/separators-left
                                :text/replacement-map
-                               :text/custom-id-replacement-map
+                               :link/custom-id-replacement-map
                                :link/type->prefix
                                :headline/max-depth
                                :org/toc-max-depth
@@ -80,7 +80,7 @@
 (s/def ::overriding-configs (s/keys :op [:text/separators-rigth
                                          :text/separators-left
                                          :text/replacement-map
-                                         :text/custom-id-replacement-map
+                                         :link/custom-id-replacement-map
                                          :link/type->prefix
                                          :headline/max-depth
                                          :org/toc-max-depth
@@ -97,14 +97,14 @@
 
 (defn-spec valid-configs? boolean?
   "Return true if CONFIGS is valid."
-  [configs ::configs]
+  [configs any?]
   (s/valid? ::configs configs))
 
 
 (defn-spec valid-overrides? boolean?
   "Return true if CONFIGS is valid override configuration.
 Same as `valid-configs?` but all elements of the CONFIGS map are optional."
-  [configs ::overriding-configs]
+  [configs any?]
   (s/valid? ::overriding-configs configs))
 
 
