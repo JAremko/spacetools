@@ -1,9 +1,10 @@
 (ns spacetools.spacedoc-cli.args-test
+  "Testing parsing of the program inputs."
   (:require [cats.monad.exception :as exc]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc-cli.args :refer :all]
-            [spacetools.spacedoc-io.interface :as sio]
+            [spacetools.spacedoc-io.interface :refer [file?]]
             [spacetools.spacedoc.config :as sc]
             [spacetools.test-util.interface :refer [testing-io]]))
 
@@ -86,11 +87,11 @@
                  [:overrided.edn (str overrided)]
                  [:bad-overrides.edn "foo"]]
                 [:unix
-                 (testing "sanity"
-                   (is (sio/file? "/defaults.edn"))
-                   (is (sio/file? "/empty-overrides.edn"))
-                   (is (sio/file? "/bad-overrides.edn"))
-                   (is (not (sio/file? "/nonexistent.edn"))))
+                 (testing "Sanity"
+                   (is (file? "/defaults.edn"))
+                   (is (file? "/empty-overrides.edn"))
+                   (is (file? "/bad-overrides.edn"))
+                   (is (not (file? "/nonexistent.edn"))))
                  (is (exc/success? (*configure! "/defaults.edn")))
                  (is (exc/success? (*configure! "/empty-overrides.edn")))
                  (is (exc/success? (*configure! "/nonexistent.edn")))
@@ -101,11 +102,11 @@
                  (is (and (= @(*configure! "/overrided.edn") @sc/*configs)
                           (test-key @sc/*configs)))]
                 [:osx
-                 (testing "sanity"
-                   (is (sio/file? "/defaults.edn"))
-                   (is (sio/file? "/empty-overrides.edn"))
-                   (is (sio/file? "/bad-overrides.edn"))
-                   (is (not (sio/file? "/nonexistent.edn"))))
+                 (testing "Sanity"
+                   (is (file? "/defaults.edn"))
+                   (is (file? "/empty-overrides.edn"))
+                   (is (file? "/bad-overrides.edn"))
+                   (is (not (file? "/nonexistent.edn"))))
                  (is (exc/success? (*configure! "/defaults.edn")))
                  (is (exc/success? (*configure! "/empty-overrides.edn")))
                  (is (exc/success? (*configure! "/nonexistent.edn")))
@@ -116,11 +117,11 @@
                  (is (and (= @(*configure! "/overrided.edn") @sc/*configs)
                           (test-key @sc/*configs)))]
                 [:windows
-                 (testing "sanity"
-                   (is (sio/file? "C:\\defaults.edn"))
-                   (is (sio/file? "C:\\empty-overrides.edn"))
-                   (is (sio/file? "C:\\bad-overrides.edn"))
-                   (is (not (sio/file? "C:\\nonexistent.edn"))))
+                 (testing "Sanity"
+                   (is (file? "C:\\defaults.edn"))
+                   (is (file? "C:\\empty-overrides.edn"))
+                   (is (file? "C:\\bad-overrides.edn"))
+                   (is (not (file? "C:\\nonexistent.edn"))))
                  (is (exc/success? (*configure! "C:\\defaults.edn")))
                  (is (exc/success? (*configure! "C:\\empty-overrides.edn")))
                  (is (exc/success? (*configure! "C:\\nonexistent.edn")))

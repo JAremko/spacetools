@@ -1,15 +1,14 @@
 (ns spacetools.spacedoc-io.interface-test
+  "Testing interface of the `spacedoc-io` component."
   (:require [cats.monad.exception :as exc]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [nio2.core :as nio]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc-io.interface :refer [filesystem]]
-            [spacetools.spacedoc-io.interface :as io]
-            [spacetools.spacedoc.config :as sc]
-            [spacetools.spacedoc.node :as sn]
-            [spacetools.test-util.interface :as tu :refer [testing-io]]))
+            [spacetools.spacedoc-io.interface :as io :refer [filesystem]]
+            [spacetools.spacedoc.interface :refer [default-config]]
+            [spacetools.test-util.interface :refer [testing-io]]))
 
 
 (st/instrument)
@@ -262,7 +261,7 @@
 
 
 (deftest *read-cfg-overrides-fn
-  (testing-io "*read-cfg-overrides function" [[:foo.edn (str sc/default-config)]
+  (testing-io "*read-cfg-overrides function" [[:foo.edn (str default-config)]
                                               [:bar.edn "{:foo :bar}"]]
               [:unix
                (is (exc/success? (io/*read-cfg-overrides "/foo.edn")))

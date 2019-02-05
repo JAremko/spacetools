@@ -7,6 +7,8 @@
 
 (def config-file-name cfg/config-file-name)
 
+(def default-config cfg/default-config)
+
 (defn sdn->org
   [node]
   (sdo/sdn->org node))
