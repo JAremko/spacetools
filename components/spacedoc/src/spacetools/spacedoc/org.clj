@@ -370,8 +370,6 @@ Return nil if ROOT node doesn't have any headlines."
 (defmethod sdn->org :table
   [table]
   (str/replace-first
-   #"^\n"
-   ""
    (let [[cols-w & vrep] (table->vec-rep table)]
      (sdu/indent (cfg/table-indentation)
                  (r/fold (r/monoid #(join "\n" [%1 %2]) str)
@@ -380,7 +378,8 @@ Return nil if ROOT node doesn't have any headlines."
                                              ;; Empty cols are rulers.
                                              (empty? %) (table-ruler cols-w)
                                              :else (table-row % cols-w)))
-                                vrep))))))
+                                vrep))))
+   #"^\n" ""))
 
 
 (defn fmt-cell-content
