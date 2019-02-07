@@ -8,6 +8,7 @@
             [orchestra.spec.test :as st]
             [spacetools.spacedoc-io.interface :as io :refer [filesystem]]
             [spacetools.spacedoc.interface :refer [default-config]]
+            [spacetools.spacedoc.node :as sn]
             [spacetools.test-util.interface :refer [testing-io]]))
 
 
@@ -74,6 +75,38 @@
                (is (exc/success? (io/*spit "C:\\foo\\bar" "foo\nbar\n")))
                (is (= (nio/read-all-lines (nio/path filesystem "C:\\foo\\bar"))
                       ["foo" "bar"]))]))
+
+
+(deftest *slurp-fn
+  (testing-io "*slurp function" [[:foo "bar\nbaz"]]
+              [:unix
+               (is (exc/success? (io/*slurp "/foo")))
+               (is (= ["bar" "baz"] @(io/*slurp "/foo")))
+               (is (exc/failure (io/*slurp "/")))
+               (is (exc/failure (io/*slurp "/non-existing")))]
+              [:osx
+               (is (exc/success? (io/*slurp "/foo")))
+               (is (= ["bar" "baz"] @(io/*slurp "/foo")))
+               (is (exc/failure (io/*slurp "/")))
+               (is (exc/failure (io/*slurp "/non-existing")))]
+              [:windows
+               (is (exc/success? (io/*slurp "C:\\foo")))
+               (is (= ["bar" "baz"] @(io/*slurp "C:\\foo")))
+               (is (exc/failure (io/*slurp "C:\\")))
+               (is (exc/failure (io/*slurp "C:\\non-existing")))]))
+
+
+(deftest *slurp-*spit
+  (testing-io "Slurping the spit." []
+              [:unix
+               (is (= (exc/success ["disgusting"])
+                      (io/*slurp @(io/*spit "/dev/mouth" "disgusting"))))]
+              [:osx
+               (is (= (exc/success ["disgusting"])
+                      (io/*slurp @(io/*spit "/dev/mouth" "disgusting"))))]
+              [:windows
+               (is (= (exc/success ["disgusting"])
+                      (io/*slurp @(io/*spit "C:\\dev\\mouth" "disgusting"))))]))
 
 
 (deftest file?-fn

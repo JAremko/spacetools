@@ -84,16 +84,19 @@
         not-headlines [(n/text "foo")
                        (n/src "bar" "baz")
                        (n/italic (n/text "qux"))]]
+
     (testing "headline? function"
       (testing "Headlines are headlines."
         (is (every? headline? headlines)))
       (testing "Other nodes aren't headlines"
         (is (every? (complement headline?) not-headlines))))
+
     (testing "todo-or-has-children? function"
       (is (every? todo-or-has-children? headlines))
       (is (not (todo-or-has-children? (assoc (n/headline "foo" (n/todo "bar"))
                                              :children []))))
       (is (not (todo-or-has-children? (assoc (n/todo "foo") :todo? false))))))
+
   (testing "headline->depth function"
     (is (= (headline->depth (depth->headline 2 1))
            (headline->depth (depth->headline 2 2))
@@ -101,6 +104,7 @@
     (is (= (headline->depth (depth->headline 1 1))
            (headline->depth (depth->headline 1 2))
            1)))
+
   (testing "clamp-headline-children function"
     (let [hl-2-lvl (n/todo "foo" (n/todo "bar"))
           hl-1-lvl (n/todo "foo")]
@@ -112,15 +116,18 @@
   (let [hl-2-lvl (depth->headline 2 1)
         hl-1-lvl-trimmed (assoc hl-2-lvl :children [])
         hl-1-lvl-todo (depth->headline 1 1)]
+
     (testing "Headline equality sanity"
       (is (not= hl-2-lvl hl-1-lvl-todo))
       (is (not= hl-2-lvl hl-1-lvl-trimmed))
       (is (not= hl-1-lvl-todo hl-1-lvl-trimmed)))
+
     (testing "mark-empty-as-todo function"
       (is (= (mark-empty-as-todo hl-1-lvl-trimmed)
              hl-1-lvl-todo))
       (is (= (mark-empty-as-todo hl-2-lvl)
              hl-2-lvl)))
+
     (testing "fmt-headline function"
       (is (= (fmt-headline 2 hl-2-lvl)
              hl-2-lvl))
@@ -162,18 +169,23 @@
     {:num-tests (tu/samples 10)}
     (prop/for-all
      [headline (gen/no-shrink (s/gen :spacetools.spacedoc.node/headline))]
+
      (testing "Generate valid headline"
        (is (empty? (hl-problems headline))
            "We generated valid headline."))
+
      (testing "headline? function"
        (is (headline? headline)
            "Valid headline is headline."))
+
      (testing "todo-or-has-children? function"
        (is (todo-or-has-children? headline)
            "Valid headline should have children or b marked as todo."))
+
      (testing "headline->depth function"
        (is (>= (cfg/max-headline-depth) (headline->depth headline) 1)
            "Valid headline depth should be in acceptable range."))
+
      (testing "clamp-headline-children function"
        (let [[removed added same] (diff headline
                                         (clamp-headline-children
@@ -196,10 +208,12 @@
                                          headline))]
          (is (every? nil? [removed added])
              "headline clamped to its original level should be the same.")))
+
      (testing "mark-empty-as-todo function"
        (let [empty-headline (assoc headline :children [])]
          (is (:todo? (mark-empty-as-todo empty-headline))
              "Empty headline should be marked as todo.")))
+
      (testing "fmt-headline function"
        (let [empty-headline (assoc headline :children [])]
          (is (empty? (hl-problems (fmt-headline 1 empty-headline)))

@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc-cli.args-test
-  "Testing parsing of the program inputs."
+  "Testing parsing of the cli program inputs."
   (:require [cats.monad.exception :as exc]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]

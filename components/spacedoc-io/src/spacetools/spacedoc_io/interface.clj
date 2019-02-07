@@ -16,6 +16,10 @@
   [path content]
   (io/*spit path content))
 
+(defn *slurp
+  [path]
+  (io/*slurp path))
+
 (defn file?
   [x]
   (io/file? x))

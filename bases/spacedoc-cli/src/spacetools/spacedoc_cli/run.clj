@@ -62,5 +62,5 @@
        ["describe"  [key        ]] (ac/*describe-spec key)
        ["validate"  [_     &   _]] (ac/*validate a-args)
        ["relations" [_     &   _]] (ac/*relations a-args)
-       ["orgify"    [src   trg  ]] (ac/*orgify src trg src)
+       ["orgify"    [src   trg  ]] (ac/*orgify src trg)
        :else (bad-args-handler action a-args))))))

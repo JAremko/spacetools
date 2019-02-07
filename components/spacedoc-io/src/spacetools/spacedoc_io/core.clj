@@ -252,6 +252,20 @@ NOTE: EXT must include .(dot)"
            (ex-info "Can't write file" {:path path}))))))
 
 
+(defn-spec *slurp (exception-of? (s/coll-of string?))
+  "Read content of the PATH file into array of strings (lines)."
+  [path file-ref?]
+  (io! (exc/try-or-recover
+        (if (file? path)
+          (->> path
+               file-ref->path
+               nio/read-all-lines
+               vec)
+          (ex-info "Isn't a file" {:path (str path)}))
+        (fn [^Exception err]
+          (exc/failure (ex-info "Can't read file" {:path path :error err}))))))
+
+
 (defn-spec *fps-in-dir (exception-of?
                         (s/coll-of (s/and string?
                                           (complement str/blank?))

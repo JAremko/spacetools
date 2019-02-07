@@ -4,6 +4,7 @@
 (defn *fp->sdn [path])
 (defn *read-cfg-overrides [overrides-fp])
 (defn *spit [path content])
+(defn *slurp [path])
 (defn absolute [path])
 (defn directory? [x])
 (defn mkdir [path])
