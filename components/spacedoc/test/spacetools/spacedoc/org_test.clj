@@ -7,9 +7,9 @@
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc.util :as sdu]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.org :refer :all]
+            [spacetools.spacedoc.util :as sdu]
             [spacetools.test-util.interface :as tu]))
 
 

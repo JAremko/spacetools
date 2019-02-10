@@ -2,6 +2,7 @@
 
 (def filesystem)
 (defn *fp->sdn [path])
+(defn *fp->sdn [root-node-spec path])
 (defn *read-cfg-overrides [overrides-fp])
 (defn *spit [path content])
 (defn *slurp [path])

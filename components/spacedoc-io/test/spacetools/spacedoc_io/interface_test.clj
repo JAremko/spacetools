@@ -1,6 +1,6 @@
 (ns spacetools.spacedoc-io.interface-test
   "Testing interface of the `spacedoc-io` component."
-  (:require [cats.monad.exception :as exc]
+  (:require [cats.monad.exception :as exc :refer [success? failure?]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
@@ -64,15 +64,15 @@
 (deftest *spit-fn
   (testing-io "*spit function" []
               [:unix
-               (is (exc/success? (io/*spit "/foo/bar" "foo\nbar")))
+               (is (success? (io/*spit "/foo/bar" "foo\nbar")))
                (is (= (nio/read-all-lines (nio/path filesystem "/foo/bar"))
                       ["foo" "bar"]))]
               [:osx
-               (is (exc/success? (io/*spit "/foo/bar" "foo\nbar")))
+               (is (success? (io/*spit "/foo/bar" "foo\nbar")))
                (is (= (nio/read-all-lines (nio/path filesystem "/foo/bar"))
                       ["foo" "bar"]))]
               [:windows
-               (is (exc/success? (io/*spit "C:\\foo\\bar" "foo\nbar\n")))
+               (is (success? (io/*spit "C:\\foo\\bar" "foo\nbar\n")))
                (is (= (nio/read-all-lines (nio/path filesystem "C:\\foo\\bar"))
                       ["foo" "bar"]))]))
 
@@ -80,17 +80,17 @@
 (deftest *slurp-fn
   (testing-io "*slurp function" [[:foo "bar\nbaz"]]
               [:unix
-               (is (exc/success? (io/*slurp "/foo")))
+               (is (success? (io/*slurp "/foo")))
                (is (= ["bar" "baz"] @(io/*slurp "/foo")))
                (is (exc/failure (io/*slurp "/")))
                (is (exc/failure (io/*slurp "/non-existing")))]
               [:osx
-               (is (exc/success? (io/*slurp "/foo")))
+               (is (success? (io/*slurp "/foo")))
                (is (= ["bar" "baz"] @(io/*slurp "/foo")))
                (is (exc/failure (io/*slurp "/")))
                (is (exc/failure (io/*slurp "/non-existing")))]
               [:windows
-               (is (exc/success? (io/*slurp "C:\\foo")))
+               (is (success? (io/*slurp "C:\\foo")))
                (is (= ["bar" "baz"] @(io/*slurp "C:\\foo")))
                (is (exc/failure (io/*slurp "C:\\")))
                (is (exc/failure (io/*slurp "C:\\non-existing")))]))
@@ -211,48 +211,48 @@
                             [:baz
                              [:qux.sdn]]]
    [:unix
-    (is (exc/success? (io/*flatten-fps ".sdn" [])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".edn" ["/foo.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
+    (is (success? (io/*flatten-fps ".sdn" [])))
+    (is (success? (io/*flatten-fps ".sdn" ["/"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (success? (io/*flatten-fps ".edn" ["/foo.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
     (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
     (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
     (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
     (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
     (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
    [:osx
-    (is (exc/success? (io/*flatten-fps ".sdn" [])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".edn" ["/foo.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
+    (is (success? (io/*flatten-fps ".sdn" [])))
+    (is (success? (io/*flatten-fps ".sdn" ["/"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/" "/"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
+    (is (success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
+    (is (success? (io/*flatten-fps ".edn" ["/foo.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
     (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
     (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
     (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
     (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
     (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
    [:windows
-    (is (exc/success? (io/*flatten-fps ".sdn" [])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
-    (is (exc/success? (io/*flatten-fps ".edn" ["C:\\foo.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\foo\\bar"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\bar.edn"])))
-    (is (exc/failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo\\bar"])))
+    (is (success? (io/*flatten-fps ".sdn" [])))
+    (is (success? (io/*flatten-fps ".sdn" ["C:\\"])))
+    (is (success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
+    (is (success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo.sdn"])))
+    (is (success? (io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
+    (is (success? (io/*flatten-fps ".edn" ["C:\\foo.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["C:\\bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["C:\\foo\\bar"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\bar.edn"])))
+    (is (failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo\\bar"])))
     (is (= #{"C:\\foo.sdn"} @(io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
     (is (= @(io/*flatten-fps ".sdn" ["C:\\"])
            @(io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
@@ -271,45 +271,45 @@
                                      [:baz.txt valid-sdn]
                                      [:qux.sdn (str valid-sdn valid-sdn)]]
                 [:unix
-                 (is (exc/success? (io/*fp->sdn "/foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "/baz.txt")))
+                 (is (success? (io/*fp->sdn "/foo.sdn")))
+                 (is (success? (io/*fp->sdn "/baz.txt")))
                  (is (= valid-sdn (str @(io/*fp->sdn "/baz.txt"))))
-                 (is (exc/failure? (io/*fp->sdn "/qux.sdn")))
-                 (is (exc/failure? (io/*fp->sdn "/")))
-                 (is (exc/failure? (io/*fp->sdn "/bar.sdn")))]
+                 (is (failure? (io/*fp->sdn "/qux.sdn")))
+                 (is (failure? (io/*fp->sdn "/")))
+                 (is (failure? (io/*fp->sdn "/bar.sdn")))]
                 [:osx
-                 (is (exc/success? (io/*fp->sdn "/foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "/baz.txt")))
+                 (is (success? (io/*fp->sdn "/foo.sdn")))
+                 (is (success? (io/*fp->sdn "/baz.txt")))
                  (is (= valid-sdn (str @(io/*fp->sdn "/baz.txt"))))
-                 (is (exc/failure? (io/*fp->sdn "/qux.sdn")))
-                 (is (exc/failure? (io/*fp->sdn "/")))
-                 (is (exc/failure? (io/*fp->sdn "/bar.sdn")))]
+                 (is (failure? (io/*fp->sdn "/qux.sdn")))
+                 (is (failure? (io/*fp->sdn "/")))
+                 (is (failure? (io/*fp->sdn "/bar.sdn")))]
                 [:windows
-                 (is (exc/success? (io/*fp->sdn "C:\\foo.sdn")))
-                 (is (exc/success? (io/*fp->sdn "C:\\baz.txt")))
+                 (is (success? (io/*fp->sdn "C:\\foo.sdn")))
+                 (is (success? (io/*fp->sdn "C:\\baz.txt")))
                  (is (= valid-sdn (str @(io/*fp->sdn "C:\\baz.txt"))))
-                 (is (exc/failure? (io/*fp->sdn "C:\\qux.sdn")))
-                 (is (exc/failure? (io/*fp->sdn "C:\\")))
-                 (is (exc/failure? (io/*fp->sdn "C:\\bar.sdn")))])))
+                 (is (failure? (io/*fp->sdn "C:\\qux.sdn")))
+                 (is (failure? (io/*fp->sdn "C:\\")))
+                 (is (failure? (io/*fp->sdn "C:\\bar.sdn")))])))
 
 
 (deftest *read-cfg-overrides-fn
   (testing-io "*read-cfg-overrides function" [[:foo.edn (str default-config)]
                                               [:bar.edn "{:foo :bar}"]]
               [:unix
-               (is (exc/success? (io/*read-cfg-overrides "/foo.edn")))
+               (is (success? (io/*read-cfg-overrides "/foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(io/*read-cfg-overrides "/foo.edn")))
                (is (exc/exception? (io/*read-cfg-overrides "/")))
                (is (exc/exception? (io/*read-cfg-overrides "/bar.edn")))]
               [:osx
-               (is (exc/success? (io/*read-cfg-overrides "/foo.edn")))
+               (is (success? (io/*read-cfg-overrides "/foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(io/*read-cfg-overrides "/foo.edn")))
                (is (exc/exception? (io/*read-cfg-overrides "/")))
                (is (exc/exception? (io/*read-cfg-overrides "/bar.edn")))]
               [:windows
-               (is (exc/success? (io/*read-cfg-overrides "C:\\foo.edn")))
+               (is (success? (io/*read-cfg-overrides "C:\\foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(io/*read-cfg-overrides "C:\\foo.edn")))
                (is (exc/exception? (io/*read-cfg-overrides "C:\\")))

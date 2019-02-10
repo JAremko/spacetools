@@ -37,8 +37,10 @@
   (io/directory? x))
 
 (defn *fp->sdn
-  [path]
-  (io/*fp->sdn path))
+  ([path]
+   (io/*fp->sdn path))
+  ([root-node-spec path]
+   (io/*fp->sdn root-node-spec path)))
 
 (defn try-m->output
   [*output]

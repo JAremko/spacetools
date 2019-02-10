@@ -24,7 +24,7 @@
   (and (string? x) ((complement str/blank?) x)))
 
 
-(defn-spec node->children-tag-s keyword?
+(defn-spec node->children-tag-s (s/coll-of keyword? :kind set?)
   "Return tags of the NODE direct children(non recursive)."
   [node node?]
   (into #{} (map :tag) (:children node)))
@@ -64,7 +64,9 @@
   "Return mapping between nodes and children sets."
   [parent node?]
   (r/reduce
-   (r/monoid (fn [m n] (update m (:tag n) union (node->children-tag-s n)))
+   (r/monoid (fn [m n] (update m (:tag n)
+                              (fnil union #{} #{})
+                              (node->children-tag-s n)))
              hash-map)
    (tree-seq :children :children parent)))
 

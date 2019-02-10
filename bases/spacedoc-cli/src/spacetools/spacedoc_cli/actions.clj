@@ -61,7 +61,8 @@
                  :min-count 1)]
   (m/mlet [sdn-fps (*parse-input-files fs)
            docs (->> sdn-fps
-                     (pmap (partial sio/*fp->sdn :spacetools.spacedoc.node/any))
+                     (pmap (partial sio/*fp->sdn
+                                    :spacetools.spacedoc.node/any-node))
                      (m/sequence))]
           (m/return (str "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
                          (str/join \newline (sd/relations (vec docs)))))))
