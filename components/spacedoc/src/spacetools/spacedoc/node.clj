@@ -461,6 +461,7 @@
 (s/def ::root-child (s/multi-spec sc/root-child :tag))
 (s/def :spacetools.spacedoc.node.root/children
   (s/with-gen (s/coll-of ::root-child
+                         :min-count 1
                          :kind vector?
                          :distinct true
                          :into [])
