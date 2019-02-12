@@ -1,4 +1,4 @@
-FROM clojure as clojure
+FROM clojure:openjdk-11-lein as clojure
 
 ENV GENTEST_MULTIPLIER 1
 
