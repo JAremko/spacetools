@@ -20,7 +20,7 @@ COPY --from=clojure /usr/src/app/systems/spacedoc-cli/target/spacedoc.jar ./
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
 RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz \
-    && tar -xvzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
+    && tar -xzf graalvm-ce-${GRAALVM_V}-linux-amd64.tar.gz
 
 RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
     --no-server \

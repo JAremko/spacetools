@@ -17,11 +17,7 @@
   :uberjar
   {:aot :all
    :jvm-opts ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
-              ;; Uncomment it when OpenJDK 11 will actually contain java 11
-              ;; NOTE: native-images have their own GC
-              ;; "-XX:+UnlockExperimentalVMOptions"
-              ;; "-XX:+UseEpsilonGC"
               "-Dclojure.compiler.direct-linking=true"
-              "-Xmn3G"]
+              "-Xmn1G"]
    :global-vars {*warn-on-reflection* false *assert* false}}
   :aot :all)
