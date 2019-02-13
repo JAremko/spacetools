@@ -278,15 +278,15 @@
                    :spacetools.spacedoc.node.plain-list/children]))
 
 
-;; quote node
+;; quoted node
 
-(s/def :spacetools.spacedoc.node.quote/children
+(s/def :spacetools.spacedoc.node.quoted/children
   (s/with-gen (s/coll-of ::paragraph
                          :kind vector?
                          :min-count 1
                          :into [])
     #(gen/vector (s/gen ::paragraph) 1 3)))
-(defnode ::quote (s/keys :req-un [:spacetools.spacedoc.node.quote/children]))
+(defnode ::quoted (s/keys :req-un [:spacetools.spacedoc.node.quoted/children]))
 
 
 ;; src node
@@ -389,7 +389,7 @@
 (defmethod sc/block-element :paragraph [_] ::paragraph)
 (defmethod sc/block-element :feature-list [_] ::feature-list)
 (defmethod sc/block-element :plain-list [_] ::plain-list)
-(defmethod sc/block-element :quote [_] ::quote)
+(defmethod sc/block-element :quoted [_] ::quoted)
 (defmethod sc/block-element :src [_] ::src)
 (defmethod sc/block-element :table [_] ::table)
 (defmethod sc/block-element :verse [_] ::verse)

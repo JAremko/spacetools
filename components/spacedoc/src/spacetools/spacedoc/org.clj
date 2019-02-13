@@ -15,8 +15,8 @@
   "Delimiters surrounding block elements."
   {:verse ["#+BEGIN_VERSE\n"
            "#+END_VERSE\n"]
-   :quote ["#+BEGIN_QUOTE\n"
-           "#+END_QUOTE\n"]
+   :quoted ["#+BEGIN_QUOTE\n"
+            "#+END_QUOTE\n"]
    :center ["#+BEGIN_CENTER\n"
             "#+END_CENTER\n"]
    :section ["" ""]})

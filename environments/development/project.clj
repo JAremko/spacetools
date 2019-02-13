@@ -9,6 +9,7 @@
              {:global-vars {*warn-on-reflection* true *assert* true}
               :plugins
               [[lein-environ "1.1.0"]
+               [lein-cloverage "1.0.13"]
                [lein-nvd "0.6.0"] ;; lein nvd check
                [lein-deps-tree "0.1.2"]]
               :dependencies [[environ "1.1.0"]
