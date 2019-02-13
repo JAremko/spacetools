@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/JAremko/spacetools.svg?branch=master)](https://travis-ci.org/JAremko/spacetools) [![Coverage Status](https://coveralls.io/repos/github/JAremko/spacetools/badge.svg?branch=master)](https://coveralls.io/github/JAremko/spacetools?branch=master)
+
 ### Spacemacs tools
 *Available at DockerHub as `jare/spacetools:latest`, `jare/spacetools:noemacs`*
 
