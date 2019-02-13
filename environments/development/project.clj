@@ -6,8 +6,8 @@
                  [org.clojure/tools.cli "0.4.1"]]
   :uberjar-name "spacedoc.jar"
   :profiles {:user
-             {:env {:gentest-multiplier "1"}}
-             {:plugins
+             {:env {:gentest-multiplier "1"}
+              :plugins
               [[lein-cloverage "1.0.13"]
                [lein-environ "1.1.0"]
                [lein-nvd "0.6.0"] ;; lein nvd check
@@ -26,9 +26,9 @@
              {:env {:gentest-multiplier "3"}}
              :uberjar
              {:global-vars {*warn-on-reflection* false *assert* false}
-              :dependencies [[org.clojure/clojure "1.9.0"]]}
-             :jvm-opts
-             ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
-              "-Dclojure.compiler.direct-linking=true"
-              "-Xmn1G"]}
+              :dependencies [[org.clojure/clojure "1.9.0"]]
+              :jvm-opts
+              ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
+               "-Dclojure.compiler.direct-linking=true"
+               "-Xmn1G"]}}
   :aot :all)
