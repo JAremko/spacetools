@@ -16,7 +16,6 @@
 artifacts/**
 clojure.ipr
 clojure.iws
-environments/development/cov/
 maven-classpath
 maven-classpath.properties
 nbproject/private/

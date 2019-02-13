@@ -5,5 +5,4 @@ jdk:
 
 script:
   - cd "${TRAVIS_BUILD_DIR}/environments/development"
-  - lein cloverage -o cov --coveralls
-  - curl -F 'json_file=@cov/coveralls.json' https://coveralls.io/api/v1/jobs
+  - lein cloverage --coveralls
