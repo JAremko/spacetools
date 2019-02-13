@@ -5,13 +5,17 @@
                  [orchestra "2019.02.06-1"]
                  [org.clojure/tools.cli "0.4.1"]]
   :uberjar-name "spacedoc.jar"
-  :profiles {:dev
+  :profiles {:user
+             {:env {:gentest-multiplier "1"}}
+             {:plugins
+              [[lein-cloverage "1.0.13"]
+               [lein-environ "1.1.0"]
+               [lein-nvd "0.6.0"] ;; lein nvd check
+               [lein-deps-tree "0.1.2"]]}
+             :dev
              {:global-vars {*warn-on-reflection* true *assert* true}
               :plugins
-              [[lein-environ "1.1.0"]
-               [lein-cloverage "1.0.13"]
-               [lein-nvd "0.6.0"] ;; lein nvd check
-               [lein-deps-tree "0.1.2"]]
+              [[lein-environ "1.1.0"]]
               :dependencies [[environ "1.1.0"]
                              [com.google.jimfs/jimfs "1.1"]
                              [org.clojure/core.match "0.3.0-alpha5"]
