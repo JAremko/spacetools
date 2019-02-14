@@ -65,7 +65,7 @@
 
 
 (defn fix-path
-  [^java.io.File root ^java.io.File path]
+  [^java.io.File root path]
   (let [can-path (->> path
                       (str "src/")
                       (io/as-file)

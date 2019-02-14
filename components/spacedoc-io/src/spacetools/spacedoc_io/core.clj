@@ -245,7 +245,8 @@ NOTE: EXT must include .(dot)"
               parent-dir (nio/parent a-path)]
           (nio/create-dirs parent-dir)
           (with-open [output (->> p (nio/buffered-writer) (io/writer))]
-            (.write output (str content)))
+            (.write ^java.io.Writer output (str content)))
+          ;;        ^^^^ Getting reflection warning for some reason ¯\_(ツ)_/¯
           a-path)
         (fn [^Exception err]
           (exc/failure
