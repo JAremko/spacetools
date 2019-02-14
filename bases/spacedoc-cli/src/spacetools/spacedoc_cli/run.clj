@@ -1,6 +1,6 @@
 (ns spacetools.spacedoc-cli.run
   "Tools for Spacemacs documentation files in .sdn format."
-  (:require [cats.core :refer [mlet]]
+  (:require [cats.core :as m]
             [cats.monad.exception :refer [failure]]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]]
@@ -51,9 +51,9 @@
 
 (defn -main [& args]
   (try-m->output
-   (mlet
-    [{:keys [help summary action a-args]} (*parse args ops)
-     _ (*configure! config-file-name)]
+   (m/do-let
+    (*configure! config-file-name)
+    [{:keys [help summary action a-args]} (*parse args ops)]
     (if help
       (usage summary)
       (match

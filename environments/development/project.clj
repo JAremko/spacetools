@@ -7,8 +7,11 @@
   :uberjar-name "spacedoc.jar"
   :profiles {:user
              {:env {:gentest-multiplier "1"}
+              :dependencies
+              [[cheshire "5.8.1"]]
               :plugins
               [[lein-cloverage "1.0.13"]
+               [lein-exec "0.3.7"]
                [lein-environ "1.1.0"]
                [lein-nvd "0.6.0"] ;; lein nvd check
                [lein-deps-tree "0.1.2"]]}

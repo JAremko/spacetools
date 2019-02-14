@@ -17,6 +17,7 @@ clojure.ipr
 clojure.iws
 Dockerfile
 Dockerfile.noemacs
+environments/development/cov/
 maven-classpath
 maven-classpath.properties
 nbproject/private/

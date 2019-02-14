@@ -4,5 +4,8 @@ jdk:
 - openjdk11
 
 script:
+  - lein polylith build -test
   - cd "${TRAVIS_BUILD_DIR}/environments/development"
-  - lein cloverage --coveralls
+  - lein cloverage -o cov --coveralls
+  - lein exec -p scripts/coveralls/fix-paths.clj "${TRAVIS_BUILD_DIR}" cov/coveralls.json
+  - curl -F 'json_file=@cov/coveralls.json' https://coveralls.io/api/v1/jobs
