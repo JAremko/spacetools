@@ -3,6 +3,6 @@
 ;;; test-helper.el ends here
 
 (require 'undercover)
-(undercover "*.el")
+(undercover "*.el" (:report-file "/tmp/cov/coveralls.json") (:send-report nil))
 
 (defconst sdnize-testing t)
