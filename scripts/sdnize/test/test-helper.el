@@ -2,4 +2,7 @@
 
 ;;; test-helper.el ends here
 
+(require 'undercover)
+(undercover "*.el")
+
 (defconst sdnize-testing t)

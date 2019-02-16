@@ -1,8 +1,5 @@
 ;;; sdnize-test.el --- Tests for sdnize
 
-(require 'undercover)
-(undercover "sdnize.el")
-
 (require 'sdnize)
 
 (ert-deftest sdnize-test ()
