@@ -71,6 +71,10 @@ the export dir.")
   "List of Spacemacs directories and ORG files that normally
  shouldn't be exported.")
 
+(defvar sdnize-known-ops
+  '("+copy-assets")
+  "List of known options.")
+
 ;;; NOTE: Mb move back to the shared file?
 ;; +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (defun sdnize/make-file-size-path-alist (files)
@@ -265,56 +269,64 @@ ROOT-DIR is the documentation root directory. Empty FILE-PATH ignored."
     (delete 0 (mapcar (lambda (path) (or (string-match-p exclude-re path) path))
                       (directory-files-recursively root-dir "\\.org$")))))
 
+(defun sdnize/extract-options (arg-list)
+  "Splits ARG-LIST into cons of options and the rest of ARG-LIST."
+  (let ((ops nil))
+   (while (string-prefix-p "+" (car-safe arg-list))
+     (push (pop arg-list) ops))
+   (list ops arg-list)))
+
 (defun sdnize/run (arg-list)
   "Main function for running as a script. ARG-LIST is an argument list.
 See `sdnize-help-text' for description."
   (unless arg-list
     (error sdnize-help-text))
-  (let ((f-arg (car arg-list)))
-    (setq sdnize-copy-assets
-          (when (string-prefix-p "+" f-arg)
-            ;; NOTE: Weren't planing to have any more options :P
-            (if (string= f-arg "+copy-assets")
-                (pop arg-list)
-              (error "Unrecognized option: %s" f-arg)))))
-  (unless (file-directory-p (car arg-list))
-    (error "The first argument must be a readable directory."))
-  (let ((targt-dir-name (cadr arg-list)))
-    (if (and targt-dir-name (directory-name-p targt-dir-name))
-        (make-directory targt-dir-name t)
-      (error "The second argument must be directory name \"ends with /\"")))
-  (setq sdnize-workers-fin 0
-        sdnize-stop-waiting nil)
-  (let* ((default-directory sdnize-run-file-dir)
-         (w-path (file-truename "sdnize_worker.elc"))
-         (root-dir (file-truename (file-name-as-directory (pop arg-list))))
-         (target-dir (file-truename (file-name-as-directory (pop arg-list))))
-         (files (let ((default-directory root-dir))
-                  (sdnize/find-org-files
-                   (or arg-list
-                       (sdnize/build-default-list root-dir)))))
-         (f-length (length files))
-         (w-count
-          ;; FIXME: With 1-2  workers it gets extremely slow.
-          (min (max 4 (sdnize/get-cpu-count)) f-length)))
-    (if (= f-length 0)
-        (progn (message "No files to export.")
-               (kill-emacs 0))
-      (unless (or (file-exists-p w-path)
-                  (byte-compile-file "sdnize_worker.el"))
-        (error "Failed to byte compile worker script."))
-      (setq sdnize-worker-count w-count
-            sdnize-root-dir root-dir
-            sdnize-target-dir target-dir)
-      (sdnize/do-concurrently
-       files
-       w-count
-       w-path
-       'sdnize/sentinel
-       (lambda (f) (format "%S" `(sdnize/to-sdn ,root-dir ,sdnize-target-dir ',f))))
-      (while (not sdnize-stop-waiting)
-        (accept-process-output))
-      (message "Done."))))
+  (let* ((ops-and-arg (sdnize/extract-options arg-list))
+         (ops (car ops-and-arg))
+         (unknown-ops (set-difference ops sdnize-known-ops :test #'string=))
+         (inputs (cadr ops-and-arg)))
+    (unless (null unknown-ops)
+      (error "Unknown option: %s" unknown-ops))
+    (setq sdnize-copy-assets (member "+copy-assets" ops))
+    (unless (file-directory-p (car inputs))
+      (error "The first argument must be a readable directory."))
+    (let ((targt-dir-name (cadr inputs)))
+      (if (and targt-dir-name (directory-name-p targt-dir-name))
+          (make-directory targt-dir-name t)
+        (error "The second argument must be directory name \"ends with /\"")))
+    (setq sdnize-workers-fin 0
+          sdnize-stop-waiting nil)
+    (let* ((default-directory sdnize-run-file-dir)
+           (w-path (file-truename "sdnize_worker.elc"))
+           (root-dir (file-truename (file-name-as-directory (pop inputs))))
+           (target-dir (file-truename (file-name-as-directory (pop inputs))))
+           (files (let ((default-directory root-dir))
+                    (sdnize/find-org-files
+                     (or inputs
+                         (sdnize/build-default-list root-dir)))))
+           (f-length (length files))
+           (w-count
+            ;; FIXME: With 1-2  workers it gets extremely slow.
+            (min (max 4 (sdnize/get-cpu-count)) f-length)))
+      (if (= f-length 0)
+          (progn (message "No files to export.")
+                 (kill-emacs 0))
+        (unless (or (file-exists-p w-path)
+                    (byte-compile-file "sdnize_worker.el"))
+          (error "Failed to byte compile worker script."))
+        (setq sdnize-worker-count w-count
+              sdnize-root-dir root-dir
+              sdnize-target-dir target-dir)
+        (sdnize/do-concurrently
+         files
+         w-count
+         w-path
+         'sdnize/sentinel
+         (lambda (f)
+           (format "%S" `(sdnize/to-sdn ,root-dir ,sdnize-target-dir ',f))))
+        (while (not sdnize-stop-waiting)
+          (accept-process-output))
+        (message "Done.")))))
 
 ;; Script entry point.
 (when (and load-file-name noninteractive)
