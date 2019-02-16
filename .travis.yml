@@ -3,7 +3,17 @@ sudo: false
 jdk:
 - openjdk11
 
+before_install:
+  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > travis.sh && source ./travis.sh
+  - evm install emacs-25.1-travis --use --skip
+
+install:
+  - cd scripts/sdnize && cask install
+
 script:
+  - cd scripts/sdnize
+  - cask exec ert-runner
+  - cd "${TRAVIS_BUILD_DIR}"
   - lein polylith build -test
   - cd "${TRAVIS_BUILD_DIR}/environments/development"
   - lein cloverage -o cov --coveralls

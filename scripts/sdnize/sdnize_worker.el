@@ -1054,3 +1054,5 @@ ROOT-DIR is original documentation root directory."
                  (> (nth 7 (file-attributes out-file)) 0))
             (sdnize/message "Successfully exported \"%s\"" in-file)
           (sdnize/error "Done but \"%s\" doesn't exist or empty" out-file))))))
+
+(provide 'sdnize-worker)

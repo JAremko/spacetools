@@ -1,6 +1,7 @@
 !.polylith
-**/*.iml
+**/.cask
 **/.directory
+**/*.iml
 **/.idea/**
 **/.\#*
 **/pom.xml
@@ -16,6 +17,7 @@
 artifacts/**
 clojure.ipr
 clojure.iws
+scripts/sdnize/travis.sh
 environments/development/cov/
 maven-classpath
 maven-classpath.properties

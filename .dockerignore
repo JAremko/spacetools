@@ -1,5 +1,6 @@
-**/*.iml
+**/.cask
 **/.directory
+**/*.iml
 **/.idea/**
 **/.\#*
 **/pom.xml
@@ -17,6 +18,7 @@ clojure.ipr
 clojure.iws
 Dockerfile
 Dockerfile.noemacs
+scripts/sdnize/travis.sh
 environments/development/cov/
 maven-classpath
 maven-classpath.properties

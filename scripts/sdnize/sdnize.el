@@ -329,5 +329,9 @@ See `sdnize-help-text' for description."
         (message "Done.")))))
 
 ;; Script entry point.
-(when (and load-file-name noninteractive)
+(when (and load-file-name
+           noninteractive
+           (not (bound-and-true-p sdnize-testing)))
   (sdnize/run argv))
+
+(provide 'sdnize)
