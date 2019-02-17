@@ -20,31 +20,17 @@ install:
   - cd $EL_WS && cask install
   - cd $CLJ_WS && lein deps
 
-jobs:  
-  include:
-    - stage: "Polylith Build"
-      name: "Build Clojure based Spacetools"
-      script: cd $TRAVIS_BUILD_DIR && lein polylith build -test
-    - stage: "Clojure tests"
-      name: "Testing Clojure files"
-      script: cd $CLJ_WS && lein cloverage -o $COV_DIR --coveralls
-    - stage: "Cloverage fix"
-      name: "Resolve symlinks in Cloverage report"
-      script: cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
-    - stage: "Elisp tests"
-      name: "Testing EmacsLisp files"
-      script: cd $EL_WS && cask exec ert-runner
-    - stage: deploy
-      name: "Deploy coverage report to https://coveralls.io"
-      script: skip 
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script: curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
+script:
+  # "Build Clojure based Spacetools"
+  - cd $TRAVIS_BUILD_DIR && lein polylith build -test
+  # "Testing Clojure files"
+  - cd $CLJ_WS && lein cloverage -o $COV_DIR --coveralls
+  # "Resolve symlinks in Cloverage report"
+  - cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
+  # "Testing EmacsLisp files"
+  - cd $EL_WS && cask exec ert-runner
 
-stages:
-  - "Polylith Build"
-  - "Clojure tests"
-  - "Cloverage fix"
-  - "Elisp tests"
-  - deploy
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
