@@ -5,7 +5,7 @@ jdk:
 
 before_install:
   - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh
-  - source ./travis.sh
+  - source ./x.sh
   - evm install emacs-26.1-travis --use --skip
 
 env:
@@ -35,6 +35,7 @@ jobs:
       name: "Testing EmacsLisp files"
       script: cd $EL_WS && cask exec ert-runner
     - stage: deploy
+      name: "Deploy coverage report to https://coveralls.io"
       script: skip 
       deploy:
         provider: script
