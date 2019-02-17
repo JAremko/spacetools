@@ -645,7 +645,7 @@ holding contextual information."
   "Transcode a QUOTE-BLOCK element From Org to Spacemacs SDN.
 CONTENTS holds the contents of the block. INFO is a plist
 holding contextual information."
-  (format "{:tag :quote :children [%s]}" contents))
+  (format "{:tag :quoted :children [%s]}" contents))
 
 ;;;; Radio Target
 
