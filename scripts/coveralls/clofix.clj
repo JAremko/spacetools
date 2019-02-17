@@ -10,14 +10,14 @@
   (println (str/join
             \newline
             [""
-             "Tool for fixing file paths in coveralls report files."
+             "Tool for fixing file paths in Cloverage report files."
              ""
              "Usage: lein exec -p <SCRIPT> <REPO_ROOT_DIR> <REPORT_FILE_PATH>"
              ""
              "TRAVIS CI EXAMPLE:"
              "  cd \"${TRAVIS_BUILD_DIR}/environments/development\""
              "  lein cloverage -o cov --coveralls"
-             (str "  lein exec -p scripts/coveralls/fix-paths.clj"
+             (str "  lein exec -p scripts/coveralls/clofix.clj"
                   " \"${TRAVIS_BUILD_DIR}\" cov/coveralls.json")
              ""]))
   (System/exit 0))

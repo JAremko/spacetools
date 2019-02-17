@@ -4,17 +4,46 @@ jdk:
 - openjdk11
 
 before_install:
-  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > travis.sh && source ./travis.sh
-  - evm install emacs-25.1-travis --use --skip
+  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh
+  - source ./travis.sh
+  - evm install emacs-26.1-travis --use --skip
+
+env:
+  global:
+    - COV_DIR=/tmp/cov
+    - COV_FL="${COV_DIR}/tmp/cov/coveralls.json"
+    - EL_WS="${TRAVIS_BUILD_DIR}/scripts/sdnize"
+    - CLJ_WS="${TRAVIS_BUILD_DIR}/environments/development"
+    - CLOFIX_SCR="${TRAVIS_BUILD_DIR}/scripts/coveralls/clofix.clj"
 
 install:
-  - cd "${TRAVIS_BUILD_DIR}/scripts/sdnize" && cask install
+  - cd $EL_WS && cask install
+  - cd $CLJ_WS && lein deps
 
-script:
-  - cd "${TRAVIS_BUILD_DIR}"
-  - lein polylith build -test
-  - cd "${TRAVIS_BUILD_DIR}/environments/development"
-  - lein cloverage -o /tmp/cov --coveralls
-  - lein exec -p scripts/coveralls/fix-paths.clj "${TRAVIS_BUILD_DIR}" /tmp/cov/coveralls.json
-  - cd "${TRAVIS_BUILD_DIR}/scripts/sdnize" && cask exec ert-runner
-  - curl -F 'json_file=@/tmp/cov/coveralls.json' https://coveralls.io/api/v1/jobs
+jobs:  
+  include:
+    - stage: "Polylith Build"
+      name: "Build Clojure based Spacetools"
+      script: cd $TRAVIS_BUILD_DIR && lein polylith build -test
+    - stage: "Clojure tests"
+      name: "Testing Clojure files"
+      script: cd $CLJ_WS && lein cloverage -o $COV_DIR --coveralls
+    - stage: "Cloverage fix"
+      name: "Resolve symlinks in Cloverage report"
+      script: cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
+    - stage: "Elisp tests"
+      name: "Testing EmacsLisp files"
+      script: cd $EL_WS && cask exec ert-runner
+    - stage: deploy
+      script: skip 
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
+
+stages:
+  - "Polylith Build"
+  - "Clojure tests"
+  - "Cloverage fix"
+  - "Elisp tests"
+  - deploy
