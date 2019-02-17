@@ -11,7 +11,7 @@ before_install:
 env:
   global:
     - COV_DIR=/tmp/cov
-    - COV_FL="${COV_DIR}/tmp/cov/coveralls.json"
+    - COV_FL="${COV_DIR}/coveralls.json"
     - EL_WS="${TRAVIS_BUILD_DIR}/scripts/sdnize"
     - CLJ_WS="${TRAVIS_BUILD_DIR}/environments/development"
     - CLOFIX_SCR="${TRAVIS_BUILD_DIR}/scripts/coveralls/clofix.clj"
