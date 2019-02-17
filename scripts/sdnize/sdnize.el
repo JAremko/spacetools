@@ -15,7 +15,9 @@
 ;;; Code:
 
 (require 'json)
-(require 'cl-lib)
+(eval-when-compile
+  (require 'cl)
+  (require 'cl-lib))
 (require 'subr-x)
 
 (defconst sdnize-help-text
@@ -144,7 +146,6 @@ to the return value."
             (cons (+ (caar buckets) (car fps))
                   (push (cdr fps) (cdar buckets)))))
     (mapcar 'cdr buckets)))
-(byte-compile 'sdnize-filse-to-buckets)
 
 (defun sdnize/do-concurrently
     (files w-count w-path sentinel make-task)
@@ -283,7 +284,7 @@ See `sdnize-help-text' for description."
     (error sdnize-help-text))
   (let* ((ops-and-arg (sdnize/extract-options arg-list))
          (ops (car ops-and-arg))
-         (unknown-ops (set-difference ops sdnize-known-ops :test #'string=))
+         (unknown-ops (cl-set-difference ops sdnize-known-ops :test #'string=))
          (inputs (cadr ops-and-arg)))
     (unless (null unknown-ops)
       (error "Unknown option: %s" unknown-ops))
