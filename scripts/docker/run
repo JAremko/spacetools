@@ -63,7 +63,11 @@ case $action in
         set -e
         cd ./spacedoc
         echo_headline "Exporting documentation for validation:"
-        emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
+        emacs -batch \
+              -l /opt/spacetools/spacedoc/sdnize/sdnize  \
+              -no-site-file \
+              -q \
+              "${sdnize_args[@]}"
         echo_headline "Validating documentation:"
         spacedoc validate "${tmp_dir}"
         exit $?
@@ -76,7 +80,11 @@ case $action in
             prefmt_args="${first_arg}"
         fi
         echo_headline "Exporting documentation for formatting with SDN tools:"
-        emacs -batch -l ./sdnize/sdnize.el -no-site-file -q "${sdnize_args[@]}"
+        emacs -batch \
+              -l /opt/spacetools/spacedoc/sdnize/sdnize  \
+              -no-site-file \
+              -q \
+              "${sdnize_args[@]}"
         echo_headline "Importing documentation back into .org format:"
         spacedoc orgify "${tmp_dir}" "${first_arg}"
         exit $?

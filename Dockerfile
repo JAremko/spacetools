@@ -33,7 +33,7 @@ FROM jare/emacs
 
 COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
-COPY ./run /opt/spacetools/run
+COPY ./scripts/docker/run /opt/spacetools/run
 COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools

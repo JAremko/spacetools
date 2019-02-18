@@ -33,7 +33,7 @@ FROM ubuntu
 
 COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
-COPY ./run /opt/spacetools/run
+COPY ./scripts/docker/run /opt/spacetools/run
 COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools
@@ -41,7 +41,6 @@ WORKDIR  /opt/spacetools
 RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
     && chmod 775 /usr/local/bin/spacedoc \
                  ./spacedoc/sdnize/sdnize.el \
-                 ./spacedoc/sdnize/sdnize.elc \
                  ./run
 
 ENTRYPOINT ["/opt/spacetools/run"]
