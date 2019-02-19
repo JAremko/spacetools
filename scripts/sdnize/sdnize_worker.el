@@ -108,7 +108,8 @@
    "{{newline}}"
    (if args (apply 'format format-string args) format-string)))
 
-(defsubst sdnize/export-file (src-file file-path)
+
+(defun sdnize/export-file (src-file file-path)
   "Emit request for copying file at FILE-PATH. SRC-FILE will
 be sent as the source of request (useful for debugging)"
   (message "{\"type\":\"export\",\"text\":%S,\"source\":%S}"
@@ -117,7 +118,7 @@ be sent as the source of request (useful for debugging)"
            (sdnize/format-payload
             src-file)))
 
-(defsubst sdnize/message (format-string &rest args)
+(defun sdnize/message (format-string &rest args)
   "Emit specified message."
   (message "{\"type\":\"message\",\"text\":%S}"
            (sdnize/format-payload
