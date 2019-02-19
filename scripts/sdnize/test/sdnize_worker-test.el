@@ -14,7 +14,7 @@
                                 (format "current-file: %s\n"
                                         (buffer-file-name))
                                 "error: "
-                                format-string))
+                                (apply 'format format-string args)))
                (kill-emacs 1)))
             ((symbol-function 'sdnize/export-file)
              (lambda (src-file file-path)
