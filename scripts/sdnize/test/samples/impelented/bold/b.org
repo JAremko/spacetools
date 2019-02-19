@@ -1,3 +1,0 @@
-#+TITLE: bold
-
-*bold =verbatime= text*

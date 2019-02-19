@@ -23,7 +23,7 @@
         (progn
           (make-directory tmp-dir)
           (sdnize/to-sdn "test/samples"
-                         "/tmp/samples"
+                         tmp-dir
                          (directory-files-recursively "test/samples"
                                                       "\\.org$")))
       (delete-directory tmp-dir t))))
