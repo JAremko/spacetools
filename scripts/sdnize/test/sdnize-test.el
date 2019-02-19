@@ -1,4 +1,4 @@
-;;; sdnize-test.el --- Tests for sdnize
+;;; sdnize-test.el --- Tests for sdnize -*- lexical-binding: t; -*-
 
 (require 'sdnize)
 
@@ -7,5 +7,3 @@
                  (sdnize/extract-options '("+foo" "+bar" "baz")))))
 
 (provide 'sdnize-test)
-
-;;; sdnize-test.el ends here

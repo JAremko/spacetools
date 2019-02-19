@@ -1,4 +1,4 @@
-;;; _worker.el ---  Spacemacs docs SDN export worker -*- lexical-binding: t -*-
+;;; sdnize_worker.el ---  Spacemacs SDN export worker -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2012-2018 Sylvain Benner & Contributors
 ;;
@@ -124,14 +124,14 @@ be sent as the source of request (useful for debugging)"
             format-string
             args)))
 
-(defsubst sdnize/warn (format-string &rest args)
+(defun sdnize/warn (format-string &rest args)
   "Emit specified warning."
   (message "{\"type\":\"warning\",\"text\":%S}"
            (sdnize/format-payload
             format-string
             args)))
 
-(defsubst sdnize/error (format-string &rest args)
+(defun sdnize/error (format-string &rest args)
   "Emit specified error and exit with code 1."
   (message "{\"type\":\"error\",\"text\":%S}"
            (sdnize/format-payload
@@ -1043,16 +1043,23 @@ ROOT-DIR is original documentation root directory."
                                  (file-truename in-file)))
                                ".sdn"))
              (out-dir (file-name-as-directory (file-name-directory out-file))))
-        (unless (file-accessible-directory-p out-dir)
-          (make-directory out-dir t))
-        (sdnize/message "Exporting \"%s\" into \"%s\"" in-file out-file)
-        (with-temp-buffer
-          (find-file in-file)
-          (sdnize/nrmlz-apply-all)
-          (org-export-to-file 'sdn out-file))
-        (if (and (file-readable-p out-file)
-                 (> (nth 7 (file-attributes out-file)) 0))
-            (sdnize/message "Successfully exported \"%s\"" in-file)
-          (sdnize/error "Done but \"%s\" doesn't exist or empty" out-file))))))
+        (if (not (string-match-p
+              "[^[:space:]]"
+              (with-temp-buffer
+                (insert-file-contents in-file)
+                (buffer-string))))
+            (sdnize/error "Input \"%s\" is empty" in-file)
+          (unless (file-accessible-directory-p out-dir)
+            (make-directory out-dir t))
+          (sdnize/message "Exporting \"%s\" into \"%s\"" in-file out-file)
+          (with-temp-buffer
+            (find-file in-file)
+            (sdnize/nrmlz-apply-all)
+            (org-export-to-file 'sdn out-file))
+          (if (and (file-readable-p out-file)
+                   (> (nth 7 (file-attributes out-file)) 0))
+              (sdnize/message "Successfully exported \"%s\"" in-file)
+            (sdnize/error "Done but \"%s\" doesn't exist or empty"
+                          out-file)))))))
 
-(provide 'sdnize-worker)
+(provide 'sdnize_worker)
