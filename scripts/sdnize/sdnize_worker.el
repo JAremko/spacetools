@@ -777,15 +777,15 @@ holding export options."
          (concat "Missing \"Features:\"(With a colon) list in the "
                  "top level \"Description\" headline\n"
                  "See %S")
-         sdnize-readme-template-url))))
+         sdnize-readme-template-url))
+      (unless (plist-member info :file-has-tags?)
+        (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
+                     sdnize-readme-template-url))))
 
   ;; General validations:
   (unless (plist-member info :file-has-title?)
     (sdnize/error "Missing \"#+TITLE:\" keyword. See %S"
                   sdnize-readme-template-url))
-  (unless (plist-member info :file-has-tags?)
-    (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
-                 sdnize-readme-template-url))
 
   ;; "Content is inner Template"
   contents)

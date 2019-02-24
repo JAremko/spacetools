@@ -1,0 +1,3 @@
+#+BEGIN_EXAMPLE
+foo
+#+END_EXAMPLE
