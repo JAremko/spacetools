@@ -1,13 +1,12 @@
-;;; test-helper.el --- Helpers for sdnize tests -*- lexical-binding: t; -*-
+(require 'buttercup)
 
-;;; test-helper.el ends here
-
-(require 'undercover)
-(undercover "sdnize*.el"
-            (:report-file "/tmp/cov/coveralls.json")
-            (:send-report nil))
+(when (require 'undercover nil t)
+  (undercover "sdnize*.el"
+              (:report-file "/tmp/cov/coveralls.json")
+              (:send-report nil)))
 
 (defconst sdnize-testing t)
+
 
 (defmacro sdnize-test-worker-fixture (&rest body)
   "Filter worker messages and manage TMP-DIR temporary test directory."

@@ -28,7 +28,7 @@ script:
   # "Resolve symlinks in Cloverage report"
   - cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
   # "Testing EmacsLisp files"
-  - cd $EL_WS && cask exec ert-runner
+  - cd $EL_WS && cask exec buttercup -L . -L tests
 
 deploy:
   provider: script
