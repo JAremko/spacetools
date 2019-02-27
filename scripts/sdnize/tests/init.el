@@ -24,6 +24,17 @@
                    (gethash :children sdn)
                    :initial-value nil))))
 
+(defun sdnize-test/sdn-get-source-dir (sdn)
+  "Return source (parent) directory of SDN document."
+  (if (and (hash-table-p sdn)
+           (eq (gethash :tag sdn) :root))
+      (when-let ((source (gethash :source sdn)))
+        (thread-first source
+          (file-name-directory)
+          (directory-file-name)
+          (file-name-base)))
+    (error "Root element of a SDN file should have :root tag")))
+
 (defun sdnize-test/sdn-get-title (sdn)
   "Return title of SDN document."
   (when (hash-table-p sdn)

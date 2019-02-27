@@ -50,10 +50,11 @@
                            (sdnize-test/filter-hashtable
                             (lambda (v)
                               (thread-first v
-                                (sdnize-test/sdn-get-title)
+                                (sdnize-test/sdn-get-source-dir)
                                 (sdnize-test/string->keyword)
                                 (sdnize-test/sdn-contains-tag v)))
                             h-t)))
                   (expect (hash-table-count fp->sdn) :to-equal num-samples)
                   (expect (without-root fp->sdn) :to-equal nil)
                   (expect (without-sample-element fp->sdn) :to-equal nil)))))
+
