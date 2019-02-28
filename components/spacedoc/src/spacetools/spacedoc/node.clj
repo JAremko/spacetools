@@ -102,22 +102,6 @@
   (s/keys :req-un [:spacetools.spacedoc.node.strike-through/children]))
 
 
-;; subscript node
-
-(s/def :spacetools.spacedoc.node.subscript/children
-  ::inline-container-children)
-(defnode ::subscript
-  (s/keys :req-un [:spacetools.spacedoc.node.subscript/children]))
-
-
-;; superscript node
-
-(s/def :spacetools.spacedoc.node.superscript/children
-  ::inline-container-children)
-(defnode ::superscript
-  (s/keys :req-un [:spacetools.spacedoc.node.superscript/children]))
-
-
 ;; underline node
 
 (s/def :spacetools.spacedoc.node.underline/children
@@ -175,8 +159,6 @@
 (defmethod sc/inline-container :italic [_] ::italic)
 (defmethod sc/inline-container :link [_] ::link)
 (defmethod sc/inline-container :strike-through [_] ::strike-through)
-(defmethod sc/inline-container :subscript [_] ::subscript)
-(defmethod sc/inline-container :superscript [_] ::superscript)
 (defmethod sc/inline-container :underline [_] ::underline)
 (s/def ::inline-container (s/multi-spec sc/inline-container :tag))
 

@@ -705,7 +705,7 @@ holding contextual information."
   "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object. INFO is a plist holding
 contextual information."
-  (format "{:tag :subscript :children [%s]}" contents))
+  (sdnize/noimpl "sdnize/subscript"))
 
 ;;;; Superscript
 
@@ -713,7 +713,7 @@ contextual information."
   "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
 CONTENTS is the contents of the object. INFO is a plist holding
 contextual information."
-  (format "{:tag :superscript :children [%s]}" contents))
+  (sdnize/noimpl "sdnize/superscript"))
 
 ;;;; Table
 
