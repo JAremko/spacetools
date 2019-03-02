@@ -77,8 +77,6 @@ the export dir.")
   '("+copy-assets")
   "List of known options.")
 
-;;; NOTE: Mb move back to the shared file?
-;; +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 (defun sdnize/make-file-size-path-alist (files)
   "Return (<file size> . <abs file path>) alist of FILES."
   (let ((res nil))

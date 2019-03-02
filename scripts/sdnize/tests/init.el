@@ -11,6 +11,7 @@
 
 (defconst sdnize-testing t)
 
+(defconst sdnize-elems "tests/data/elements/")
 
 ;;;; Helpers
 

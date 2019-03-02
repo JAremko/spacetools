@@ -4,16 +4,17 @@
 
 (require 'sdnize_worker)
 
+;; TODO: Add more tests
+
 (describe "Function: `sdnize/to-sdn'"
-          :var (tmp-dir sample-files num-samples)
+          :var (tmp-dir sample-fs num-samples)
           (before-all
            (setq tmp-dir (thread-last "sdnize_test"
                            (make-temp-name)
                            (concat temporary-file-directory)
                            (file-name-as-directory))
-                 sample-files (directory-files-recursively "tests/samples"
-                                                           "\\.org$")
-                 num-samples (length sample-files))
+                 sample-fs (directory-files-recursively sdnize-elems "\\.org$")
+                 num-samples (length sample-fs))
            (make-directory tmp-dir)
            (spy-on 'sdnize/message :and-return-value nil)
            (spy-on 'sdnize/warn :and-call-fake #'message)
@@ -29,7 +30,7 @@
            (spy-on 'sdnize/export-file :and-return-value nil))
           (after-all (delete-directory tmp-dir t))
           (it "Should succeed with .org samples"
-              (expect (sdnize/to-sdn "tests/samples" tmp-dir sample-files)
+              (expect (sdnize/to-sdn sdnize-elems tmp-dir sample-fs)
                       :not :to-throw))
           (it "target directory should exist"
               (expect (file-directory-p tmp-dir) :to-be-truthy))
