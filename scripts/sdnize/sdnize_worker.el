@@ -101,49 +101,52 @@
 
 ;;; Helper Functions
 
-(defsubst sdnize/format-payload (format-string args)
+(defsubst sdnize/format-payload (format-string &rest args)
   "Format payload for JSON."
   (replace-regexp-in-string
    "\n"
    "{{newline}}"
    (if args (apply 'format format-string args) format-string)))
 
+(defalias 'sdnize/msg 'message
+  "This function called to communicate with the runner script.")
+
+(defalias 'sdnize/fail (apply-partially 'kill-emacs 5)
+  "Call `kill-emacs' with code 5.")
 
 (defun sdnize/export-file (src-file file-path)
   "Emit request for copying file at FILE-PATH. SRC-FILE will
-be sent as the source of request (useful for debugging)"
-  (message "{\"type\":\"export\",\"text\":%S,\"source\":%S}"
-           (sdnize/format-payload
-            file-path)
-           (sdnize/format-payload
-            src-file)))
+be sent as the source of request (useful for debugging).
+The return value of `sdnize/msg' call is returned."
+  (sdnize/msg "{\"type\":\"export\",\"text\":%S,\"source\":%S}"
+              (sdnize/format-payload file-path)
+              (sdnize/format-payload src-file)))
 
 (defun sdnize/message (format-string &rest args)
-  "Emit specified message."
-  (message "{\"type\":\"message\",\"text\":%S}"
-           (sdnize/format-payload
-            format-string
-            args)))
+  "Emit specified message.
+The return value of `sdnize/msg' call is returned."
+  (sdnize/msg "{\"type\":\"message\",\"text\":%S}"
+              (sdnize/format-payload format-string args)))
 
 (defun sdnize/warn (format-string &rest args)
-  "Emit specified warning."
-  (message "{\"type\":\"warning\",\"text\":%S}"
-           (sdnize/format-payload
-            format-string
-            args)))
+  "Emit specified warning.
+The return value of `sdnize/msg' call is returned."
+  (sdnize/msg "{\"type\":\"warning\",\"text\":%S}"
+              (sdnize/format-payload format-string args)))
 
 (defun sdnize/error (format-string &rest args)
-  "Emit specified error and exit with code 1."
-  (message "{\"type\":\"error\",\"text\":%S}"
-           (sdnize/format-payload
-            (concat (format "current-buffer: %s\n"
-                            (buffer-name))
-                    (format "current-file: %s\n"
-                            (buffer-file-name))
-                    "error: "
-                    format-string)
-            args))
-  (kill-emacs 1))
+  "Emit specified error and exit with code 1.
+The return value of `sdnize/msg' call is returned."
+  (sdnize/msg "{\"type\":\"error\",\"text\":%S}"
+              (sdnize/format-payload
+               (concat (format "current-buffer: %s\n"
+                               (buffer-name))
+                       (format "current-file: %s\n"
+                               (buffer-file-name))
+                       "error: "
+                       format-string)
+               args))
+  (sdnize/fail))
 
 (defconst sdnize/special-chars '(("\\" . "\\\\")
                                  ("\t" . "\\t")
@@ -1046,10 +1049,10 @@ ROOT-DIR is original documentation root directory."
                                ".sdn"))
              (out-dir (file-name-as-directory (file-name-directory out-file))))
         (if (not (string-match-p
-              "[^[:space:]]"
-              (with-temp-buffer
-                (insert-file-contents in-file)
-                (buffer-string))))
+                  "[^[:space:]]"
+                  (with-temp-buffer
+                    (insert-file-contents in-file)
+                    (buffer-string))))
             (sdnize/error "Input \"%s\" is empty" in-file)
           (unless (file-accessible-directory-p out-dir)
             (make-directory out-dir t))

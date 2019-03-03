@@ -5,6 +5,6 @@
 (require 'sdnize)
 
 (describe "Function: `sdnize/extract-options'"
-          (it "Should split options from other arguments"
-              (expect (sdnize/extract-options '("+foo" "+bar" "baz"))
-                      :to-have-same-items-as '(("+bar" "+foo") ("baz")))))
+  (it "Should split options from other arguments"
+    (expect (sdnize/extract-options '("+foo" "+bar" "baz"))
+            :to-have-same-items-as '(("+bar" "+foo") ("baz")))))

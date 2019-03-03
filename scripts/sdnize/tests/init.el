@@ -3,6 +3,7 @@
 (require 'buttercup)
 (require 'cl)
 (require 'edn)
+(require 'json)
 
 (when (require 'undercover nil t)
   (undercover "sdnize*.el"
@@ -59,10 +60,10 @@
 
 (defun sdnize-test/filter-hashtable (val-pred h-t)
   "Return list of hash table H-T keys of values satisfying VAL-PRED."
- (let ((ret-col nil))
-   (maphash
-    (lambda (k v)
-      (unless (funcall val-pred v)
-        (push k ret-col)))
-    h-t)
-   ret-col))
+  (let ((ret-col nil))
+    (maphash
+     (lambda (k v)
+       (unless (funcall val-pred v)
+         (push k ret-col)))
+     h-t)
+    ret-col))
