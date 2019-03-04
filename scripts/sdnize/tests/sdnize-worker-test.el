@@ -13,6 +13,7 @@
                              (json-read-from-string
                               (apply 'format fmt-str args))))
     (spy-on 'sdnize/fail))
+
   (describe "Function: `sdnize/export-file'"
     (it "Should succeed in sending message"
       (expect (sdnize/export-file "foo" "bar") :not :to-throw)
@@ -21,7 +22,49 @@
     (it "Should return expected message"
       (expect  (sdnize/export-file "foo" "bar")
                :to-have-same-items-as
-               '((:type . "export") (:text . "bar") (:source . "foo"))))))
+               '((:type . "export") (:text . "bar") (:source . "foo")))))
+
+  (describe "Function: `sdnize/message'"
+    (it "Should succeed in sending message"
+      (expect (sdnize/message "foo %s" "bar") :not :to-throw)
+      (expect 'sdnize/msg :to-have-been-called)
+      (expect 'sdnize/fail :not :to-have-been-called))
+    (it "Also should return expected message"
+      (expect  (sdnize/message "foo")
+               :to-have-same-items-as
+               '((:type . "message") (:text . "foo"))))
+    (it "Also should return expected message with interpolation"
+      (expect  (sdnize/message "foo %s" "bar")
+               :to-have-same-items-as
+               '((:type . "message") (:text . "foo bar")))))
+
+  (describe "Function: `sdnize/warn'"
+    (it "Should succeed in sending message"
+      (expect (sdnize/warn "foo %s" "bar") :not :to-throw)
+      (expect 'sdnize/msg :to-have-been-called)
+      (expect 'sdnize/fail :not :to-have-been-called))
+    (it "Also should return expected message"
+      (expect  (sdnize/warn "foo")
+               :to-have-same-items-as
+               '((:type . "warning") (:text . "foo"))))
+    (it "Also should return expected message with interpolation"
+      (expect  (sdnize/warn "foo %s" "bar")
+               :to-have-same-items-as
+               '((:type . "warning") (:text . "foo bar")))))
+
+  (describe "Function: `sdnize/error'"
+    (it "Should succeed in sending message"
+      (expect (sdnize/error "foo %s" "bar") :not :to-throw)
+      (expect 'sdnize/msg :to-have-been-called)
+      (expect 'sdnize/fail :to-have-been-called))
+    (it "Also should return expected message"
+      (expect  (sdnize/error "foo")
+               :to-contain
+               '(:type . "error")))
+    (it "Also should return expected message with interpolation"
+      (expect  (sdnize/error "foo %s" "bar")
+               :to-contain
+               '(:type . "error")))))
 
 (describe "Function: `sdnize/to-sdn'"
   :var (tmp-dir sample-fs num-samples)

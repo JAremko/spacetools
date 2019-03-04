@@ -101,7 +101,7 @@
 
 ;;; Helper Functions
 
-(defsubst sdnize/format-payload (format-string &rest args)
+(defun sdnize/format-payload (format-string &rest args)
   "Format payload for JSON."
   (replace-regexp-in-string
    "\n"
@@ -126,27 +126,29 @@ The return value of `sdnize/msg' call is returned."
   "Emit specified message.
 The return value of `sdnize/msg' call is returned."
   (sdnize/msg "{\"type\":\"message\",\"text\":%S}"
-              (sdnize/format-payload format-string args)))
+              (apply 'sdnize/format-payload format-string args)))
 
 (defun sdnize/warn (format-string &rest args)
   "Emit specified warning.
 The return value of `sdnize/msg' call is returned."
   (sdnize/msg "{\"type\":\"warning\",\"text\":%S}"
-              (sdnize/format-payload format-string args)))
+              (apply 'sdnize/format-payload format-string args)))
 
 (defun sdnize/error (format-string &rest args)
   "Emit specified error and exit with code 1.
-The return value of `sdnize/msg' call is returned."
-  (sdnize/msg "{\"type\":\"error\",\"text\":%S}"
-              (sdnize/format-payload
-               (concat (format "current-buffer: %s\n"
-                               (buffer-name))
-                       (format "current-file: %s\n"
-                               (buffer-file-name))
-                       "error: "
-                       format-string)
-               args))
-  (sdnize/fail))
+The return value of `sdnize/msg' call is returned if the worker doesn't
+terminate first (used in testing)."
+  (prog1
+      (sdnize/msg "{\"type\":\"error\",\"text\":%S}"
+                  (apply 'sdnize/format-payload
+                         (concat (format "current-buffer: %s\n"
+                                         (buffer-name))
+                                 (format "current-file: %s\n"
+                                         (buffer-file-name))
+                                 "error: "
+                                 format-string)
+                         args))
+    (sdnize/fail)))
 
 (defconst sdnize/special-chars '(("\\" . "\\\\")
                                  ("\t" . "\\t")
