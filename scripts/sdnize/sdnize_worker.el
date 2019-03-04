@@ -190,8 +190,8 @@ terminate first (used in testing)."
   "Ignore locks on files"
   t)
 
-(defun sdnize/noimpl (element)
-  (sdnize/error "\"%s\" not implemented" element))
+;; (defun sdnize/noimpl (element)
+;;   (sdnize/error "\"%s\" not implemented" element))
 
 
 ;;; Transcode Functions
@@ -214,11 +214,11 @@ holding contextual information."
 
 ;;;; Clock
 
-(defun sdnize/clock (_clock _contents _info)
-  "Transcode a CLOCK element From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist used as a communication
-channel."
-  (sdnize/noimpl "sdnize/clock"))
+;; (defun sdnize/clock (_clock _contents _info)
+;;   "Transcode a CLOCK element From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist used as a communication
+;; channel."
+;;   (sdnize/noimpl "sdnize/clock"))
 
 ;;;; Code
 
@@ -239,27 +239,27 @@ NOTE: In Spacemacs ~code blocks~ are key sequences."
 
 ;;;; Drawer
 
-(defun sdnize/drawer (_drawer _contents _info)
-  "Transcode a DRAWER element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block. INFO is a plist
-holding contextual information."
-  (sdnize/noimpl "sdnize/drawer"))
+;; (defun sdnize/drawer (_drawer _contents _info)
+;;   "Transcode a DRAWER element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the block. INFO is a plist
+;; holding contextual information."
+;;   (sdnize/noimpl "sdnize/drawer"))
 
 ;;;; Dynamic Block
 
-(defun sdnize/dynamic-block (_dynamic-block _contents _info)
-  "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block. INFO is a plist
-holding contextual information.  See `org-export-data'."
-  (sdnize/noimpl "sdnize/dynamic-block"))
+;; (defun sdnize/dynamic-block (_dynamic-block _contents _info)
+;;   "Transcode a DYNAMIC-BLOCK element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the block. INFO is a plist
+;; holding contextual information.  See `org-export-data'."
+;;   (sdnize/noimpl "sdnize/dynamic-block"))
 
 ;;;; Entity
 
-(defun sdnize/entity (_entity _contents _info)
-  "Transcode an ENTITY object From Org to Spacemacs SDN.
-CONTENTS are the definition itself. INFO is a plist holding
-contextual information."
-  (sdnize/noimpl "sdnize/entity"))
+;; (defun sdnize/entity (_entity _contents _info)
+;;   "Transcode an ENTITY object From Org to Spacemacs SDN.
+;; CONTENTS are the definition itself. INFO is a plist holding
+;; contextual information."
+;;   (sdnize/noimpl "sdnize/entity"))
 
 ;;;; Example Block
 
@@ -272,41 +272,41 @@ information."
 
 ;;;; Export Block
 
-(defun sdnize/export-block (_export-block _contents _info)
-  "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
-  CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/export-block"))
+;; (defun sdnize/export-block (_export-block _contents _info)
+;;   "Transcode a EXPORT-BLOCK element From Org to Spacemacs SDN.
+;;   CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/export-block"))
 
 ;;;; Export Snippet
 
-(defun sdnize/export-snippet (_export-snippet _contents _info)
-  "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
-  CONTENTS is nil. INFO is a plist holding contextual
-  information."
-  (sdnize/noimpl "sdnize/export-snippet"))
+;; (defun sdnize/export-snippet (_export-snippet _contents _info)
+;;   "Transcode a EXPORT-SNIPPET object From Org to Spacemacs SDN.
+;;   CONTENTS is nil. INFO is a plist holding contextual
+;;   information."
+;;   (sdnize/noimpl "sdnize/export-snippet"))
 
 ;;;; Fixed Width
 
-(defun sdnize/fixed-width (_fixed-width _contents _info)
-  "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
-  CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/fixed-width"))
+;; (defun sdnize/fixed-width (_fixed-width _contents _info)
+;;   "Transcode a FIXED-WIDTH element From Org to Spacemacs SDN.
+;;   CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/fixed-width"))
 
 ;;;; Footnote definition
 
-(defun sdnize/footnote-definition
-    (_footnote-definition _contents _info)
-  "Transcode a FOOTNOTE-DEFINITION element From Org to Spacemacs SDN.
-  CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/footnote-definition"))
+;; (defun sdnize/footnote-definition
+;;     (_footnote-definition _contents _info)
+;;   "Transcode a FOOTNOTE-DEFINITION element From Org to Spacemacs SDN.
+;;   CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/footnote-definition"))
 
 ;;;; Footnote Reference
 
-(defun sdnize/footnote-reference
-    (_footnote-reference _contents _info)
-  "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
-  CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/footnote-reference"))
+;; (defun sdnize/footnote-reference
+;;     (_footnote-reference _contents _info)
+;;   "Transcode a FOOTNOTE-REFERENCE element From Org to Spacemacs SDN.
+;;   CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/footnote-reference"))
 
 ;;;; Headline
 
@@ -369,26 +369,26 @@ information."
 
 ;;;; Horizontal Rule
 
-(defun sdnize/horizontal-rule (_horizontal-rule _contents _info)
-  "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
-CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/horizontal-rule"))
+;; (defun sdnize/horizontal-rule (_horizontal-rule _contents _info)
+;;   "Transcode an HORIZONTAL-RULE  object From Org to Spacemacs SDN.)))))
+;; CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/horizontal-rule"))
 
 ;;;; Inline Src Block
 
-(defun sdnize/inline-src-block (_inline-src-block _contents _info)
-  "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the item. INFO is a plist holding
-contextual information."
-  (sdnize/noimpl "sdnize/inline-src-block"))
+;; (defun sdnize/inline-src-block (_inline-src-block _contents _info)
+;;   "Transcode an INLINE-SRC-BLOCK element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the item. INFO is a plist holding
+;; contextual information."
+;;   (sdnize/noimpl "sdnize/inline-src-block"))
 
 ;;;; Inlinetask
 
-(defun sdnize/inlinetask (_inlinetask _contents _info)
-  "Transcode an INLINETASK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block. INFO is a plist
-holding contextual information."
-  (sdnize/noimpl "sdnize/inlinetask"))
+;; (defun sdnize/inlinetask (_inlinetask _contents _info)
+;;   "Transcode an INLINETASK element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the block. INFO is a plist
+;; holding contextual information."
+;;   (sdnize/noimpl "sdnize/inlinetask"))
 
 ;;;; Inner Template
 
@@ -456,17 +456,17 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 
 ;;;; Latex Environment
 
-(defun sdnize/latex-environment (_latex-environment _contents _info)
-  "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/latex-environment"))
+;; (defun sdnize/latex-environment (_latex-environment _contents _info)
+;;   "Transcode a LATEX-ENVIRONMENT element From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/latex-environment"))
 
 ;;;; Latex Fragment
 
-(defun sdnize/latex-fragment (_latex-fragment _contents _info)
-  "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/latex-fragment"))
+;; (defun sdnize/latex-fragment (_latex-fragment _contents _info)
+;;   "Transcode a LATEX-FRAGMENT object From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/latex-fragment"))
 
 ;;;; Line Break
 
@@ -563,11 +563,11 @@ INFO is a plist holding contextual information.  See
 ;;;; Node Property
 
 
-(defun sdnize/node-property (_node-property _contents _info)
-  "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual
-information."
-  (sdnize/noimpl "sdnize/node-property"))
+;; (defun sdnize/node-property (_node-property _contents _info)
+;;   "Transcode a NODE-PROPERTY element From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual
+;; information."
+;;   (sdnize/noimpl "sdnize/node-property"))
 
 ;;;; Paragraph
 
@@ -631,19 +631,19 @@ contextual information."
 
 ;;;; Planning
 
-(defun sdnize/planning (_planning _contents _info)
-  "Transcode a PLANNING element From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist used as a communication
-channel."
-  (sdnize/noimpl "sdnize/planning"))
+;; (defun sdnize/planning (_planning _contents _info)
+;;   "Transcode a PLANNING element From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist used as a communication
+;; channel."
+;;   (sdnize/noimpl "sdnize/planning"))
 
 ;;;; Property Drawer
 
-(defun sdnize/property-drawer (_property-drawer _contents _info)
-  "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the drawer. INFO is a plist
-holding contextual information."
-  (sdnize/noimpl "sdnize/property-drawer"))
+;; (defun sdnize/property-drawer (_property-drawer _contents _info)
+;;   "Transcode a PROPERTY-DRAWER element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the drawer. INFO is a plist
+;; holding contextual information."
+;;   (sdnize/noimpl "sdnize/property-drawer"))
 
 ;;;; Quote Block
 
@@ -655,11 +655,11 @@ holding contextual information."
 
 ;;;; Radio Target
 
-(defun sdnize/radio-target (_radio-target _text _info)
-  "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
-TEXT is the text of the target. INFO is a plist holding
-contextual information."
-  (sdnize/noimpl "sdnize/radio-target"))
+;; (defun sdnize/radio-target (_radio-target _text _info)
+;;   "Transcode a RADIO-TARGET object From Org to Spacemacs SDN.
+;; TEXT is the text of the target. INFO is a plist holding
+;; contextual information."
+;;   (sdnize/noimpl "sdnize/radio-target"))
 
 ;;;; Section
 
@@ -671,11 +671,11 @@ holding contextual information."
 
 ;;;; Special Block
 
-(defun sdnize/special-block (_special-block _contents _info)
-  "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
-CONTENTS holds the contents of the block. INFO is a plist
-holding contextual information."
-  (sdnize/noimpl "sdnize/special-block"))
+;; (defun sdnize/special-block (_special-block _contents _info)
+;;   "Transcode a SPECIAL-BLOCK element From Org to Spacemacs SDN.
+;; CONTENTS holds the contents of the block. INFO is a plist
+;; holding contextual information."
+;;   (sdnize/noimpl "sdnize/special-block"))
 
 ;;;; Src Block
 
@@ -691,10 +691,10 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 
 ;;;; Statistics Cookie
 
-(defun sdnize/statistics-cookie (_statistics-cookie _contents _info)
-  "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual information."
-  (sdnize/noimpl "sdnize/statistics-cookie"))
+;; (defun sdnize/statistics-cookie (_statistics-cookie _contents _info)
+;;   "Transcode a STATISTICS-COOKIE object From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual information."
+;;   (sdnize/noimpl "sdnize/statistics-cookie"))
 
 ;;;; Strike-Through
 
@@ -706,19 +706,19 @@ holding contextual information."
 
 ;;;; Subscript
 
-(defun sdnize/subscript (_subscript contents _info)
-  "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
-CONTENTS is the contents of the object. INFO is a plist holding
-contextual information."
-  (sdnize/noimpl "sdnize/subscript"))
+;; (defun sdnize/subscript (_subscript contents _info)
+;;   "Transcode a SUBSCRIPT object From Org to Spacemacs SDN.
+;; CONTENTS is the contents of the object. INFO is a plist holding
+;; contextual information."
+;;   (sdnize/noimpl "sdnize/subscript"))
 
 ;;;; Superscript
 
-(defun sdnize/superscript (_superscript contents _info)
-  "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
-CONTENTS is the contents of the object. INFO is a plist holding
-contextual information."
-  (sdnize/noimpl "sdnize/superscript"))
+;; (defun sdnize/superscript (_superscript contents _info)
+;;   "Transcode a SUPERSCRIPT object From Org to Spacemacs SDN.
+;; CONTENTS is the contents of the object. INFO is a plist holding
+;; contextual information."
+;;   (sdnize/noimpl "sdnize/superscript"))
 
 ;;;; Table
 
@@ -755,11 +755,11 @@ communication channel."
 
 ;;;; Target
 
-(defun sdnize/target (_target _contents _info)
-  "Transcode a TARGET object From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual
-information."
-  (sdnize/noimpl "sdnize/target"))
+;; (defun sdnize/target (_target _contents _info)
+;;   "Transcode a TARGET object From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual
+;; information."
+;;   (sdnize/noimpl "sdnize/target"))
 
 ;;;; Template
 
@@ -797,11 +797,11 @@ holding export options."
 
 ;;;; Timestamp
 
-(defun sdnize/timestamp (_timestamp _contents _info)
-  "Transcode a TIMESTAMP object From Org to Spacemacs SDN.
-CONTENTS is nil. INFO is a plist holding contextual
-information."
-  (sdnize/noimpl "sdnize/timestamp"))
+;; (defun sdnize/timestamp (_timestamp _contents _info)
+;;   "Transcode a TIMESTAMP object From Org to Spacemacs SDN.
+;; CONTENTS is nil. INFO is a plist holding contextual
+;; information."
+;;   (sdnize/noimpl "sdnize/timestamp"))
 
 ;;;; Underline
 
