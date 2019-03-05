@@ -2,7 +2,6 @@
   "Global configurations."
   (:require [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]))
 
@@ -53,11 +52,7 @@
 
 (s/def :org/toc-max-depth nat-int?)
 
-(s/def :org/toc-template (s/with-gen (s/and string? #(re-matches #".*%s.*" %))
-                           #(gen/fmap (fn [[head tail]] (str head "%s" tail))
-                                      (gen/tuple
-                                       (gen/string-alphanumeric)
-                                       (gen/string-alphanumeric)))))
+(s/def :org/toc-template (s/and string? #(re-matches #".*%s.*" %)))
 
 (s/def :org/emphasis-tokens (s/map-of keyword? string?))
 
@@ -93,12 +88,6 @@
 (def *configs
   "Configuration atom."
   (atom default-config))
-
-
-(defn-spec valid-configs? boolean?
-  "Return true if CONFIGS is valid."
-  [configs any?]
-  (s/valid? ::configs configs))
 
 
 (defn-spec valid-overrides? boolean?

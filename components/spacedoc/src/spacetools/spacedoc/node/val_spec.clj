@@ -21,16 +21,16 @@
   (s/and string? (complement str/blank?)))
 
 
-(s/def ::path-id
-  (s/with-gen
-    (s/and
-     string?
-     #(re-matches
-       #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
-       %))
-    #(gen/fmap
-      (fn [[a delm b]] (str/lower-case (str a delm b)))
-      (gen/tuple
-       (gen/string-alphanumeric)
-       (gen/elements ["/" ""])
-       (gen/string-alphanumeric)))))
+;; (s/def ::path-id
+;;   (s/with-gen
+;;     (s/and
+;;      string?
+;;      #(re-matches
+;;        #"^(?!.*[_/]{2}.*|^/.*|.*/$|.*[\p{Lu}].*)[\p{Nd}\p{L}\p{Pd}\p{Pc}/]+$"
+;;        %))
+;;     #(gen/fmap
+;;       (fn [[a delm b]] (str/lower-case (str a delm b)))
+;;       (gen/tuple
+;;        (gen/string-alphanumeric)
+;;        (gen/elements ["/" ""])
+;;        (gen/string-alphanumeric)))))

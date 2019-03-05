@@ -171,24 +171,7 @@ SRC is the exported file name."
          trailing-ns)))))
 
 
-;;;; Table stuff
-
-(defn-spec same-row-child-count? boolean?
-  "Returns true if all rows have equal count of children.
-:rule rows are ignored."
-  ;; Note: Can't use row spec predicate here.
-  [rows (s/coll-of (s/and node? #(= :table-row (:tag %))))]
-  (let [t-c (remove #(#{:rule} (:type %)) rows)]
-    (or (empty? t-c)
-        (apply = (map #(count (:children %)) t-c)))))
-
-
 ;;;; Headline stuff
-
-(defn-spec in-hl-level-range? boolean?
-  "Returns true if LEVEL is in [1..`cfg/max-headline-depth`] range."
-  [level nat-int?]
-  (some? ((set (range 1 (inc (cfg/max-headline-depth)))) level)))
 
 
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))
@@ -230,34 +213,3 @@ Fragments are  particular headline values in the \"/\" separated chain."
   [node any?]
   (and (hl? node)
        (valid-node? node)))
-
-
-;; (defn-spec hl->list ::paragraph
-;;   "Turn HL headline into paragraph."
-;;   [{:keys [value children todo?] :as hl hl?}])
-
-
-(defn-spec flatten-hl valid-hl?
-  "Flatten HL headline children by converting them into section.
-if LEVEL provided - flatten every headline \"deeper\" than it."
-  [level (s/and pos-int? #(<= % (cfg/max-headline-depth))) hl hl?]
-  ((fn rec [depth {:keys [value children todo?] :as node}]
-     (if (hl? node)
-       (let [children (mapv (partial rec (inc depth)) children)]
-         (if (>= depth level)
-           {:tag :section
-            :children [{:tag :paragraph
-                        :children (vec
-                                   (r/reduce
-                                    concat
-                                    [{:tag :text
-                                      :value (str (if todo? "TODO: " "") value)}
-                                     {:tag :line-break}]
-                                    (r/map
-                                     #(if (= :section (:tag %))
-                                        (:children %)
-                                        [%])
-                                     children)))}]}
-           (assoc node :children children)))
-       node))
-   0 hl))

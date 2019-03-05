@@ -25,10 +25,6 @@
   [parents]
   (sdu/relations parents))
 
-(defn valid-configs?
-  [configs]
-  (cfg/valid-configs? configs))
-
 (defn valid-overrides?
   [configs]
   (cfg/valid-overrides? configs))

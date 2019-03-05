@@ -181,18 +181,15 @@ Return nil if ROOT node doesn't have any headlines."
                                (up-*gid->count! *gid->count hl))))
                      (update :children
                              #(when (< depth (cfg/toc-max-depth))
-                                (some->>
-                                 %
-                                 (filter hl?)
-                                 (seq)
-                                 (mapv (partial inner (inc depth))))))
+                                (when-let [hls (seq (filter hl? %))]
+                                  (mapv (partial inner (inc depth)) hls))))
                      hl->toc-el))
                0
                {:toc-wrapper? true :children (vec headlines)})))]
 
-    (some->> children
-             (filter hl?)
-             (hls->toc))))
+    (->> children
+         (filter hl?)
+         (hls->toc))))
 
 
 (defn-spec assoc-toc :spacetools.spacedoc.node/root
@@ -335,16 +332,15 @@ Return nil if ROOT node doesn't have any headlines."
   {:pre [((some-fn vector? nil?) rows)]}
   (let [vec-tab (mapv
                  (fn [{type :type cells :children}]
-                   (if (= type :standard)
-                     (mapv #(str " " (conv :table-row (:children %)) " ") cells)
-                     []))
+                   (when (= type :standard)
+                     (mapv #(str " " (conv :table-row (:children %)) " ")
+                           cells)))
                  rows)
-        cols-w (if-let [ne-vec-tab (seq (remove empty? vec-tab))]
+        cols-w (when-let [ne-vec-tab (seq (remove empty? vec-tab))]
                  (apply mapv
                         (fn [& cols]
                           (apply max (map viz-len cols)))
-                        ne-vec-tab)
-                 [])]
+                        ne-vec-tab))]
     (vec (concat [cols-w] vec-tab))))
 
 
@@ -380,26 +376,6 @@ Return nil if ROOT node doesn't have any headlines."
                                              :else (table-row % cols-w)))
                                 vrep))))
    #"^\n" ""))
-
-
-(defn fmt-cell-content
-  "FIXME: Tables shouldn't have newlines or pipes
-  but silently removing them is sub-optimal."
-  [t-c-children-str]
-  (str/replace t-c-children-str #"\n|\|" " "))
-
-
-(defmethod sdn->org :table-cell
-  [{:keys [tag children]}]
-  (fmt-cell-content (conv tag children)))
-
-
-(defmethod sdn->org :table-row
-  [{:keys [tag type children]}]
-  (if (= type :standard)
-    (str "| " (join " |" (conv* tag children)) " |")
-    ;; Ruler prefix.
-    "|-"))
 
 
 (defmethod sdn->org :link
@@ -445,16 +421,6 @@ Return nil if ROOT node doesn't have any headlines."
 (defmethod sdn->org :text
   [{value :value}]
   (sdu/fmt-str value))
-
-
-(defmethod sdn->org :superscript
-  [{:keys [tag children]}]
-  (apply str "^" (conv* tag children)))
-
-
-(defmethod sdn->org :subscript
-  [{:keys [tag children]}]
-  (apply str "_" (conv* tag children)))
 
 
 (defmethod sdn->org :line-break

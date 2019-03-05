@@ -29,14 +29,6 @@
   (s/valid? :spacetools.spacedoc.node/any-node x))
 
 
-(defn-spec known-node? boolean?
-  "Return true if X is a known node."
-  [x node?]
-  (some? ((all-tags) (:tag x))))
-
-(s/def :spacetools.spacedoc.node/known-node known-node?)
-
-
 (defn-spec tag->spec-k qualified-keyword?
   "Given node tag return fully qualified spec key for it."
   [node-tag keyword?]
@@ -66,12 +58,6 @@
   "All inline containers tags."
   []
   (set (keys (methods inline-container))))
-
-
-(defn-spec inline-tags ::set-of-keys
-  "All inline elements tags (inline leafs and inline containers)."
-  []
-  (set (union inline-leaf-tags inline-container-tags)))
 
 
 (defmulti block-element

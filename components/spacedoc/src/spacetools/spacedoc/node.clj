@@ -19,8 +19,7 @@
 (s/def :spacetools.spacedoc.node.any-node/children (s/coll-of
                                                     ::any-node
                                                     :min-count 0
-                                                    :kind vector?
-                                                    :into []))
+                                                    :kind vector?))
 (s/def ::any-node (s/keys
                    :req-un [:spacetools.spacedoc.node.any-node/tag]
                    :opt-un [:spacetools.spacedoc.node.any-node/children]))
@@ -40,8 +39,7 @@
 (s/def :spacetools.spacedoc.node.kbd/value
   (s/with-gen (s/coll-of ::vs/non-blank-string
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::vs/non-blank-string) 1 3)))
 
 
@@ -76,8 +74,7 @@
 (s/def ::inline-container-children
   (s/with-gen (s/coll-of ::inline-element
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::inline-element) 1 3)))
 
 
@@ -89,8 +86,7 @@
 
 ;; italic node
 
-(s/def :spacetools.spacedoc.node.italic/children
-  ::inline-container-children)
+(s/def :spacetools.spacedoc.node.italic/children ::inline-container-children)
 (defnode ::italic (s/keys :req-un [:spacetools.spacedoc.node.italic/children]))
 
 
@@ -131,8 +127,7 @@
 (s/def :spacetools.spacedoc.node.link/children
   (s/with-gen (s/coll-of ::inline-element
                          :kind vector?
-                         :min-count 0
-                         :into [])
+                         :min-count 0)
     #(gen/vector (s/gen ::inline-element) 0 3)))
 (defnode* ::link (s/keys :req-un
                          [:spacetools.spacedoc.node.link/type
@@ -146,8 +141,7 @@
 (s/def :spacetools.spacedoc.node.paragraph/children
   (s/with-gen (s/coll-of ::paragraph-child
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::paragraph-child) 1 3)))
 (defnode ::paragraph
   (s/keys :req-un [:spacetools.spacedoc.node.paragraph/children]))
@@ -169,8 +163,7 @@
 (s/def :spacetools.spacedoc.node.center/children
   (s/with-gen (s/coll-of ::center-child
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::center-child) 1 3)))
 (defnode ::center (s/keys :req-un [:spacetools.spacedoc.node.center/children]))
 
@@ -189,8 +182,7 @@
 (s/def :spacetools.spacedoc.node.item-children/children
   (s/with-gen (s/coll-of :spacetools.spacedoc.node.item-children/child
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen :spacetools.spacedoc.node.item-children/child)
                  1 3)))
 (defnode ::item-children
@@ -203,8 +195,7 @@
 (s/def :spacetools.spacedoc.node.item-tag/children
   (s/with-gen (s/coll-of :spacetools.spacedoc.node.item-tag/child
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen :spacetools.spacedoc.node.item-tag/child) 1 3)))
 (defnode ::item-tag (s/keys :req-un
                             [:spacetools.spacedoc.node.item-tag/children]))
@@ -237,8 +228,7 @@
 (s/def :spacetools.spacedoc.node.feature-list/children
   (s/with-gen (s/coll-of ::list-item
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::list-item) 1 3)))
 (defnode* ::feature-list
   (s/keys :req-un [:spacetools.spacedoc.node.feature-list/type
@@ -252,8 +242,7 @@
 (s/def :spacetools.spacedoc.node.plain-list/children
   (s/with-gen (s/coll-of ::list-item
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::list-item) 1 3)))
 (defnode* ::plain-list
   (s/keys :req-un [:spacetools.spacedoc.node.plain-list/type
@@ -265,8 +254,7 @@
 (s/def :spacetools.spacedoc.node.quoted/children
   (s/with-gen (s/coll-of ::paragraph
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::paragraph) 1 3)))
 (defnode ::quoted (s/keys :req-un [:spacetools.spacedoc.node.quoted/children]))
 
@@ -284,8 +272,7 @@
 (s/def :spacetools.spacedoc.node.table-cell/children
   (s/with-gen (s/coll-of ::inline-element
                          :kind vector?
-                         :min-count 0
-                         :into [])
+                         :min-count 0)
     #(gen/vector (s/gen ::inline-element) 0 3)))
 (defnode ::table-cell
   (s/keys :req-un [:spacetools.spacedoc.node.table-cell/children]))
@@ -295,11 +282,9 @@
 
 (s/def :spacetools.spacedoc.node.table-row/type #{:rule :standard})
 (s/def :spacetools.spacedoc.node.table-row/children
-  (s/with-gen (s/coll-of ::table-cell
-                         :kind vector?
-                         :min-count 0
-                         :into [])
-    #(gen/vector (s/gen ::table-cell) 0 3)))
+  (s/coll-of ::table-cell
+             :kind vector?
+             :min-count 0))
 (defnode ::table-row
   (s/keys :req-un [:spacetools.spacedoc.node.table-row/type
                    :spacetools.spacedoc.node.table-row/children]))
@@ -311,13 +296,13 @@
 (s/def :spacetools.spacedoc.node.table/children
   (s/with-gen (s/and (s/coll-of ::table-row
                                 :kind vector?
-                                :min-count 1
-                                :into [])
+                                :min-count 1)
                      (fn same-row-child-count?
                        [rows]
-                       (let [t-c (remove #(#{:rule} (:type %)) rows)]
-                         (or (empty? t-c)
-                             (apply = (map #(count (:children %)) t-c))))))
+                       (let [lns (->> rows
+                                      (remove #(#{:rule} (:type %)))
+                                      (map #(count (:children %))))]
+                         (every? (partial = (first lns)) lns))))
     #(gen/fmap (fn [[cells cells-per-row]]
                  (mapv
                   (fn [row-children]
@@ -337,8 +322,7 @@
                                 :type :rule
                                 :children []})
                    (s/gen ::table-cell)])
-                 1
-                 6)
+                 1 6)
                 (gen/elements (range 1 3))))))
 (defnode* ::table
   (s/keys :req-un [:spacetools.spacedoc.node.table/type
@@ -350,8 +334,7 @@
 (s/def :spacetools.spacedoc.node.verse/children
   (s/with-gen (s/coll-of ::inline-element
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::inline-element) 1 3)))
 (defnode ::verse (s/keys :req-un [:spacetools.spacedoc.node.verse/children]))
 
@@ -384,8 +367,7 @@
 (s/def :spacetools.spacedoc.node.section/children
   (s/with-gen (s/coll-of ::block-element
                          :kind vector?
-                         :min-count 1
-                         :into [])
+                         :min-count 1)
     #(gen/vector (s/gen ::block-element) 1 2)))
 (defnode ::section
   (s/keys :req-un [:spacetools.spacedoc.node.section/children]))
@@ -405,8 +387,7 @@
   (s/with-gen (s/coll-of ::headline-child
                          :kind vector?
                          :min-count 0
-                         :distinct true
-                         :into [])
+                         :distinct true)
     #(gen/vector-distinct (s/gen ::headline-child)
                           {:min-elements 1 :max-elements 2 :max-tries 100})))
 
@@ -445,8 +426,7 @@
   (s/with-gen (s/coll-of ::root-child
                          :min-count 1
                          :kind vector?
-                         :distinct true
-                         :into [])
+                         :distinct true)
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
@@ -460,13 +440,10 @@
 
 ;; For the cases when we need a nonempty headline children vector.
 (s/def :spacetools.spacedoc.node.meta.hl.nonempty/children
-  (s/with-gen (s/coll-of ::headline-child
-                         :kind vector?
-                         :min-count 1
-                         :distinct true
-                         :into [])
-    #(gen/vector-distinct (s/gen ::headline-child)
-                          {:min-elements 1 :max-elements 2 :max-tries 100})))
+  (s/coll-of ::headline-child
+             :kind vector?
+             :min-count 1
+             :distinct true))
 
 
 ;; Description meta node
