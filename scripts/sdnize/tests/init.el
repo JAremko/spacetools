@@ -6,7 +6,8 @@
 (require 'json)
 
 (when (require 'undercover nil t)
-  (undercover "sdnize*.el"))
+  (undercover "sdnize*.el"
+              (:report-type :codecov)))
 
 (defconst sdnize-testing t)
 
