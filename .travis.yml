@@ -24,18 +24,12 @@ script:
   # Build Clojure based Spacetools
   - cd $TRAVIS_BUILD_DIR && lein polylith build -test
   # Testing Clojure files
-  - cd $CLJ_WS && lein cloverage -o $COV_DIR --coveralls
-  # Resolve symlinks in Cloverage report
-  - cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
+  - cd $CLJ_WS && lein cloverage --codecov
   # Testing EmacsLisp files
   - cd $EL_WS && cask exec buttercup -L . -L tests
 
+# Upload coverage to https://codecov.io/bash
 deploy:
   provider: script
   skip_cleanup: true
-  script:
-    # Send coverage report to coveralls.io
-    - curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
-    # Save a copy for debugging (like is single use)
-    - curl -F "file=@$COV_FL" https://file.io
-
+  script: bash <(curl -s https://codecov.io/bash)
