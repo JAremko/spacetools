@@ -28,8 +28,10 @@ script:
   # Testing EmacsLisp files
   - cd $EL_WS && cask exec buttercup -L . -L tests
 
-# Upload coverage to https://codecov.io/bash
 deploy:
   provider: script
   skip_cleanup: true
-  script: bash <(curl -s https://codecov.io/bash)
+  script:
+    - cd "${TRAVIS_BUILD_DIR}"
+    - curl -fsSL https://codecov.io/bash -o codecov.bash
+    - bash ./codecov.bash
