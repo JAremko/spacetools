@@ -2,27 +2,24 @@
   "`defnode` and `defnode*` implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.core :as sc]))
 
 
-(def unqualified-ident? (complement qualified-ident?))
+(def unqualified-keyword? (complement qualified-keyword?))
 
 
-(defn unqualify
-  [symbol-or-keyword]
-  {:pre [(ident? symbol-or-keyword)]}
-  (if (unqualified-ident? symbol-or-keyword)
-    symbol-or-keyword
-    (when-let [name (name symbol-or-keyword)]
-      (if (keyword? symbol-or-keyword)
-        (keyword name)
-        (symbol name)))))
+(defn-spec unqualify-kv unqualified-keyword?
+  [q-kv qualified-keyword?]
+  {:pre [(qualified-keyword? q-kv)]
+   :post [(unqualified-keyword? %)]}
+  (keyword (name q-kv)))
 
 
-(defn sdn-key-rank
-  [sdn-key]
-  {:pre [(keyword? sdn-key)(unqualified-ident? sdn-key)]
-   :post [(integer? %)]}
+(defn-spec sdn-key-rank int?
+  [sdn-key unqualified-keyword?]
+  {:pre [(unqualified-keyword? sdn-key)]
+   :post [(int? %)]}
   (sdn-key
    {:tag (Integer/MIN_VALUE)
     :key (inc Integer/MIN_VALUE)
@@ -36,23 +33,24 @@
    0))
 
 
-(defn map-spec->keys
+(defn-spec map-spec->keys (partial every? qualified-keyword?)
   "Extremely naive way to scoop keywords from map-spec."
-  [spec-form]
+  [spec-form list?]
   (->> spec-form
        (tree-seq #(list? %) rest)
        (mapcat #(when (vector? %) %))
        (set)
-       (sort-by (comp sdn-key-rank unqualify))))
+       (sort-by (comp sdn-key-rank unqualify-kv))))
 
 
-(defn defnode-spec-args
+(defn-spec defnode-spec-args seq?
   "If You read this - I'm sorry..."
-  [q-keys]
-  (let [key-map (zipmap (mapv unqualify q-keys) q-keys)
+  [q-keys (partial every? qualified-keyword?)]
+  (let [key-map (zipmap (mapv unqualify-kv q-keys) q-keys)
         q-keys-no-ch (remove #(#{(:children key-map)} %) q-keys)
-        ch-s-f (some-> key-map :children s/get-spec s/form)]
-    (concat (interleave (mapv unqualify q-keys-no-ch) q-keys-no-ch)
+        ch-s (:children key-map)
+        ch-s-f (when ch-s (s/form (s/get-spec ch-s)))]
+    (concat (interleave (mapv unqualify-kv q-keys-no-ch) q-keys-no-ch)
             (condp = (some-> ch-s-f first name)
               "coll-of" [:children `(s/+ ~(second ch-s-f))]
               "cat" (rest ch-s-f)
@@ -61,9 +59,9 @@
                               {:keys q-keys}))))))
 
 
-(defn defnode-impl
-  [k con? spec-form]
-  (let [tag (unqualify k)
+(defn-spec defnode-impl seq?
+  [k qualified-keyword? con? boolean? spec-form list?]
+  (let [tag (unqualify-kv k)
         q-ks (map-spec->keys spec-form)
         arg-tmpl (mapv (comp symbol name) q-ks)
         ret-tmpl (replace {'children '(vec children)} arg-tmpl)
@@ -92,7 +90,7 @@
            {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-ks ret-tmpl)
             :post [(s/valid? ~k ~'%)]}
            ;; Returned value
-           ~(merge {:tag tag} (zipmap (mapv unqualify q-ks) ret-tmpl))))))))
+           ~(merge {:tag tag} (zipmap (mapv unqualify-kv q-ks) ret-tmpl))))))))
 
 
 (defmacro defnode
@@ -108,4 +106,4 @@
 
 (defmacro defnode*
   "Same as `defnode` but doesn't create constructor."
-  [k spec-form] (defnode-impl k nil spec-form))
+  [k spec-form] (defnode-impl k false spec-form))

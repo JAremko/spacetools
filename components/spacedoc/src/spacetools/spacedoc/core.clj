@@ -10,17 +10,16 @@
   "Given node return fully qualified spec key for it."
   :tag)
 
-(defmethod node->spec-k :default [_] :spacetools.spacedoc.node/known-node)
-
-
 (defn-spec all-tags (s/coll-of keyword? :kind set?)
   "Return all node tags."
   []
-  (some-> node->spec-k
-          (methods)
-          (dissoc :default)
-          (keys)
-          (set)))
+  (-> node->spec-k
+      (methods)
+      (dissoc :default)
+      ;; NOTE: It will throw if called before any node added.
+      ;; Which is good because it should never happen :D
+      (keys)
+      (set)))
 
 
 (defn-spec node? boolean?

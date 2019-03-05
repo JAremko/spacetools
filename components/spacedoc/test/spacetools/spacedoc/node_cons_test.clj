@@ -8,12 +8,16 @@
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
+            [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :refer :all]
             [spacetools.test-util.interface :as tu]))
 
 
 (st/instrument)
 
+(deftest sanity-test
+  (testing "We have nodes defined"
+    (is (seq (sc/all-tags)))))
 
 ;; Grab all public functions in `spacetools.spacedoc.node`
 ;; and their specs. Then run it through generative testing.
