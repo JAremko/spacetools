@@ -21,16 +21,21 @@ install:
   - cd $CLJ_WS && lein deps
 
 script:
-  # "Build Clojure based Spacetools"
+  # Build Clojure based Spacetools
   - cd $TRAVIS_BUILD_DIR && lein polylith build -test
-  # "Testing Clojure files"
+  # Testing Clojure files
   - cd $CLJ_WS && lein cloverage -o $COV_DIR --coveralls
-  # "Resolve symlinks in Cloverage report"
+  # Resolve symlinks in Cloverage report
   - cd $CLJ_WS && lein exec -p $CLOFIX_SCR $TRAVIS_BUILD_DIR $COV_FL
-  # "Testing EmacsLisp files"
+  # Testing EmacsLisp files
   - cd $EL_WS && cask exec buttercup -L . -L tests
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
+  script:
+    # Send coverage report to coveralls.io
+    - curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
+    # Save a copy for debugging (like is single use)
+    - curl -F "json_file=@$COV_FL" https://file.io
+
