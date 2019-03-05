@@ -6,9 +6,7 @@
 (require 'json)
 
 (when (require 'undercover nil t)
-  (undercover "sdnize*.el"
-              (:report-file "/tmp/cov/coveralls.json")
-              (:send-report nil)))
+  (undercover "sdnize*.el"))
 
 (defconst sdnize-testing t)
 
