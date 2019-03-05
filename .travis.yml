@@ -37,5 +37,5 @@ deploy:
     # Send coverage report to coveralls.io
     - curl -F "json_file=@$COV_FL" https://coveralls.io/api/v1/jobs
     # Save a copy for debugging (like is single use)
-    - curl -F "json_file=@$COV_FL" https://file.io
+    - curl -F "file=@$COV_FL" https://file.io
 
