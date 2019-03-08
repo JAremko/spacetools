@@ -31,7 +31,7 @@
 
 
 (defn-spec fmt-problem string?
-  "Format `:clojure.spec.alpha/problems` into string."
+  "Format one of `:clojure.spec.alpha/problems`."
   [node node? problem map?]
   (str/join \newline
             (assoc problem
