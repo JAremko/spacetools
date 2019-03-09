@@ -8,11 +8,12 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
+            [com.rpl.specter :refer :all]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.core :as sc]
+            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :refer :all]
-            [spacetools.test-util.interface :as tu]
-            [spacetools.spacedoc.node :as n]))
+            [spacetools.test-util.interface :as tu]))
 
 
 (st/instrument)
@@ -46,3 +47,20 @@
     (is (str/includes? (fmt-problem text problem) ":bar"))
     (is (str/includes? (fmt-problem text problem) ":text"))
     (is (str/includes? (fmt-problem text problem) (str text-spec-form)))))
+
+
+(deftest explain-deepest-fn
+  (let [good-node (->> "foo" n/text n/paragraph n/section (n/headline "foo"))
+        bad-node (setval [:value] :bad-hl-val good-node)
+        double-bad-node (setval [:children FIRST
+                                 :children FIRST
+                                 :children FIRST
+                                 :value]
+                                :bad-text-val
+                                bad-node)]
+    (is (nil? (explain-deepest good-node)))
+    (is (some? (explain-deepest {:tag :unknown-node})))
+    (is (= (-> bad-node explain-deepest :clojure.spec.alpha/value :value)
+           :bad-hl-val))
+    (is (= (-> double-bad-node explain-deepest :clojure.spec.alpha/value :value)
+           :bad-text-val))))

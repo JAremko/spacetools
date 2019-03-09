@@ -20,6 +20,7 @@
               :plugins
               [[lein-environ "1.1.0"]]
               :dependencies [[environ "1.1.0"]
+                             [com.rpl/specter "1.1.2"]
                              [com.google.jimfs/jimfs "1.1"]
                              [org.clojure/core.match "0.3.0-alpha5"]
                              [org.clojure/test.check "0.10.0-alpha3"]

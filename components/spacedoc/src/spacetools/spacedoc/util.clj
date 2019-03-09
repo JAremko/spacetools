@@ -39,9 +39,8 @@
                    :spec-form (s/form (sc/node->spec-k node)))))
 
 
-(s/def ::problems (s/coll-of string? :min-count 1))
-
-(defn-spec explain-deepest (s/nilable (s/keys :req [::problems]))
+(defn-spec explain-deepest (s/nilable
+                            (s/keys :req [:clojure.spec.alpha/problems]))
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
@@ -50,8 +49,8 @@
   (or (when (nil? node) nil)
       (when-let [children (:children node)]
         (first (sequence (keep explain-deepest) children)))
-      (when-not (s/valid? :spacetools.spacedoc.node/known-node node)
-        (s/explain-data :spacetools.spacedoc.node/known-node node))
+      (when-not (s/valid? (sc/node->spec-k node) node)
+        (s/explain-data (sc/node->spec-k node) node))
       (some->> node
                (s/explain-data (sc/node->spec-k node))
                (:clojure.spec.alpha/problems)

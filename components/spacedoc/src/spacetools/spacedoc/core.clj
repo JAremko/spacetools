@@ -10,6 +10,10 @@
   "Given node return fully qualified spec key for it."
   :tag)
 
+
+(defmethod node->spec-k :default [_] :spacetools.spacedoc.node/known-node)
+
+
 (defn-spec all-tags (s/coll-of keyword? :kind set?)
   "Return all node tags."
   []
@@ -20,6 +24,9 @@
       ;; Which is good because it should never happen :D
       (keys)
       (set)))
+
+
+(s/def :spacetools.spacedoc.node/known-node #((all-tags) (:tag %)))
 
 
 (defn-spec node? boolean?
