@@ -70,6 +70,13 @@
                                 double-bad-node)]
     (is (nil? (explain-deepest good-node)))
     (is (some? (explain-deepest {:tag :unknown-node})))
+    (is (= (-> "text"
+               (n/text)
+               (assoc :value :bad-text-val)
+               explain-deepest
+               :clojure.spec.alpha/value
+               :value)
+           :bad-text-val))
     (is (= (-> bad-node explain-deepest :clojure.spec.alpha/value :value)
            :bad-hl-val))
     (is (= (-> double-bad-node explain-deepest :clojure.spec.alpha/value :value)
