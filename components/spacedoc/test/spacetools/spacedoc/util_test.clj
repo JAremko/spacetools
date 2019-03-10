@@ -50,17 +50,29 @@
 
 
 (deftest explain-deepest-fn
-  (let [good-node (->> "foo" n/text n/paragraph n/section (n/headline "foo"))
+  (let [good-node (->> "baz"
+                       n/text
+                       (n/paragraph (n/text "bar"))
+                       n/section
+                       (n/headline "foo"))
         bad-node (setval [:value] :bad-hl-val good-node)
         double-bad-node (setval [:children FIRST
                                  :children FIRST
+                                 :children LAST
+                                 :value]
+                                :bad-last-text-val
+                                bad-node)
+        triple-bad-node (setval [:children FIRST
+                                 :children FIRST
                                  :children FIRST
                                  :value]
-                                :bad-text-val
-                                bad-node)]
+                                :bad-first-text-val
+                                double-bad-node)]
     (is (nil? (explain-deepest good-node)))
     (is (some? (explain-deepest {:tag :unknown-node})))
     (is (= (-> bad-node explain-deepest :clojure.spec.alpha/value :value)
            :bad-hl-val))
     (is (= (-> double-bad-node explain-deepest :clojure.spec.alpha/value :value)
-           :bad-text-val))))
+           :bad-last-text-val))
+    (is (= (-> triple-bad-node explain-deepest :clojure.spec.alpha/value :value)
+           :bad-first-text-val))))

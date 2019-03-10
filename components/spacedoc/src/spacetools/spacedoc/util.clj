@@ -44,19 +44,15 @@
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
+  If multiply children of the same node are invalid the first one
+  will be reported.
   The function returns `nil` If all nodes are valid."
   [node node?]
-  (or (when (nil? node) nil)
-      (when-let [children (:children node)]
+  (or (when-let [children (:children node)]
         (first (sequence (keep explain-deepest) children)))
       (when-not (s/valid? (sc/node->spec-k node) node)
         (s/explain-data (sc/node->spec-k node) node))
-      (some->> node
-               (s/explain-data (sc/node->spec-k node))
-               (:clojure.spec.alpha/problems)
-               (r/map (partial fmt-problem node))
-               (r/reduce str)
-               (hash-map :problems))))
+      (some->> node (s/explain-data (sc/node->spec-k node)))))
 
 
 (defn-spec relation (s/map-of keyword? set?)
