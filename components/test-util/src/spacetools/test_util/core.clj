@@ -15,10 +15,7 @@
 (def gen-mult
   "Multiplier for generative testing."
   (delay
-   (let [g-m (or (when-let [g-m-str (env :gentest-multiplier)]
-                   (let [g-m (read-string g-m-str)]
-                     (when (pos? g-m) g-m)))
-                 1)]
+   (let [g-m (max ((fnil read-string "0") (env :gentest-multiplier)) 1)]
      (prn (format "Gentest sample's count multiplier is (%s)" g-m))
      g-m)))
 

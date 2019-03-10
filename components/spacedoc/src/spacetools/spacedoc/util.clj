@@ -48,11 +48,8 @@
   will be reported.
   The function returns `nil` If all nodes are valid."
   [node node?]
-  (or (when-let [children (:children node)]
-        (first (sequence (keep explain-deepest) children)))
-      (when-not (s/valid? (sc/node->spec-k node) node)
-        (s/explain-data (sc/node->spec-k node) node))
-      (some->> node (s/explain-data (sc/node->spec-k node)))))
+  (or (first (sequence (keep explain-deepest) (:children node)))
+      (s/explain-data (sc/node->spec-k node) node)))
 
 
 (defn-spec relation (s/map-of keyword? set?)
