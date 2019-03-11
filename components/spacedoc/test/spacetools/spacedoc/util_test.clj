@@ -83,3 +83,16 @@
            :bad-last-text-val))
     (is (= (-> triple-bad-node explain-deepest :clojure.spec.alpha/value :value)
            :bad-first-text-val))))
+
+
+;; (deftest relation-fn
+;;   (let [good-node (-> :spacetools.spacedoc.node/root
+;;                       (s/exercise 1)
+;;                       ffirst
+;;                       str)
+;;         bad-node {:bad :node}
+;;         test-node (-> "foobar"
+;;                       sn/todo
+;;                       sn/root
+;;                       str)]
+;;     ))

@@ -16,6 +16,9 @@
                                     :clojure.spec.alpha/value]))
 
 
+(alias 'spec 'clojure.spec.alpha)
+
+
 ;;;; Generic stuff for SDN manipulation
 
 (defn-spec non-blank-string? boolean?
@@ -39,8 +42,7 @@
                    :spec-form (s/form (sc/node->spec-k node)))))
 
 
-(defn-spec explain-deepest (s/nilable
-                            (s/keys :req [:clojure.spec.alpha/problems]))
+(defn-spec explain-deepest (s/nilable (s/keys :req [::spec/problems]))
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
