@@ -85,14 +85,37 @@
            :bad-first-text-val))))
 
 
-;; (deftest relation-fn
-;;   (let [good-node (-> :spacetools.spacedoc.node/root
-;;                       (s/exercise 1)
-;;                       ffirst
-;;                       str)
-;;         bad-node {:bad :node}
-;;         test-node (-> "foobar"
-;;                       sn/todo
-;;                       sn/root
-;;                       str)]
-;;     ))
+(deftest relation-fn
+  (is (= (relation (n/text "foo")) {:text #{}}))
+  (is (thrown? Exception (relation {:not-a-tag :text})))
+  (let [good-node (n/section (n/paragraph (n/text "foo")
+                                          (n/text "bar")
+                                          (n/verbatim "baz")))
+        bad-node {:tag :bad-node :children [(n/text "qux")]}]
+    (is (= (relation bad-node) {:bad-node #{:text} :text #{}}))
+    (is (= (relation good-node) {:section #{:paragraph}
+                                 :paragraph #{:verbatim :text}
+                                 :text #{}
+                                 :verbatim #{}}))))
+
+
+(deftest relations-fn
+  (is (thrown? Exception (relations (n/text "foo"))))
+  (is (= (relations [(n/text "foo")]) {:text #{}}))
+  (is (empty? (relations [])))
+  (is (thrown? Exception (relations [{:not-a-tag :text}])))
+  (let [good-node (n/section (n/paragraph (n/text "foo")
+                                          (n/text "bar")
+                                          (n/verbatim "baz")))
+        bad-node {:tag :bad-node :children [(n/text "qux")]}]
+    (is (= (relations [bad-node]) {:bad-node #{:text} :text #{}}))
+    (is (= (relations [good-node]) {:section #{:paragraph}
+                                    :paragraph #{:verbatim :text}
+                                    :text #{}
+                                    :verbatim #{}}))
+    (is (= (relations [bad-node good-node])
+           {:bad-node #{:text}
+            :section #{:paragraph}
+            :paragraph #{:verbatim :text}
+            :text #{}
+            :verbatim #{}}))))
