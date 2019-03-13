@@ -10,6 +10,7 @@
             [clojure.test.check.properties :as prop]
             [com.rpl.specter :refer :all]
             [orchestra.spec.test :as st]
+            [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :refer :all]
@@ -17,16 +18,6 @@
 
 
 (st/instrument)
-
-
-(defspec non-blank-string?-gen
-  {:num-tests (tu/samples 10)}
-  (prop/for-all
-   [s-sample gen/string]
-   (is (or (and (not (non-blank-string? s-sample))
-                (str/blank? s-sample))
-           (and (non-blank-string? s-sample)
-                (not (str/blank? s-sample)))))))
 
 
 (deftest node->children-tag-s-fn
@@ -119,3 +110,78 @@
             :paragraph #{:verbatim :text}
             :text #{}
             :verbatim #{}}))))
+
+
+;; NOTE: Should break when the function starts to actually do something.
+(deftest up-tags-fn
+  (let [root-node (n/root (n/todo "foo"))]
+    (testing "NOTE: Currently this function returns unaltered root node"
+      (is (= (up-tags "foo" "bar" root-node)
+             root-node)))))
+
+
+(deftest regex-pat?-fn
+  (is (regex-pat? #"foo"))
+  (is (not (regex-pat? "bar")))
+  (is (regex-pat? (re-pattern "foo"))))
+
+
+(deftest fmt-str-fn
+  (is (= (fmt-str "foo") "foo"))
+  (is (= (fmt-str {#"foo" "bar"} "foo") "bar"))
+  (is (= (fmt-str "key-bindings") "key bindings"))
+  (is (= (fmt-str (cfg/text-rep-map) "key-bindings") "key bindings"))
+  (is (= (fmt-str {} "key-bindings") "key-bindings")))
+
+
+;; Here we mainly test `cfg/custom-id-link-rep-map` regexps
+(deftest fmt-link-fn
+  (testing "Formatting of custom-id links"
+    (is (= (fmt-link :custom-id "foo") "foo"))
+    (is (= (fmt-link :custom-id "Foo") "foo"))
+    (is (= (fmt-link :custom-id "#key-bindings") "#key-bindings"))
+    (is (= (fmt-link :custom-id "keybindings") "key-bindings"))
+    (is (= (fmt-link :custom-id "#keybindings") "#key-bindings"))
+    (is (= (fmt-link {} :custom-id "keybindings") "keybindings"))
+    (is (= (fmt-link {#"foo" "bar"} :custom-id "foo") "bar")))
+  (testing "Formatting of non-custom-id links (currently noop)"
+    (is (= (fmt-link :qux "foo") "foo"))
+    (is (= (fmt-link :qux "Foo") "Foo"))
+    (is (= (fmt-link :qux "#key-bindings") "#key-bindings"))
+    (is (= (fmt-link :qux "keybindings") "keybindings"))
+    (is (= (fmt-link :qux "#keybindings") "#keybindings"))
+    (is (= (fmt-link {} :custom-id "keybindings") "keybindings"))
+    (is (= (fmt-link {#"foo" "bar"} :qux "foo") "foo"))))
+
+
+(deftest fmt-hl-val-fn
+  (is (= (fmt-hl-val "foo") "foo"))
+  (is (= (fmt-hl-val "key-bindings") "key bindings"))
+  (is (= (fmt-hl-val {#"foo" "bar"} "foo") "bar"))
+  (is (= (fmt-hl-val {} "key-bindings") "key-bindings"))
+  (testing "toc headline shouldn't be altered."
+    (is (= (fmt-hl-val (cfg/toc-hl-val)) (cfg/toc-hl-val)))
+    (is (= (fmt-hl-val {(-> (cfg/toc-hl-val)
+                            (java.util.regex.Pattern/quote)
+                            re-pattern)
+                        ""}
+                       (cfg/toc-hl-val))
+           (cfg/toc-hl-val)))))
+
+
+(defspec non-blank-string?-gen
+  {:num-tests (tu/samples 30)}
+  (prop/for-all
+   [s-sample gen/string]
+   (is (or (and (not (non-blank-string? s-sample))
+                (str/blank? s-sample))
+           (and (non-blank-string? s-sample)
+                (not (str/blank? s-sample)))))))
+
+
+(deftest ident-fn
+  (is (= (ident "foo") "foo"))
+  (is (= (ident {#"foo" "bar"} "foo") "bar"))
+  (is (= (ident "key-bindings") "key bindings"))
+  (is (= (ident (cfg/text-rep-map) "key-bindings") "key bindings"))
+  (is (= (ident {} "key-bindings") "key-bindings")))

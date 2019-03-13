@@ -72,6 +72,7 @@
           (r/map relation parents)))
 
 
+;; TODO Implement
 (defn-spec up-tags node?
   "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the R-NODE.
 R-NODE must be `:spacetools.spacedoc.node/root` node.
@@ -104,38 +105,46 @@ SRC is the exported file name."
   ([text string?]
    (fmt-str (cfg/text-rep-map) text))
   ([rep-map (s/map-of regex-pat? string?) text string?]
-   ((fn [t]
-      (let [ret (str/replace
-                 t
-                 (re-pats-union (keys rep-map))
-                 (fn [text-match]
-                   (reduce
-                    (fn [text-frag [pat rep]]
-                      (if (re-matches pat text-frag)
-                        (str/replace text-frag pat rep)
-                        text-frag))
-                    (first text-match)
-                    rep-map)))]
-        (if-not (= ret t)
-          (recur ret)
-          ret)))
-    text)))
+   (if (empty? rep-map)
+     text
+     ((fn [t]
+        (let [ret (str/replace
+                   t
+                   (re-pats-union (keys rep-map))
+                   (fn [text-match]
+                     (reduce
+                      (fn [text-frag [pat rep]]
+                        (if (re-matches pat text-frag)
+                          (str/replace text-frag pat rep)
+                          text-frag))
+                      (first text-match)
+                      rep-map)))]
+          (if-not (= ret t)
+            (recur ret)
+            ret)))
+      text))))
 
 
 (defn-spec fmt-link non-blank-string?
   "Format link value based on LINK-TYPE."
-  [link-type keyword? link non-blank-string?]
-  (if (= link-type :custom-id)
-    (fmt-str (cfg/custom-id-link-rep-map) (str/lower-case link))
-    link))
+  ([link-type keyword? link non-blank-string?]
+   (fmt-link (cfg/custom-id-link-rep-map) link-type link))
+  ([rep-map (s/map-of regex-pat? string?)
+    link-type keyword?
+    link non-blank-string?]
+   (if (= link-type :custom-id)
+     (fmt-str rep-map (str/lower-case link))
+     link)))
 
 
 (defn-spec fmt-hl-val non-blank-string?
   "Format headline value string."
-  [hl-val non-blank-string?]
-  (if (= hl-val (cfg/toc-hl-val))
-    (cfg/toc-hl-val)
-    (fmt-str (cfg/text-rep-map) (str/trim hl-val))))
+  ([rep-map (s/map-of regex-pat? string?) hl-val non-blank-string?]
+   (if (= hl-val (cfg/toc-hl-val))
+     (cfg/toc-hl-val)
+     (fmt-str rep-map (str/trim hl-val))))
+  ([hl-val non-blank-string?]
+   (fmt-hl-val (cfg/text-rep-map) (str/trim hl-val))))
 
 
 (defn-spec indent string?
@@ -165,6 +174,12 @@ SRC is the exported file name."
          trailing-ns)))))
 
 
+(defn-spec valid-node? boolean?
+  "Return true if NODE is a valid node."
+  [node any?]
+  (s/valid? (sc/node->spec-k node) node))
+
+
 ;;;; Headline stuff
 
 
@@ -188,12 +203,6 @@ Fragments are  particular headline values in the \"/\" separated chain."
       (str/replace #"[^\p{Nd}\p{L}\p{Pd}]" " ")
       (str/trim)
       (str/replace #"\s+" "_")))
-
-
-(defn-spec valid-node? boolean?
-  "Return true if NODE is a valid node."
-  [node any?]
-  (s/valid? (sc/node->spec-k node) node))
 
 
 (defn-spec hl? boolean?
