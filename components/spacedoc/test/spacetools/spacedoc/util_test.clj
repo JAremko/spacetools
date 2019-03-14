@@ -20,6 +20,28 @@
 (st/instrument)
 
 
+(defspec indent-gen
+  {:num-tests (tu/samples 30)}
+  (prop/for-all
+   [indentation gen/nat
+    s-sample (gen/fmap (partial str/join)
+                       (gen/tuple gen/string-alphanumeric
+                                  (gen/elements ["\n" ""])
+                                  gen/string-alphanumeric
+                                  (gen/elements ["\n" ""])
+                                  gen/string-alphanumeric
+                                  (gen/elements ["\n" ""])
+                                  gen/string-alphanumeric
+                                  (gen/elements ["\n" ""])))]
+   (is (every? #(= (- (count %) (count (str/triml %)))
+                   indentation)
+               (->> s-sample
+                    (indent indentation)
+                    (str/split-lines)
+                    ;; Empty lines aren't indented
+                    (remove empty?))))))
+
+
 (deftest node->children-tag-s-fn
   (let [text (n/text "foo")
         section (-> text n/paragraph n/section)
@@ -167,21 +189,3 @@
                         ""}
                        (cfg/toc-hl-val))
            (cfg/toc-hl-val)))))
-
-
-(defspec non-blank-string?-gen
-  {:num-tests (tu/samples 30)}
-  (prop/for-all
-   [s-sample gen/string]
-   (is (or (and (not (non-blank-string? s-sample))
-                (str/blank? s-sample))
-           (and (non-blank-string? s-sample)
-                (not (str/blank? s-sample)))))))
-
-
-(deftest ident-fn
-  (is (= (ident "foo") "foo"))
-  (is (= (ident {#"foo" "bar"} "foo") "bar"))
-  (is (= (ident "key-bindings") "key bindings"))
-  (is (= (ident (cfg/text-rep-map) "key-bindings") "key bindings"))
-  (is (= (ident {} "key-bindings") "key-bindings")))
