@@ -52,6 +52,30 @@
     (is (= (node->children-tag-s root) #{:section :headline}))))
 
 
+(deftest valid-node?-fn
+  (is (valid-node? (n/text "foo")))
+  (is (valid-node? (n/root (n/todo "bar"))))
+  (is (not (valid-node? "baz")))
+  (is (not (valid-node? {:tag :qux})))
+  (letfn [(set-roots-first-hl-val [new-val r-node]
+            (setval [:children FIRST :value] new-val r-node))]
+    (let [test-node (n/root (n/todo "quux"))]
+      (is (valid-node? (set-roots-first-hl-val
+                        "quuz"
+                        test-node)))
+      (is (not (valid-node? (set-roots-first-hl-val
+                             :not-a-string
+                             test-node)))))))
+
+
+(defspec valid-node?-gen
+  {:num-tests (tu/samples 20)}
+  (prop/for-all
+   ;; NOTE: That's gonna have extremely divergent performance.
+   [node (gen/one-of (map (comp s/gen sc/tag->spec-k) (sc/all-tags)))]
+   (is (valid-node? node))))
+
+
 (deftest fmt-problem-fn
   (let [text (n/text "foo")
         text-spec-form (s/form :spacetools.spacedoc.node/text)
