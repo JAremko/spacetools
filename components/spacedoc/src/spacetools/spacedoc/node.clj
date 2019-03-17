@@ -221,20 +221,6 @@
                               :spacetools.spacedoc.node.list-item/children]))
 
 
-;; feature-list node
-
-(s/def :spacetools.spacedoc.node.feature-list/type
-  #{:ordered :unordered :descriptive})
-(s/def :spacetools.spacedoc.node.feature-list/children
-  (s/with-gen (s/coll-of ::list-item
-                         :kind vector?
-                         :min-count 1)
-    #(gen/vector (s/gen ::list-item) 1 3)))
-(defnode* ::feature-list
-  (s/keys :req-un [:spacetools.spacedoc.node.feature-list/type
-                   :spacetools.spacedoc.node.feature-list/children]))
-
-
 ;; plain-list node
 
 (s/def :spacetools.spacedoc.node.plain-list/type
@@ -352,7 +338,6 @@
 (defmethod sc/block-element :center [_] ::center)
 (defmethod sc/block-element :example [_] ::example)
 (defmethod sc/block-element :paragraph [_] ::paragraph)
-(defmethod sc/block-element :feature-list [_] ::feature-list)
 (defmethod sc/block-element :plain-list [_] ::plain-list)
 (defmethod sc/block-element :quoted [_] ::quoted)
 (defmethod sc/block-element :src [_] ::src)

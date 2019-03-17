@@ -579,8 +579,8 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-(defsubst sdnize/plain-list-tag (plain-list)
-  "Return proper SDN tag for PLAIN-LIST or signal error."
+(defsubst sdnize/feature-list-p (plain-list)
+  "Return true if PLAIN-LIST is a feature list."
   (let* ((type (org-element-property :type plain-list))
          (parent-type (symbol-name (car (org-export-get-parent plain-list))))
          (parent-hl (org-export-get-parent-headline plain-list))
@@ -590,30 +590,25 @@ the plist used as a communication channel."
                 (eq 'unordered type)
                 (eq 'descriptive type))
       (sdnize/error "Plain list type \"%s\" is unknown" type))
-    (if (and (not (string= parent-type "item"))
-             (= (or (org-element-property :level parent-hl) -1) 2)
-             (string= (org-element-property :raw-value parent-hl) "Features:")
-             (= (or (org-element-property :level parent-hl-parent-hl) -1) 1)
-             (string= perant-hl-val "Description"))
-        :feature-list
-      :plain-list)))
+    (and (not (string= parent-type "item"))
+         (= (or (org-element-property :level parent-hl) -1) 2)
+         (string= (org-element-property :raw-value parent-hl) "Features:")
+         (= (or (org-element-property :level parent-hl-parent-hl) -1) 1)
+         (string= perant-hl-val "Description"))))
 
 (defun sdnize/plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element From Org to Spacemacs SDN.
 CONTENTS is the contents of the list. INFO is a plist holding
 contextual information."
-  (let* ((type (org-element-property :type plain-list))
-         (tag (sdnize/plain-list-tag plain-list)))
-    (when (eq tag :feature-list)
+  (let* ((type (org-element-property :type plain-list)))
+    (when (sdnize/feature-list-p plain-list)
       (if (plist-member info :file-has-feature-list?)
           (sdnize/error
            (concat "Multiply \"Features:\" lists in the top "
                    "level \"Description\" headline"))
         (plist-put info :file-has-feature-list? 'true)))
-    (format "{:tag %s :type :%s :children [%s]}"
-            tag
-            type
-            contents)))
+    (format "{:tag :plain-list :type :%s :children [%s]}"
+            type contents)))
 
 ;;;; Plain Text
 
