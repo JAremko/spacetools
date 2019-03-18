@@ -8,6 +8,7 @@
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.core :as sc]
+            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.org :refer :all]
             [spacetools.spacedoc.util :as sdu]
             [spacetools.test-util.interface :as tu]))
@@ -69,3 +70,22 @@
                                     (s/gen)
                                     (gen/no-shrink))]
                          (invariants node# (sdn->org node#)))))))))
+
+
+;; Tests for helper functions:
+
+(deftest gen-toc-fn
+  (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)]
+    (is (nil? (gen-toc (n/root (n/section (n/key-word "foo" "bar"))))))
+    (is (valid-toc? (gen-toc (n/root (n/todo "foo")))))
+    (is (valid-toc? (gen-toc (n/root (n/todo "foo")
+                                     (n/section (n/key-word "bar" "baz"))
+                                     (n/headline "qux" (n/todo "quux"))))))))
+
+
+(defspec gen-toc-gen
+  {:num-tests (tu/samples 30)}
+  (prop/for-all
+   [root-node (s/gen :spacetools.spacedoc.node/root)]
+   (is ((some-fn nil? (partial s/valid? :spacetools.spacedoc.org/toc))
+        (gen-toc root-node)))))

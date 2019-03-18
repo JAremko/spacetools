@@ -155,8 +155,7 @@ Return nil if ROOT node doesn't have any headlines."
 
           (up-*gid->count! [*gc hl]
             (let [gid-base (hl->gid-base hl)]
-              ((vswap! *gc update gid-base #(inc (or % 0)))
-               gid-base)))
+              ((vswap! *gc update gid-base (fnil inc 0)) gid-base)))
 
           (hl->toc-el [{:keys [toc-wrapper? value gh-id children]}]
             (if toc-wrapper?
@@ -184,8 +183,7 @@ Return nil if ROOT node doesn't have any headlines."
                                 (when-let [hls (seq (filter hl? %))]
                                   (mapv (partial inner (inc depth)) hls))))
                      hl->toc-el))
-               0
-               {:toc-wrapper? true :children (vec headlines)})))]
+               0 {:toc-wrapper? true :children (vec headlines)})))]
 
     (->> children
          (filter hl?)
