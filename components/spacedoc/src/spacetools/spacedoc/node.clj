@@ -260,7 +260,7 @@
                          :kind vector?
                          :min-count 0)
     #(gen/vector (s/gen ::inline-element) 0 3)))
-(defnode ::table-cell
+(defnode* ::table-cell
   (s/keys :req-un [:spacetools.spacedoc.node.table-cell/children]))
 
 
@@ -271,7 +271,7 @@
   (s/coll-of ::table-cell
              :kind vector?
              :min-count 0))
-(defnode ::table-row
+(defnode* ::table-row
   (s/keys :req-un [:spacetools.spacedoc.node.table-row/type
                    :spacetools.spacedoc.node.table-row/children]))
 
@@ -574,6 +574,37 @@
   {:pre [(s/valid? :spacetools.spacedoc.node.root/children (vec children))]
    :post [(s/valid? ::root %)]}
   {:tag :root :children (vec children)})
+
+
+(defn-spec table ::table
+  "\"table\" node constructor."
+  [row (s/with-gen (s/coll-of (s/+ ::inline-element))
+         #(-> ::inline-element
+              s/gen
+              (gen/vector 1 3)
+              (gen/vector 1 3)))
+   & rows (s/with-gen (s/* (s/coll-of (s/+ ::inline-element)))
+            #(-> ::inline-element
+                 s/gen
+                 (gen/vector 1 3)
+                 (gen/vector 0 3)
+                 (gen/vector 0 3)))]
+  {:pre [(s/valid? (s/coll-of (s/+ ::inline-element)) row)
+         (s/valid? (s/* (s/coll-of (s/+ ::inline-element))) rows)]
+   :post [(s/valid? ::table %)]}
+  {:tag :table
+   :type :org
+   :children (r/reduce
+              (r/monoid conj vector)
+              (r/map (fn [cell]
+                       (merge {:tag :table-row :children [] :type :rule}
+                              (when (seq (:children cell))
+                                {:type :standard :children (conj [] cell)})))
+                     (r/map (fn [cell-cont]
+                              (when (seq cell-cont)
+                                {:tag :table-cell
+                                 :children (-> cell-cont flatten vec)}))
+                            (concat [row] rows))))})
 
 
 ;; TODO: Add `:descriptive` list constructor.
