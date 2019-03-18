@@ -8,6 +8,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
+            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
             [spacetools.spacedoc.node.util :as nu]
             [spacetools.spacedoc.node.val-spec :as vs]))
@@ -460,10 +461,6 @@
    & children (s/with-gen (s/+ ::headline-child)
                 #(gen/vector-distinct (s/gen ::headline-child)
                                       {:min-elements 1 :max-elements 3}))]
-  {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
-         (s/valid? :spacetools.spacedoc.node.meta.hl.nonempty/children
-                   (vec children))]
-   :post [(s/valid? ::headline %)]}
   {:tag :headline :todo? false :value value :children (vec children)})
 
 
@@ -475,9 +472,6 @@
    & children (s/with-gen (s/* ::headline-child)
                 #(gen/vector-distinct (s/gen ::headline-child)
                                       {:min-elements 0 :max-elements 3}))]
-  {:pre [(s/valid? :spacetools.spacedoc.node.headline/value value)
-         (s/valid? :spacetools.spacedoc.node.headline/children (vec children))]
-   :post [(s/valid? :spacetools.spacedoc.node.meta/todo %)]}
   {:tag :headline :todo? true :value value :children (vec children)})
 
 
@@ -488,9 +482,6 @@
   [& children (s/with-gen (s/+ ::headline-child)
                 #(gen/vector-distinct (s/gen ::headline-child)
                                       {:min-elements 1 :max-elements 3}))]
-  {:pre [(s/valid? :spacetools.spacedoc.node.meta.hl.nonempty/children
-                   (vec children))]
-   :post [(s/valid? :spacetools.spacedoc.node.meta/description %)]}
   {:tag :headline :todo? false :value "Description" :children (vec children)})
 
 
@@ -499,10 +490,6 @@
 (defn-spec link ::link
   "\"link\" node constructor."
   [link :spacetools.spacedoc.node.link/path & children (s/* ::inline-element)]
-  {:pre  [(s/valid? :spacetools.spacedoc.node.link/path link)
-          (s/valid? :spacetools.spacedoc.node.link/children
-                    (vec children))]
-   :post [(s/valid? ::link %)]}
   (let [link-prefix (->> (vals (cfg/link-type->prefix))
                          (filter (partial str/starts-with? link))
                          (first))
@@ -542,8 +529,6 @@
   [& items (s/with-gen (s/+ :spacetools.spacedoc.node.item-children/children)
              #(gen/vector
                (s/gen :spacetools.spacedoc.node.item-children/children) 1 3))]
-  {:pre [(every? vector? items)]
-   :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :unordered
    :children (vec (map-indexed (partial apply list-item :unordered) items))})
@@ -559,8 +544,6 @@
   [& items (s/with-gen (s/+ :spacetools.spacedoc.node.item-children/children)
              #(gen/vector
                (s/gen :spacetools.spacedoc.node.item-children/children) 1 3))]
-  {:pre [(every? vector? items)]
-   :post [(s/valid? ::plain-list %)]}
   {:tag :plain-list
    :type :ordered
    :children (vec (map-indexed (partial apply list-item :ordered) items))})
@@ -571,40 +554,41 @@
   [& children (s/with-gen (s/+ ::root-child)
                 #(gen/vector-distinct (s/gen ::root-child)
                                       {:min-elements 1 :max-elements 3}))]
-  {:pre [(s/valid? :spacetools.spacedoc.node.root/children (vec children))]
-   :post [(s/valid? ::root %)]}
   {:tag :root :children (vec children)})
 
 
-(defn-spec table ::table
+(s/fdef table
+  :args (s/with-gen (s/and
+                     (s/+ (s/coll-of (s/coll-of ::inline-element
+                                                :min-count 1)))
+                     (fn square-table?
+                       [rows]
+                       (if-let [no-rule (seq (filter seq rows))]
+                         (apply = (map count no-rule))
+                         true)))
+          #(-> ::inline-element
+               s/gen
+               (gen/vector 1 3)
+               (gen/vector 0 3)
+               (gen/vector 1 3)))
+  :ret ::table)
+
+
+(defn table
   "\"table\" node constructor."
-  [row (s/with-gen (s/coll-of (s/+ ::inline-element))
-         #(-> ::inline-element
-              s/gen
-              (gen/vector 1 3)
-              (gen/vector 1 3)))
-   & rows (s/with-gen (s/* (s/coll-of (s/+ ::inline-element)))
-            #(-> ::inline-element
-                 s/gen
-                 (gen/vector 1 3)
-                 (gen/vector 0 3)
-                 (gen/vector 0 3)))]
-  {:pre [(s/valid? (s/coll-of (s/+ ::inline-element)) row)
-         (s/valid? (s/* (s/coll-of (s/+ ::inline-element))) rows)]
-   :post [(s/valid? ::table %)]}
+  [& rows]
   {:tag :table
    :type :org
    :children (r/reduce
               (r/monoid conj vector)
               (r/map (fn [cell]
                        (merge {:tag :table-row :children [] :type :rule}
-                              (when (seq (:children cell))
-                                {:type :standard :children (conj [] cell)})))
-                     (r/map (fn [cell-cont]
-                              (when (seq cell-cont)
-                                {:tag :table-cell
-                                 :children (-> cell-cont flatten vec)}))
-                            (concat [row] rows))))})
+                              (when (seq cell)
+                                {:type :standard :children cell})))
+                     (r/map (fn [cell]
+                              (mapv (fn [cont] {:tag :table-cell
+                                               :children cont}) cell))
+                            rows)))})
 
 
 ;; TODO: Add `:descriptive` list constructor.

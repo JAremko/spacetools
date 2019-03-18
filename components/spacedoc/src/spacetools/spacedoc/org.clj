@@ -271,7 +271,6 @@ Return nil if ROOT node doesn't have any headlines."
   proper separators (new lies and white spaces).
   P-TAG is parent node tag."
   [p-tag keyword? children (s/coll-of sc/node? :kind vector?)]
-  {:pre [((some-fn vector? nil?) children)]}
   (r/reduce (r/monoid
              (fn [acc [n-t n-s]]
                (let [{h-t :head-tag h :head} (meta acc)
@@ -289,7 +288,6 @@ Return nil if ROOT node doesn't have any headlines."
   "Reduce CHILDREN vector into `str/join`ed ORG string using `conv*`
   P-TAG is parent node tag."
   [p-tag keyword? children (s/coll-of sc/node? :kind vector?)]
-  {:pre [((some-fn vector? nil?) children)]}
   (join (conv* p-tag children)))
 
 
@@ -323,10 +321,10 @@ Return nil if ROOT node doesn't have any headlines."
   (conv tag children))
 
 
-(defn table->vec-rep
+(defn-spec table->vec-rep (s/cat :cols-width (s/nilable (s/coll-of nat-int?))
+                                 :cols (s/+ (s/nilable (s/coll-of string?))))
   "Return vector representation of table ROWS."
-  [{rows :children}]
-  {:pre [((some-fn vector? nil?) rows)]}
+  [{rows :children} :spacetools.spacedoc.node/table]
   (let [vec-tab (mapv
                  (fn [{type :type cells :children}]
                    (when (= type :standard)
@@ -349,13 +347,13 @@ Return nil if ROOT node doesn't have any headlines."
 
 (defn-spec table-row string?
   "Join table cells of ROW into string."
-  [row (s/coll-of string?) cell-width (s/coll-of pos-int?)]
+  [row (s/coll-of string?)
+   cell-width (s/coll-of pos-int?)]
   (join "|"
-        (map (fn [column-width cell-str]
-               (str cell-str
-                    (join (repeat (- column-width
-                                     (viz-len cell-str))
-                                  " "))))
+        (map (fn [column-width cell]
+               (str cell (join (repeat (- column-width
+                                          (viz-len cell))
+                                       " "))))
              cell-width
              row)))
 

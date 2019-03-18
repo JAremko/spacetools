@@ -11,15 +11,11 @@
 
 (defn-spec unqualify-kv unqualified-keyword?
   [q-kv qualified-keyword?]
-  {:pre [(qualified-keyword? q-kv)]
-   :post [(unqualified-keyword? %)]}
   (keyword (name q-kv)))
 
 
 (defn-spec sdn-key-rank int?
   [sdn-key unqualified-keyword?]
-  {:pre [(unqualified-keyword? sdn-key)]
-   :post [(int? %)]}
   (sdn-key
    {:tag (Integer/MIN_VALUE)
     :key (inc Integer/MIN_VALUE)
@@ -86,9 +82,6 @@
            ~(format "\"%s\" node constructor [AUTO-GENERATED]" k)
            ;; Args
            ~(vec (flatten (replace {'children ['& 'children]}  arg-tmpl)))
-           ;; pre/post conditions
-           {:pre ~(mapv (fn [s-k arg] `(s/valid? ~s-k ~arg)) q-ks ret-tmpl)
-            :post [(s/valid? ~k ~'%)]}
            ;; Returned value
            ~(merge {:tag tag} (zipmap (mapv unqualify-kv q-ks) ret-tmpl))))))))
 
