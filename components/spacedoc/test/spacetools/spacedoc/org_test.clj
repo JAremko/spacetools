@@ -93,3 +93,9 @@
    [root-node (s/gen :spacetools.spacedoc.node/root)]
    (is ((some-fn nil? (partial s/valid? :spacetools.spacedoc.org/toc))
         (gen-toc root-node)))))
+
+
+(deftest tag->kind-fn
+  (is (= (tag->kind :foo) nil))
+  (is (= (tag->kind nil) nil))
+  (is (= (tag->kind :paragraph) :block)))

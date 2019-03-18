@@ -218,27 +218,27 @@ Return nil if ROOT node doesn't have any headlines."
                           "/" (sdu/hl-val->path-id-frag value))))))
 
 
-(defn viz-len
+(defn-spec viz-len nat-int?
   "Like `count` but returns real visual length of a string."
-  [^String s]
+  [^String s string?]
   (-> s
       (str/replace #"\[(?:\[[^\[\]]+\]){0,1}\[([^\[\]]+)\]+\]" "$1")
       (str/replace "\u200B" "")
       (count)))
 
 
-(defn tag->kind
+(defn-spec tag->kind (s/nilable keyword?)
   "Given node tag return its family. See `kinds`."
-  [tag]
+  [tag (s/nilable keyword?)]
   (some->> kinds
            (filter #((key %) tag))
            (first)
            (val)))
 
 
-(defn sep-inlines
+(defn-spec sep-inlines (s/nilable string?)
   "Separate inline elements."
-  [t1 s1 t2 s2]
+  [t1 (s/nilable keyword?) s1 (s/nilable string?) t2 keyword? s2 string?]
   (when (and (every? not-empty [s1 s2])
              (not=  :text t1 t2))
     (let [l-s1-sep? ((cfg/seps-right) (last s1))
@@ -246,9 +246,9 @@ Return nil if ROOT node doesn't have any headlines."
       (when-not (or l-s1-sep? f-s2-sep?) " "))))
 
 
-(defn sep-blocks
+(defn-spec sep-blocks (s/nilable string?)
   "Separate block elements."
-  [p-t t1 t2]
+  [p-t keyword? t1 (s/nilable keyword?) t2 keyword?]
   (let [[t1-k t2-k] (mapv tag->kind [t1 t2])]
     (match [p-t            t1          t1-k        t2            t2-k     ]
            [:item-children :paragraph  _           ::end         _        ] ""
@@ -266,12 +266,11 @@ Return nil if ROOT node doesn't have any headlines."
            :else nil)))
 
 
-
-(defn conv*
+(defn-spec conv* (s/coll-of string? :kind vector?)
   "Reduce CHILDREN vector into vector of ORG string representations inserting
   proper separators (new lies and white spaces).
   P-TAG is parent node tag."
-  [p-tag children]
+  [p-tag keyword? children (s/coll-of sc/node? :kind vector?)]
   {:pre [((some-fn vector? nil?) children)]}
   (r/reduce (r/monoid
              (fn [acc [n-t n-s]]
@@ -286,10 +285,10 @@ Return nil if ROOT node doesn't have any headlines."
                    (conj children {:tag ::end}))))
 
 
-(defn conv
+(defn-spec conv string?
   "Reduce CHILDREN vector into `str/join`ed ORG string using `conv*`
   P-TAG is parent node tag."
-  [p-tag children]
+  [p-tag keyword? children (s/coll-of sc/node? :kind vector?)]
   {:pre [((some-fn vector? nil?) children)]}
   (join (conv* p-tag children)))
 
