@@ -76,7 +76,11 @@
 
 (deftest gen-toc-fn
   (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)]
-    (is (nil? (gen-toc (n/root (n/section (n/key-word "foo" "bar"))))))
+    (testing "If the root node doesn't have headlines"
+      (is (nil? (gen-toc (n/root (n/section (n/key-word "foo" "bar")))))))
+    (testing "When headlines have same name at the same level"
+      (is (valid-toc? (gen-toc (n/root (n/headline "foo" (n/todo "bar"))
+                                       (n/headline "foo" (n/todo "baz")))))))
     (is (valid-toc? (gen-toc (n/root (n/todo "foo")))))
     (is (valid-toc? (gen-toc (n/root (n/todo "foo")
                                      (n/section (n/key-word "bar" "baz"))
