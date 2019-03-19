@@ -8,7 +8,6 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.node-impl :refer [defnode defnode*]]
             [spacetools.spacedoc.node.util :as nu]
             [spacetools.spacedoc.node.val-spec :as vs]))
@@ -561,8 +560,7 @@
   :args (s/with-gen (s/and
                      (s/+ (s/coll-of (s/coll-of ::inline-element
                                                 :min-count 1)))
-                     (fn square-table?
-                       [rows]
+                     (fn square-table? [rows]
                        (if-let [no-rule (seq (filter seq rows))]
                          (apply = (map count no-rule))
                          true)))
@@ -582,12 +580,16 @@
    :children (r/reduce
               (r/monoid conj vector)
               (r/map (fn [cell]
-                       (merge {:tag :table-row :children [] :type :rule}
+                       (merge {:tag :table-row
+                               :children []
+                               :type :rule}
                               (when (seq cell)
-                                {:type :standard :children cell})))
+                                {:type :standard
+                                 :children cell})))
                      (r/map (fn [cell]
                               (mapv (fn [cont] {:tag :table-cell
-                                               :children cont}) cell))
+                                               :children cont})
+                                    cell))
                             rows)))})
 
 
