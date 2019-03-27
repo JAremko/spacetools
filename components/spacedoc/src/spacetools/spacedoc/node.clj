@@ -157,17 +157,6 @@
 (s/def ::inline-container (s/multi-spec sc/inline-container :tag))
 
 
-;; center node
-
-(s/def ::center-child ::inline-element)
-(s/def :spacetools.spacedoc.node.center/children
-  (s/with-gen (s/coll-of ::center-child
-                         :kind vector?
-                         :min-count 1)
-    #(gen/vector (s/gen ::center-child) 1 3)))
-(defnode ::center (s/keys :req-un [:spacetools.spacedoc.node.center/children]))
-
-
 ;; example node
 
 (s/def :spacetools.spacedoc.node.example/value ::vs/non-blank-lines)
@@ -335,7 +324,6 @@
 
 ;; block group
 
-(defmethod sc/block-element :center [_] ::center)
 (defmethod sc/block-element :example [_] ::example)
 (defmethod sc/block-element :paragraph [_] ::paragraph)
 (defmethod sc/block-element :plain-list [_] ::plain-list)

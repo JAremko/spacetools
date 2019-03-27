@@ -1,2 +1,6 @@
-* TODO foo
+#+TITLE: headline
 
+* Table of Contents                     :TOC_4_gh:noexport:
+- [[#foo][foo]]
+
+* TODO foo

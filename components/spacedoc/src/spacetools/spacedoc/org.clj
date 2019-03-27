@@ -17,8 +17,6 @@
            "#+END_VERSE\n"]
    :quoted ["#+BEGIN_QUOTE\n"
             "#+END_QUOTE\n"]
-   :center ["#+BEGIN_CENTER\n"
-            "#+END_CENTER\n"]
    :section ["" ""]})
 
 (def indirect-nodes

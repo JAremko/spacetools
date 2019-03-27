@@ -1,2 +1,4 @@
+#+TITLE: link
+
 [[#foo]]
 [[#foo]]

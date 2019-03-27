@@ -47,6 +47,14 @@ RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
                  ./spacedoc/sdnize/sdnize.elc \
                  ./run
 
+RUN apt-get update && apt-get install -y python \
+    && cd /opt/spacetools/spacedoc/sdnize \
+    && git clone https://github.com/cask/cask.git /tmp/caks \
+    && /tmp/caks/bin/cask install \
+    && /tmp/caks/bin/cask exec buttercup -L . -L tests \
+    && apt-get purge python -y \
+    && rm -rf .cask /tmp/* /var/lib/apt/lists/*
+
 ENTRYPOINT ["/opt/spacetools/run"]
 
 CMD ["--help"]

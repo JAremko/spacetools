@@ -1,2 +1,4 @@
+#+TITLE: plain-list
+
 Foo
-  - bar :: baz
+- bar :: baz

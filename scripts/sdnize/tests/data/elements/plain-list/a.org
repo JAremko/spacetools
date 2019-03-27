@@ -1,2 +1,4 @@
+#+TITLE: plain-list
+
 Foo
-  1. bar
+1. bar

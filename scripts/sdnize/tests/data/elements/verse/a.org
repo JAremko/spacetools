@@ -1,2 +1,5 @@
+#+TITLE: verse
+
 #+BEGIN_VERSE
+  foo
 #+END_VERSE

@@ -1,1 +1,3 @@
+#+TITLE: bold
+
 *bold text*

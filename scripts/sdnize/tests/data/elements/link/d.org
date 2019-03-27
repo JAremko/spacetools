@@ -1,1 +1,3 @@
+#+TITLE: link
+
 [[https://foo.bar][baz]]

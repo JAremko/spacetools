@@ -1,3 +1,0 @@
-#+BEGIN_CENTER
-foo
-#+END_CENTER

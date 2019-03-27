@@ -1,2 +1,4 @@
+#+TITLE: list-item
+
 Foo
-  - bar
+- bar

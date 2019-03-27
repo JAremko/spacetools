@@ -1,3 +1,0 @@
-#+BEGIN_VERSE
-  foo
-#+END_VERSE

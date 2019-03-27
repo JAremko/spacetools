@@ -1,1 +1,3 @@
+#+TITLE: strike-through
+
 +strike-through text+

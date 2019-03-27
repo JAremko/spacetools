@@ -206,11 +206,11 @@ contextual information."
 
 ;;;; Center Block
 
-(defun sdnize/center-block (_center-block contents _info)
-  "Transcode a CENTER-BLOCK element From Org to Spacemacs SDN.))
-CONTENTS holds the contents of the block. INFO is a plist
-holding contextual information."
-  (format "{:tag :center :children [%s]}" contents))
+;; (defun sdnize/center-block (_center-block contents _info)
+;;   "Transcode a CENTER-BLOCK element From Org to Spacemacs SDN.))
+;; CONTENTS holds the contents of the block. INFO is a plist
+;; holding contextual information."
+;;   (sdnize/noimpl "sdnize/center-block"))
 
 ;;;; Clock
 
