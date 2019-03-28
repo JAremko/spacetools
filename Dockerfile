@@ -38,8 +38,9 @@ COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools
 
-RUN emacs --batch --eval '(byte-compile-file "spacedoc/sdnize/sdnize.el")'
-RUN emacs --batch --eval '(byte-compile-file "spacedoc/sdnize/sdnize_worker.el")'
+RUN emacs --batch \
+          --eval '(byte-compile-file "spacedoc/sdnize/sdnize.el")' \
+          --eval '(byte-compile-file "spacedoc/sdnize/sdnize_worker.el")'
 
 RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
     && chmod 775 /usr/local/bin/spacedoc \
