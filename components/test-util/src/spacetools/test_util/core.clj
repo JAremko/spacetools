@@ -8,7 +8,7 @@
             [environ.core :refer [env]]
             [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.spacedoc-io.interface :as sio])
+            [spacetools.fs-io.interface :as sio])
   (:import  [com.google.common.jimfs Jimfs Configuration]))
 
 
@@ -100,7 +100,7 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
                             ~name
                             (str/capitalize (name ~os)))
              (let [fs# (create-fs ~struct ~os)]
-               (with-redefs [spacetools.spacedoc-io.core/filesystem fs#
-                             spacetools.spacedoc-io.interface/filesystem fs#]
+               (with-redefs [spacetools.fs-io.core/filesystem fs#
+                             spacetools.fs-io.interface/filesystem fs#]
                  ~@body))))
         'do))
