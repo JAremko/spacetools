@@ -122,6 +122,7 @@ NOTE: EXT must include .(dot)"
          (str->path (str/replace-first a-p a-ob a-nb)))))
 
 
+;; TODO Extract into shared component
 (defmacro exception-of?
   "Construct predicate function for testing exception monad value.
   The predicate returns true if the monad contains `exc/failure`

@@ -3,12 +3,12 @@
   :dependencies [[funcool/cats "2.3.2"]
                  [nio2 "0.2.3"]
                  [orchestra "2019.02.17-SNAPSHOT"]
+                 [cheshire "5.8.1"]
+                 [http-kit "2.4.0-alpha3"]
                  [org.clojure/tools.cli "0.4.2"]]
   :uberjar-name "spacedoc.jar"
   :profiles {:user
              {:env {:gentest-multiplier "1"}
-              :dependencies
-              [[cheshire "5.8.1"]]
               :plugins
               [[lein-cloverage "1.1.2-SNAPSHOT"]
                [lein-exec "0.3.7"]

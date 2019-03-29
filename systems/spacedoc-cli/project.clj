@@ -5,6 +5,8 @@
                  [funcool/cats "2.3.2"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/core.match "0.3.0-alpha5"]
+                 [cheshire "5.8.1"]
+                 [http-kit "2.4.0-alpha3"]
                  [nio2 "0.2.3"]
                  [org.clojure/tools.cli "0.4.2"]]
   :main spacetools.spacedoc-cli.run
