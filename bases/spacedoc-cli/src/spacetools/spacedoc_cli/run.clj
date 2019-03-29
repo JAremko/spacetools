@@ -4,9 +4,9 @@
             [cats.monad.exception :refer [failure]]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [join]]
+            [spacetools.fs-io.interface :refer [try-m->output]]
             [spacetools.spacedoc-cli.actions :as ac]
             [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
-            [spacetools.spacedoc-io.interface :refer [try-m->output]]
             [spacetools.spacedoc.interface :refer [config-file-name]])
   (:gen-class))
 

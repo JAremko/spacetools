@@ -6,42 +6,43 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
+            [spacetools.fs-io.interface :refer [exception-of?]]
+            [spacetools.fs-io.interface :as io]
             [spacetools.spacedoc-cli.args :refer [*parse-input-files]]
-            [spacetools.spacedoc-io.interface :refer [exception-of?]]
-            [spacetools.spacedoc-io.interface :as sio]
+            [spacetools.spacedoc-io.interface :refer [*fp->sdn]]
             [spacetools.spacedoc.interface :as sd]))
 
 
-(defn-spec *validate (sio/exception-of? string?)
+(defn-spec *validate (io/exception-of? string?)
   "Validate Spacemacs documentation files with specs."
-  [fs (s/coll-of (s/and string? (some-fn sio/directory? sio/sdn-file?))
+  [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]
   (m/mlet
    [sdn-fps (*parse-input-files fs)
-    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
+    docs (m/sequence (pmap *fp->sdn sdn-fps))]
    (m/return (format "%s Documentation files have been successfully validated."
                      (count docs)))))
 
 
-(defn-spec *orgify (sio/exception-of? string?)
+(defn-spec *orgify (io/exception-of? string?)
   "Export .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
-  [src-dir (s/and string? sio/directory?) target-dir string?]
+  [src-dir (s/and string? io/directory?) target-dir string?]
   (letfn [(org-path [edn-path]
-            (str/replace (sio/rebase-path src-dir target-dir edn-path)
+            (str/replace (io/rebase-path src-dir target-dir edn-path)
                          #"(?ix)\.sdn$" ".org"))
           (export-to-org [fp content]
-            (sio/*spit (org-path fp)
-                       (->> content (sd/up-tags src-dir fp) (sd/sdn->org))))]
+            (io/*spit (org-path fp)
+                      (->> content (sd/up-tags src-dir fp) (sd/sdn->org))))]
     (m/mlet [sdn-fps (*parse-input-files [src-dir])
-             docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
+             docs (m/sequence (pmap *fp->sdn sdn-fps))
              orgs (m/sequence (pmap export-to-org sdn-fps docs))]
             (m/return (format (str "%s .sdn files have been successfully "
                                    "exported to \"%s\" directory as .org files")
                               (count orgs)
-                              (sio/absolute target-dir))))))
+                              (io/absolute target-dir))))))
 
 
-(defn-spec *describe-spec (sio/exception-of? string?)
+(defn-spec *describe-spec (io/exception-of? string?)
   "Describe spec by qualified keyword."
   [spec-key string?]
   (exc/try-on
@@ -55,13 +56,13 @@
                              {:keyword key}))))))
 
 
-(defn-spec *relations (sio/exception-of? string?)
+(defn-spec *relations (io/exception-of? string?)
   "Output nodes relations in SDN files."
-  [fs (s/coll-of (s/and string? (some-fn sio/directory? sio/sdn-file?))
+  [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]
   (m/mlet [sdn-fps (*parse-input-files fs)
            docs (->> sdn-fps
-                     (pmap (partial sio/*fp->sdn
+                     (pmap (partial *fp->sdn
                                     :spacetools.spacedoc.node/any-node))
                      (m/sequence))]
           (m/return (str "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"

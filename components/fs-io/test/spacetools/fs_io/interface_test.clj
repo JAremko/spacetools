@@ -132,6 +132,30 @@
                (is (not (io/file? "C:\\foo\\qux.sdn")))]))
 
 
+;; TODO: add this test
+;; (deftest file-ref?-fn
+;;   (testing-io "file-ref? function" [[:foo [:bar.sdn] [:baz.edn]]]
+;;               [:unix
+;;                (is (io/file-ref? "/foo/bar.sdn"))
+;;                (is (io/file? "/foo/baz.edn"))
+;;                (is (not (io/file? 42)))
+;;                (is (not (io/file? "/qux")))
+;;                (is (not (io/file? "/foo")))
+;;                (is (not (io/file? "/foo/qux.sdn")))]))
+
+
+;; TODO: And this
+;; (deftest file-ref->path-fn
+;;   (testing-io "file-ref->path function" [[:foo [:bar.sdn] [:baz.edn]]]
+;;               [:unix
+;;                (is (io/file-ref? "/foo/bar.sdn"))
+;;                (is (io/file? "/foo/baz.edn"))
+;;                (is (not (io/file? 42)))
+;;                (is (not (io/file? "/qux")))
+;;                (is (not (io/file? "/foo")))
+;;                (is (not (io/file? "/foo/qux.sdn")))]))
+
+
 (deftest sdn-file?-fn
   (testing-io "sdn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix

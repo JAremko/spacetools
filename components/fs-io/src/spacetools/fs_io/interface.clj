@@ -24,6 +24,17 @@
   [x]
   (io/file? x))
 
+
+(defn file-ref?
+  [x]
+  (io/file-ref? x))
+
+
+(defn file-ref->path
+  [f-ref]
+  (io/file-ref->path f-ref))
+
+
 (defn sdn-file?
   [x]
   (io/sdn-file? x))

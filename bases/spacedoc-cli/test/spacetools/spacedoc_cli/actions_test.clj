@@ -5,8 +5,8 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
+            [spacetools.fs-io.interface :as io :refer [filesystem]]
             [spacetools.spacedoc-cli.actions :refer :all]
-            [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.node :as sn] ;; Also needed to define nodes.
             [spacetools.test-util.interface :as tu :refer [testing-io]]))
 
@@ -76,30 +76,30 @@
                  (is (success? (*orgify "/qux" "/foo")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
-                 (is (sio/directory? "/foo"))
-                 (is ((complement sio/directory?) "/new-dir"))
-                 (is (sio/file? "/foo/quux.org"))
-                 (is (seq @(sio/*slurp "/foo/quux.org")))
+                 (is (io/directory? "/foo"))
+                 (is ((complement io/directory?) "/new-dir"))
+                 (is (io/file? "/foo/quux.org"))
+                 (is (seq @(io/*slurp "/foo/quux.org")))
                  (testing "Testing *orgify function with some bad input files."
                    (is (failure? (*orgify "/" "/new-dir"))))]
                 [:osx
                  (is (success? (*orgify "/qux" "/foo")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
-                 (is (sio/directory? "/foo"))
-                 (is ((complement sio/directory?) "/new-dir"))
-                 (is (sio/file? "/foo/quux.org"))
-                 (is (seq @(sio/*slurp "/foo/quux.org")))
+                 (is (io/directory? "/foo"))
+                 (is ((complement io/directory?) "/new-dir"))
+                 (is (io/file? "/foo/quux.org"))
+                 (is (seq @(io/*slurp "/foo/quux.org")))
                  (testing "Testing *orgify function with some bad input files."
                    (is (failure? (*orgify "/" "/new-dir"))))]
                 [:windows
                  (is (success? (*orgify "C:\\qux" "C:\\foo")))
                  (is (success? (*orgify "C:\\empty-dir" "C:\\new-dir")))
                  (is (success? (*orgify "C:\\empty-dir" "C:\\new-dir")))
-                 (is (sio/directory? "C:\\foo"))
-                 (is ((complement sio/directory?) "C:\\new-dir"))
-                 (is (sio/file? "C:\\foo\\quux.org"))
-                 (is (seq @(sio/*slurp "C:\\foo\\quux.org")))
+                 (is (io/directory? "C:\\foo"))
+                 (is ((complement io/directory?) "C:\\new-dir"))
+                 (is (io/file? "C:\\foo\\quux.org"))
+                 (is (seq @(io/*slurp "C:\\foo\\quux.org")))
                  (testing "Testing *orgify function with some bad input files."
                    (is (failure? (*orgify "C:\\" "C:\\new-dir"))))])))
 

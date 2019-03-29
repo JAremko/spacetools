@@ -3,10 +3,11 @@
   (:require [cats.monad.exception :refer [success? failure?]]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
+            [spacetools.fs-io.interface :refer [file? filesystem] :as io]
             [spacetools.spacedoc-cli.args :refer :all]
-            [spacetools.spacedoc-io.interface :refer [file?]]
             [spacetools.spacedoc.config :as sc]
-            [spacetools.test-util.interface :refer [testing-io]]))
+            [spacetools.test-util.interface :refer [testing-io]]
+            [nio2.core :as nio]))
 
 
 (st/instrument)
