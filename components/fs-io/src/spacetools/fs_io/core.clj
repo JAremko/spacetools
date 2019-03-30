@@ -23,15 +23,9 @@
   (instance? Path x))
 
 
-(defn-spec file-or-dir? boolean?
-  "Returns true if X is a `File` instance."
-  [x any?]
-  (instance? File x))
-
-
 (s/def ::file-ref (s/or :string-path (s/and string? (complement str/blank?))
-                        :path path?
-                        :file-or-dir file-or-dir?))
+                        :path path?))
+
 
 (defn-spec file-ref? boolean?
   "Returns true if X is one of file reference types or a string."
@@ -50,7 +44,6 @@
   [f-ref file-ref?]
   ((condp #(%1 %2) f-ref
      string? str->path
-     file-or-dir? (comp str->path str)
      path? identity
      (throw (ex-info "Argument isn't a file reference."
                      {:arg f-ref :arg-type (type f-ref)})))
@@ -121,7 +114,6 @@ NOTE: EXT must include .(dot)"
          (str->path (str/replace-first a-p a-ob a-nb)))))
 
 
-;; TODO Extract into shared component
 (defmacro exception-of?
   "Construct predicate function for testing exception monad value.
   The predicate returns true if the monad contains `exc/failure`

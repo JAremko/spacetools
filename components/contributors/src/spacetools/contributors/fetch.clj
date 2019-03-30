@@ -6,7 +6,8 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
-            [org.httpkit.client :as client]))
+            [org.httpkit.client :as client]
+            [spacetools.fs-io.core :refer [exception-of?]]))
 
 
 (s/def ::github-api-url
@@ -25,23 +26,6 @@
   (s/and string?
          #(re-matches #"https://api.github.com/repositories/.*/contributors"
                       %)))
-
-
-;; TODO Extract into shared component
-(defmacro exception-of?
-  "Construct predicate function for testing exception monad value.
-  The predicate returns true if the monad contains `exc/failure`
-  or if `exc/success` wraps value satisfying PRED predicate.
-  PRED also can be a spec or qualified-ident referencing a spec."
-  [pred]
-  `(fn [*val#]
-     (and (exc/exception? *val#)
-          (if (exc/success? *val#)
-            (m/bind *val# #(if (or (qualified-ident? ~pred)
-                                   (s/spec? ~pred))
-                             (s/valid? ~pred %)
-                             (~pred %)))
-            true))))
 
 
 (defn-spec *first->last-page-url (exception-of? ::github-api-paged-url)

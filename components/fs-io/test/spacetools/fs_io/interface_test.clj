@@ -132,28 +132,45 @@
                (is (not (io/file? "C:\\foo\\qux.sdn")))]))
 
 
-;; TODO: add this test
-;; (deftest file-ref?-fn
-;;   (testing-io "file-ref? function" [[:foo [:bar.sdn] [:baz.edn]]]
-;;               [:unix
-;;                (is (io/file-ref? "/foo/bar.sdn"))
-;;                (is (io/file? "/foo/baz.edn"))
-;;                (is (not (io/file? 42)))
-;;                (is (not (io/file? "/qux")))
-;;                (is (not (io/file? "/foo")))
-;;                (is (not (io/file? "/foo/qux.sdn")))]))
+(deftest file-ref?-fn
+  (testing-io "file-ref? function" [[:foo [:bar.txt]]]
+              [:unix
+               (is (not (io/file-ref? 5)))
+               (is (io/file-ref? "foo") "strings are file references")
+               (is (io/file-ref? (nio/path filesystem "/foo")))
+               (is (io/file-ref? (nio/path filesystem "/non-existent")))]
+              [:osx
+               (is (not (io/file-ref? 5)))
+               (is (io/file-ref? "foo") "strings are file references")
+               (is (io/file-ref? (nio/path filesystem "/foo")))
+               (is (io/file-ref? (nio/path filesystem "/non-existent")))]
+              [:windows
+               (is (not (io/file-ref? 5)))
+               (is (io/file-ref? "foo") "strings are file references")
+               (is (io/file-ref? (nio/path filesystem "C:\\foo")))
+               (is (io/file-ref? (nio/path filesystem "C:\\non-existent")))]))
 
 
-;; TODO: And this
-;; (deftest file-ref->path-fn
-;;   (testing-io "file-ref->path function" [[:foo [:bar.sdn] [:baz.edn]]]
-;;               [:unix
-;;                (is (io/file-ref? "/foo/bar.sdn"))
-;;                (is (io/file? "/foo/baz.edn"))
-;;                (is (not (io/file? 42)))
-;;                (is (not (io/file? "/qux")))
-;;                (is (not (io/file? "/foo")))
-;;                (is (not (io/file? "/foo/qux.sdn")))]))
+(deftest file-ref->path-fn
+  (testing-io "file-ref->path function" [[:foo {:type :dir}]]
+              [:unix
+               (is (io/file-ref? "foo"))
+               (is (io/file-ref? (nio/path filesystem "/foo")))
+               (is (io/file-ref? "/non-existent"))
+               (is (io/file-ref? (nio/path filesystem "/non-existent")))
+               (is (thrown? Exception (io/file-ref->path 42)))]
+              [:osx
+               (is (io/file-ref? "foo"))
+               (is (io/file-ref? (nio/path filesystem "/foo")))
+               (is (io/file-ref? "/non-existent"))
+               (is (io/file-ref? (nio/path filesystem "/non-existent")))
+               (is (thrown? Exception (io/file-ref->path 42)))]
+              [:windows
+               (is (io/file-ref? "foo"))
+               (is (io/file-ref? (nio/path filesystem "C:\\foo")))
+               (is (io/file-ref? "C:\\non-existent"))
+               (is (io/file-ref? (nio/path filesystem "C:\\non-existent")))
+               (is (thrown? Exception (io/file-ref->path 42)))]))
 
 
 (deftest sdn-file?-fn
