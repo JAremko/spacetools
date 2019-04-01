@@ -1,4 +1,16 @@
 (ns spacetools.fs-io.interface)
 
-;; add your function signatures here...
-(defn add-two [x])
+(def filesystem)
+(defmacro exception-of? [pred])
+(defn *flatten-fps [ext paths])
+(defn *slurp [path])
+(defn *spit [path content])
+(defn absolute [path])
+(defn directory? [x])
+(defn edn-file? [x])
+(defn file-ref->path [f-ref])
+(defn file-ref? [x])
+(defn file? [x])
+(defn rebase-path [old-base new-base path])
+(defn sdn-file? [x])
+(defn try-m->output [*output])

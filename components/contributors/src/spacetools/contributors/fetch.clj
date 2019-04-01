@@ -7,7 +7,7 @@
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [org.httpkit.client :as client]
-            [spacetools.fs-io.core :refer [exception-of?]]))
+            [spacetools.fs-io.interface :refer [exception-of?]]))
 
 
 (s/def ::github-api-url
