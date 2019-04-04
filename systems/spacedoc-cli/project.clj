@@ -11,10 +11,8 @@
   :uberjar-name "spacedoc.jar"
   :global-vars {*warn-on-reflection* true *assert* true}
   :profiles {:dev {:jvm-opts ["-Xss8m"]
-                   :dependencies [[com.google.jimfs/jimfs
-                                   "1.1"]
-                                  [org.clojure/test.check
-                                   "0.10.0-alpha4"]]}
+                   :dependencies [[com.google.jimfs/jimfs "1.1"]
+                                  [org.clojure/test.check "0.10.0-alpha4"]]}
              :test {:env {:gentest-multiplier "1"}}}
   :uberjar
     {:aot :all
@@ -22,6 +20,5 @@
        ["-Dclojure.compiler.elide-meta=[:doc :file :line :added]"
         "-Dclojure.compiler.direct-linking=true"
         "-Xmn1G"]
-     :global-vars {*warn-on-reflection* false
-                   *assert* false}}
+     :global-vars {*warn-on-reflection* false *assert* false}}
   :aot :all)

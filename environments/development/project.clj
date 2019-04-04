@@ -19,10 +19,10 @@
                       [lein-environ "1.1.0"]
                       [lein-nvd "1.0.0"]
                       [lein-deps-tree "0.1.2"]]}
-     :dev {:global-vars {*warn-on-reflection* true
-                         *assert* true}
+     :dev {:global-vars {*warn-on-reflection* true *assert* true}
            :plugins [[lein-environ "1.1.0"]]
            :dependencies [[com.google.jimfs/jimfs "1.1"]
+                          [http-kit.fake "0.2.1"]
                           [com.rpl/specter "1.1.3-SNAPSHOT"]
                           [org.clojure/clojure "1.10.0"]
                           [org.clojure/test.check

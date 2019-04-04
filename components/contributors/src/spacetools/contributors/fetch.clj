@@ -16,11 +16,11 @@
 
 (s/def ::github-api-paged-url
   (s/and string?
-         #(re-matches #"https://api.github.com/.*(:?&|!)page=\d+.*" %)))
+         #(re-matches #"https://api.github.com/.*(:?&|\?)page=\d+.*" %)))
 
-(s/def ::github-api-first-paged-url
+(s/def ::github-api-first-page-url
   (s/and string?
-         #(re-matches #"https://api.github.com/.*(:?&|!)page=1.*" %)))
+         #(re-matches #"https://api.github.com/.*(:?&|\?)page=1.*" %)))
 
 (s/def ::github-api-contributors-url
   (s/and string?
@@ -29,7 +29,7 @@
 
 
 (defn-spec *first->last-page-url (exception-of? ::github-api-paged-url)
-  [url ::github-api-first-paged-url]
+  [url ::github-api-first-page-url]
   (exc/try-on
    (let [{{links :link} :headers status :status} @(client/head url)]
      (if-let [err (cond (not= status 200)
@@ -46,7 +46,7 @@
 
 (defn-spec url->page-number (s/nilable pos-int?)
   [url ::github-api-paged-url]
-  (last (re-find #"(:?&|!)page=(\d+)" url)))
+  (Integer. ^String (last (re-find #"(:?&|\?)page=(\d+)" url))))
 
 
 (defn-spec *url->body (exception-of? vector?)
@@ -96,10 +96,13 @@
                         (map *url->body
                              (->> lp-url
                                   url->page-number
-                                  Integer.
                                   (range 1)
                                   (map #(str url url-infix %)))))]
-             (mapcat #(json/decode-strict % (fn [k] (keyword (.toLowerCase k))))
+             (mapcat #(json/decode-strict % (fn [^String k]
+                                              (keyword (.toLowerCase k))))
                      p-bodies)))))
 
 ;; (def test-data (vec @(*fetch-contributors "https://api.github.com/repositories/7212645/contributors")))
+
+
+;; (map :contributions test-data)
