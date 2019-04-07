@@ -182,7 +182,6 @@ SRC is the exported file name."
 
 ;;;; Headline stuff
 
-
 (defn-spec hl-val->gh-id-base (s/and string? #(re-matches #"#.+" %))
   "Given HL-VALUE headline value return github style id base.
 Base means that the value doesn't have -N post-fix used to resolve collisions."
@@ -216,3 +215,17 @@ Fragments are  particular headline values in the \"/\" separated chain."
   [node any?]
   (and (hl? node)
        (valid-node? node)))
+
+
+;;;; Document tags stuff
+
+(defn-spec valid-doc-tag? boolean?
+  []
+  "Return true if a tag is known Spacemacs documentation tag."
+  (some? (tag (cfg/doc-tags))))
+
+
+(defn-spec doc-tags (s/coll-of (s/and string? (complement str/blank?)))
+  []
+  "Return seq of know Spacemacs documentation tags."
+  (cfg/doc-tags))

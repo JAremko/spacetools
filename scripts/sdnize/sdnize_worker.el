@@ -396,7 +396,14 @@ information."
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
-  (format "{:tag :root :source \"%s\" :spaceroot \"%s\" :children [%s]}"
+  (format (concat "{:tag :root"
+                  " :title \"%s\""
+                  " :tags %s"
+                  " :source \"%s\""
+                  " :spaceroot \"%s\""
+                  " :children [%s]}")
+          (plist-get info :doc-title)
+          (or (plist-get info :doc-tags) "[]")
           (sdnize/esc-str (file-truename (plist-get info :input-file)))
           (sdnize/esc-str (file-truename sdnize-root-dir))
           contents))
@@ -436,23 +443,32 @@ contextual information."
 
 ;;;; Keyword
 
+(defun sdnize//keyword-fmt-tags (tags-str)
+  "Format document tags string."
+  (sdnize/esc-str (format "[%s]" (mapconcat (apply-partially 'format "\"%s\"")
+                                            (split-string tags-str "|")
+                                            " "))))
+
 (defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
 CONTENTS is nil. INFO is a plist holding contextual information."
   (let* ((key (org-element-property :key keyword))
          (d-key (downcase key))
-         (val (org-element-property :value keyword)))
-    (when (string= "title" d-key)
-      (if (plist-member info :doc-title)
-          (sdnize/error "Multiply \"#+TITLE:\" keywords")
-        (plist-put info :file-has-title? 'true)))
-    (when (string= "tags" d-key)
-      (if (plist-member info :doc-tags)
-          (sdnize/error "Multiply \"#+TAGS:\" keywords")
-        (plist-put info :file-has-tags? 'true)))
-    (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
-            (sdnize/esc-str key)
-            (sdnize/esc-str val))))
+         (val (org-element-property :value keyword))
+         (e-val (sdnize/esc-str val)))
+    (cond ((string= "title" d-key)
+           (if (plist-member info :doc-title)
+               (sdnize/error "Multiply \"#+TITLE:\" keywords")
+             (plist-put info :doc-title e-val)
+             ""))
+          ((string= "tags" d-key)
+           (if (plist-member info :doc-tags)
+               (sdnize/error "Multiply \"#+TAGS:\" keywords")
+             (plist-put info :doc-tags (sdnize//keyword-fmt-tags val))
+             ""))
+          (t (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
+                     (sdnize/esc-str key)
+                     e-val)))))
 
 ;;;; Latex Environment
 
@@ -778,12 +794,12 @@ holding export options."
                  "top level \"Description\" headline\n"
                  "See %S")
          sdnize-readme-template-url))
-      (unless (plist-member info :file-has-tags?)
+      (unless (plist-member info :doc-tags)
         (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
                      sdnize-readme-template-url))))
 
   ;; General validations:
-  (unless (plist-member info :file-has-title?)
+  (unless (plist-member info :doc-title)
     (sdnize/error "Missing \"#+TITLE:\" keyword. See %S"
                   sdnize-readme-template-url))
 

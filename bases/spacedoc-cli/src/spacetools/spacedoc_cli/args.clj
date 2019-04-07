@@ -2,7 +2,6 @@
   "Application arguments parsing stuff."
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
-            [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
             [clojure.tools.cli :refer [parse-opts]]
             [orchestra.core :refer [defn-spec]]
