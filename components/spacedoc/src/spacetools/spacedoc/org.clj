@@ -189,7 +189,7 @@ Return nil if ROOT node doesn't have any headlines."
 
 
 (defn-spec assoc-toc :spacetools.spacedoc.node/root
-  "Add Table of content based on headlines present in the ROOT node."
+  "Add Table of content based on headlines present in the ROOT node"
   [{children :children :as root} :spacetools.spacedoc.node/root]
   (if-let [toc (gen-toc root)]
     (let [[b-toc a-toc] (split-with (complement hl?) children)]
@@ -197,8 +197,22 @@ Return nil if ROOT node doesn't have any headlines."
     root))
 
 
-;;;; Helpers
+(defn-spec assoc-title :spacetools.spacedoc.node/root
+  "Add title node"
+  [title string? {children :children :as root} :spacetools.spacedoc.node/root]
+  (update root :children
+          (partial apply vector (n/key-word "TITLE" title))))
 
+
+(defn-spec assoc-tags :spacetools.spacedoc.node/root
+  "Add tags node"
+  [tags (s/coll-of (s/and string? (complement str/blank?)))
+   {children :children :as root} :spacetools.spacedoc.node/root]
+  (update root :children
+          (partial apply vector (n/key-word "TAGS" (join "|" tags)))))
+
+
+;;;; Helpers
 
 (defn-spec assoc-level-and-path-id valid-hl?
   "Fill node with :level and :path-id"

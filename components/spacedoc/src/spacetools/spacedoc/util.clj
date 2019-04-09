@@ -213,8 +213,7 @@ Fragments are  particular headline values in the \"/\" separated chain."
 (defn-spec valid-hl? boolean?
   "Return true if NODE is a valid headline."
   [node any?]
-  (and (hl? node)
-       (valid-node? node)))
+  (and (hl? node) (valid-node? node)))
 
 
 ;;;; Document tags stuff

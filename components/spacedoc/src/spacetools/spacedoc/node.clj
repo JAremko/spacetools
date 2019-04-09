@@ -442,9 +442,27 @@
            (s/keys :req-un [:spacetools.spacedoc.node.meta.todo/todo?])))
 
 
+;; ;; title meta node
+
+;; (s/def :spacetools.spacedoc.node.meta.title/key #(= (str/lower-case %) "title"))
+;; (s/def :spacetools.spacedoc.node.meta.title/value ::vs/non-blank-string)
+;; (s/def :spacetools.spacedoc.node.meta/title
+;;   (s/keys :req-un [:spacetools.spacedoc.node.meta.title/key
+;;                    :spacetools.spacedoc.node.meta.title/value]))
+
+
+;; tags meta node
+
+(s/def :spacetools.spacedoc.node.meta.tags/key #(= (str/lower-case %) "tags"))
+(s/def :spacetools.spacedoc.node.meta.tags/value ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.meta/tags
+  (s/keys :req-un [:spacetools.spacedoc.node.meta.tags/key
+                   :spacetools.spacedoc.node.meta.tags/value]))
+
+
 ;;;; "handmade" human-friendly constructors
 
-;; headline node
+;; headline node constructor
 
 (defn-spec headline ::headline
   "\"headline\" node constructor."
@@ -455,7 +473,7 @@
   {:tag :headline :todo? false :value value :children (vec children)})
 
 
-;; todo meta node
+;; todo node constructor
 
 (defn-spec todo :spacetools.spacedoc.node.meta/todo
   "\"todo\" node constructor."
@@ -466,7 +484,7 @@
   {:tag :headline :todo? true :value value :children (vec children)})
 
 
-;; description meta node
+;; description node constructor
 
 (defn-spec description :spacetools.spacedoc.node.meta/description
   "\"description\" node constructor."
@@ -476,7 +494,7 @@
   {:tag :headline :todo? false :value "Description" :children (vec children)})
 
 
-;; link
+;; link node constructor
 
 (defn-spec link ::link
   "\"link\" node constructor."
@@ -491,7 +509,7 @@
      :children (vec children)}))
 
 
-;; list-item
+;; list-item node constructor
 
 (defn-spec list-item ::list-item
   "create list item node."
@@ -508,7 +526,7 @@
    :children [{:tag :item-children :children (vec children)}]})
 
 
-;; plain-list
+;; plain-list node constructors
 
 (defn-spec unordered-list ::plain-list
   "Unordered \"plain-list\" node constructor.
@@ -540,6 +558,8 @@
    :children (vec (map-indexed (partial apply list-item :ordered) items))})
 
 
+;; root node constructor
+
 (defn-spec root ::root
   "\"root\" node constructor."
   [& children (s/with-gen (s/+ ::root-child)
@@ -563,6 +583,8 @@
                (gen/vector 1 3)))
   :ret ::table)
 
+
+;; table node constructor
 
 (defn table
   "\"table\" node constructor."
