@@ -188,6 +188,37 @@ Return nil if ROOT node doesn't have any headlines."
          (hls->toc))))
 
 
+;;;; full-root node spec
+
+(s/def :spacetools.spacedoc.org.full-root.title-wrapper/children
+  (s/cat :title :spacetools.spacedoc.node.meta/title))
+
+(s/def :spacetools.spacedoc.org.full-root/title-wrapper
+  (s/keys :req-un [:spacetools.spacedoc.node.section/tag
+                   :spacetools.spacedoc.org.full-root.title-wrapper/children]))
+
+(s/def :spacetools.spacedoc.org.full-root.tags-wrapper/children
+  (s/cat :tags :spacetools.spacedoc.node.meta/tags))
+
+(s/def :spacetools.spacedoc.org.full-root/tags-wrapper
+  (s/keys :req-un [:spacetools.spacedoc.node.section/tag
+                   :spacetools.spacedoc.org.full-root.tags-wrapper/children]))
+
+(s/def :spacetools.spacedoc.org.full-root/children
+  (s/cat
+   :title :spacetools.spacedoc.org.full-root/title-wrapper
+   :tags :spacetools.spacedoc.org.full-root/tags-wrapper
+   :logo (s/* :spacetools.spacedoc.node/section)
+   :toc (s/? ::toc)
+   :rest (s/* :spacetools.spacedoc.node/root-child)))
+
+(s/def ::full-root
+  (s/merge :spacetools.spacedoc.node/root
+           (s/keys :req-un [:spacetools.spacedoc.org.full-root/children])))
+
+
+;;;; root node helpers
+
 (defn-spec assoc-toc :spacetools.spacedoc.node/root
   "Add Table of content based on headlines present in the ROOT node"
   [{children :children :as root} :spacetools.spacedoc.node/root]
@@ -199,17 +230,32 @@ Return nil if ROOT node doesn't have any headlines."
 
 (defn-spec assoc-title :spacetools.spacedoc.node/root
   "Add title node"
-  [title string? {children :children :as root} :spacetools.spacedoc.node/root]
+  [title (s/and string? (complement str/blank?))
+   {children :children :as root} :spacetools.spacedoc.node/root]
   (update root :children
-          (partial apply vector (n/key-word "TITLE" title))))
+          (partial apply vector (n/section (n/key-word "TITLE" title)))))
 
 
 (defn-spec assoc-tags :spacetools.spacedoc.node/root
   "Add tags node"
-  [tags (s/coll-of (s/and string? (complement str/blank?)))
+  [tags (s/coll-of (s/and string? (complement str/blank?))
+                   :min-count 1)
    {children :children :as root} :spacetools.spacedoc.node/root]
   (update root :children
-          (partial apply vector (n/key-word "TAGS" (join "|" tags)))))
+          (partial apply vector (->> tags
+                                     (join "|")
+                                     (n/key-word "TAGS")
+                                     n/section))))
+
+
+(defn-spec fill-root-children ::full-root
+  "Assoc Title tags and TOC nodes to the ROOT node children.
+NOTE: If ROOT doesn't have title and tags values placeholders will be used."
+  [root :spacetools.spacedoc.node/root]
+  (->> root
+       assoc-toc
+       (assoc-tags (:tags root ["Untagged"]))
+       (assoc-title (:title root "Untitled"))))
 
 
 ;;;; Helpers
@@ -472,7 +518,7 @@ Return nil if ROOT node doesn't have any headlines."
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
-       (assoc-toc)
+       (fill-root-children)
        (:children)
        (mapv #(if (sdu/hl? %) (assoc-level-and-path-id %) %))
        (conv tag)))

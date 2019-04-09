@@ -220,11 +220,13 @@ Fragments are  particular headline values in the \"/\" separated chain."
 
 (defn-spec valid-doc-tag? boolean?
   []
+  ;; TODO: Implement
   "Return true if a tag is known Spacemacs documentation tag."
-  (some? (tag (cfg/doc-tags))))
+  true
+ #_ (some? (tag (cfg/doc-tags))))
 
 
-(defn-spec doc-tags (s/coll-of (s/and string? (complement str/blank?)))
-  []
-  "Return seq of know Spacemacs documentation tags."
-  (cfg/doc-tags))
+;; (defn-spec doc-tags (s/coll-of (s/and string? (complement str/blank?)))
+;;   []
+;;   "Return seq of know Spacemacs documentation tags."
+;;   (cfg/doc-tags))

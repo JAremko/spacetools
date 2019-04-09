@@ -403,7 +403,8 @@
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string))
+(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string
+                                                      :min-count 1))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/children]
@@ -442,13 +443,13 @@
            (s/keys :req-un [:spacetools.spacedoc.node.meta.todo/todo?])))
 
 
-;; ;; title meta node
+;; title meta node
 
-;; (s/def :spacetools.spacedoc.node.meta.title/key #(= (str/lower-case %) "title"))
-;; (s/def :spacetools.spacedoc.node.meta.title/value ::vs/non-blank-string)
-;; (s/def :spacetools.spacedoc.node.meta/title
-;;   (s/keys :req-un [:spacetools.spacedoc.node.meta.title/key
-;;                    :spacetools.spacedoc.node.meta.title/value]))
+(s/def :spacetools.spacedoc.node.meta.title/key #(= (str/lower-case %) "title"))
+(s/def :spacetools.spacedoc.node.meta.title/value ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.meta/title
+  (s/keys :req-un [:spacetools.spacedoc.node.meta.title/key
+                   :spacetools.spacedoc.node.meta.title/value]))
 
 
 ;; tags meta node
