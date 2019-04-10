@@ -1,1 +1,3 @@
-#+TITLE: foo
+#+TITLE: key-word
+
+#+FOO: bar
