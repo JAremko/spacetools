@@ -462,16 +462,14 @@ CONTENTS is nil. INFO is a plist holding contextual information."
     (cond ((string= "title" d-key)
            (if (plist-member info :doc-title)
                (sdnize/error "Multiply \"#+TITLE:\" keywords")
-             (plist-put info :doc-title e-val)
-             ""))
+             (plist-put info :doc-title e-val)))
           ((string= "tags" d-key)
            (if (plist-member info :doc-tags)
                (sdnize/error "Multiply \"#+TAGS:\" keywords")
-             (plist-put info :doc-tags (sdnize//keyword-fmt-tags val))
-             ""))
-          (t (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
-                     (sdnize/esc-str key)
-                     e-val)))))
+             (plist-put info :doc-tags (sdnize//keyword-fmt-tags val)))))
+    (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
+            (sdnize/esc-str key)
+            e-val)))
 
 ;;;; Latex Environment
 

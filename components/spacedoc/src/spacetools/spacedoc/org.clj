@@ -190,24 +190,24 @@ Return nil if ROOT node doesn't have any headlines."
 
 ;;;; full-root node spec
 
-(s/def :spacetools.spacedoc.org.full-root.title-wrapper/children
+(s/def :spacetools.spacedoc.org.title-wrapper/children
   (s/cat :title :spacetools.spacedoc.node.meta/title))
 
-(s/def :spacetools.spacedoc.org.full-root/title-wrapper
+(s/def ::title-wrapper
   (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                   :spacetools.spacedoc.org.full-root.title-wrapper/children]))
+                   :spacetools.spacedoc.org.title-wrappr/children]))
 
-(s/def :spacetools.spacedoc.org.full-root.tags-wrapper/children
+(s/def :spacetools.spacedoc.org.tags-wrapper/children
   (s/cat :tags :spacetools.spacedoc.node.meta/tags))
 
-(s/def :spacetools.spacedoc.org.full-root/tags-wrapper
+(s/def ::tags-wrapper
   (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                   :spacetools.spacedoc.org.full-root.tags-wrapper/children]))
+                   :spacetools.spacedoc.org.tags-wrapper/children]))
 
 (s/def :spacetools.spacedoc.org.full-root/children
   (s/cat
-   :title :spacetools.spacedoc.org.full-root/title-wrapper
-   :tags :spacetools.spacedoc.org.full-root/tags-wrapper
+   :title ::title-wrapper
+   :tags ::tags-wrapper
    :logo (s/* :spacetools.spacedoc.node/section)
    :toc (s/? ::toc)
    :rest (s/* :spacetools.spacedoc.node/root-child)))
@@ -248,11 +248,16 @@ Return nil if ROOT node doesn't have any headlines."
                                      n/section))))
 
 
-(defn-spec fill-root-children ::full-root
+(s/def ::special-node (s/or :title ::title-wrapper
+                            :tags ::tags-wrapper
+                            :toc ::toc))
+
+(defn-spec normalize-root-children ::full-root
   "Assoc Title tags and TOC nodes to the ROOT node children.
-NOTE: If ROOT doesn't have title and tags values placeholders will be used."
+NOTE: If ROOT doesn't have title and tags values placeholders will be used.
+NOTE: Existing nodes will be replaced."
   [root :spacetools.spacedoc.node/root]
-  (->> root
+  (->> (update root :children (partial remove #(s/valid? ::special-node %)))
        assoc-toc
        (assoc-tags (:tags root ["Untagged"]))
        (assoc-title (:title root "Untitled"))))
@@ -518,7 +523,7 @@ NOTE: If ROOT doesn't have title and tags values placeholders will be used."
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
-       (fill-root-children)
+       (normalize-root-children)
        (:children)
        (mapv #(if (sdu/hl? %) (assoc-level-and-path-id %) %))
        (conv tag)))
