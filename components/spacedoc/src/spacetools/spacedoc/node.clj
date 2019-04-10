@@ -403,8 +403,7 @@
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string
-                                                      :min-count 1))
+(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/children]
@@ -415,6 +414,17 @@
 
 
 ;;;; Meta specs
+
+;; Empty root node
+
+(s/def :spacetools.spacedoc.node.meta.empty-root/children #{[]})
+(s/def :spacetools.spacedoc.node.meta/empty-root
+  (s/keys :req-un [:spacetools.spacedoc.node.meta.empty-root/children]
+          :opt-un [:spacetools.spacedoc.node.root/title
+                   :spacetools.spacedoc.node.root/tags
+                   :spacetools.spacedoc.node.root/source
+                   :spacetools.spacedoc.node.root/spaceroot]))
+
 
 ;; For the cases when we need a nonempty headline children vector.
 (s/def :spacetools.spacedoc.node.meta.hl.nonempty/children
@@ -445,7 +455,8 @@
 
 ;; title meta node
 
-(s/def :spacetools.spacedoc.node.meta.title/key #(= (str/lower-case %) "title"))
+(s/def :spacetools.spacedoc.node.meta.title/key
+  (s/and string? #(= (str/lower-case %) "title")))
 (s/def :spacetools.spacedoc.node.meta.title/value ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.meta/title
   (s/keys :req-un [:spacetools.spacedoc.node.meta.title/key
@@ -454,7 +465,8 @@
 
 ;; tags meta node
 
-(s/def :spacetools.spacedoc.node.meta.tags/key #(= (str/lower-case %) "tags"))
+(s/def :spacetools.spacedoc.node.meta.tags/key
+  (s/and string? #(= (str/lower-case %) "tags")))
 (s/def :spacetools.spacedoc.node.meta.tags/value ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.meta/tags
   (s/keys :req-un [:spacetools.spacedoc.node.meta.tags/key

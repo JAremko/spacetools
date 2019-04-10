@@ -195,7 +195,7 @@ Return nil if ROOT node doesn't have any headlines."
 
 (s/def ::title-wrapper
   (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                   :spacetools.spacedoc.org.title-wrappr/children]))
+                   :spacetools.spacedoc.org.title-wrapper/children]))
 
 (s/def :spacetools.spacedoc.org.tags-wrapper/children
   (s/cat :tags :spacetools.spacedoc.node.meta/tags))
@@ -252,18 +252,30 @@ Return nil if ROOT node doesn't have any headlines."
                             :tags ::tags-wrapper
                             :toc ::toc))
 
-(defn-spec normalize-root-children ::full-root
-  "Assoc Title tags and TOC nodes to the ROOT node children.
-NOTE: If ROOT doesn't have title and tags values placeholders will be used.
-NOTE: Existing nodes will be replaced."
+
+(defn-spec remove-inlinded-root-props
+  (s/or :root :spacetools.spacedoc.node/root
+        :empty-root :spacetools.spacedoc.node.meta/empty-root)
+  "Remove title, tags and TOC nodes from the ROOT node children."
   [root :spacetools.spacedoc.node/root]
-  (->> (update root :children (partial remove #(s/valid? ::special-node %)))
-       assoc-toc
+  (update root :children (->> ::special-node
+                              (partial s/valid?)
+                              complement
+                              (partial filterv))))
+
+
+(defn-spec inline-root-prop ::full-root
+  "Assoc Title tags and TOC nodes to the ROOT node children.
+NOTE: If ROOT doesn't have title and tags values placeholders will be used."
+  [root (s/or :root :spacetools.spacedoc.node/root
+              :empty-root :spacetools.spacedoc.node.meta/empty-root)]
+  (->> root
        (assoc-tags (:tags root ["Untagged"]))
-       (assoc-title (:title root "Untitled"))))
+       (assoc-title (:title root "Untitled"))
+       assoc-toc))
 
 
-;;;; Helpers
+;;;; general helpers
 
 (defn-spec assoc-level-and-path-id valid-hl?
   "Fill node with :level and :path-id"
@@ -523,7 +535,8 @@ NOTE: Existing nodes will be replaced."
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
-       (normalize-root-children)
+       (remove-inlinded-root-props)
+       (inline-root-prop)
        (:children)
        (mapv #(if (sdu/hl? %) (assoc-level-and-path-id %) %))
        (conv tag)))
