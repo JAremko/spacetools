@@ -445,9 +445,12 @@ contextual information."
 
 (defun sdnize//keyword-fmt-tags (tags-str)
   "Format document tags string."
-  (sdnize/esc-str (format "[%s]" (mapconcat (apply-partially 'format "\"%s\"")
-                                            (split-string tags-str "|")
-                                            " "))))
+  (format "[%s]" (mapconcat (lambda (tag)
+                              (thread-last tag
+                                (sdnize/esc-str)
+                                (format "\"%s\"")))
+                            (split-string tags-str "|")
+                            " ")))
 
 (defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
