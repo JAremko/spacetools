@@ -81,7 +81,7 @@
       (is (->> "bar"
                (n/key-word "foo")
                n/section
-               n/root
+               (n/root "bar" [])
                root->toc
                :children
                empty?)))

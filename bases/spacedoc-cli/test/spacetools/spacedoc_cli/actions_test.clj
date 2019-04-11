@@ -121,9 +121,9 @@
                       ffirst
                       str)
         bad-node {:bad :node}
-        test-node (-> "foobar"
+        test-node (->> "foobar"
                       sn/todo
-                      sn/root
+                      (sn/root "foo" [])
                       str)]
     (testing-io "*relations function"
                 [[:good.sdn good-node]

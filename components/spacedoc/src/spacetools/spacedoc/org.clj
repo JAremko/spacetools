@@ -201,17 +201,6 @@ Return nil if ROOT node doesn't have any headlines."
                    :spacetools.spacedoc.org.root-head/children]))
 
 
-;; root head conformer
-
-(s/def :spacetools.spacedoc.org.root-head-conformer/children
-  (s/cat :title (s/? :spacetools.spacedoc.node.meta/title)
-         :tags (s/? :spacetools.spacedoc.node.meta/tags)
-         :rest (s/* :spacetools.spacedoc.node/block-element)))
-
-(s/def ::root-head-conformer
-  (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                   :spacetools.spacedoc.org.root-head-conformer/children]))
-
 ;; root with head
 
 (s/def :spacetools.spacedoc.org.root-with-head-props/children
@@ -228,54 +217,12 @@ Return nil if ROOT node doesn't have any headlines."
                    :spacetools.spacedoc.node.root/spaceroot]))
 
 
-;; root with TOC
-
-(s/def :spacetools.spacedoc.org.root-with-toc/children
-  (s/cat
-   :head (s/? ::root-head)
-   :toc ::toc
-   :rest (s/* :spacetools.spacedoc.node/root-child)))
-
-(s/def ::root-with-toc
-  (s/merge :spacetools.spacedoc.node/root
-           (s/keys :req-un [:spacetools.spacedoc.org.root-with-toc/children])))
-
-
-;; full root
-(s/def :spacetools.spacedoc.org.full-root/children
-  (s/cat
-   :head ::root-head
-   :toc ::toc
-   :rest (s/* :spacetools.spacedoc.node/root-child)))
-
-
-(s/def ::full-root
-  (s/merge :spacetools.spacedoc.node/root
-           (s/keys :req-un [:spacetools.spacedoc.org.full-root/children])))
-
-
-;; root conformer
-(s/def :spacetools.spacedoc.org.root-conformer/children
-  (s/cat
-   :head (s/? ::root-head-conformer)
-   :toc (s/? ::toc)
-   :rest (s/* :spacetools.spacedoc.node/root-child)))
-
-
-(s/def ::root-conformer
-  (s/keys :req-un [:spacetools.spacedoc.node.root/title
-                   :spacetools.spacedoc.node.root/tags
-                   :spacetools.spacedoc.org.root-conformer/children]
-          :opt-un [:spacetools.spacedoc.node.root/source
-                   :spacetools.spacedoc.node.root/spaceroot]))
-
-
 ;;;; root node helpers
 
-(defn-spec conj-toc ::root-with-toc
+(defn-spec conj-toc :spacetools.spacedoc.node/root
   "Add Table of content based on headlines present in the ROOT node"
   [{children :children :as root} :spacetools.spacedoc.node/root]
-  (if-let [toc (or (root->toc root) (n/todo (cfg/toc-hl-val)))]
+  (if-let [toc (root->toc root)]
     (let [[b-toc a-toc] (split-with (complement hl?) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
     root))
@@ -283,13 +230,19 @@ Return nil if ROOT node doesn't have any headlines."
 
 (defn-spec inline-head-props ::root-with-head-props
   "Add title and tags nodes to the head of the root node."
-  [{:keys [tags title] :as root} :spacetools.spacedoc.node/root]
+  [{tags :tags title :title [f-child & children] :children :as root}
+   :spacetools.spacedoc.node/root]
   (let [title-n (n/key-word "title" title)
-        tags-n (n/key-word "tags" (or (str/join "|" tags) "Untagged"))]
-    (s/unform ::root-with-head-props
-              (-> (s/conform ::root-conformer root)
-                  (assoc-in [:children :head :children :title] title-n)
-                  (assoc-in [:children :head :children :tags] tags-n)))))
+        tags-n (n/key-word "tags" (if (seq tags)
+                                    (str/join "|" tags)
+                                    "Untagged"))
+        head (when (s/valid? :spacetools.spacedoc.node/section f-child)
+               (update f-child :children
+                       (partial apply vector title-n tags-n)))]
+    (assoc root :children
+           (vec (if head
+                  (list* head children)
+                  (list* (n/section title-n tags-n) f-child children))))))
 
 
 ;;;; general helpers
@@ -562,6 +515,3 @@ Return nil if ROOT node doesn't have any headlines."
 ;;;; Pseudo-nodes
 
 (defmethod sdn->org ::end [_] "")
-
-
-;; (s/unform ::root-conformer (s/conform ::root-conformer (n/root "foo" [] (n/todo "foo"))))
