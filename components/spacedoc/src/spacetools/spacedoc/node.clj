@@ -406,10 +406,10 @@
 (s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
-(defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/children]
-                         :opt-un [:spacetools.spacedoc.node.root/title
+(defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title
                                   :spacetools.spacedoc.node.root/tags
-                                  :spacetools.spacedoc.node.root/source
+                                  :spacetools.spacedoc.node.root/children]
+                         :opt-un [:spacetools.spacedoc.node.root/source
                                   :spacetools.spacedoc.node.root/spaceroot]))
 
 
@@ -419,12 +419,11 @@
 
 (s/def :spacetools.spacedoc.node.meta.empty-root/children #{[]})
 (s/def :spacetools.spacedoc.node.meta/empty-root
-  (s/keys :req-un [:spacetools.spacedoc.node.meta.empty-root/children]
-          :opt-un [:spacetools.spacedoc.node.root/title
+  (s/keys :req-un [:spacetools.spacedoc.node.root/title
                    :spacetools.spacedoc.node.root/tags
-                   :spacetools.spacedoc.node.root/source
+                   :spacetools.spacedoc.node.meta.empty-root/children]
+          :opt-un [:spacetools.spacedoc.node.root/source
                    :spacetools.spacedoc.node.root/spaceroot]))
-
 
 ;; For the cases when we need a nonempty headline children vector.
 (s/def :spacetools.spacedoc.node.meta.hl.nonempty/children
@@ -575,10 +574,12 @@
 
 (defn-spec root ::root
   "\"root\" node constructor."
-  [& children (s/with-gen (s/+ ::root-child)
+  [title :spacetools.spacedoc.node.root/title
+   tags :spacetools.spacedoc.node.root/tags
+   & children (s/with-gen (s/+ ::root-child)
                 #(gen/vector-distinct (s/gen ::root-child)
                                       {:min-elements 1 :max-elements 3}))]
-  {:tag :root :children (vec children)})
+  {:tag :root :title title :tags tags :children (vec children)})
 
 
 (s/fdef table

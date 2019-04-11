@@ -74,25 +74,32 @@
 
 ;; Tests for helper functions:
 
-(deftest gen-toc-fn
-  (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)]
+(deftest root->toc-fn
+  (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)
+        t-root (partial n/root "foo" [])]
     (testing "If the root node doesn't have headlines"
-      (is (nil? (gen-toc (n/root (n/section (n/key-word "foo" "bar")))))))
+      (is (->> "bar"
+               (n/key-word "foo")
+               n/section
+               n/root
+               root->toc
+               :children
+               empty?)))
     (testing "When headlines have same name at the same level"
-      (is (valid-toc? (gen-toc (n/root (n/headline "foo" (n/todo "bar"))
-                                       (n/headline "foo" (n/todo "baz")))))))
-    (is (valid-toc? (gen-toc (n/root (n/todo "foo")))))
-    (is (valid-toc? (gen-toc (n/root (n/todo "foo")
-                                     (n/section (n/key-word "bar" "baz"))
-                                     (n/headline "qux" (n/todo "quux"))))))))
+      (is (valid-toc? (root->toc (t-root (n/headline "foo" (n/todo "bar"))
+                                         (n/headline "foo" (n/todo "baz")))))))
+    (is (valid-toc? (root->toc (t-root (n/todo "foo")))))
+    (is (valid-toc? (root->toc (t-root (n/todo "foo")
+                                       (n/section (n/key-word "bar" "baz"))
+                                       (n/headline "qux" (n/todo "quux"))))))))
 
 
-(defspec gen-toc-gen
+(defspec root->toc-gen
   {:num-tests (tu/samples 30)}
   (prop/for-all
    [root-node (s/gen :spacetools.spacedoc.node/root)]
    (is ((some-fn nil? (partial s/valid? :spacetools.spacedoc.org/toc))
-        (gen-toc root-node)))))
+        (root->toc root-node)))))
 
 
 (deftest tag->kind-fn

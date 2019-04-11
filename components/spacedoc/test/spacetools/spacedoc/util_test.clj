@@ -46,7 +46,7 @@
   (let [text (n/text "foo")
         section (-> text n/paragraph n/section)
         headline (n/todo "bar")
-        root (n/root section headline)]
+        root (n/root "foo" [] section headline)]
     (is (= (node->children-tag-s text) #{}))
     (is (= (node->children-tag-s section) #{:paragraph}))
     (is (= (node->children-tag-s root) #{:section :headline}))))
@@ -54,12 +54,12 @@
 
 (deftest valid-node?-fn
   (is (valid-node? (n/text "foo")))
-  (is (valid-node? (n/root (n/todo "bar"))))
+  (is (valid-node? (n/root "foo" [] (n/todo "bar"))))
   (is (not (valid-node? "baz")))
   (is (not (valid-node? {:tag :qux})))
   (letfn [(set-roots-first-hl-val [new-val r-node]
             (setval [:children FIRST :value] new-val r-node))]
-    (let [test-node (n/root (n/todo "quux"))]
+    (let [test-node (n/root "foo" [] (n/todo "quux"))]
       (is (valid-node? (set-roots-first-hl-val
                         "quuz"
                         test-node)))
@@ -160,7 +160,7 @@
 
 ;; NOTE: Should break when the function starts to actually do something.
 (deftest up-tags-fn
-  (let [root-node (n/root (n/todo "foo"))]
+  (let [root-node (n/root "foo" [] (n/todo "foo"))]
     (testing "NOTE: Currently this function returns unaltered root node"
       (is (= (up-tags "foo" "bar" root-node)
              root-node)))))
