@@ -193,7 +193,7 @@ Return nil if ROOT node doesn't have any headlines."
 
 (s/def :spacetools.spacedoc.org.root-head/children
   (s/cat :title :spacetools.spacedoc.node.meta/title
-         :tags :spacetools.spacedoc.node.meta/tags
+         :tags (s/? :spacetools.spacedoc.node.meta/tags)
          :rest (s/* :spacetools.spacedoc.node/block-element)))
 
 (s/def ::root-head
@@ -232,17 +232,35 @@ Return nil if ROOT node doesn't have any headlines."
   "Add title and tags nodes to the head of the root node."
   [{tags :tags title :title [f-child & children] :children :as root}
    :spacetools.spacedoc.node/root]
-  (let [title-n (n/key-word "title" title)
-        tags-n (n/key-word "tags" (if (seq tags)
-                                    (str/join "|" tags)
-                                    "Untagged"))
-        head (when (s/valid? :spacetools.spacedoc.node/section f-child)
-               (update f-child :children
-                       (partial apply vector title-n tags-n)))]
-    (assoc root :children
-           (vec (if head
-                  (list* head children)
-                  (list* (n/section title-n tags-n) f-child children))))))
+  (let [title-n (n/key-word "TITLE" title)
+        tags-n (when (seq tags) (n/key-word "TAGS" (str/join "|" tags)))
+        head-childen (when (s/valid? :spacetools.spacedoc.node/section f-child)
+                       (:children f-child))]
+    (update root :children
+            #(apply vector
+                    (->> head-childen
+                         (list* title-n tags-n)
+                         (remove nil?)
+                         (apply n/section))
+                    (if head-childen children %)))))
+
+
+(s/def :spacetools.spacedoc.org/root-head-prop
+  (s/or :title :spacetools.spacedoc.node.meta/title
+        :tags :spacetools.spacedoc.node.meta/tags))
+
+
+(defn-spec remove-head-props :spacetools.spacedoc.node/root
+  "Remove title and tags nodes from the head of the root node."
+  [{[f-child & children] :children :as root} :spacetools.spacedoc.node/root]
+  (if (s/valid? :spacetools.spacedoc.node/section f-child)
+    (update-in
+     root
+     [:children 0 :children]
+     (partial into [] (->> :spacetools.spacedoc.org/root-head-prop
+                           (partial s/valid?)
+                           (remove))))
+    root))
 
 
 ;;;; general helpers
@@ -505,6 +523,7 @@ Return nil if ROOT node doesn't have any headlines."
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
+       remove-head-props
        inline-head-props
        conj-toc
        (:children)
