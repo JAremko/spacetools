@@ -34,7 +34,8 @@
     ""]))
 
 
-(def ops [["-h" "--help" "Show help message."]])
+(def ops [["-h" "--help" "Show help message."]
+          ["-c" "--config CONFIG" "Configuration file path"]])
 
 
 (defn bad-args-handler
@@ -52,8 +53,8 @@
 (defn -main [& args]
   (try-m->output
    (m/do-let
-    (*configure! config-file-name)
-    [{:keys [help summary action a-args]} (*parse args ops)]
+    [{:keys [help summary action a-args config]} (*parse args ops)]
+    (*configure! config)
     (if help
       (usage summary)
       (match

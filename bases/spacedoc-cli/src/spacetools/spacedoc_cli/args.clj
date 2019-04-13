@@ -53,9 +53,9 @@
 
 (defn-spec *configure! (io/exception-of? (s/map-of qualified-keyword? any?))
   "Configure spacedoc with overrides from CONFIG-FILE file."
-  [config-file string?]
+  [config-file (s/nilable string?)]
   (m/mlet
-   [cfg-overrides (if (io/file? config-file)
+   [cfg-overrides (if config-file
                     (*read-cfg-overrides config-file)
                     (exc/success {}))]
    (m/return (override-configs! cfg-overrides))))
