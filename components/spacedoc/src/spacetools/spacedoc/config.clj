@@ -12,6 +12,39 @@
 
 (def default-config
   "Default configurations."
+  {:layers.org/valid-tags [{"chat" "Chats"}
+                           {"checker" "Checkers"}
+                           {"completion" "Completion"}
+                           {"distribution" "Distributions"}
+                           {"e-mail" "E-mail"}
+                           {"emacs" "Emacs"}
+                           {"framework" "Frameworks"}
+                           {"fun" "Fun"}
+                           {"i18n" "internationalization"}
+                           {"markup"}
+                           {"misc"}
+                           {"os"}
+                           {"pair programming"}
+                           {"lang"}
+                           {"extra"}
+                           {"dsl"}
+                           {"lisp"}
+                           {"script"}
+                           {"general"}
+                           {"Imperative"}
+                           {"multi-paradigm"}
+                           {"js"}
+                           {"functional"}
+                           {"versioning"}
+                           {"tagging"}
+                           {"theme"}
+                           {"tool"}
+                           {"vim"}
+                           {"web"}]}
+  :layers.org/structure
+  [{{"lang" "Programming language"}
+    ["functional" "Purely functional"]
+    }]
   {:text/separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
    :text/separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
    :text/replacement-map {"\\r+" ""
