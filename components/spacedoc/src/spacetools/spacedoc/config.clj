@@ -13,36 +13,38 @@
 
 (def default-config
   "Default configurations."
-  #::{:layers_org-valid-tags [{"chat" "Chats"}
-                              {"checker" "Checkers"}
-                              {"completion" "Completion"}
-                              {"distribution" "Distributions"}
-                              {"e-mail" "E-mail"}
-                              {"emacs" "Emacs"}
-                              {"framework" "Frameworks"}
-                              {"fun" "Fun"}
-                              {"i18n" "internationalization"}
-                              {"markup" "Markup languages"}
-                              {"misc" "Misc"}
-                              {"os" "Operating systems"}
-                              {"pairing" "Pair programming"}
-                              {"lang" "Programming languages"}
-                              {"extra" "Extra"}
-                              {"dsl" "Domain-specific"}
-                              {"lisp" "Lisp dialects"}
-                              {"script" "Scripting"}
-                              {"general" "General-purpose"}
-                              {"Imperative" "Imperative"}
-                              {"multi-paradigm" "Multi-paradigm"}
-                              {"js" "JavaScript"}
-                              {"pure" "Purely functional"}
-                              {"versioning" "Source control"}
-                              {"tagging" "Tags"}
-                              {"theme" "Themes"}
-                              {"tool" "Tools"}
-                              {"vim" "Vim"}
-                              {"web services" "Web services"}]
-      :layers_org-structure [{"lang" ["pure"
+  ;; Allowed tags of documentation files.
+  #::{:valid-tags #{{"chat" "Chats"}
+                   {"checker" "Checkers"}
+                   {"completion" "Completion"}
+                   {"distribution" "Distributions"}
+                   {"e-mail" "E-mail"}
+                   {"emacs" "Emacs"}
+                   {"framework" "Frameworks"}
+                   {"fun" "Fun"}
+                   {"i18n" "internationalization"}
+                   {"markup" "Markup languages"}
+                   {"misc" "Misc"}
+                   {"os" "Operating systems"}
+                   {"pairing" "Pair programming"}
+                   {"lang" "Programming languages"}
+                   {"extra" "Extra"}
+                   {"dsl" "Domain-specific"}
+                   {"lisp" "Lisp dialects"}
+                   {"script" "Scripting"}
+                   {"general" "General-purpose"}
+                   {"Imperative" "Imperative"}
+                   {"multi-paradigm" "Multi-paradigm"}
+                   {"js" "JavaScript"}
+                   {"pure" "Purely functional"}
+                   {"versioning" "Source control"}
+                   {"tagging" "Tags"}
+                   {"theme" "Themes"}
+                   {"tool" "Tools"}
+                   {"vim" "Vim"}
+                   {"web services" "Web services"}}
+      ;; layers.org structure.
+      :layers-org-structure [{"lang" ["pure"
                                       {"general" ["imperative" "multi-paradigm"]}]}
                              "markup"]
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
@@ -72,16 +74,15 @@
       :org-table-indentation 0})
 
 
-;; (s/def :layers_org/valid-tags (s/coll-of (s/map-of string? string?)
-;;                                          :kind vector?))
+(s/def ::valid-tags (s/coll-of (s/map-of (complement #(str/includes? % "|"))
+                                         string?)
+                               :kind set?))
 
-;; (s/def :layers_org.structure )
-
-;;   (s/def :layers_org/structure (s/coll-of
-;;                                 (s/or :join :layers_org.structure/join
-;;                                       :select :layers_org.structure/select)
-;;                                 :kind vector?))
-
+(s/def ::layers-org-structure
+  (s/coll-of
+   (s/or :join (s/map-of string? ::layers-org-structure)
+         :select string?)
+   :kind vector?))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))
 
@@ -105,7 +106,9 @@
 
 (s/def ::org-table-indentation nat-int?)
 
-(s/def ::configs (s/keys :req [::text-separators-rigth
+(s/def ::configs (s/keys :req [::valid-tags
+                               ::layers-org-structure
+                               ::text-separators-rigth
                                ::text-separators-left
                                ::text-replacement-map
                                ::link-custom-id-replacement-map
@@ -117,7 +120,9 @@
                                ::org-block-indentation
                                ::org-table-indentation]))
 
-(s/def ::overriding-configs (s/keys :op [::text-separators-rigth
+(s/def ::overriding-configs (s/keys :op [::valid-tags
+                                         ::layers-org-structure
+                                         ::text-separators-rigth
                                          ::text-separators-left
                                          ::text-replacement-map
                                          ::link-custom-id-replacement-map
@@ -156,16 +161,28 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
 
 ;;;; General
 
-(defn-spec seps-right ::text-separators-rigth
-  "Return right separators."
+(defn-spec valid-tags ::valid-tags
+  "Return set of tag->description of valid tags."
   []
-  (::text-separators-rigth @*configs))
+  (::valid-tags @*configs))
+
+
+(defn-spec layers-org-structure ::layers-org-structure
+  "Return structure of layers.org file. See `::layers-org-structure`."
+  []
+  (::layers-org-structure @*configs))
 
 
 (defn-spec seps-left ::text-separators-left
   "Return left separators."
   []
   (::text-separators-left @*configs))
+
+
+(defn-spec seps-right ::text-separators-rigth
+  "Return right separators."
+  []
+  (::text-separators-rigth @*configs))
 
 
 (defn-spec text-rep-map (s/map-of regexp? string?)
@@ -214,7 +231,7 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   (format (::org-toc-template @*configs) (toc-max-depth)))
 
 
-;;;; Org
+;;;; Orgify
 
 (defn-spec emphasis-tokens ::org-emphasis-tokens
   "Return emphasis tokens of org-mode."
