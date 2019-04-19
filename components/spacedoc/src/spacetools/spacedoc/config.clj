@@ -15,38 +15,38 @@
   "Default configurations."
   ;; Allowed tags of documentation files.
   #::{:valid-tags #{{"chat" "Chats"}
-                   {"checker" "Checkers"}
-                   {"completion" "Completion"}
-                   {"distribution" "Distributions"}
-                   {"e-mail" "E-mail"}
-                   {"emacs" "Emacs"}
-                   {"framework" "Frameworks"}
-                   {"fun" "Fun"}
-                   {"i18n" "internationalization"}
-                   {"markup" "Markup languages"}
-                   {"misc" "Misc"}
-                   {"os" "Operating systems"}
-                   {"pairing" "Pair programming"}
-                   {"lang" "Programming languages"}
-                   {"extra" "Extra"}
-                   {"dsl" "Domain-specific"}
-                   {"lisp" "Lisp dialects"}
-                   {"script" "Scripting"}
-                   {"general" "General-purpose"}
-                   {"Imperative" "Imperative"}
-                   {"multi-paradigm" "Multi-paradigm"}
-                   {"js" "JavaScript"}
-                   {"pure" "Purely functional"}
-                   {"versioning" "Source control"}
-                   {"tagging" "Tags"}
-                   {"theme" "Themes"}
-                   {"tool" "Tools"}
-                   {"vim" "Vim"}
-                   {"web services" "Web services"}}
-      ;; layers.org structure.
-      :layers-org-structure [{"lang" ["pure"
-                                      {"general" ["imperative" "multi-paradigm"]}]}
-                             "markup"]
+                    {"checker" "Checkers"}
+                    {"completion" "Completion"}
+                    {"distribution" "Distributions"}
+                    {"e-mail" "E-mail"}
+                    {"emacs" "Emacs"}
+                    {"framework" "Frameworks"}
+                    {"fun" "Fun"}
+                    {"i18n" "internationalization"}
+                    {"markup" "Markup languages"}
+                    {"misc" "Misc"}
+                    {"os" "Operating systems"}
+                    {"pairing" "Pair programming"}
+                    {"lang" "Programming languages"}
+                    {"extra" "Extra"}
+                    {"dsl" "Domain-specific"}
+                    {"lisp" "Lisp dialects"}
+                    {"script" "Scripting"}
+                    {"general" "General-purpose"}
+                    {"Imperative" "Imperative"}
+                    {"multi-paradigm" "Multi-paradigm"}
+                    {"js" "JavaScript"}
+                    {"pure" "Purely functional"}
+                    {"versioning" "Source control"}
+                    {"tagging" "Tags"}
+                    {"theme" "Themes"}
+                    {"tool" "Tools"}
+                    {"vim" "Vim"}
+                    {"web services" "Web services"}}
+      ;; layers.org shape.
+      :layers-org-shape [{"lang" ["pure"
+                                  {"general" ["imperative" "multi-paradigm"]}]}
+                         "markup"]
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
       :text-separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
       :text-replacement-map {"\\r+" ""
@@ -78,9 +78,10 @@
                                          string?)
                                :kind set?))
 
-(s/def ::layers-org-structure
+(s/def ::layers-org-shape
   (s/coll-of
-   (s/or :join (s/map-of string? ::layers-org-structure)
+   (s/or :join (s/map-of string? ::layers-org-shape
+                         :count 1)
          :select string?)
    :kind vector?))
 
@@ -107,7 +108,7 @@
 (s/def ::org-table-indentation nat-int?)
 
 (s/def ::configs (s/keys :req [::valid-tags
-                               ::layers-org-structure
+                               ::layers-org-shape
                                ::text-separators-rigth
                                ::text-separators-left
                                ::text-replacement-map
@@ -121,7 +122,7 @@
                                ::org-table-indentation]))
 
 (s/def ::overriding-configs (s/keys :op [::valid-tags
-                                         ::layers-org-structure
+                                         ::layers-org-shape
                                          ::text-separators-rigth
                                          ::text-separators-left
                                          ::text-replacement-map
@@ -167,10 +168,10 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   (::valid-tags @*configs))
 
 
-(defn-spec layers-org-structure ::layers-org-structure
-  "Return structure of layers.org file. See `::layers-org-structure`."
+(defn-spec layers-org-shape ::layers-org-shape
+  "Return shape of layers.org file. See `::layers-org-shape`."
   []
-  (::layers-org-structure @*configs))
+  (::layers-org-shape @*configs))
 
 
 (defn-spec seps-left ::text-separators-left

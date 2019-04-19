@@ -403,7 +403,8 @@
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string))
+(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string
+                                                      :kind set?))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title

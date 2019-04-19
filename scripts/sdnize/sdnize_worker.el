@@ -403,7 +403,7 @@ holding export options."
                   " :spaceroot \"%s\""
                   " :children [%s]}")
           (plist-get info :doc-title)
-          (or (plist-get info :doc-tags) "[]")
+          (or (plist-get info :doc-tags) "#{}")
           (sdnize/esc-str (file-truename (plist-get info :input-file)))
           (sdnize/esc-str (file-truename sdnize-root-dir))
           contents))
