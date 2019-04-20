@@ -15,6 +15,7 @@
   "Default configurations."
   ;; Allowed tags of documentation files.
   #::{:valid-tags #{{"chat" "Chats"}
+                    {"layer" "layers"}
                     {"checker" "Checkers"}
                     {"completion" "Completion"}
                     {"distribution" "Distributions"}

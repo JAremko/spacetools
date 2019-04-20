@@ -187,6 +187,7 @@ Return nil if ROOT node doesn't have any headlines."
          (hls->toc))))
 
 
+
 ;;;; root node head spec
 
 ;; root head
