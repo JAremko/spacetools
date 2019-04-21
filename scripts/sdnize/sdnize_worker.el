@@ -316,17 +316,27 @@ information."
   holding contextual information."
   (let* ((raw-val (org-element-property :raw-value headline))
          (level (org-element-property :level headline))
-         (p-level-prop (thread-last headline
-                         (org-export-get-parent)
-                         (org-element-property :level)))
+         (parent (org-export-get-parent headline))
+         (p-level-prop (org-element-property :level parent))
          (p-level (if (numberp p-level-prop) p-level-prop 0))
          (path-ids (plist-get info :path-ids))
          (path-id (sdnize/headline-make-path-id headline))
          (todo? (org-element-property :todo-keyword headline))
-         (description? (and (= level 1) (string= raw-val "Description"))))
-
+         (description? (and (= level 1) (string= raw-val "Description")))
+         (description-child? (and (= p-level 1)
+                                  (thread-last parent
+                                    (org-element-property :raw-value)
+                                    (string= "Description")))))
     ;; Validations:
     (cond
+     ((and description-child?
+           (not (string= raw-val "Features:")))
+      (sdnize/error (concat "Headline %S is a Description subheadline.\n"
+                            "Please keep Descriptions simple."
+                            " They shouldn't have subheadings except"
+                            "  \"Features:\" features list.")
+                    raw-val))
+
      ((not (= (- level p-level) 1))
       (sdnize/error "Headline %S has level %S but its parent level is %S"
                     raw-val

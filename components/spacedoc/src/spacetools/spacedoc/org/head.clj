@@ -1,11 +1,11 @@
 (ns spacetools.spacedoc.org.head
   "Exporting to .org format."
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :as str :refer [join]]
+            [clojure.string :refer [join]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu :refer [hl? valid-hl?]]))
+            [spacetools.spacedoc.util :as sdu]))
 
 
 ;;;;  TOC spec and constructor
@@ -138,13 +138,13 @@ Return nil if ROOT node doesn't have any headlines."
                                (up-*gid->count! *gid->count hl))))
                      (update :children
                              #(when (< depth (cfg/toc-max-depth))
-                                (when-let [hls (seq (filter hl? %))]
+                                (when-let [hls (seq (filter sdu/hl? %))]
                                   (mapv (partial inner (inc depth)) hls))))
                      hl->toc-el))
                0 {:toc-wrapper? true :children (vec headlines)})))]
 
     (->> children
-         (filter hl?)
+         (filter sdu/hl?)
          (hls->toc))))
 
 
@@ -184,7 +184,7 @@ Return nil if ROOT node doesn't have any headlines."
   "Add Table of content based on headlines present in the ROOT node"
   [{children :children :as root} :spacetools.spacedoc.node/root]
   (if-let [toc (root->toc root)]
-    (let [[b-toc a-toc] (split-with (complement hl?) children)]
+    (let [[b-toc a-toc] (split-with (complement sdu/hl?) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
     root))
 
@@ -194,7 +194,7 @@ Return nil if ROOT node doesn't have any headlines."
   [{tags :tags title :title [f-child & children] :children :as root}
    :spacetools.spacedoc.node/root]
   (let [title-n (n/key-word "TITLE" title)
-        tags-n (when (seq tags) (n/key-word "TAGS" (str/join "|" tags)))
+        tags-n (when (seq tags) (n/key-word "TAGS" (join "|" tags)))
         head-childen (when (s/valid? :spacetools.spacedoc.node/section f-child)
                        (:children f-child))]
     (update root :children

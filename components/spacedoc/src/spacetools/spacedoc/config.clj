@@ -43,7 +43,7 @@
                     {"theme" "Themes"}
                     {"tool" "Tools"}
                     {"vim" "Vim"}
-                    {"web services" "Web services"}}
+                    {"web service" "Web services"}}
       :layers-org-quary [{"lang" ["pure"
                                   {"general" ["imperative" "multi-paradigm"]}]}
                          "markup"]

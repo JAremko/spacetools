@@ -1,23 +1,28 @@
 (ns spacetools.spacedoc.org.layers
   "layers.org generator."
-  (:require [clojure.core.match :refer [match]]
-            [clojure.core.reducers :as r]
+  (:require [clojure.core.reducers :as r]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str :refer [join]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
-            [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.org.orgify :refer [sdn->org]]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu :refer [hl? valid-hl?]]
-            [clojure.set :refer [union]]
-            [cats.core :as m]
-            [clojure.set :as set]))
+            [spacetools.spacedoc.org.orgify :refer [sdn->org]]))
 
 
-(defn-spec describe any?
-  [node any?]
-  (n/section (n/paragraph (n/bold (n/text (:title node))))))
+(defn-spec root->description (s/nilable :spacetools.spacedoc.node/headline)
+  [node :spacetools.spacedoc.node/root]
+  (->> node
+       :children
+       (filter (partial s/valid? :spacetools.spacedoc.node.meta/description))
+       first))
+
+
+(defn-spec describe :spacetools.spacedoc.node/headline
+  [node :spacetools.spacedoc.node/root]
+  (n/headline (:title node) (:children (root->description node)
+                                       (->> "<NO_DESCIPTION>"
+                                            n/text
+                                            n/paragraph
+                                            n/section))))
 
 
 (defn-spec tree->sdn (s/nilable :spacetools.spacedoc.node/root)

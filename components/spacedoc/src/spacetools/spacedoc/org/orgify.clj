@@ -9,7 +9,7 @@
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node] ;; for specs
             [spacetools.spacedoc.org.head :as head]
-            [spacetools.spacedoc.util :as sdu :refer [hl? valid-hl?]]))
+            [spacetools.spacedoc.util :as sdu]))
 
 
 (def block-container-delims
@@ -68,14 +68,14 @@
 
 ;;;; general helpers
 
-(defn-spec assoc-level-and-path-id valid-hl?
+(defn-spec assoc-level-and-path-id sdu/valid-hl?
   "Fill node with :level and :path-id"
-  ([node hl?]
+  ([node sdu/hl?]
    (let [{tag :tag value :value} node]
      (assoc node
             :level 1
             :path-id (sdu/hl-val->path-id-frag value))))
-  ([parent-node hl? node hl?]
+  ([parent-node sdu/hl? node sdu/hl?]
    (let [{tag :tag value :value} node
          hl-level (inc (:level parent-node))]
      (assoc node
