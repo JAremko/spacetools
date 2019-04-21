@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc.layers-org
+(ns spacetools.spacedoc.org.layers
   "layers.org generator."
   (:require [clojure.core.match :refer [match]]
             [clojure.core.reducers :as r]
@@ -7,7 +7,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.org :refer [sdn->org]]
+            [spacetools.spacedoc.org.orgify :refer [sdn->org]]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :as sdu :refer [hl? valid-hl?]]
             [clojure.set :refer [union]]
@@ -15,9 +15,14 @@
             [clojure.set :as set]))
 
 
+(defn-spec describe any?
+  [node any?]
+  (n/section (n/paragraph (n/bold (n/text (:title node))))))
+
+
 (defn-spec tree->sdn (s/nilable :spacetools.spacedoc.node/root)
-  "Create layers.org SDN with SHAPE from a seq of sdn DOCS."
-  [shape :spacetools.spacedoc.config/layers-org-tree
+  "Create layers.org SDN with QUARY from a seq of sdn DOCS."
+  [quary :spacetools.spacedoc.config/layers-org-quary
    docs :spacetools.spacedoc.node/root]
   (when docs
     (apply n/root "Configuration layers" #{}
@@ -28,23 +33,14 @@
                            node)]
                  (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
                    (if (string? node)
-                     (mapv #(n/headline tag (describe %))
-                           f-ds)
+                     (apply n/headline tag (mapv #(describe %) f-ds))
                      (->> node
                           first
                           val
-                          (r/map (partial walk f-ds))
-                          (r/reduce (r/monoid #(if (vector? %2)
-                                                 (concat %1 %2)
-                                                 (conj %1 %2))
-                                              vector))
+                          (map (partial walk f-ds))
                           (apply n/headline tag))))))
-             docs {"layer" shape})))))
+             docs {"layer" quary})))))
 
-
-(defn-spec describe any?
-  [node any?]
-  (n/section (n/paragraph (n/bold (n/text (:title node))))))
 
 (def documents [
                 (n/root "asm" #{"layer" "general" "lang" "imperative"}  (n/todo "FOO"))
@@ -61,8 +57,8 @@
 
                 ])
 
-(tree->sdn (cfg/layers-org-shape) documents)
+(tree->sdn (cfg/layers-org-quary) documents)
 
-;; (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-shape) documents))
+;; (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-quary) documents))
 
-(spit "/tmp/test.org" (sdn->org (tree->sdn (cfg/layers-org-shape) documents)))
+(spit "/tmp/test.org" (sdn->org (tree->sdn (cfg/layers-org-quary) documents)))

@@ -44,8 +44,7 @@
                     {"tool" "Tools"}
                     {"vim" "Vim"}
                     {"web services" "Web services"}}
-      ;; layers.org shape.
-      :layers-org-shape [{"lang" ["pure"
+      :layers-org-quary [{"lang" ["pure"
                                   {"general" ["imperative" "multi-paradigm"]}]}
                          "markup"]
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
@@ -79,9 +78,9 @@
                                          string?)
                                :kind set?))
 
-(s/def ::layers-org-shape
+(s/def ::layers-org-quary
   (s/coll-of
-   (s/or :join (s/map-of string? ::layers-org-shape
+   (s/or :join (s/map-of string? ::layers-org-quary
                          :count 1)
          :select string?)
    :kind vector?))
@@ -109,7 +108,7 @@
 (s/def ::org-table-indentation nat-int?)
 
 (s/def ::configs (s/keys :req [::valid-tags
-                               ::layers-org-shape
+                               ::layers-org-quary
                                ::text-separators-rigth
                                ::text-separators-left
                                ::text-replacement-map
@@ -123,7 +122,7 @@
                                ::org-table-indentation]))
 
 (s/def ::overriding-configs (s/keys :op [::valid-tags
-                                         ::layers-org-shape
+                                         ::layers-org-quary
                                          ::text-separators-rigth
                                          ::text-separators-left
                                          ::text-replacement-map
@@ -169,10 +168,10 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   (::valid-tags @*configs))
 
 
-(defn-spec layers-org-shape ::layers-org-shape
-  "Return shape of layers.org file. See `::layers-org-shape`."
+(defn-spec layers-org-quary ::layers-org-quary
+  "Return quary of layers.org file. See `::layers-org-quary`."
   []
-  (::layers-org-shape @*configs))
+  (::layers-org-quary @*configs))
 
 
 (defn-spec seps-left ::text-separators-left

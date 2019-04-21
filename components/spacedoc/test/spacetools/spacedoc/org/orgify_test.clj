@@ -1,4 +1,4 @@
-(ns spacetools.spacedoc.org-test
+(ns spacetools.spacedoc.org.orgify-test
   "Testing export to .org format."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
@@ -9,7 +9,7 @@
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.org :refer :all]
+            [spacetools.spacedoc.org.orgify :refer :all]
             [spacetools.spacedoc.util :as sdu]
             [spacetools.test-util.interface :as tu]))
 
@@ -72,34 +72,35 @@
                          (invariants node# (sdn->org node#)))))))))
 
 
-;; Tests for helper functions:
+;; TODO: Move to head ns test
+;; ;; Tests for helper functions:
 
-(deftest root->toc-fn
-  (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)
-        t-root (partial n/root "foo" [])]
-    (testing "If the root node doesn't have headlines"
-      (is (->> "bar"
-               (n/key-word "foo")
-               n/section
-               (n/root "bar" [])
-               root->toc
-               :children
-               empty?)))
-    (testing "When headlines have same name at the same level"
-      (is (valid-toc? (root->toc (t-root (n/headline "foo" (n/todo "bar"))
-                                         (n/headline "foo" (n/todo "baz")))))))
-    (is (valid-toc? (root->toc (t-root (n/todo "foo")))))
-    (is (valid-toc? (root->toc (t-root (n/todo "foo")
-                                       (n/section (n/key-word "bar" "baz"))
-                                       (n/headline "qux" (n/todo "quux"))))))))
+;; (deftest root->toc-fn
+;;   (let [valid-toc? (partial s/valid? :spacetools.spacedoc.org/toc)
+;;         t-root (partial n/root "foo" [])]
+;;     (testing "If the root node doesn't have headlines"
+;;       (is (->> "bar"
+;;                (n/key-word "foo")
+;;                n/section
+;;                (n/root "bar" [])
+;;                root->toc
+;;                :children
+;;                empty?)))
+;;     (testing "When headlines have same name at the same level"
+;;       (is (valid-toc? (root->toc (t-root (n/headline "foo" (n/todo "bar"))
+;;                                          (n/headline "foo" (n/todo "baz")))))))
+;;     (is (valid-toc? (root->toc (t-root (n/todo "foo")))))
+;;     (is (valid-toc? (root->toc (t-root (n/todo "foo")
+;;                                        (n/section (n/key-word "bar" "baz"))
+;;                                        (n/headline "qux" (n/todo "quux"))))))))
 
 
-(defspec root->toc-gen
-  {:num-tests (tu/samples 30)}
-  (prop/for-all
-   [root-node (s/gen :spacetools.spacedoc.node/root)]
-   (is ((some-fn nil? (partial s/valid? :spacetools.spacedoc.org/toc))
-        (root->toc root-node)))))
+;; (defspec root->toc-gen
+;;   {:num-tests (tu/samples 30)}
+;;   (prop/for-all
+;;    [root-node (s/gen :spacetools.spacedoc.node/root)]
+;;    (is ((some-fn nil? (partial s/valid? :spacetools.spacedoc.org/toc))
+;;         (root->toc root-node)))))
 
 
 (deftest tag->kind-fn

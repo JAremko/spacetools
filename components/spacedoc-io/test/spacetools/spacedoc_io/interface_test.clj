@@ -18,7 +18,7 @@
 
 (deftest *fp->sdn-fn
   (let [valid-sdn (->> (sn/todo "foo")
-                       (sn/root "bar" [])
+                       (sn/root "bar" #{})
                        (str))]
     (testing-io "*fp->sdn function" [[:foo.sdn valid-sdn]
                                      [:bar.sdn "{:foo :bar}"]

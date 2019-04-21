@@ -123,7 +123,7 @@
         bad-node {:bad :node}
         test-node (->> "foobar"
                       sn/todo
-                      (sn/root "foo" [])
+                      (sn/root "foo" #{})
                       str)]
     (testing-io "*relations function"
                 [[:good.sdn good-node]

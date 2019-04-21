@@ -1,7 +1,7 @@
 (ns spacetools.spacedoc.interface
   (:require [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core  :as sdc]
-            [spacetools.spacedoc.org  :as sdo]
+            [spacetools.spacedoc.org.orgify  :as sdo]
             [spacetools.spacedoc.util :as sdu]))
 
 
