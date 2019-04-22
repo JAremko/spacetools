@@ -53,15 +53,15 @@
 (defn-spec directory? boolean?
   "Returns true if X is a directory."
   [x any?]
-  (io! (and (file-ref? x)
-            (some-> x (file-ref->path) (nio/dir?)))))
+  (and (file-ref? x)
+       (some-> x (file-ref->path) (nio/dir?))))
 
 
 (defn-spec file? boolean?
   "Returns true if X is a file but not a directory."
   [x any?]
-  (io! (and (file-ref? x)
-            (some-> x (file-ref->path) (nio/file?)))))
+  (and (file-ref? x)
+       (some-> x (file-ref->path) (nio/file?))))
 
 
 (defn-spec error? boolean?
@@ -103,15 +103,15 @@ NOTE: EXT must include .(dot)"
 (defn-spec absolute path?
   "Return absolute version of the PATH."
   [path file-ref?]
-  (io! (-> path (file-ref->path) (nio/absolute))))
+  (-> path (file-ref->path) (nio/absolute)))
 
 
 (defn-spec rebase-path path?
   "Rebase PATH from OLD-BASE to NEW-BASE."
   [old-base file-ref? new-base file-ref? path file-ref?]
-  (io! (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
-                                  [old-base new-base path])]
-         (str->path (str/replace-first a-p a-ob a-nb)))))
+  (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
+                             [old-base new-base path])]
+    (str->path (str/replace-first a-p a-ob a-nb))))
 
 
 (defmacro exception-of?
@@ -133,16 +133,16 @@ NOTE: EXT must include .(dot)"
 (defn-spec output-err nat-int?
   "Print out MSG es into stderr and return 2."
   [& msg (s/* string?)]
-  (io! (binding [*out* *err*]
-         (println (str/join msg))
-         2)))
+  (binding [*out* *err*]
+    (println (str/join msg))
+    2))
 
 
 (defn-spec output-ok nat-int?
   "Print out MSG es into stdout and return 0."
   [& msg (s/* string?)]
-  (io! (println (str/join msg))
-       0))
+  (println (str/join msg))
+  0)
 
 
 (defn-spec err->msg string?
@@ -162,49 +162,48 @@ NOTE: EXT must include .(dot)"
   "Call `System/exit` with status-code.
   NOTE: Useful for mocking."
   [status-code]
-  (io! ;; :)
-   (System/exit status-code)))
+  (System/exit status-code))
 
 
 (defn-spec try-m->output nil?
   "Print *OUTPUT value to stderr or stdout and `System/exit` with code 0 or 2."
   [*output (exception-of? any?)]
-  (io! (exit
-        (let [output (m/extract *output)]
-          (if (exc/failure? *output)
-            (output-err
-             (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
-            (output-ok (str output)))))))
+  (exit
+   (let [output (m/extract *output)]
+     (if (exc/failure? *output)
+       (output-err
+        (format "Error:\n%s\nRun with \"-h\" for usage" (err->msg output)))
+       (output-ok (str output))))))
 
 
 (defn-spec *spit (exception-of? any?)
   "Spit CONTENT into PATH file and returns path wrapped into `exc/exception`."
   [path file-ref? content any?]
-  (io! (exc/try-or-recover
-        (let [p (file-ref->path path)
-              a-path (absolute p)
-              parent-dir (nio/parent a-path)]
-          (nio/create-dirs parent-dir)
-          (with-open [output (->> p (nio/buffered-writer) (io/writer))]
-            (.write output (str content)))
-          a-path)
-        (fn [^Exception err]
-          (exc/failure
-           (ex-info "Can't write file" {:path path}))))))
+  (exc/try-or-recover
+   (let [p (file-ref->path path)
+         a-path (absolute p)
+         parent-dir (nio/parent a-path)]
+     (nio/create-dirs parent-dir)
+     (with-open [output (->> p (nio/buffered-writer) (io/writer))]
+       (.write output (str content)))
+     a-path)
+   (fn [^Exception err]
+     (exc/failure
+      (ex-info "Can't write file" {:path path})))))
 
 
 (defn-spec *slurp (exception-of? (s/coll-of string?))
   "Read content of the PATH file into array of strings (lines)."
   [path file-ref?]
-  (io! (exc/try-or-recover
-        (if (file? path)
-          (->> path
-               file-ref->path
-               nio/read-all-lines
-               vec)
-          (ex-info "Isn't a file" {:path (str path)}))
-        (fn [^Exception err]
-          (exc/failure (ex-info "Can't read file" {:path path :error err}))))))
+  (exc/try-or-recover
+   (if (file? path)
+     (->> path
+          file-ref->path
+          nio/read-all-lines
+          vec)
+     (ex-info "Isn't a file" {:path (str path)}))
+   (fn [^Exception err]
+     (exc/failure (ex-info "Can't read file" {:path path :error err})))))
 
 
 (defn-spec *fps-in-dir (exception-of?
@@ -216,22 +215,22 @@ NOTE: EXT must include .(dot)"
   "Return absolute paths of files with EXT extension in PATH directory.
 NOTE: EXT must include dot."
   [ext ::ext path file-ref?]
-  (io! (exc/try-on
-        (let [p (file-ref->path path)]
-          (if (directory? p)
-            (into #{}
-                  (comp (map absolute)
-                        (filter (partial file-with-ext? ext))
-                        (map str))
-                  (tree-seq nio/dir?
-                            #(-> % nio/dir-stream (.iterator) (iterator-seq))
-                            p))
-            (throw
-             ((cond
-                (not (nio/exists? p)) (partial ex-info "File doesn't exists")
-                (nio/file? p) (partial ex-info "File isn't a directory")
-                (nio/readable? p) (partial ex-info "Directory isn't readable"))
-              {:extension ext :file p})))))))
+  (exc/try-on
+   (let [p (file-ref->path path)]
+     (if (directory? p)
+       (into #{}
+             (comp (map absolute)
+                   (filter (partial file-with-ext? ext))
+                   (map str))
+             (tree-seq nio/dir?
+                       #(-> % nio/dir-stream (.iterator) (iterator-seq))
+                       p))
+       (throw
+        ((cond
+           (not (nio/exists? p)) (partial ex-info "File doesn't exists")
+           (nio/file? p) (partial ex-info "File isn't a directory")
+           (nio/readable? p) (partial ex-info "Directory isn't readable"))
+         {:extension ext :file p}))))))
 
 
 (defn-spec *flatten-fps (exception-of?
@@ -255,3 +254,15 @@ NOTE: EXT must include dot."
                              " or isn't a readable directory.")
                         {:expected-extension ext :file %})))
      paths))))
+
+
+(defn-spec normalize path?
+  "Normalize PATH"
+  [path file-ref?]
+  (nio/normalize (file-ref->path path)))
+
+
+(defn-spec join path?
+  "Join PATH and PARENT path."
+  [parent file-ref? path file-ref?]
+  (nio/join (file-ref->path parent) (file-ref->path path)))

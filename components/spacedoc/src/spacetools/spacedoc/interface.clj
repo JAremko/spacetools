@@ -1,7 +1,8 @@
 (ns spacetools.spacedoc.interface
   (:require [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core  :as sdc]
-            [spacetools.spacedoc.org.orgify  :as sdo]
+            [spacetools.spacedoc.org.orgify :as sdo]
+            [spacetools.spacedoc.org.layers :as sdl]
             [spacetools.spacedoc.util :as sdu]))
 
 
@@ -12,6 +13,10 @@
 (defn sdn->org
   [node]
   (sdo/sdn->org node))
+
+(defn layers-sdn
+  [quary docs]
+  (sdl/layers-sdn quary docs))
 
 (defn up-tags
   [spaceroot src r-node]

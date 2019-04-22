@@ -14,3 +14,6 @@
 (defn rebase-path [old-base new-base path])
 (defn sdn-file? [x])
 (defn try-m->output [*output])
+
+(defn normalize [path])
+(defn join [parent path])

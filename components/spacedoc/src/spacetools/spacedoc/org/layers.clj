@@ -5,6 +5,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
+            [spacetools.spacedoc.node.val-spec :as vs]
             [spacetools.spacedoc.org.orgify :refer [sdn->org]]))
 
 
@@ -18,14 +19,22 @@
 
 (defn-spec describe :spacetools.spacedoc.node/headline
   [node :spacetools.spacedoc.node/root]
-  (n/headline (:title node) (:children (root->description node)
-                                       (->> "<NO_DESCIPTION>"
-                                            n/text
-                                            n/paragraph
-                                            n/section))))
+  (n/headline (:title node)
+              (:children (root->description node)
+                         (->> (str "If you read this,"
+                                   " pleas add \"Description\" headline"
+                                   " to the layer's README.org file.")
+                              n/text
+                              n/bold
+                              n/paragraph
+                              n/section))
+              (-> (:source node)
+                  n/section
+                  n/paragraph
+                  (n/link (n/text "link")))))
 
 
-(defn-spec tree->sdn (s/nilable :spacetools.spacedoc.node/root)
+(defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
   "Create layers.org SDN with QUARY from a seq of sdn DOCS."
   [quary :spacetools.spacedoc.config/layers-org-quary
    docs :spacetools.spacedoc.node/root]
@@ -47,23 +56,25 @@
              docs {"layer" quary})))))
 
 
-(def documents [
-                (n/root "asm" #{"layer" "general" "lang" "imperative"}  (n/todo "FOO"))
-                (n/root "forth" #{"layer" "general" "imperative" "lang"}  (n/todo "BAR"))
+#_ (def documents
+     [
+      (n/root "asm" #{"layer" "general" "lang" "imperative"}  (n/todo "FOO"))
 
-                (n/root "agda" #{"layer" "pure" "lang"}  (n/todo "BAZ"))
+      (n/root "forth" #{"layer" "general" "imperative" "lang"}  (n/todo "BAR"))
 
-                (n/root "c-c++" #{"layer" "general" "lang" "multi-paradigm"}  (n/todo "QUX"))
+      (n/root "agda" #{"layer" "pure" "lang"}  (n/todo "BAZ"))
 
-                (n/root "html" #{"layer" "markup"}  (n/todo "QUUX"))
+      (n/root "c-c++" #{"layer" "general" "lang" "multi-paradigm"}  (n/todo "QUX"))
+
+      (n/root "html" #{"layer" "markup"}  (n/todo "QUUX"))
 
 
-                (n/root "markdown" #{"layer" "markup"}  (n/todo "QUUXY"))
+      (n/root "markdown" #{"layer" "markup"}  (n/todo "QUUXY"))
 
-                ])
+      ])
 
-(tree->sdn (cfg/layers-org-quary) documents)
+#_ (tree->sdn (cfg/layers-org-quary) documents)
 
-;; (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-quary) documents))
+#_ (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-quary) documents))
 
-(spit "/tmp/test.org" (sdn->org (tree->sdn (cfg/layers-org-quary) documents)))
+#_ (spit "/tmp/test.org" (sdn->org (tree->sdn (cfg/layers-org-quary) documents)))

@@ -193,6 +193,14 @@ terminate first (used in testing)."
 ;; (defun sdnize/noimpl (element)
 ;;   (sdnize/error "\"%s\" not implemented" element))
 
+(defsubst sdnize/layer-file-p (info)
+  "Return true if exported file is one of layer README.org files."
+  (let ((file (file-truename (plist-get info :input-file))))
+    (and (string-prefix-p (file-truename
+                           (concat sdnize-root-dir "layers/"))
+                          file)
+         (string-suffix-p "README.org" file t))))
+
 
 ;;; Transcode Functions
 
@@ -453,14 +461,20 @@ contextual information."
 
 ;;;; Keyword
 
-(defun sdnize//keyword-fmt-tags (tags-str)
-  "Format document tags string."
-  (format "[%s]" (mapconcat (lambda (tag)
-                              (thread-last tag
-                                (sdnize/esc-str)
-                                (format "\"%s\"")))
-                            (split-string tags-str "|")
-                            " ")))
+(defsubst sdnize//keyword-fmt-tags (info tags-val)
+  "Format document tags string.
+Info needed to figure out if the file is one of layer README.org files."
+  (format "#{%s}"
+          (let ((sliced-tags (split-string tags-val "|")))
+            (mapconcat (lambda (tag)
+                         (thread-last tag
+                           (sdnize/esc-str)
+                           (format "\"%s\"")))
+                       (if (and (not (member "layer" sliced-tags))
+                                (sdnize/layer-file-p info))
+                           (cons "layer" sliced-tags)
+                         sliced-tags)
+                       " "))))
 
 (defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
@@ -476,7 +490,7 @@ CONTENTS is nil. INFO is a plist holding contextual information."
           ((string= "tags" d-key)
            (if (plist-member info :doc-tags)
                (sdnize/error "Multiply \"#+TAGS:\" keywords")
-             (plist-put info :doc-tags (sdnize//keyword-fmt-tags val)))))
+             (plist-put info :doc-tags (sdnize//keyword-fmt-tags info val)))))
     (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
             (sdnize/esc-str key)
             e-val)))
@@ -789,25 +803,21 @@ communication channel."
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
-  (let ((file (file-truename (plist-get info :input-file))))
 
-    ;; Validations for layer README.org files:
-    (when (and (string-prefix-p (file-truename
-                                 (concat sdnize-root-dir "layers/"))
-                                file)
-               (string-suffix-p "README.org" file t))
-      (unless (plist-member info :file-has-description?)
-        (sdnize/error "Missing top level \"Description\" headline\n See %S"
-                      sdnize-readme-template-url))
-      (unless (plist-member info :file-has-feature-list?)
-        (sdnize/error
-         (concat "Missing \"Features:\"(With a colon) list in the "
-                 "top level \"Description\" headline\n"
-                 "See %S")
-         sdnize-readme-template-url))
-      (unless (plist-member info :doc-tags)
-        (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
-                     sdnize-readme-template-url))))
+  ;; Validations for layer README.org files:
+  (when (sdnize/layer-file-p info)
+    (unless (plist-member info :file-has-description?)
+      (sdnize/error "Missing top level \"Description\" headline\n See %S"
+                    sdnize-readme-template-url))
+    (unless (plist-member info :file-has-feature-list?)
+      (sdnize/error
+       (concat "Missing \"Features:\"(With a colon) list in the "
+               "top level \"Description\" headline\n"
+               "See %S")
+       sdnize-readme-template-url))
+    (unless (plist-member info :doc-tags)
+      (sdnize/warn "Missing \"#+TAGS:\" keyword. See %S"
+                   sdnize-readme-template-url)))
 
   ;; General validations:
   (unless (plist-member info :doc-title)

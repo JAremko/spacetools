@@ -10,3 +10,5 @@
 (defn node? [x])
 (def config-file-name)
 (def default-config)
+
+(defn layers-sdn [quary docs])

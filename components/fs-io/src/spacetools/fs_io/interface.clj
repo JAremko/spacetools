@@ -52,6 +52,14 @@
   [ext paths]
   (io/*flatten-fps ext paths))
 
+(defn normalize
+  [path]
+  (io/normalize path))
+
 (defmacro exception-of?
   [pred]
   `(io/exception-of? ~pred))
+
+(defn join
+  [parent path]
+  (io/join parent path))
