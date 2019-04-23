@@ -31,6 +31,8 @@
     "                          TARGET is target directory for .ORG files."
     "  describe  SPEC          Describe spec by fully qualified keyword."
     "                          Example :spacetools.spacedoc.node/<keyword>"
+    "  layers    SOURCE TARGET Create LAYERS.org file in the TARGET directory"
+    "                          using SDN files from SOURCE directory."
     ""]))
 
 
@@ -46,6 +48,7 @@
    ["validate"  _     ] (failure {} "\"validate\" takes at least 1 input")
    ["orgify"    _     ] (failure {:args a-args} "\"orgify\" takes 2 arguments")
    ["relations" _     ] (failure {} "\"relations\" takes at least 1 input")
+   ["layers"    _     ] (failure {:args a-args} "\"layers\" takes 2 arguments")
    [nil         _     ] (failure {} "No action specified")
    :else (failure {:action action} "Invalid action")))
 
@@ -64,4 +67,5 @@
        ["validate"  [_     &   _]] (ac/*validate a-args)
        ["relations" [_     &   _]] (ac/*relations a-args)
        ["orgify"    [src   trg  ]] (ac/*orgify src trg)
+       ["layers"    [src   trg  ]] (ac/*layers src trg)
        :else (bad-args-handler action a-args))))))
