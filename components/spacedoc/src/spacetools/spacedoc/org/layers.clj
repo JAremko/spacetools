@@ -19,41 +19,47 @@
 
 (defn-spec describe :spacetools.spacedoc.node/headline
   [node :spacetools.spacedoc.node/root]
-  (n/headline (:title node)
-              (:children (root->description node)
-                         (->> (str "If you read this,"
-                                   " pleas add \"Description\" headline"
-                                   " to the layer's README.org file.")
-                              n/text
-                              n/bold
-                              n/paragraph
-                              n/section))
-              (-> (:source node)
-                  n/section
-                  n/paragraph
-                  (n/link (n/text "link")))))
+  (apply n/headline
+         (:title node)
+         (:children (root->description node)
+                    (->> (str "If you read this,"
+                              " pleas add \"Description\" headline"
+                              " to the layer's README.org file.")
+                         n/text
+                         n/bold
+                         n/paragraph
+                         n/section
+                         (n/headline "placeholder")))))
 
+;; (-> #_(:source node)
+;;     "file:layers.org"
+;;     (n/link (n/text "foo"))
+;;     n/paragraph
+;;     n/section)
 
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
-  "Create layers.org SDN with QUARY from a seq of sdn DOCS."
-  [quary :spacetools.spacedoc.config/layers-org-quary
-   docs :spacetools.spacedoc.node/root]
-  (when docs
-    (apply n/root "Configuration layers" #{}
-           (:children
-            ((fn walk [ds node]
-               (let [tag (if (map? node)
-                           (ffirst node)
-                           node)]
-                 (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
-                   (if (string? node)
-                     (apply n/headline tag (mapv #(describe %) f-ds))
-                     (->> node
-                          first
-                          val
-                          (map (partial walk f-ds))
-                          (apply n/headline tag))))))
-             docs {"layer" quary})))))
+  "Create layers.org(in SDN format) from DOCS seq of sdn."
+  [docs (s/coll-of :spacetools.spacedoc.node/root)]
+  (some->> (cfg/layers-org-quary)
+           seq
+           (hash-map "layer")
+           ((fn walk [ds node]
+              (let [tag (if (map? node)
+                          (ffirst node)
+                          node)]
+                (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
+                  (if (string? node)
+                    (apply n/headline tag (mapv #(describe %) f-ds))
+                    (->> node
+                         first
+                         val
+                         (map (partial walk f-ds))
+                         (remove nil?)
+                         (apply n/headline ((cfg/valid-tags) tag)))))))
+            docs)
+           :children
+           seq
+           (apply n/root "Configuration layers" #{})))
 
 
 #_ (def documents
@@ -73,7 +79,7 @@
 
       ])
 
-#_ (tree->sdn (cfg/layers-org-quary) documents)
+;; (layers-sdn documents)
 
 #_ (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-quary) documents))
 

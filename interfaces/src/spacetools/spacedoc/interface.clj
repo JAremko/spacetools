@@ -11,4 +11,4 @@
 (def config-file-name)
 (def default-config)
 
-(defn layers-sdn [quary docs])
+(defn layers-sdn [docs])

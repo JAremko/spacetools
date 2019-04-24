@@ -14,36 +14,36 @@
 (def default-config
   "Default configurations."
   ;; Allowed tags of documentation files.
-  #::{:valid-tags #{{"chat" "Chats"}
-                    {"layer" "layers"}
-                    {"checker" "Checkers"}
-                    {"completion" "Completion"}
-                    {"distribution" "Distributions"}
-                    {"e-mail" "E-mail"}
-                    {"emacs" "Emacs"}
-                    {"framework" "Frameworks"}
-                    {"fun" "Fun"}
-                    {"i18n" "internationalization"}
-                    {"markup" "Markup languages"}
-                    {"misc" "Misc"}
-                    {"os" "Operating systems"}
-                    {"pairing" "Pair programming"}
-                    {"lang" "Programming languages"}
-                    {"extra" "Extra"}
-                    {"dsl" "Domain-specific"}
-                    {"lisp" "Lisp dialects"}
-                    {"script" "Scripting"}
-                    {"general" "General-purpose"}
-                    {"Imperative" "Imperative"}
-                    {"multi-paradigm" "Multi-paradigm"}
-                    {"js" "JavaScript"}
-                    {"pure" "Purely functional"}
-                    {"versioning" "Source control"}
-                    {"tagging" "Tags"}
-                    {"theme" "Themes"}
-                    {"tool" "Tools"}
-                    {"vim" "Vim"}
-                    {"web service" "Web services"}}
+  #::{:valid-tags {"chat" "Chats"
+                   "layer" "layers"
+                   "checker" "Checkers"
+                   "completion" "Completion"
+                   "distribution" "Distributions"
+                   "e-mail" "E-mail"
+                   "emacs" "Emacs"
+                   "framework" "Frameworks"
+                   "fun" "Fun"
+                   "i18n" "internationalization"
+                   "markup" "Markup languages"
+                   "misc" "Misc"
+                   "os" "Operating systems"
+                   "pairing" "Pair programming"
+                   "lang" "Programming languages"
+                   "extra" "Extra"
+                   "dsl" "Domain-specific"
+                   "lisp" "Lisp dialects"
+                   "script" "Scripting"
+                   "general" "General-purpose"
+                   "Imperative" "Imperative"
+                   "multi-paradigm" "Multi-paradigm"
+                   "js" "JavaScript"
+                   "pure" "Purely functional"
+                   "versioning" "Source control"
+                   "tagging" "Tags"
+                   "theme" "Themes"
+                   "tool" "Tools"
+                   "vim" "Vim"
+                   "web service" "Web services"}
       :layers-org-quary [{"lang" ["pure"
                                   {"general" ["imperative" "multi-paradigm"]}]}
                          "markup"]
@@ -74,9 +74,9 @@
       :org-table-indentation 0})
 
 
-(s/def ::valid-tags (s/coll-of (s/map-of (complement #(str/includes? % "|"))
-                                         string?)
-                               :kind set?))
+(s/def ::valid-tags (s/map-of (s/and string?
+                                     (complement #(str/includes? % "|")))
+                              string?))
 
 (s/def ::layers-org-quary
   (s/coll-of

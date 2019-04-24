@@ -15,8 +15,8 @@
   (sdo/sdn->org node))
 
 (defn layers-sdn
-  [quary docs]
-  (sdl/layers-sdn quary docs))
+  [docs]
+  (sdl/layers-sdn docs))
 
 (defn up-tags
   [spaceroot src r-node]
