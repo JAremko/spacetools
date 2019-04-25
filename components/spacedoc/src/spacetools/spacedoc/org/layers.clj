@@ -6,7 +6,8 @@
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.node.val-spec :as vs]
-            [spacetools.spacedoc.org.orgify :refer [sdn->org]]))
+            [spacetools.spacedoc.org.orgify :refer [sdn->org]]
+            [spacetools.spacedoc.util :as sdu]))
 
 
 (defn-spec root->description (s/nilable :spacetools.spacedoc.node/headline)
@@ -21,21 +22,21 @@
   [node :spacetools.spacedoc.node/root]
   (apply n/headline
          (:title node)
-         (:children (root->description node)
-                    (->> (str "If you read this,"
-                              " pleas add \"Description\" headline"
-                              " to the layer's README.org file.")
-                         n/text
-                         n/bold
-                         n/paragraph
-                         n/section
-                         (n/headline "placeholder")))))
+         (:children
+          (sdu/flatten-headline 1 (root->description node))
+          (->> "README.org of the layer misses or has invalid \"Description\"."
+               n/text
+               n/bold
+               n/paragraph
+               n/section
+               (n/headline "placeholder")))))
 
 ;; (-> #_(:source node)
 ;;     "file:layers.org"
 ;;     (n/link (n/text "foo"))
 ;;     n/paragraph
 ;;     n/section)
+
 
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
   "Create layers.org(in SDN format) from DOCS seq of sdn."
@@ -60,27 +61,3 @@
            :children
            seq
            (apply n/root "Configuration layers" #{})))
-
-
-#_ (def documents
-     [
-      (n/root "asm" #{"layer" "general" "lang" "imperative"}  (n/todo "FOO"))
-
-      (n/root "forth" #{"layer" "general" "imperative" "lang"}  (n/todo "BAR"))
-
-      (n/root "agda" #{"layer" "pure" "lang"}  (n/todo "BAZ"))
-
-      (n/root "c-c++" #{"layer" "general" "lang" "multi-paradigm"}  (n/todo "QUX"))
-
-      (n/root "html" #{"layer" "markup"}  (n/todo "QUUX"))
-
-
-      (n/root "markdown" #{"layer" "markup"}  (n/todo "QUUXY"))
-
-      ])
-
-;; (layers-sdn documents)
-
-#_ (s/explain-str :spacetools.spacedoc.node/root (tree->sdn (cfg/layers-org-quary) documents))
-
-#_ (spit "/tmp/test.org" (sdn->org (tree->sdn (cfg/layers-org-quary) documents)))

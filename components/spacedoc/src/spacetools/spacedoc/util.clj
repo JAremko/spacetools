@@ -216,17 +216,24 @@ Fragments are  particular headline values in the \"/\" separated chain."
   (and (hl? node) (valid-node? node)))
 
 
-;;;; Document tags stuff
-
-(defn-spec valid-doc-tag? boolean?
-  []
-  ;; TODO: Implement
-  "Return true if a tag is known Spacemacs documentation tag."
-  true
- #_ (some? (tag (cfg/doc-tags))))
-
-
-;; (defn-spec doc-tags (s/coll-of (s/and string? (complement str/blank?)))
-;;   []
-;;   "Return seq of know Spacemacs documentation tags."
-;;   (cfg/doc-tags))
+(defn-spec flatten-headline valid-hl?
+  "Flatten HL headline children by converting them into sections"
+  [level (s/and pos-int? #(<= % (cfg/max-headline-depth))) hl hl?]
+  ((fn rec [depth idx {:keys [value children todo?] :as node}]
+     (if (hl? node)
+       (let [children (vec (map-indexed (partial rec (inc depth)) children))]
+         (if (>= depth level)
+           (->> children
+                (r/mapcat
+                 #(if (= :section (:tag %))
+                    (:children %)
+                    [%]))
+                (into [(n/text (str
+                                (if todo? "TODO: " "")
+                                (when-not (= idx 0) "\n")
+                                value \newline))])
+                (apply n/paragraph)
+                n/section)
+           (assoc node :children children)))
+       node))
+   0 0 hl))
