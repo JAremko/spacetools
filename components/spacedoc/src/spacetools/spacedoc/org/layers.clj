@@ -22,20 +22,20 @@
   [node :spacetools.spacedoc.node/root]
   (apply n/headline
          (:title node)
-         (:children
-          (sdu/flatten-headline 1 (root->description node))
-          (->> "README.org of the layer misses or has invalid \"Description\"."
-               n/text
-               n/bold
-               n/paragraph
-               n/section
-               (n/headline "placeholder")))))
-
-;; (-> #_(:source node)
-;;     "file:layers.org"
-;;     (n/link (n/text "foo"))
-;;     n/paragraph
-;;     n/section)
+         (into (->> (if-let [src (:source node)]
+                      (n/link src (n/text "link"))
+                      (n/text "<layer link is missing>"))
+                    n/paragraph
+                    n/section
+                    vector)
+               (:children
+                (sdu/flatten-headline 1 (root->description node))
+                (->> "README.org of the layer misses or has invalid \"Description\"."
+                     n/text
+                     n/bold
+                     n/paragraph
+                     n/section
+                     (n/headline "placeholder"))))))
 
 
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
