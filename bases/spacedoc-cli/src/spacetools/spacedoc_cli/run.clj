@@ -31,7 +31,7 @@
     "                          TARGET is target directory for .ORG files."
     "  describe  SPEC          Describe spec by fully qualified keyword."
     "                          Example :spacetools.spacedoc.node/<keyword>"
-    "  layers    DIR           Create LAYERS.org file in DIR using SDN"
+    "  layers    DIR           Create LAYERS.sdn file in DIR using SDN"
     "                          files from the directory."
     ""]))
 
