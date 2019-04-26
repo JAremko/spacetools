@@ -25,19 +25,24 @@
 
 
 (defn-spec *layers (io/exception-of? string?)
-  "Create LAYERS.org file in the TARGET-DIR using SDN files from SOURCE-DIR."
-  [source-dir string? target-dir string?]
+  "Create LAYERS.org file in DIR using SDN files from the directory."
+  [dir string?]
   (m/do-let
-   [sdn-fps (*parse-input-files source-dir)
+   [sdn-fps (*parse-input-files dir)
     docs (m/sequence (pmap *fp->sdn sdn-fps))]
    (->> docs
+        (map (fn [path doc]
+               (assoc doc :source
+                      (str "file:" (str/replace (io/relativize dir path)
+                                                #"(?i)\.sdn$" ".org"))))
+             sdn-fps)
         sd/layers-sdn
         sd/sdn->org
-        (io/*spit (io/join target-dir "LAYERS.org")))
+        (io/*spit (io/join dir "LAYERS_WIP.org")))
    (m/return (format (str "%s Documentation files processed."
                           " LAYERS.org created in \"%s\" directory.")
                      (count docs)
-                     target-dir))))
+                     dir))))
 
 
 (defn-spec *orgify (io/exception-of? string?)

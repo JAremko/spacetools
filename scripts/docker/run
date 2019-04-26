@@ -85,6 +85,8 @@ case $action in
               -no-site-file \
               -q \
               "${sdnize_args[@]}"
+        echo_headline "Generating \"LAYERS_WIP.org\""
+        spacedoc layers "${tmp_dir}/layers"
         echo_headline "Importing documentation back into .org format:"
         spacedoc orgify "${tmp_dir}" "${first_arg}"
         exit $?

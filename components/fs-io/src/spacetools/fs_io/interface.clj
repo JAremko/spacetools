@@ -63,3 +63,7 @@
 (defn join
   [parent path]
   (io/join parent path))
+
+(defn relativize
+  [path other]
+  (io/relativize path other))

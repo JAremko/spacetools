@@ -266,3 +266,9 @@ NOTE: EXT must include dot."
   "Join PATH and PARENT path."
   [parent file-ref? path file-ref?]
   (nio/join (file-ref->path parent) (file-ref->path path)))
+
+
+(defn-spec relativize path?
+  "Relativize PATH relative to OTHER"
+  [path file-ref? other file-ref?]
+  (nio/relativize (file-ref->path path) (file-ref->path other)))
