@@ -228,12 +228,12 @@ Fragments are  particular headline values in the \"/\" separated chain."
                  #(if (= :section (:tag %))
                     (:children %)
                     [%]))
-                (into [(n/text (str
-                                (if todo? "TODO: " "")
-                                (when-not (= idx 0) "\n")
-                                value \newline))])
-                (apply n/paragraph)
-                n/section)
+                (into [(n/paragraph
+                        (n/text (str
+                                 (if todo? "TODO: " "")
+                                 (when-not (= idx 0) "\n")
+                                 value \newline)))])
+                (apply n/section))
            (assoc node :children children)))
        node))
    0 0 hl))
