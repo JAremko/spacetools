@@ -46,14 +46,14 @@
                           (ffirst node)
                           node)]
                 (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
-                  (if (string? node)
-                    (apply n/headline tag (mapv #(describe %) f-ds))
-                    (->> node
-                         first
-                         val
-                         (map (partial walk f-ds))
-                         (remove nil?)
-                         (apply n/headline ((cfg/valid-tags) tag)))))))
+                  (apply n/headline ((cfg/valid-tags) tag)
+                         (if (string? node)
+                           (mapv #(describe %) f-ds)
+                           (->> node
+                                first
+                                val
+                                (map (partial walk f-ds))
+                                (remove nil?)))))))
             docs)
            :children
            seq
