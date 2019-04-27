@@ -11,7 +11,7 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=1.0.0-rc14
+ENV GRAALVM_V=1.0.0-rc16
 
 WORKDIR /tmp
 
@@ -33,7 +33,8 @@ FROM jare/emacs
 
 COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
-COPY ./scripts/docker/run /opt/spacetools/run
+COPY ./scripts/docker/run /opt/spacetools/
+COPY ./scripts/docker/spacedoc-cfg.edn /opt/spacetools/
 COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools

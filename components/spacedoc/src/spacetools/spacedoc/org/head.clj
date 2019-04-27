@@ -194,7 +194,7 @@ Return nil if ROOT node doesn't have any headlines."
   [{tags :tags title :title [f-child & children] :children :as root}
    :spacetools.spacedoc.node/root]
   (let [title-n (n/key-word "TITLE" title)
-        tags-n (when (seq tags) (n/key-word "TAGS" (join "|" tags)))
+        tags-n (when (seq tags) (n/key-word "TAGS" (join "|" (sort tags))))
         head-childen (when (s/valid? :spacetools.spacedoc.node/section f-child)
                        (:children f-child))]
     (update root :children
