@@ -404,11 +404,18 @@
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/tags (s/and
-                                            (s/coll-of ::vs/non-blank-string
-                                                       :kind set?)
-                                            (partial set/superset?
-                                                     (cfg/valid-tags))))
+(s/def :spacetools.spacedoc.node.root/tags
+  (s/with-gen
+    (s/and
+     (s/coll-of ::vs/non-blank-string
+                :kind set?)
+     (partial set/superset? (cfg/valid-tags)))
+    (->> (cfg/valid-tags)
+         keys
+         gen/elements
+         gen/vector-distinct
+         (gen/fmap set)
+         #())))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title
