@@ -26,7 +26,7 @@
               "versioning" "Source control"
               "fun" "Fun"
               "script" "Scripting"
-              "Imperative" "Imperative"
+              "imperative" "Imperative"
               "general" "General-purpose"
               "pure" "Purely functional"
               "emacs" "Emacs"

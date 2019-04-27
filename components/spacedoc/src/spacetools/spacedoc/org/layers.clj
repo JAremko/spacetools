@@ -1,12 +1,9 @@
 (ns spacetools.spacedoc.org.layers
   "layers.org generator."
-  (:require [clojure.core.reducers :as r]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.node.val-spec :as vs]
-            [spacetools.spacedoc.org.orgify :refer [sdn->org]]
             [spacetools.spacedoc.util :as sdu]))
 
 

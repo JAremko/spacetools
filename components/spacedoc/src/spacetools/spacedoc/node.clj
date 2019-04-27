@@ -2,6 +2,7 @@
   "Node specs and constructors. All public functions are constructors."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [map-invert]]
+            [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
@@ -403,8 +404,11 @@
     #(gen/vector-distinct (s/gen ::root-child)
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/tags (s/coll-of ::vs/non-blank-string
-                                                      :kind set?))
+(s/def :spacetools.spacedoc.node.root/tags (s/and
+                                            (s/coll-of ::vs/non-blank-string
+                                                       :kind set?)
+                                            (partial set/superset?
+                                                     (cfg/valid-tags))))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title

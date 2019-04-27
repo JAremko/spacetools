@@ -87,7 +87,7 @@ case $action in
               "${sdnize_args[@]}"
         echo_headline "Generating \"LAYERS_WIP.sdn\" file:"
         spacedoc layers -c "/opt/spacetools/spacedoc-cfg.edn" \
-                 "${tmp_dir}/layers"
+                 "${tmp_dir}layers"
         echo_headline "Importing documentation back into .org format:"
         spacedoc orgify -c "/opt/spacetools/spacedoc-cfg.edn" \
                  "${tmp_dir}" "${first_arg}"

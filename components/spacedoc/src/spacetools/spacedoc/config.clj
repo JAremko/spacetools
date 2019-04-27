@@ -34,7 +34,7 @@
                    "lisp" "Lisp dialects"
                    "script" "Scripting"
                    "general" "General-purpose"
-                   "Imperative" "Imperative"
+                   "imperative" "Imperative"
                    "multi-paradigm" "Multi-paradigm"
                    "js" "JavaScript"
                    "pure" "Purely functional"
