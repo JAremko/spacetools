@@ -7,7 +7,8 @@
             [spacetools.fs-io.interface :refer [try-m->output]]
             [spacetools.spacedoc-cli.actions :as ac]
             [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
-            [spacetools.spacedoc.interface :refer [config-file-name]])
+            [spacetools.spacedoc.interface :refer [config-file-name]]
+            [clojure.string :as str])
   (:gen-class))
 
 
@@ -37,7 +38,9 @@
 
 
 (def ops [["-h" "--help" "Show help message."]
-          ["-c" "--config CONFIG" "Configuration file path"]])
+          ["-c" "--config CONFIG" "Configuration file path"
+           :validate [(complement str/blank?)
+                      "Configuration path should be a string"]]])
 
 
 (defn bad-args-handler

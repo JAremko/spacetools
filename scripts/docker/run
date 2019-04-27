@@ -69,7 +69,7 @@ case $action in
               -q \
               "${sdnize_args[@]}"
         echo_headline "Validating documentation:"
-        spacedoc validate -c "/opt/spacetools/spacedoc-cfg.edn" "${tmp_dir}"
+        spacedoc validate -c"/opt/spacetools/spacedoc-cfg.edn" "${tmp_dir}"
         exit $?
         ;;
     docfmt)
@@ -86,10 +86,10 @@ case $action in
               -q \
               "${sdnize_args[@]}"
         echo_headline "Generating \"LAYERS_WIP.sdn\" file:"
-        spacedoc layers -c "/opt/spacetools/spacedoc-cfg.edn" \
+        spacedoc layers -c"/opt/spacetools/spacedoc-cfg.edn" \
                  "${tmp_dir}layers"
         echo_headline "Importing documentation back into .org format:"
-        spacedoc orgify -c "/opt/spacetools/spacedoc-cfg.edn" \
+        spacedoc orgify -c"/opt/spacetools/spacedoc-cfg.edn" \
                  "${tmp_dir}" "${first_arg}"
         exit $?
         ;;
