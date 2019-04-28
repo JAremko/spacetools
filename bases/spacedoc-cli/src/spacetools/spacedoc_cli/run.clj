@@ -8,7 +8,8 @@
             [spacetools.spacedoc-cli.actions :as ac]
             [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
             [spacetools.spacedoc.interface :refer [config-file-name]]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [cats.monad.exception :as exc])
   (:gen-class))
 
 
@@ -62,7 +63,7 @@
     [{:keys [help summary action a-args config]} (*parse args ops)]
     (*configure! config)
     (if help
-      (usage summary)
+      (exc/success (usage summary))
       (match
        ;; Handlers:
        [action      a-args       ]
