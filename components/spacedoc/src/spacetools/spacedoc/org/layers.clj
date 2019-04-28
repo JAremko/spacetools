@@ -4,7 +4,8 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.util :as sdu]
+            [clojure.string :as str]))
 
 
 (defn-spec root->description (s/nilable :spacetools.spacedoc.node/headline)
@@ -46,7 +47,10 @@
                           (ffirst node)
                           node)]
                 (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
-                  (apply n/headline ((cfg/valid-tags) tag)
+                  (apply n/headline (or ((cfg/valid-tags) tag)
+                                        (->> tag
+                                             (format "<\"%s\" invalid tag>")
+                                             str/upper-case))
                          (if (string? node)
                            (mapv #(describe %) f-ds)
                            (->> node

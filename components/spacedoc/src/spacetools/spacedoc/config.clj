@@ -80,9 +80,11 @@
 
 (s/def ::layers-org-quary
   (s/coll-of
-   (s/or :join (s/map-of string? ::layers-org-quary
-                         :count 1)
-         :select string?)
+   (s/or :join (s/and (s/map-of string? ::layers-org-quary
+                                :count 1)
+                      (cfg/valid-tags))
+         :select (s/and string?
+                        (cfg/valid-tags)))
    :kind vector?))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))

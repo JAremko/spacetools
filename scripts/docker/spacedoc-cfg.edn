@@ -1,7 +1,7 @@
 {:spacetools.spacedoc.config/layers-org-quary
  [{"lang" [
            "pure" {"general" [
-                              "imperative"
+                              "imperativez"
                               "multi-paradigm"
                               ]
                    }
