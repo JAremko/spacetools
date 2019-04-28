@@ -82,9 +82,9 @@
   (s/coll-of
    (s/or :join (s/and (s/map-of string? ::layers-org-quary
                                 :count 1)
-                      (cfg/valid-tags))
+                      (::valid-tags default-config))
          :select (s/and string?
-                        (cfg/valid-tags)))
+                        (::valid-tags default-config)))
    :kind vector?))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))
