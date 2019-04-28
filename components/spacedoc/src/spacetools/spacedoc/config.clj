@@ -44,7 +44,7 @@
                    "tool" "Tools"
                    "vim" "Vim"
                    "web service" "Web services"}
-      :layers-org-quary [{"lang" ["pure"
+      :layers-org-query [{"lang" ["pure"
                                   {"general" ["imperative" "multi-paradigm"]}]}
                          "markup"]
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
@@ -78,13 +78,11 @@
                                      (complement #(str/includes? % "|")))
                               string?))
 
-(s/def ::layers-org-quary
+(s/def ::layers-org-query
   (s/coll-of
-   (s/or :join (s/and (s/map-of string? ::layers-org-quary
-                                :count 1)
-                      #(::valid-tags default-config (ffirst %)))
-         :select (s/and string?
-                        (::valid-tags default-config)))
+   (s/or :join (s/map-of string? ::layers-org-query
+                         :count 1)
+         :select string?)
    :kind vector?))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))
@@ -110,7 +108,7 @@
 (s/def ::org-table-indentation nat-int?)
 
 (s/def ::configs (s/keys :req [::valid-tags
-                               ::layers-org-quary
+                               ::layers-org-query
                                ::text-separators-rigth
                                ::text-separators-left
                                ::text-replacement-map
@@ -124,7 +122,7 @@
                                ::org-table-indentation]))
 
 (s/def ::overriding-configs (s/keys :op [::valid-tags
-                                         ::layers-org-quary
+                                         ::layers-org-query
                                          ::text-separators-rigth
                                          ::text-separators-left
                                          ::text-replacement-map
@@ -170,10 +168,10 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   (::valid-tags @*configs))
 
 
-(defn-spec layers-org-quary ::layers-org-quary
-  "Return quary of layers.org file. See `::layers-org-quary`."
+(defn-spec layers-org-query ::layers-org-query
+  "Return query of layers.org file. See `::layers-org-query`."
   []
-  (::layers-org-quary @*configs))
+  (::layers-org-query @*configs))
 
 
 (defn-spec seps-left ::text-separators-left

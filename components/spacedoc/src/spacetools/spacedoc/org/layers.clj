@@ -36,28 +36,32 @@
                      (n/headline "placeholder"))))))
 
 
+;; TODO Replace TAG validation with SPEC on configs read.
+;; TODO Handle case when the root node ends up empty.
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
   "Create layers.org(in SDN format) from DOCS seq of sdn."
   [docs (s/coll-of :spacetools.spacedoc.node/root)]
-  (some->> (cfg/layers-org-quary)
+  (some->> (cfg/layers-org-query)
            seq
            (hash-map "layer")
            ((fn walk [ds node]
               (let [tag (if (map? node)
                           (ffirst node)
                           node)]
-                (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
-                  (apply n/headline (or ((cfg/valid-tags) tag)
-                                        (->> tag
-                                             (format "<\"%s\" invalid tag>")
-                                             str/upper-case))
-                         (if (string? node)
-                           (mapv #(describe %) f-ds)
-                           (->> node
-                                first
-                                val
-                                (map (partial walk f-ds))
-                                (remove nil?)))))))
+                (if-not ((cfg/valid-tags) tag)
+                  (throw (ex-info "Query has invalid tag" {:tag tag}))
+                  (when-let [f-ds (seq (filter #((:tags %) tag) ds))]
+                    (apply n/headline (or ((cfg/valid-tags) tag)
+                                          (->> tag
+                                               (format "<\"%s\" invalid tag>")
+                                               str/upper-case))
+                           (if (string? node)
+                             (mapv #(describe %) f-ds)
+                             (->> node
+                                  first
+                                  val
+                                  (map (partial walk f-ds))
+                                  (remove nil?))))))))
             docs)
            :children
            seq
