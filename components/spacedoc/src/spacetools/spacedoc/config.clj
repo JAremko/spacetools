@@ -82,7 +82,7 @@
   (s/coll-of
    (s/or :join (s/and (s/map-of string? ::layers-org-quary
                                 :count 1)
-                      (::valid-tags default-config))
+                      #(::valid-tags default-config (ffirst %)))
          :select (s/and string?
                         (::valid-tags default-config)))
    :kind vector?))
