@@ -374,7 +374,7 @@
 ;; Handy in gen-testing headline constructors.
 (s/def :spacetools.spacedoc.headline*/descendent-headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap (partial nu/fmt-headline (dec (cfg/max-headline-depth)))
+           #(gen/fmap #(nu/fmt-headline (dec (cfg/max-headline-depth)) %)
                       (s/gen :spacetools.spacedoc.headline*/base)))
          #(<= (nu/headline->depth %) (dec (cfg/max-headline-depth)))
          nu/todo-or-has-children?))
@@ -385,7 +385,7 @@
 ;; TODO: Make it doable with `defnode` macro.
 (s/def ::headline
   (s/and (s/with-gen :spacetools.spacedoc.headline*/base
-           #(gen/fmap (partial nu/fmt-headline (cfg/max-headline-depth))
+           #(gen/fmap #(nu/fmt-headline (cfg/max-headline-depth) %)
                       (s/gen :spacetools.spacedoc.headline*/base)))
          #(<= (nu/headline->depth %) (cfg/max-headline-depth))
          nu/todo-or-has-children?))
@@ -409,7 +409,8 @@
     (s/and
      (s/coll-of ::vs/non-blank-string
                 :kind set?)
-     (partial set/superset? (cfg/valid-tags)))
+     ;; NOTE: We have to prevent this from inlining
+     #(set/superset? (cfg/valid-tags) %))
     (->> (cfg/valid-tags)
          keys
          gen/elements
