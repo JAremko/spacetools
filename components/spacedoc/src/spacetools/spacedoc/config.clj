@@ -49,7 +49,9 @@
        "layer" "All layers"
        "theme" "Themes"
        "multi-paradigm" "Multi-paradigm"
-       "checker" "Checkers"}
+       "checker" "Checkers"
+       "uncategorized" "Please somebody add proper tags to the docs below"
+       }
       :layers-org-query
       ["chat"
        "checker"
@@ -86,6 +88,7 @@
        "tool"
        "vim"
        "web service"
+       "uncategorized"
        ]
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
       :text-separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
