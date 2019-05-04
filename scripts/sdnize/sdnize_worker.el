@@ -416,15 +416,19 @@ CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
   (format (concat "{:tag :root"
                   " :title \"%s\""
-                  " :tags %s"
+                  " :tags #{%s}"
                   " :source \"%s\""
                   " :spaceroot \"%s\""
                   " :children [%s]}")
           (plist-get info :doc-title)
-          (or (plist-get info :doc-tags) "#{}")
+          (or (plist-get info :doc-tags)
+              (when (sdnize/layer-file-p info)
+                "\"layer\" \"uncategorized\"")
+              "")
           (sdnize/esc-str (file-truename (plist-get info :input-file)))
           (sdnize/esc-str (file-truename sdnize-root-dir))
           contents))
+
 
 ;;;; Italic
 
@@ -464,17 +468,13 @@ contextual information."
 (defsubst sdnize//keyword-fmt-tags (info tags-val)
   "Format document tags string.
 Info needed to figure out if the file is one of layer README.org files."
-  (format "#{%s}"
-          (let ((sliced-tags (split-string tags-val "|")))
-            (mapconcat (lambda (tag)
-                         (thread-last tag
-                           (sdnize/esc-str)
-                           (format "\"%s\"")))
-                       (if (and (not (member "layer" sliced-tags))
-                                (sdnize/layer-file-p info))
-                           (cons "layer" sliced-tags)
-                         sliced-tags)
-                       " "))))
+  (let ((sliced-tags (split-string tags-val "|")))
+    (mapconcat (lambda (tag)
+                 (thread-last tag
+                   (sdnize/esc-str)
+                   (format "\"%s\"")))
+               sliced-tags
+               " ")))
 
 (defun sdnize/keyword (keyword _contents info)
   "Transcode a KEYWORD element From Org to Spacemacs SDN.)))))
