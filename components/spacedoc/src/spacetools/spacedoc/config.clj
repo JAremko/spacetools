@@ -50,7 +50,7 @@
        "theme" "Themes"
        "multi-paradigm" "Multi-paradigm"
        "checker" "Checkers"
-       "uncategorized" "Please somebody add proper tags to the docs below"
+       "uncategorized" "README.org files that need proper tags"
        }
       :layers-org-query
       ["chat"
