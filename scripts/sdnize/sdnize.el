@@ -69,7 +69,8 @@ the export dir.")
     "private/"
     "tests/"
     "elpa/"
-    "layers/LAYERS.org")
+    "layers/LAYERS.org"
+    "layers/LAYERS_WIP.org")
   "List of Spacemacs directories and ORG files that normally
  shouldn't be exported.")
 
