@@ -201,6 +201,17 @@ terminate first (used in testing)."
                           file)
          (string-suffix-p "README.org" file t))))
 
+
+(defsubst sdnize/docker-install-p (info)
+  "Return true if exported file is one of installer script README.org files."
+  (let ((file (file-truename (plist-get info :input-file))))
+    (and (string-prefix-p
+          (file-truename
+           (concat sdnize-root-dir
+                   "layers/+distributions/spacemacs-docker/deps-install/"))
+          file)
+         (string-suffix-p "README.org" file t))))
+
 
 ;;; Transcode Functions
 
@@ -422,7 +433,8 @@ holding export options."
                   " :children [%s]}")
           (plist-get info :doc-title)
           (or (plist-get info :doc-tags)
-              (when (sdnize/layer-file-p info)
+              (when (and (sdnize/layer-file-p info)
+                         (not (sdnize/docker-install-p info)))
                 "\"layer\" \"uncategorized\"")
               "")
           (sdnize/esc-str (file-truename (plist-get info :input-file)))
