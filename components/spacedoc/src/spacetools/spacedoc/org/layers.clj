@@ -24,8 +24,8 @@
    (into (-> (if-let [src (:source node)]
                (n/link src (n/text src))
                (n/text "<layer link is missing>"))
-             (n/paragraph (n/line-break))
-             n/section
+             n/paragraph
+             (n/section (n/paragraph (n/line-break)))
              vector)
          (:children
           (sdu/flatten-headline 1 (root->description node))

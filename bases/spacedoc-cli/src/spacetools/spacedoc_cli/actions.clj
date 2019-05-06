@@ -36,6 +36,7 @@
                       (str "file:" (str/replace (io/relativize dir path)
                                                 #"(?ix)\.sdn$" ".org"))))
              sdn-fps)
+
         sd/layers-sdn
         (io/*spit (io/join dir "LAYERS_WIP.sdn")))
    (m/return (format (str "%s Documentation files processed."
