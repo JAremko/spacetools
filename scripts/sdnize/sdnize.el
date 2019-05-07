@@ -69,6 +69,7 @@ the export dir.")
     "private/"
     "tests/"
     "elpa/"
+    ".cache/"
     "layers/LAYERS.org"
     "layers/LAYERS_WIP.org")
   "List of Spacemacs directories and ORG files that normally
