@@ -455,7 +455,8 @@
 (s/def :spacetools.spacedoc.node.meta/description
   (s/merge ::headline
            (s/keys
-            :req-un [:spacetools.spacedoc.node.meta.description/todo?
+            :req-un [:spacetools.spacedoc.node.meta.description/value
+                     :spacetools.spacedoc.node.meta.description/todo?
                      :spacetools.spacedoc.node.meta.hl.nonempty/children])))
 
 

@@ -23,7 +23,7 @@
    n/headline
    (:title node)
    (into (-> (if-let [src (:source node)]
-               (n/link src (n/text src))
+               (n/link (str "file:" src) (n/text src))
                (n/text "<layer link is missing>"))
              n/paragraph
              (n/section (n/paragraph (n/line-break)))
@@ -35,7 +35,8 @@
                n/bold
                n/paragraph
                n/section
-               (n/headline "placeholder"))))))
+               (n/headline "placeholder")
+               vector)))))
 
 
 ;; TODO Replace TAG validation with SPEC on configs read.
@@ -65,40 +66,43 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                 (map (partial walk f-ds))
                                 (remove nil?))))))))
 
-          (rm-file-pref [path]
+          (rm-file-prefix [path]
             (str/replace path #"^file:" ""))
 
-          (add-file-pref [path]
+          (add-file-prefix [path]
             (str "file:" path))
 
           (relativize [path old-root other]
-           (io/relativize path (io/join (io/parent old-root) other)))
+            (io/relativize path (io/join (io/parent old-root) other)))
 
           (re-root-sdn [path sdn]
             (assoc sdn
                    :source
                    (-> root-dir
-                       (relativize path (rm-file-pref path))
-                       (str/replace #"(?ix)\.sdn$" ".org")
-                       add-file-pref)
+                       (relativize path (rm-file-prefix path))
+                       (str/replace #"(?ix)\.sdn$" ".org"))
                    :root-dir root-dir))
 
-          (fix-relative-links [path sdn]
-            (apply
-             update sdn
-             (if (s/valid? :spacetools.spacedoc.node/link sdn)
-               [:path #(if (= (:type sdn) :file)
-                         (->> %
-                              rm-file-pref
-                              (relativize root-dir path)
-                              add-file-pref)
-                         %)]
-               [:children (partial mapv (partial fix-relative-links path))])))]
+          (fix-relative-links [path doc]
+            ((fn inner [f-p sdn]
+               (if (s/valid? :spacetools.spacedoc.node/link sdn)
+                 (condp = (:type sdn)
+                   :file (update sdn :path #(->> %
+                                                 rm-file-prefix
+                                                 (relativize root-dir f-p)
+                                                 add-file-prefix))
+                   :custom-id  (assoc sdn
+                                      :path (add-file-prefix (:source doc))
+                                      :type :file)
+                   sdn)
+                 (update sdn :children (partial mapv (partial inner path)))))
+             path doc))]
 
     (some->> (cfg/layers-org-query)
              seq
              (hash-map "layer")
-             (walk (pmap #(->> % (apply re-root-sdn)
+             (walk (pmap #(->> %
+                               (apply re-root-sdn)
                                (fix-relative-links (first %)))
                          path->sdn))
              :children
