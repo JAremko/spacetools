@@ -158,14 +158,6 @@
             :verbatim #{}}))))
 
 
-;; NOTE: Should break when the function starts to actually do something.
-(deftest up-tags-fn
-  (let [root-node (n/root "foo" #{} (n/todo "foo"))]
-    (testing "NOTE: Currently this function returns unaltered root node"
-      (is (= (up-tags "foo" "bar" root-node)
-             root-node)))))
-
-
 (deftest regex-pat?-fn
   (is (regex-pat? #"foo"))
   (is (not (regex-pat? "bar")))
