@@ -6,14 +6,13 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.fs-io.interface :refer [exception-of?]]
-            [spacetools.fs-io.interface :as io]
+            [spacetools.fs-io.interface :as io :refer [exception-of?]]
             [spacetools.spacedoc-cli.args :refer [*parse-input-files]]
             [spacetools.spacedoc-io.interface :refer [*fp->sdn]]
             [spacetools.spacedoc.interface :as sd]))
 
 
-(defn-spec *validate (io/exception-of? string?)
+(defn-spec *validate (exception-of? string?)
   "Validate Spacemacs documentation files with specs."
   [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]
@@ -24,20 +23,15 @@
                      (count docs)))))
 
 
-(defn-spec *layers (io/exception-of? string?)
+(defn-spec *layers (exception-of? string?)
   "Create LAYERS.sdn file in DIR using SDN files from the directory."
   [dir string?]
   (m/do-let
    [sdn-fps (*parse-input-files dir)
     docs (m/sequence (pmap *fp->sdn sdn-fps))]
    (->> docs
-        (map (fn [path doc]
-               (assoc doc :source
-                      (str "file:" (str/replace (io/relativize dir path)
-                                                #"(?ix)\.sdn$" ".org"))))
-             sdn-fps)
-
-        sd/layers-sdn
+        (zipmap sdn-fps)
+        (sd/layers-sdn dir)
         (io/*spit (io/join dir "LAYERS_WIP.sdn")))
    (m/return (format (str "%s Documentation files processed."
                           " LAYERS.org created in \"%s\" directory.")
@@ -45,15 +39,14 @@
                      dir))))
 
 
-(defn-spec *orgify (io/exception-of? string?)
+(defn-spec *orgify (exception-of? string?)
   "Export .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
   [src-dir (s/and string? io/directory?) target-dir string?]
   (letfn [(org-path [edn-path]
             (str/replace (io/rebase-path src-dir target-dir edn-path)
                          #"(?ix)\.sdn$" ".org"))
           (export-to-org [fp content]
-            (io/*spit (org-path fp)
-                      (->> content (sd/up-tags src-dir fp) (sd/sdn->org))))]
+            (io/*spit (org-path fp) (sd/sdn->org content)))]
     (m/mlet [sdn-fps (*parse-input-files [src-dir])
              docs (m/sequence (pmap *fp->sdn sdn-fps))
              orgs (m/sequence (pmap export-to-org sdn-fps docs))]
@@ -63,7 +56,7 @@
                               (io/absolute target-dir))))))
 
 
-(defn-spec *describe-spec (io/exception-of? string?)
+(defn-spec *describe-spec (exception-of? string?)
   "Describe spec by qualified keyword."
   [spec-key string?]
   (exc/try-on
@@ -77,7 +70,7 @@
                              {:keyword key}))))))
 
 
-(defn-spec *relations (io/exception-of? string?)
+(defn-spec *relations (exception-of? string?)
   "Output nodes relations in SDN files."
   [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]

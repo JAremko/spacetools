@@ -15,12 +15,8 @@
   (sdo/sdn->org node))
 
 (defn layers-sdn
-  [docs]
-  (sdl/layers-sdn docs))
-
-(defn up-tags
-  [spaceroot src r-node]
-  (sdu/up-tags spaceroot src r-node))
+  [root-dir path->sdn]
+  (sdl/layers-sdn root-dir path->sdn))
 
 (defn explain-deepest
   [node]

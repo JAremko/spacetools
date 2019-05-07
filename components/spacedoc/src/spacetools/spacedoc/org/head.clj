@@ -175,7 +175,7 @@ Return nil if ROOT node doesn't have any headlines."
                    :spacetools.spacedoc.node.root/tags
                    :spacetools.spacedoc.org.head.root-with-head-props/children]
           :opt-un [:spacetools.spacedoc.node.root/source
-                   :spacetools.spacedoc.node.root/spaceroot]))
+                   :spacetools.spacedoc.node.root/root-dir]))
 
 
 ;;;; root node helpers

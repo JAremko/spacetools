@@ -17,3 +17,4 @@
 (defn normalize [path])
 (defn relativize [path other])
 (defn join [parent path])
+(defn parent [path])

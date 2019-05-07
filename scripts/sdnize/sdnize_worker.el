@@ -429,7 +429,7 @@ holding export options."
                   " :title \"%s\""
                   " :tags #{%s}"
                   " :source \"%s\""
-                  " :spaceroot \"%s\""
+                  " :root-dir \"%s\""
                   " :children [%s]}")
           (plist-get info :doc-title)
           (or (plist-get info :doc-tags)

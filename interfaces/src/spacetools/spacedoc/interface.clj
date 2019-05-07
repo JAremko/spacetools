@@ -8,7 +8,6 @@
 (defn valid-configs? [configs])
 (defn valid-overrides? [configs])
 (defn node? [x])
+(defn layers-sdn [root-dir path->sdn])
 (def config-file-name)
 (def default-config)
-
-(defn layers-sdn [docs])

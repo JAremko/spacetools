@@ -72,16 +72,6 @@
           (r/map relation parents)))
 
 
-;; TODO Implement
-(defn-spec up-tags node?
-  "Update #+TAGS `:spacetools.spacedoc.node/key-word` of the R-NODE.
-R-NODE must be `:spacetools.spacedoc.node/root` node.
-SPACEROOT is the root directory of Spacemacs.
-SRC is the exported file name."
-  [spaceroot string? src string? r-node node?]
-  r-node)
-
-
 ;;;; Formatters
 
 (defn-spec regex-pat? boolean?

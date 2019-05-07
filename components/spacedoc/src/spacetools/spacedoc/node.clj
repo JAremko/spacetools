@@ -420,12 +420,12 @@
          (gen/fmap set)
          #())))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
-(s/def :spacetools.spacedoc.node.root/spaceroot ::vs/non-blank-string)
+(s/def :spacetools.spacedoc.node.root/root-dir ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title
                                   :spacetools.spacedoc.node.root/tags
                                   :spacetools.spacedoc.node.root/children]
                          :opt-un [:spacetools.spacedoc.node.root/source
-                                  :spacetools.spacedoc.node.root/spaceroot]))
+                                  :spacetools.spacedoc.node.root/root-dir]))
 
 
 ;;;; Meta specs
@@ -438,7 +438,7 @@
                    :spacetools.spacedoc.node.root/tags
                    :spacetools.spacedoc.node.meta.empty-root/children]
           :opt-un [:spacetools.spacedoc.node.root/source
-                   :spacetools.spacedoc.node.root/spaceroot]))
+                   :spacetools.spacedoc.node.root/root-dir]))
 
 ;; For the cases when we need a nonempty headline children vector.
 (s/def :spacetools.spacedoc.node.meta.hl.nonempty/children

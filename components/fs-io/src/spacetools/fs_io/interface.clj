@@ -67,3 +67,7 @@
 (defn relativize
   [path other]
   (io/relativize path other))
+
+(defn parent
+  [path]
+  (io/parent path))
