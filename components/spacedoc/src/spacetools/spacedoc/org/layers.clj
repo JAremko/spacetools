@@ -72,7 +72,7 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
             (str "file:" path))
 
           (relativize [path old-root other]
-            (io/relativize path (io/join ( old-root) other)))
+           (io/relativize path (io/join (io/parent old-root) other)))
 
           (re-root-sdn [path sdn]
             (assoc sdn

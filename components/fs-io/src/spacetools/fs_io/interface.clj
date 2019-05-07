@@ -56,10 +56,6 @@
   [path]
   (io/normalize path))
 
-(defmacro exception-of?
-  [pred]
-  `(io/exception-of? ~pred))
-
 (defn join
   [parent path]
   (io/join parent path))
@@ -71,3 +67,7 @@
 (defn parent
   [path]
   (io/parent path))
+
+(defmacro exception-of?
+  [pred]
+  `(io/exception-of? ~pred))
