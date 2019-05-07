@@ -477,7 +477,7 @@ contextual information."
 
 ;;;; Keyword
 
-(defsubst sdnize//keyword-fmt-tags (info tags-val)
+(defsubst sdnize//keyword-fmt-tags (tags-val)
   "Format document tags string.
 Info needed to figure out if the file is one of layer README.org files."
   (let ((sliced-tags (split-string tags-val "|")))
@@ -502,7 +502,7 @@ CONTENTS is nil. INFO is a plist holding contextual information."
           ((string= "tags" d-key)
            (if (plist-member info :doc-tags)
                (sdnize/error "Multiply \"#+TAGS:\" keywords")
-             (plist-put info :doc-tags (sdnize//keyword-fmt-tags info val)))))
+             (plist-put info :doc-tags (sdnize//keyword-fmt-tags val)))))
     (format "{:tag :key-word :key \"%s\" :value \"%s\"}"
             (sdnize/esc-str key)
             e-val)))
