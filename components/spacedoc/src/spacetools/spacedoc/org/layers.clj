@@ -29,15 +29,15 @@
              n/paragraph
              (n/section (n/paragraph (n/line-break)))
              vector)
-         (:children
-          (sdu/flatten-headline 1 (root->description node))
-          (->> "README.org of the layer misses or has invalid \"Description\"."
-               n/text
-               n/bold
-               n/paragraph
-               n/section
-               (n/headline "placeholder")
-               vector)))))
+         (if-let [description (root->description node)]
+           (:children (sdu/flatten-headline 1 description))
+           (->> "README.org of the layer misses or has invalid \"Description\"."
+                n/text
+                n/bold
+                n/paragraph
+                n/section
+                (n/headline "placeholder")
+                vector)))))
 
 
 (defn rm-file-prefix
