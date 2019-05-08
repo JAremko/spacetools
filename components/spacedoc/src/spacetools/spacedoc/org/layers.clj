@@ -133,5 +133,6 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                  seq
                                  (sort-by :title)
                                  (map describe)
-                                 (apply n/headline "Skipped layers:"))))
+                                 (apply n/headline "Skipped layers:")
+                                 vector)))
                (n/todo "No README.org files tagged with \"layer\" tag")))))
