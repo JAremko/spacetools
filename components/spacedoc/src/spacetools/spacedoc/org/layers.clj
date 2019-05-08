@@ -40,19 +40,23 @@
                vector)))))
 
 
-(defn rm-file-prefix [path]
+(defn rm-file-prefix
+  [path]
   (str/replace path #"^file:" ""))
 
 
-(defn add-file-prefix [path]
+(defn add-file-prefix
+  [path]
   (str "file:" path))
 
 
-(defn relativize [path old-root other]
+(defn relativize
+  [path old-root other]
   (io/relativize path (io/join (io/parent old-root) other)))
 
 
-(defn re-root-sdn [root-dir path sdn]
+(defn re-root-sdn
+  [root-dir path sdn]
   (assoc sdn
          :source
          (-> root-dir
@@ -61,7 +65,8 @@
          :root-dir root-dir))
 
 
-(defn fix-relative-links [root-dir path doc]
+(defn fix-relative-links
+  [root-dir path doc]
   ((fn inner [f-p sdn]
      (if (s/valid? :spacetools.spacedoc.node/link sdn)
        (condp = (:type sdn)
@@ -106,20 +111,27 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                    (map (partial inner f-ds))
                                    (remove nil?))
                               (do (vswap! all-docs-v difference f-ds)
-                                  (mapv #(describe %) f-ds))))))))]
-    (let [ds (->> path->sdn
-                  (pmap #(->> %
-                              (apply re-root-sdn root-dir)
-                              (fix-relative-links root-dir (first %))))
-                  set
-                  (vreset! all-docs-v))
-          root-node (some->> (cfg/layers-org-query)
-                             seq
+                                  (->> f-ds
+                                       (sort-by :title)
+                                       (mapv describe)))))))))]
+
+    (apply n/root "Configuration layers" #{}
+           (or (seq
+                (concat (->> (cfg/layers-org-query)
                              (hash-map "layer")
-                             (walk ds)
-                             :children
-                             seq
-                             (apply n/root "Configuration layers" #{}))]
-      root-node
-      #_ (if (and (seq ds) root-node)
-           (update)))))
+                             (walk (->> path->sdn
+                                        (pmap
+                                         #(->> %
+                                               (apply re-root-sdn root-dir)
+                                               (fix-relative-links root-dir
+                                                                   (first %))))
+                                        set
+                                        (vreset! all-docs-v)))
+                             :children)
+                        (some->> @all-docs-v
+                                 (filter #(contains? (:tags %) "layer"))
+                                 seq
+                                 (sort-by :title)
+                                 (map describe)
+                                 (apply n/headline "Skipped layers:"))))
+               (n/todo "No README.org files tagged with \"layer\" tag")))))
