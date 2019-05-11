@@ -1,6 +1,7 @@
 (ns spacetools.spacedoc.org.layers
   "layers.org generator."
-  (:require [clojure.set :refer [difference]]
+  (:require [clojure.core.reducers :as r]
+            [clojure.set :refer [difference]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
@@ -82,6 +83,19 @@
    path doc))
 
 
+(defn merge-same-hls
+  [hls]
+  (->> hls
+       (r/reduce
+        (fn [acc {:keys [value children] :as hl}]
+          (if (acc value)
+            (update-in acc [value :children] #(vec (concat % children)))
+            (assoc acc value hl)))
+        {})
+       vals
+       vec))
+
+
 ;; TODO Replace TAG validation with SPEC on configs read.
 ;; TODO Handle case when the root node ends up empty.
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
@@ -109,7 +123,8 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                    first
                                    val
                                    (map (partial inner f-ds))
-                                   (remove nil?))
+                                   (remove nil?)
+                                   merge-same-hls)
                               (do (vswap! all-docs-v difference f-ds)
                                   (->> f-ds
                                        (sort-by :title)
