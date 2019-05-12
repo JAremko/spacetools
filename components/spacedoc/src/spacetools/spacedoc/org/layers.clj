@@ -23,7 +23,7 @@
   [node :spacetools.spacedoc.node/root]
   (apply
    n/headline
-   (:title node)
+   (str/replace-first (:title node) #"\s+layer$" "")
    (into (-> (if-let [src (:source node)]
                (n/link (str "file:" src) (n/text src))
                (n/text "<layer link is missing>"))
@@ -146,7 +146,7 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                         (some->> @all-docs-v
                                  (filter #(contains? (:tags %) "layer"))
                                  seq
-                                 (sort-by :title)
+                                 (sort-by (comp str/lower-case :title))
                                  (map describe)
                                  (apply n/headline "Skipped layers:")
                                  vector)))
