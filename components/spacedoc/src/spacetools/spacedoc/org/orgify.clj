@@ -202,7 +202,7 @@
                         (fn [& cols]
                           (apply max (map viz-len cols)))
                         ne-vec-tab))]
-    (vec (concat [cols-w] vec-tab))))
+    (into [cols-w] vec-tab)))
 
 
 (defn-spec table-ruler string?

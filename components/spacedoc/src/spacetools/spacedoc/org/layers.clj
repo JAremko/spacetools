@@ -89,12 +89,17 @@
        (r/reduce
         (fn [acc {:keys [value children] :as hl}]
           (if (acc value)
-            (update-in acc [value :children] #(vec (concat % children)))
+            (update-in acc [value :children] #(into children %))
             (assoc acc value hl)))
         {})
        vals
        vec))
 
+#_ (merge-same-hls #{
+                     (n/headline "foo" (n/section (n/key-word "1" "foo")))
+                     (n/headline "bar" (n/section (n/key-word "2" "foo")))
+                     (n/headline "foo" (n/section (n/key-word "3" "foo")))
+                     })
 
 ;; TODO Replace TAG validation with SPEC on configs read.
 ;; TODO Handle case when the root node ends up empty.
@@ -132,22 +137,22 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
 
     (apply n/root "Configuration layers" #{}
            (or (seq
-                (concat (->> (cfg/layers-org-query)
-                             (hash-map "layer")
-                             (walk (->> path->sdn
-                                        (pmap
-                                         #(->> %
-                                               (apply re-root-sdn root-dir)
-                                               (fix-relative-links root-dir
-                                                                   (first %))))
-                                        set
-                                        (vreset! all-docs-v)))
-                             :children)
-                        (some->> @all-docs-v
-                                 (filter #(contains? (:tags %) "layer"))
-                                 seq
-                                 (sort-by (comp str/lower-case :title))
-                                 (map describe)
-                                 (apply n/headline "Skipped layers:")
-                                 vector)))
+                (into (->> (cfg/layers-org-query)
+                           (hash-map "layer")
+                           (walk (->> path->sdn
+                                      (pmap
+                                       #(->> %
+                                             (apply re-root-sdn root-dir)
+                                             (fix-relative-links root-dir
+                                                                 (first %))))
+                                      set
+                                      (vreset! all-docs-v)))
+                           :children)
+                      (some->> @all-docs-v
+                               (filter #(contains? (:tags %) "layer"))
+                               seq
+                               (sort-by (comp str/lower-case :title))
+                               (map describe)
+                               (apply n/headline "Skipped layers:")
+                               vector)))
                (n/todo "No README.org files tagged with \"layer\" tag")))))

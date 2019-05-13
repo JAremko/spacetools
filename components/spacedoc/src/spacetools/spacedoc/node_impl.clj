@@ -46,7 +46,7 @@
         q-keys-no-ch (remove #(#{(:children key-map)} %) q-keys)
         ch-s (:children key-map)
         ch-s-f (when ch-s (s/form (s/get-spec ch-s)))]
-    (concat (interleave (mapv unqualify-kv q-keys-no-ch) q-keys-no-ch)
+    (concat (interleave (map unqualify-kv q-keys-no-ch) q-keys-no-ch)
             (condp = (some-> ch-s-f first name)
               "coll-of" [:children `(s/+ ~(second ch-s-f))]
               "cat" (rest ch-s-f)
@@ -64,13 +64,14 @@
         f-name (symbol (name k))
         tag-spec-k (keyword (str (namespace k) "." (name k)) "tag")
         arg-l (when con? (defnode-spec-args q-ks))]
-    (concat
-     `(do)
-     `((defmethod sc/node->spec-k ~tag [_#] ~k)
-       ;; Define tag spec
-       (s/def ~tag-spec-k #{~tag})
-       ;; Define node's spec
-       (s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form)))
+    (list*
+     `do
+     ;; Register node tag
+     `(defmethod sc/node->spec-k ~tag [_#] ~k)
+     ;; Define tag spec
+     `(s/def ~tag-spec-k #{~tag})
+     ;; Define node spec
+     `(s/def ~k (s/merge (s/keys :req-un [~tag-spec-k]) ~spec-form))
      (when con?
        `(;; Constructor function's spec
          (s/fdef ~f-name
