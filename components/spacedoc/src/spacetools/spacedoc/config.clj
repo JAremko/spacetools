@@ -126,7 +126,8 @@
    (s/or :join (s/map-of string? ::layers-org-query
                          :count 1)
          :select string?)
-   :kind vector?))
+   :kind vector?
+   :min-count 1))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))
 
