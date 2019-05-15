@@ -23,7 +23,7 @@
   [node :spacetools.spacedoc.node/root]
   (apply
    n/headline
-   (str/replace-first (:title node) #"\s+layer$" "")
+   (-> node :title (str/replace-first #"\s+layer$" "") str/capitalize)
    (into (-> (if-let [src (:source node)]
                (n/link (str "file:" src) (n/text src))
                (n/text "<layer link is missing>"))

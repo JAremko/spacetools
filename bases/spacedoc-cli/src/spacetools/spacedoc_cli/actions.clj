@@ -32,7 +32,7 @@
    (->> docs
         (zipmap sdn-fps)
         (sd/layers-sdn dir)
-        (io/*spit (io/join dir "LAYERS_WIP.sdn")))
+        (io/*spit (io/join dir "LAYERS.sdn")))
    (m/return (format (str "%s Documentation files processed."
                           " LAYERS.org created in \"%s\" directory.")
                      (count docs)
