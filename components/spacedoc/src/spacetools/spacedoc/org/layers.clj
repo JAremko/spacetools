@@ -102,7 +102,6 @@
                      })
 
 ;; TODO Replace TAG validation with SPEC on configs read.
-;; TODO Handle case when the root node ends up empty.
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
   "Create root node for layers.org(SDN) fixing relative paths in descriptions.
 ROOT-DIR is the directory that will be used to resolve relative paths against.
@@ -129,30 +128,38 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                    val
                                    (map (partial inner f-ds))
                                    (remove nil?)
-                                   merge-same-hls)
+                                   merge-same-hls
+                                   (sort-by (comp str/upper-case :value)))
                               (do (vswap! all-docs-v difference f-ds)
                                   (->> f-ds
-                                       (sort-by :title)
+                                       (sort-by (comp str/upper-case :title))
                                        (mapv describe)))))))))]
 
     (apply n/root "Configuration layers" #{}
-           (or (seq
-                (into (->> (cfg/layers-org-query)
-                           (hash-map "layer")
-                           (walk (->> path->sdn
-                                      (pmap
-                                       #(->> %
-                                             (apply re-root-sdn root-dir)
-                                             (fix-relative-links root-dir
-                                                                 (first %))))
-                                      set
-                                      (vreset! all-docs-v)))
-                           :children)
-                      (some->> @all-docs-v
-                               (filter #(contains? (:tags %) "layer"))
-                               seq
-                               (sort-by (comp str/lower-case :title))
-                               (map describe)
-                               (apply n/headline "Skipped layers:")
-                               vector)))
-               (n/todo "No README.org files tagged with \"layer\" tag")))))
+           (conj (or
+                  (seq
+                   (into (->> (cfg/layers-org-query)
+                              (hash-map "layer")
+                              (walk (->> path->sdn
+                                         (map
+                                          #(->> %
+                                                (apply re-root-sdn root-dir)
+                                                (fix-relative-links root-dir
+                                                                    (first %))))
+                                         set
+                                         (vreset! all-docs-v)))
+                              :children)
+                         (some->> @all-docs-v
+                                  (filter #(contains? (:tags %) "layer"))
+                                  seq
+                                  (sort-by (comp str/lower-case :title))
+                                  (map describe)
+                                  (apply n/headline "Skipped layers:")
+                                  vector)))
+                  (list (n/todo "No README.org files with \"layer\" tag.")))
+                 (->> (str "Don't edit it directly.\n"
+                           "See README.org template for instructions.")
+                      n/text
+                      n/paragraph
+                      n/section
+                      (n/headline "This file is auto generated"))))))
