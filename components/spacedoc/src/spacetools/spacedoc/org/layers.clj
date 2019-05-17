@@ -162,4 +162,4 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                       n/text
                       n/paragraph
                       n/section
-                      (n/headline "This file is auto generated"))))))
+                      (n/headline "THIS FILE IS AUTO GENERATED"))))))
