@@ -158,7 +158,8 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                                   vector)))
                   (list (n/todo "No README.org files with \"layer\" tag.")))
                  (->> (str "Don't edit it directly.\n"
-                           "See README.org template for instructions.")
+                           "See \"README.org tags\" section of"
+                           " CONTRIBUTING.org for instructions.")
                       n/text
                       n/paragraph
                       n/section
