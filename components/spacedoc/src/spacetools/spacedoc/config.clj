@@ -90,9 +90,13 @@
        "web service"
        "uncategorized"
        ]
-      :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \?}
-      :text-separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \?}
-      :text-replacement-map {"\\r+" ""
+      :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \? \"}
+      :text-separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \? \"}
+      :text-replacement-map {"‘" "'"
+                             "’" "'"
+                             "“" "\""
+                             "”" "\""
+                             "\\r+" ""
                              "\\t" " "
                              "[ ]{2,}" " "
                              ;; Key-binding
