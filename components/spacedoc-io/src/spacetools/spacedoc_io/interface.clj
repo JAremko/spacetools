@@ -12,3 +12,8 @@
 (defn *read-cfg-overrides
   [overrides-fp]
   (sio/*read-cfg-overrides overrides-fp))
+
+
+(defn rebase-sdn
+  [old-root-dir new-root-dir sdn]
+  (sio/rebase-sdn old-root-dir new-root-dir sdn))

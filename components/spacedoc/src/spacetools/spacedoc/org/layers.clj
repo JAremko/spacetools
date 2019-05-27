@@ -5,10 +5,9 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.fs-io.interface :as io]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.util :refer [flatten-headline]]))
 
 
 (defn-spec root->description (s/nilable :spacetools.spacedoc.node/headline)
@@ -31,7 +30,7 @@
              (n/section (n/paragraph (n/line-break)))
              vector)
          (if-let [description (root->description node)]
-           (:children (sdu/flatten-headline 1 description))
+           (:children (flatten-headline 1 description))
            (->> "README.org of the layer misses or has invalid \"Description\"."
                 n/text
                 n/bold
@@ -39,48 +38,6 @@
                 n/section
                 (n/headline "placeholder")
                 vector)))))
-
-
-(defn rm-file-prefix
-  [path]
-  (str/replace path #"^file:" ""))
-
-
-(defn add-file-prefix
-  [path]
-  (str "file:" path))
-
-
-(defn relativize
-  [path old-root other]
-  (io/relativize path (io/join (io/parent old-root) other)))
-
-
-(defn re-root-sdn
-  [root-dir path sdn]
-  (assoc sdn
-         :source
-         (-> root-dir
-             (relativize path (rm-file-prefix path))
-             (str/replace #"(?ix)\.sdn$" ".org"))
-         :root-dir root-dir))
-
-
-(defn fix-relative-links
-  [root-dir path doc]
-  ((fn inner [f-p sdn]
-     (if (s/valid? :spacetools.spacedoc.node/link sdn)
-       (condp = (:type sdn)
-         :file (update sdn :path #(->> %
-                                       rm-file-prefix
-                                       (relativize root-dir f-p)
-                                       add-file-prefix))
-         :custom-id  (assoc sdn
-                            :path (add-file-prefix (:source doc))
-                            :type :file)
-         sdn)
-       (update sdn :children (partial mapv (partial inner path)))))
-   path doc))
 
 
 (defn merge-same-hls
@@ -101,13 +58,11 @@
                      (n/headline "foo" (n/section (n/key-word "3" "foo")))
                      })
 
+
 ;; TODO Replace TAG validation with SPEC on configs read.
 (defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
-  "Create root node for layers.org(SDN) fixing relative paths in descriptions.
-ROOT-DIR is the directory that will be used to resolve relative paths against.
-In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
-  [root-dir io/file-ref?
-   path->sdn (s/map-of io/file-ref? :spacetools.spacedoc.node/root)]
+  "Create layers.org from a seq of documentation files."
+  [docs :spacetools.spacedoc.node/root]
   (let [all-docs-v (volatile! #{})
         walk (fn inner [ds node]
                (let [tag (if (map? node)
@@ -140,14 +95,7 @@ In PATH->SDN map PATH(keys) are original file paths and SDN(values) are docs."
                   (seq
                    (into (->> (cfg/layers-org-query)
                               (hash-map "layer")
-                              (walk (->> path->sdn
-                                         (map
-                                          #(->> %
-                                                (apply re-root-sdn root-dir)
-                                                (fix-relative-links root-dir
-                                                                    (first %))))
-                                         set
-                                         (vreset! all-docs-v)))
+                              (walk (vreset! all-docs-v (set docs)))
                               :children)
                          (some->> @all-docs-v
                                   (filter #(contains? (:tags %) "layer"))

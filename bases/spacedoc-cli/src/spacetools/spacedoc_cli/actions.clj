@@ -8,7 +8,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.fs-io.interface :as io :refer [exception-of?]]
             [spacetools.spacedoc-cli.args :refer [*parse-input-files]]
-            [spacetools.spacedoc-io.interface :refer [*fp->sdn]]
+            [spacetools.spacedoc-io.interface :refer [*fp->sdn rebase-sdn]]
             [spacetools.spacedoc.interface :as sd]))
 
 
@@ -30,8 +30,8 @@
    [sdn-fps (*parse-input-files dir)
     docs (m/sequence (pmap *fp->sdn sdn-fps))]
    (->> docs
-        (zipmap sdn-fps)
-        (sd/layers-sdn dir)
+        (map #(rebase-sdn %1 dir %2) sdn-fps)
+        (sd/layers-sdn)
         (io/*spit (io/join dir "LAYERS.sdn")))
    (m/return (format (str "%s Documentation files processed."
                           " LAYERS.org created in \"%s\" directory.")

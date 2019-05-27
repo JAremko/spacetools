@@ -15,8 +15,8 @@
   (sdo/sdn->org node))
 
 (defn layers-sdn
-  [root-dir path->sdn]
-  (sdl/layers-sdn root-dir path->sdn))
+  [docs]
+  (sdl/layers-sdn docs))
 
 (defn explain-deepest
   [node]
@@ -29,6 +29,14 @@
 (defn valid-overrides?
   [configs]
   (cfg/valid-overrides? configs))
+
+(defn valid-node?
+  [x]
+  (sdu/valid-node? x))
+
+(defn valid-root?
+  [x]
+  (sdu/valid-root? x))
 
 (defn override-configs!
   [overrides]

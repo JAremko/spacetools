@@ -206,6 +206,12 @@ Fragments are  particular headline values in the \"/\" separated chain."
   (and (hl? node) (valid-node? node)))
 
 
+(defn-spec valid-root? boolean?
+  "Return true if NODE is a valid root node."
+  [node any?]
+  (s/valid? :spacetools.spacedoc.node/root node))
+
+
 (defn-spec flatten-headline valid-hl?
   "Flatten HL headline children by converting them into sections"
   [level (s/and pos-int? #(<= % (cfg/max-headline-depth))) hl hl?]
@@ -221,7 +227,7 @@ Fragments are  particular headline values in the \"/\" separated chain."
                 (into [(n/paragraph
                         (n/text (str
                                  (if todo? "TODO: " "")
-                                 (when-not (= idx 0) "\n")
+                                 (when-not (zero? idx) "\n")
                                  value \newline)))])
                 (apply n/section))
            (assoc node :children children)))
