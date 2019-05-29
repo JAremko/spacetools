@@ -81,34 +81,28 @@
 
 ;; TODO: Mb also change :spaceroot or how its called?
 (defn-spec re-root-sdn valid-root?
-  [root-dir file-ref? path file-ref? sdn valid-root?]
-  (assoc sdn
+  [root-dir file-ref? path file-ref? doc valid-root?]
+  (assoc doc
          :source
          (-> root-dir
              (re-relativize path (rm-file-prefix path))
+             ;; TODO: Move it somewhere
              (str/replace #"(?ix)\.sdn$" ".org"))
          :root-dir root-dir))
 
 
-(defn-spec fix-relative-links valid-root?
-  [root-dir file-ref? path file-ref? sdn valid-root?]
+(defn-spec re-root-relative-links valid-root?
+  [root-dir file-ref? path file-ref? doc valid-root?]
   ((fn inner [f-p sdn]
-     (if (s/valid? :spacetools.spacedoc.node/link sdn)
+     (if (= :link (:tag sdn))
        (condp = (:type sdn)
          :file (update sdn :path #(->> %
                                        rm-file-prefix
                                        (re-relativize root-dir f-p)
                                        add-file-prefix))
          :custom-id  (assoc sdn
-                            :path (add-file-prefix (:source sdn))
+                            :path (add-file-prefix (:source doc))
                             :type :file)
          sdn)
        (update sdn :children (partial mapv (partial inner path)))))
-   path sdn))
-
-
-(defn-spec rebase-sdn valid-root?
-  [old-root-dir file-ref? new-root-dir file-ref? sdn valid-root?]
-  (->> sdn
-       (re-root-sdn new-root-dir old-root-dir)
-       (fix-relative-links new-root-dir old-root-dir)))
+   path doc))

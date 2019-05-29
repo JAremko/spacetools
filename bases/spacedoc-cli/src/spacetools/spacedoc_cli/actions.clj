@@ -8,7 +8,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.fs-io.interface :as io :refer [exception-of?]]
             [spacetools.spacedoc-cli.args :refer [*parse-input-files]]
-            [spacetools.spacedoc-io.interface :refer [*fp->sdn rebase-sdn]]
+            [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :as sd]))
 
 
@@ -18,7 +18,7 @@
                  :min-count 1)]
   (m/mlet
    [sdn-fps (*parse-input-files fs)
-    docs (m/sequence (pmap *fp->sdn sdn-fps))]
+    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
    (m/return (format "%s Documentation files have been successfully validated."
                      (count docs)))))
 
@@ -28,9 +28,10 @@
   [dir string?]
   (m/do-let
    [sdn-fps (*parse-input-files dir)
-    docs (m/sequence (pmap *fp->sdn sdn-fps))]
+    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
    (->> docs
-        (map #(rebase-sdn %1 dir %2) sdn-fps)
+        (map #(sio/re-root-relative-links dir %1 (sio/re-root-sdn dir %1 %2))
+             sdn-fps)
         (sd/layers-sdn)
         (io/*spit (io/join dir "LAYERS.sdn")))
    (m/return (format (str "%s Documentation files processed."
@@ -48,7 +49,7 @@
           (export-to-org [fp content]
             (io/*spit (org-path fp) (sd/sdn->org content)))]
     (m/mlet [sdn-fps (*parse-input-files [src-dir])
-             docs (m/sequence (pmap *fp->sdn sdn-fps))
+             docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
              orgs (m/sequence (pmap export-to-org sdn-fps docs))]
             (m/return (format (str "%s .sdn files have been successfully "
                                    "exported to \"%s\" directory as .org files")
@@ -76,7 +77,7 @@
                  :min-count 1)]
   (m/mlet [sdn-fps (*parse-input-files fs)
            docs (->> sdn-fps
-                     (pmap (partial *fp->sdn
+                     (pmap (partial sio/*fp->sdn
                                     :spacetools.spacedoc.node/any-node))
                      (m/sequence))]
           (m/return (str "[<NODE_TAG> <FOUND_CHILDREN_TAGS>]\n"
