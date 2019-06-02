@@ -22,3 +22,8 @@
 (defn re-root-relative-links
   [root-dir path doc]
   (sio/re-root-relative-links root-dir path doc))
+
+
+(defn set-ext
+  [ext fp]
+  (sio/set-ext ext fp))

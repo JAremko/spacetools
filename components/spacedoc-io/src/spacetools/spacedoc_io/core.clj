@@ -79,16 +79,16 @@
   (fio/relativize path (fio/join (fio/parent old-root) other)))
 
 
-;; TODO: Mb also change :spaceroot or how its called?
 (defn-spec re-root-sdn valid-root?
   [root-dir file-ref? path file-ref? doc valid-root?]
   (assoc doc
-         :source
-         (-> root-dir
-             (re-relativize path (rm-file-prefix path))
-             ;; TODO: Move it somewhere
-             (str/replace #"(?ix)\.sdn$" ".org"))
+         :source (re-relativize root-dir path (rm-file-prefix path))
          :root-dir root-dir))
+
+
+(defn-spec set-ext file-ref?
+  [ext (partial re-matches #"^\..*" ) fp file-ref?]
+  (-> fp (str/replace #"\.[^\.]+$" "") (str ext) fio/file-ref->path))
 
 
 (defn-spec re-root-relative-links valid-root?

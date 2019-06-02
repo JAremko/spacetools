@@ -5,3 +5,4 @@
 (defn *read-cfg-overrides [overrides-fp])
 (defn re-root-relative-links [root-dir path doc])
 (defn re-root-sdn [root-dir path doc])
+(defn set-ext [ext fp])

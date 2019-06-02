@@ -23,29 +23,11 @@
                      (count docs)))))
 
 
-(defn-spec *layers (exception-of? string?)
-  "Create LAYERS.sdn file in DIR using SDN files from the directory."
-  [dir string?]
-  (m/do-let
-   [sdn-fps (*parse-input-files dir)
-    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
-   (->> docs
-        (map #(sio/re-root-relative-links dir %1 (sio/re-root-sdn dir %1 %2))
-             sdn-fps)
-        (sd/layers-sdn)
-        (io/*spit (io/join dir "LAYERS.sdn")))
-   (m/return (format (str "%s Documentation files processed."
-                          " LAYERS.org created in \"%s\" directory.")
-                     (count docs)
-                     dir))))
-
-
 (defn-spec *orgify (exception-of? string?)
   "Export .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
   [src-dir (s/and string? io/directory?) target-dir string?]
   (letfn [(org-path [edn-path]
-            (str/replace (io/rebase-path src-dir target-dir edn-path)
-                         #"(?ix)\.sdn$" ".org"))
+            (sio/set-ext  ".org" (io/rebase-path src-dir target-dir edn-path)))
           (export-to-org [fp content]
             (io/*spit (org-path fp) (sd/sdn->org content)))]
     (m/mlet [sdn-fps (*parse-input-files [src-dir])
@@ -69,6 +51,28 @@
                                {:keyword key})))
        (exc/failure (ex-info "Spec key must be a qualified keyword"
                              {:keyword key}))))))
+
+
+(defn-spec *layers (exception-of? string?)
+  "Create LAYERS.sdn file in DIR using SDN files from the directory."
+  [dir string?]
+  (m/do-let
+   [sdn-fps (*parse-input-files dir)
+    docs (m/sequence (pmap sio/*fp->sdn sdn-fps))]
+   (->> docs
+        (map (fn fix-paths
+               [fp doc]
+               (as-> doc $
+                 (sio/re-root-sdn dir fp $)
+                 (update $ :source #(->> % (sio/set-ext ".org") str))
+                 (sio/re-root-relative-links dir fp $)))
+             sdn-fps)
+        (sd/layers-sdn)
+        (io/*spit (io/join dir "LAYERS.sdn")))
+   (m/return (format (str "%s Documentation files processed."
+                          " LAYERS.org created in \"%s\" directory.")
+                     (count docs)
+                     dir))))
 
 
 (defn-spec *relations (exception-of? string?)
