@@ -26,17 +26,17 @@
 (defn-spec *orgify (exception-of? string?)
   "Export .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
   [src-dir (s/and string? io/directory?) target-dir string?]
-  (letfn [(org-path [edn-path]
-            (sio/set-ext  ".org" (io/rebase-path src-dir target-dir edn-path)))
-          (export-to-org [fp content]
-            (io/*spit (org-path fp) (sd/sdn->org content)))]
-    (m/mlet [sdn-fps (*parse-input-files [src-dir])
+  (m/do-let [sdn-fps (*parse-input-files [src-dir])
              docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
              orgs (m/sequence (pmap export-to-org sdn-fps docs))]
+            (io/*spit (->> sdn-fps
+                           (io/rebase-path src-dir target-dir)
+                           (sio/set-ext ".org"))
+                      (sd/sdn->org docs))
             (m/return (format (str "%s .sdn files have been successfully "
                                    "exported to \"%s\" directory as .org files")
                               (count orgs)
-                              (io/absolute target-dir))))))
+                              (io/absolute target-dir)))))
 
 
 (defn-spec *describe-spec (exception-of? string?)
