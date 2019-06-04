@@ -204,11 +204,11 @@
 (s/def :spacetools.spacedoc.node.list-item/children
   (s/with-gen :spacetools.spacedoc.node.list-item*/children-list
     #(gen/fmap vec (s/gen :spacetools.spacedoc.node.list-item*/children-list))))
-(defnode ::list-item (s/keys :req-un
-                             [:spacetools.spacedoc.node.list-item/type
-                              :spacetools.spacedoc.node.list-item/bullet
-                              :spacetools.spacedoc.node.list-item/checkbox
-                              :spacetools.spacedoc.node.list-item/children]))
+(defnode* ::list-item (s/keys :req-un
+                              [:spacetools.spacedoc.node.list-item/type
+                               :spacetools.spacedoc.node.list-item/bullet
+                               :spacetools.spacedoc.node.list-item/checkbox
+                               :spacetools.spacedoc.node.list-item/children]))
 
 
 ;; plain-list node
@@ -413,12 +413,11 @@
                 :kind set?)
      ;; NOTE: We have to prevent this from inlining
      #(set/superset? (cfg/valid-tags) %))
-    (->> (cfg/valid-tags)
-         keys
-         gen/elements
-         gen/vector-distinct
-         (gen/fmap set)
-         #())))
+    #(->> (cfg/valid-tags)
+          keys
+          gen/elements
+          gen/vector-distinct
+          (gen/fmap set))))
 (s/def :spacetools.spacedoc.node.root/source ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/root-dir ::vs/non-blank-string)
 (defnode* ::root (s/keys :req-un [:spacetools.spacedoc.node.root/title
@@ -603,7 +602,7 @@
                      (s/+ (s/coll-of (s/coll-of ::inline-element
                                                 :min-count 1)))
                      (fn square-table? [rows]
-                       (if-let [no-rule (seq (filter seq rows))]
+                       (if-let [no-rule (seq (remove empty? rows))]
                          (apply = (map count no-rule))
                          true)))
           #(-> ::inline-element

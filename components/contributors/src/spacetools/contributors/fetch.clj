@@ -46,7 +46,7 @@
 
 (defn-spec url->page-number (s/nilable pos-int?)
   [url ::github-api-paged-url]
-  (Integer. ^String (last (re-find #"(:?&|\?)page=(\d+)" url))))
+  (Integer/parseInt (last (re-find #"(:?&|\?)page=(\d+)" url))))
 
 
 (defn-spec *url->body (exception-of? vector?)

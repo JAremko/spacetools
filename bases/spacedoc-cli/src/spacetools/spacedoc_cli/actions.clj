@@ -28,11 +28,12 @@
   [src-dir (s/and string? io/directory?) target-dir string?]
   (m/do-let [sdn-fps (*parse-input-files [src-dir])
              docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
-             orgs (m/sequence (pmap export-to-org sdn-fps docs))]
-            (io/*spit (->> sdn-fps
-                           (io/rebase-path src-dir target-dir)
-                           (sio/set-ext ".org"))
-                      (sd/sdn->org docs))
+             orgs (m/sequence (pmap #(io/*spit
+                                      (->> %1
+                                           (io/rebase-path src-dir target-dir)
+                                           (sio/set-ext ".org"))
+                                      (sd/sdn->org %2))
+                                    sdn-fps docs))]
             (m/return (format (str "%s .sdn files have been successfully "
                                    "exported to \"%s\" directory as .org files")
                               (count orgs)
