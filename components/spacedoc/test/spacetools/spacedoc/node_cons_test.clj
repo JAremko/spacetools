@@ -35,11 +35,12 @@
        (deftest ~(symbol (str f-name "-has-spec"))
          (testing (str "Node constructor function \"" ~v "\" speced.")
            (is (s/spec? f-spec#)
-               (format (str "Public function `%s` doesn't have spec\n"
-                            "All public functions in the `spacetools.spacedoc.node`"
-                            " ns considered node constructors "
-                            "and must be speced.\n")
-                       ~v))
+               (format
+                (str "Public function `%s` doesn't have spec\n"
+                     "All public functions in the `spacetools.spacedoc.node`"
+                     " ns considered node constructors "
+                     "and must be speced.\n")
+                ~v))
            (is (s/spec? f-spec-args#)
                (format "Function `%s` doesn't have :args spec.\n spec: \"%s\"\n"
                        ~v

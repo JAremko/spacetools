@@ -52,15 +52,13 @@
 
 (deftest defnode-spec-args-fn
   (testing "The function should return valid argument seq"
-    (is (= (defnode-spec-args
-             [:testing.defnode-spec-args-fn.cat/children])
+    (is (= (defnode-spec-args [:testing.defnode-spec-args-fn.cat/children])
            '(:any clojure.core/any?)))
     (is (= (defnode-spec-args [::merge-spec]) '(:merge-spec ::merge-spec)))
-    (is (= (defnode-spec-args
-             [::merge-spec :testing.defnode-spec-args-fn.cat/children])
+    (is (= (defnode-spec-args [::merge-spec
+                               :testing.defnode-spec-args-fn.cat/children])
            '(:merge-spec ::merge-spec :any clojure.core/any?)))
-    (is (= (defnode-spec-args
-             [:testing.defnode-spec-args-fn.coll-of/children])
+    (is (= (defnode-spec-args [:testing.defnode-spec-args-fn.coll-of/children])
            '(:children (clojure.spec.alpha/+ clojure.core/any?)))))
 
   (testing "The function should throw when passed unsupported spec"

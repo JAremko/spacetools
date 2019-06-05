@@ -23,40 +23,38 @@
 
 (deftest absolute-fn
   (testing-io "absolute function" []
+              ;; NOTE: "work" is a default working directory for jimfs
               [:unix
+               (is (= "/work/bar" (str (io/absolute "/work/bar"))))
                (is (= "/work/bar" (str (io/absolute "bar"))))]
               [:osx
+               (is (= "/work/bar" (str (io/absolute "/work/bar"))))
                (is (= "/work/bar" (str (io/absolute "bar"))))]
               [:windows
+               (is (= "C:\\work\\bar" (str (io/absolute "C:\\work\\bar"))))
                (is (= "C:\\work\\bar" (str (io/absolute "bar"))))]))
 
 
 (deftest rebase-path-fn
   (testing-io "rebase-path function" []
               [:unix
-               (is (= "/bar/baz"
-                      (str (io/rebase-path "/foo" "/bar" "/foo/baz"))))
-               (is (= "/foo/bar"
-                      (str (io/rebase-path "/foo" "/foo" "/foo/bar"))))
-               (is (= "/foo/bar"
-                      (str (io/rebase-path "/baz" "/qux" "/foo/bar"))))]
+               (are [new-path old-base new-base path]
+                   (= new-path (str (io/rebase-path old-base new-base path)))
+                 "/bar/baz" "/foo" "/bar" "/foo/baz"
+                 "/foo/bar" "/foo" "/foo" "/foo/bar"
+                 "/foo/bar" "/baz" "/qux" "/foo/bar")]
               [:osx
-               (is (= "/bar/baz"
-                      (str (io/rebase-path "/foo" "/bar" "/foo/baz"))))
-               (is (= "/foo/bar"
-                      (str (io/rebase-path "/foo" "/foo" "/foo/bar"))))
-               (is (= "/foo/bar"
-                      (str (io/rebase-path "/baz" "/qux" "/foo/bar"))))]
+               (are [new-path old-base new-base path]
+                   (= new-path (str (io/rebase-path old-base new-base path)))
+                 "/bar/baz" "/foo" "/bar" "/foo/baz"
+                 "/foo/bar" "/foo" "/foo" "/foo/bar"
+                 "/foo/bar" "/baz" "/qux" "/foo/bar")]
               [:windows
-               (is (= "C:\\bar\\baz"
-                      (str
-                       (io/rebase-path "C:\\foo" "C:\\bar" "C:\\foo\\baz"))))
-               (is (= "C:\\foo\\bar"
-                      (str
-                       (io/rebase-path "C:\\foo" "C:\\foo" "C:\\foo\\bar"))))
-               (is (= "C:\\foo\\bar"
-                      (str
-                       (io/rebase-path "C:\\baz" "C:\\qux" "C:\\foo\\bar"))))]))
+               (are [new-path old-base new-base path]
+                   (= new-path (str (io/rebase-path old-base new-base path)))
+                 "C:\\bar\\baz" "C:\\foo" "C:\\bar" "C:\\foo\\baz"
+                 "C:\\foo\\bar" "C:\\foo" "C:\\foo" "C:\\foo\\bar"
+                 "C:\\foo\\bar" "C:\\baz" "C:\\qux" "C:\\foo\\bar")]))
 
 
 (deftest *spit-fn
@@ -78,20 +76,23 @@
 (deftest *slurp-fn
   (testing-io "*slurp function" [[:foo "bar\nbaz"]]
               [:unix
-               (is (success? (io/*slurp "/foo")))
                (is (= ["bar" "baz"] @(io/*slurp "/foo")))
-               (is (exc/failure (io/*slurp "/")))
-               (is (exc/failure (io/*slurp "/non-existing")))]
+               (are [pred file-path] (true? (pred (io/*slurp file-path)))
+                 success? "/foo"
+                 failure? "/"
+                 failure? "/non-existing")]
               [:osx
-               (is (success? (io/*slurp "/foo")))
                (is (= ["bar" "baz"] @(io/*slurp "/foo")))
-               (is (exc/failure (io/*slurp "/")))
-               (is (exc/failure (io/*slurp "/non-existing")))]
+               (are [pred file-path] (true? (pred (io/*slurp file-path)))
+                 success? "/foo"
+                 failure? "/"
+                 failure? "/non-existing")]
               [:windows
-               (is (success? (io/*slurp "C:\\foo")))
                (is (= ["bar" "baz"] @(io/*slurp "C:\\foo")))
-               (is (exc/failure (io/*slurp "C:\\")))
-               (is (exc/failure (io/*slurp "C:\\non-existing")))]))
+               (are [pred file-path] (true? (pred (io/*slurp file-path)))
+                 success? "C:\\foo"
+                 failure? "C:\\"
+                 failure? "C:\\non-existing")]))
 
 
 (deftest *slurp-*spit
