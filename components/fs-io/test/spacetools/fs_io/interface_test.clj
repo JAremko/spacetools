@@ -111,26 +111,29 @@
 (deftest file?-fn
   (testing-io "file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix
-               (is (io/file? "/foo/bar.sdn"))
-               (is (io/file? "/foo/baz.edn"))
-               (is (not (io/file? 42)))
-               (is (not (io/file? "/qux")))
-               (is (not (io/file? "/foo")))
-               (is (not (io/file? "/foo/qux.sdn")))]
+               (are [pred file-path] (pred (io/file? file-path))
+                 true? "/foo/bar.sdn"
+                 true? "/foo/baz.edn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/qux.sdn")]
               [:osx
-               (is (io/file? "/foo/bar.sdn"))
-               (is (io/file? "/foo/baz.edn"))
-               (is (not (io/file? 42)))
-               (is (not (io/file? "/qux")))
-               (is (not (io/file? "/foo")))
-               (is (not (io/file? "/foo/qux.sdn")))]
+               (are [pred file-path] (pred (io/file? file-path))
+                 true? "/foo/bar.sdn"
+                 true? "/foo/baz.edn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/qux.sdn")]
               [:windows
-               (is (io/file? "C:\\foo\\bar.sdn"))
-               (is (io/file? "C:\\foo\\baz.edn"))
-               (is (not (io/file? 42)))
-               (is (not (io/file? "C:\\qux")))
-               (is (not (io/file? "C:\\foo")))
-               (is (not (io/file? "C:\\foo\\qux.sdn")))]))
+               (are [pred file-path] (pred (io/file? file-path))
+                 true? "C:\\foo\\bar.sdn"
+                 true? "C:\\foo\\baz.edn"
+                 false? 42
+                 false? "C:\\qux"
+                 false? "C:\\foo"
+                 false? "C:\\foo\\qux.sdn")]))
 
 
 (deftest file-ref?-fn
@@ -155,92 +158,104 @@
 (deftest file-ref->path-fn
   (testing-io "file-ref->path function" [[:foo {:type :dir}]]
               [:unix
-               (is (io/file-ref? "foo"))
-               (is (io/file-ref? (nio/path filesystem "/foo")))
-               (is (io/file-ref? "/non-existent"))
-               (is (io/file-ref? (nio/path filesystem "/non-existent")))
+               (are [file-path] (true? (io/file-ref? file-path))
+                 "foo"
+                 (nio/path filesystem "/foo")
+                 "/non-existent"
+                 (nio/path filesystem "/non-existent"))
                (is (thrown? Exception (io/file-ref->path 42)))]
               [:osx
-               (is (io/file-ref? "foo"))
-               (is (io/file-ref? (nio/path filesystem "/foo")))
-               (is (io/file-ref? "/non-existent"))
-               (is (io/file-ref? (nio/path filesystem "/non-existent")))
+               (are [file-path] (true? (io/file-ref? file-path))
+                 "foo"
+                 (nio/path filesystem "/foo")
+                 "/non-existent"
+                 (nio/path filesystem "/non-existent"))
                (is (thrown? Exception (io/file-ref->path 42)))]
               [:windows
-               (is (io/file-ref? "foo"))
-               (is (io/file-ref? (nio/path filesystem "C:\\foo")))
-               (is (io/file-ref? "C:\\non-existent"))
-               (is (io/file-ref? (nio/path filesystem "C:\\non-existent")))
+               (are [file-path] (true? (io/file-ref? file-path))
+                 "foo"
+                 (nio/path filesystem "C:\\foo")
+                 "C:\\non-existent"
+                 (nio/path filesystem "C:\\non-existent"))
                (is (thrown? Exception (io/file-ref->path 42)))]))
 
 
 (deftest sdn-file?-fn
   (testing-io "sdn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix
-               (is (io/sdn-file? "/foo/bar.sdn"))
-               (is (not (io/sdn-file? 42)))
-               (is (not (io/sdn-file? "/qux")))
-               (is (not (io/sdn-file? "/foo")))
-               (is (not (io/sdn-file? "/foo/baz.edn")))
-               (is (not (io/sdn-file? "/foo/qux.sdn")))]
+               (are [pred file-path] (pred (io/sdn-file? file-path))
+                 true? "/foo/bar.sdn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/baz.edn"
+                 false? "/foo/qux.sdn")]
               [:osx
-               (is (io/sdn-file? "/foo/bar.sdn"))
-               (is (not (io/sdn-file? 42)))
-               (is (not (io/sdn-file? "/qux")))
-               (is (not (io/sdn-file? "/foo")))
-               (is (not (io/sdn-file? "/foo/baz.edn")))
-               (is (not (io/sdn-file? "/foo/qux.sdn")))]
+               (are [pred file-path] (pred (io/sdn-file? file-path))
+                 true? "/foo/bar.sdn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/baz.edn"
+                 false? "/foo/qux.sdn")]
               [:windows
-               (is (io/sdn-file? "C:\\foo\\bar.sdn"))
-               (is (not (io/sdn-file? 42)))
-               (is (not (io/sdn-file? "C:\\qux")))
-               (is (not (io/sdn-file? "C:\\foo")))
-               (is (not (io/sdn-file? "C:\\foo\\baz.edn")))
-               (is (not (io/sdn-file? "C:\\foo\\qux.sdn")))]))
+               (are [pred file-path] (pred (io/sdn-file? file-path))
+                 true? "C:\\foo\\bar.sdn"
+                 false?  42
+                 false?  "C:\\qux"
+                 false?  "C:\\foo"
+                 false?  "C:\\foo\\baz.edn"
+                 false?  "C:\\foo\\qux.sdn")]))
 
 
 (deftest edn-file?-fn
   (testing-io "edn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix
-               (is (io/edn-file? "/foo/baz.edn"))
-               (is (not (io/edn-file? 42)))
-               (is (not (io/edn-file? "/qux")))
-               (is (not (io/edn-file? "/foo")))
-               (is (not (io/edn-file? "/foo/bar.sdn")))
-               (is (not (io/edn-file? "/foo/qux.edn")))]
+               (are [pred file-path] (pred (io/edn-file? file-path))
+                 true? "/foo/baz.edn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/bar.sdn"
+                 false? "/foo/qux.edn")]
               [:osx
-               (is (io/edn-file? "/foo/baz.edn"))
-               (is (not (io/edn-file? 42)))
-               (is (not (io/edn-file? "/qux")))
-               (is (not (io/edn-file? "/foo")))
-               (is (not (io/edn-file? "/foo/bar.sdn")))
-               (is (not (io/edn-file? "/foo/qux.edn")))]
+               (are [pred file-path] (pred (io/edn-file? file-path))
+                 true? "/foo/baz.edn"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo"
+                 false? "/foo/bar.sdn"
+                 false? "/foo/qux.edn")]
               [:windows
-               (is (io/edn-file? "C:\\foo\\baz.edn"))
-               (is (not (io/edn-file? 42)))
-               (is (not (io/edn-file? "C:\\qux")))
-               (is (not (io/edn-file? "C:\\foo")))
-               (is (not (io/edn-file? "C:\\foo\\bar.sdn")))
-               (is (not (io/edn-file? "C:\\foo\\qux.edn")))]))
+               (are [pred file-path] (pred (io/edn-file? file-path))
+                 true? "C:\\foo\\baz.edn"
+                 false? 42
+                 false? "C:\\qux"
+                 false? "C:\\foo"
+                 false? "C:\\foo\\bar.sdn"
+                 false? "C:\\foo\\qux.edn")]))
 
 
 (deftest drectory?-fn
   (testing-io "directory? function" [[:foo [:bar]]]
               [:unix
-               (is (io/directory? "/foo"))
-               (is (not (io/directory? 42)))
-               (is (not (io/directory? "/qux")))
-               (is (not (io/directory? "/foo/bar")))]
+               (are [pred file-path] (pred (io/directory? file-path))
+                 true? "/foo"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo/bar")]
               [:osx
-               (is (io/directory? "/foo"))
-               (is (not (io/directory? 42)))
-               (is (not (io/directory? "/qux")))
-               (is (not (io/directory? "/foo/bar")))]
+               (are [pred file-path] (pred (io/directory? file-path))
+                 true? "/foo"
+                 false? 42
+                 false? "/qux"
+                 false? "/foo/bar")]
               [:windows
-               (is (io/directory? "C:\\foo"))
-               (is (not (io/directory? 42)))
-               (is (not (io/directory? "C:\\qux")))
-               (is (not (io/directory? "C:\\foo\\bar")))]))
+               (are [pred file-path] (pred (io/directory? file-path))
+                 true? "C:\\foo"
+                 false? 42
+                 false? "C:\\qux"
+                 false? "C:\\foo\\bar")]))
 
 
 (deftest *flatten-fps
