@@ -1,9 +1,0 @@
-#+TITLE: headline
-
-* Table of Contents                     :TOC_4_gh:noexport:
-- [[#foo][Foo]]
-  - [[#bar][Bar]]
-
-* Foo
-** Bar
-Baz

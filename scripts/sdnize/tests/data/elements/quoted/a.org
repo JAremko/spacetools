@@ -1,5 +1,0 @@
-#+TITLE: quoted
-
-#+BEGIN_QUOTE
-  foo
-#+END_QUOTE

@@ -1,4 +1,0 @@
-#+TITLE: list-item
-
-Foo
-- bar :: baz

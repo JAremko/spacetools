@@ -1,5 +1,0 @@
-#+TITLE: example
-
-#+BEGIN_EXAMPLE
-  foo
-#+END_EXAMPLE

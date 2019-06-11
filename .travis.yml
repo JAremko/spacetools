@@ -3,30 +3,18 @@ sudo: false
 jdk:
 - openjdk11
 
-before_install:
-  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh
-  - source ./x.sh
-  - evm install emacs-26.1-travis --use --skip
-
 env:
   global:
-    - COV_DIR=/tmp/cov
-    - COV_FL="${COV_DIR}/coveralls.json"
-    - EL_WS="${TRAVIS_BUILD_DIR}/scripts/sdnize"
     - CLJ_WS="${TRAVIS_BUILD_DIR}/environments/development"
-    - CLOFIX_SCR="${TRAVIS_BUILD_DIR}/scripts/coveralls/clofix.clj"
 
 install:
-  - cd $EL_WS && cask install
   - cd $CLJ_WS && lein deps
 
 script:
-  # Build Clojure based Spacetools
+  # Build Spacetools
   - cd $TRAVIS_BUILD_DIR && lein polylith build -test
-  # Testing Clojure files
+  # Testing files
   - cd $CLJ_WS && lein cloverage --codecov
-  # Testing EmacsLisp files
-  - cd $EL_WS && cask exec buttercup -L . -L tests
 
 # Upload coverage reports to codecov.io
 after_success:

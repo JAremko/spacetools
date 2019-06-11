@@ -1,3 +1,0 @@
-#+TITLE: key-word
-
-#+FOO: bar

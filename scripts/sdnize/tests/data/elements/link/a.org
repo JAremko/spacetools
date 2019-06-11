@@ -1,3 +1,0 @@
-#+TITLE: link
-
-[[http://foo.bar.baz]]

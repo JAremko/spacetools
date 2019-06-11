@@ -1,3 +1,0 @@
-#+TITLE: italic
-
-/italic text/

@@ -1,4 +1,0 @@
-#+TITLE: plain-list
-
-Foo
-- bar

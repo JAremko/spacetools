@@ -39,7 +39,8 @@ COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
 COPY ./scripts/docker/run /opt/spacetools/
 COPY ./scripts/docker/spacedoc-cfg.edn /opt/spacetools/
-COPY ./scripts/sdnize /opt/spacetools/spacedoc/sdnize
+RUN git clone https://github.com/JAremko/sdnize.el.git \
+        /opt/spacetools/spacedoc/sdnize
 
 WORKDIR  /opt/spacetools
 
