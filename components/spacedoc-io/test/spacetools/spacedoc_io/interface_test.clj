@@ -24,14 +24,7 @@
                                      [:bar.sdn "{:foo :bar}"]
                                      [:baz.txt valid-sdn]
                                      [:qux.sdn (str valid-sdn valid-sdn)]]
-                [:unix
-                 (is (success? (sio/*fp->sdn "/foo.sdn")))
-                 (is (success? (sio/*fp->sdn "/baz.txt")))
-                 (is (= valid-sdn (str @(sio/*fp->sdn "/baz.txt"))))
-                 (is (failure? (sio/*fp->sdn "/qux.sdn")))
-                 (is (failure? (sio/*fp->sdn "/")))
-                 (is (failure? (sio/*fp->sdn "/bar.sdn")))]
-                [:osx
+                [:unix+osx
                  (is (success? (sio/*fp->sdn "/foo.sdn")))
                  (is (success? (sio/*fp->sdn "/baz.txt")))
                  (is (= valid-sdn (str @(sio/*fp->sdn "/baz.txt"))))
@@ -50,13 +43,7 @@
 (deftest *read-cfg-overrides-fn
   (testing-io "*read-cfg-overrides function" [[:foo.edn (str default-config)]
                                               [:bar.edn "{:foo :bar}"]]
-              [:unix
-               (is (success? (sio/*read-cfg-overrides "/foo.edn")))
-               (is (s/valid? :spacetools.spacedoc.config/overriding-configs
-                             @(sio/*read-cfg-overrides "/foo.edn")))
-               (is (exc/exception? (sio/*read-cfg-overrides "/")))
-               (is (exc/exception? (sio/*read-cfg-overrides "/bar.edn")))]
-              [:osx
+              [:unix+osx
                (is (success? (sio/*read-cfg-overrides "/foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(sio/*read-cfg-overrides "/foo.edn")))

@@ -44,18 +44,7 @@
                [:qux.sdn]
                [:quux.edn]
                [:quuz {:type :dir}]]
-              [:unix
-               (is (success? (*parse-input-files ["/"])))
-               (is (success? (*parse-input-files ["/qux.sdn"])))
-               (is (success? (*parse-input-files ["/" "/qux.sdn"])))
-               (is (success? (*parse-input-files ["/quuz"])))
-               (is (failure? (*parse-input-files ["/quux.edn"])))
-               (is (failure? (*parse-input-files ["/quux"])))
-               (is (= #{"/qux.sdn"
-                        "/foo/bar.sdn"
-                        "/foo/qux/qux.sdn"}
-                      @(*parse-input-files ["/"])))]
-              [:osx
+              [:unix+osx
                (is (success? (*parse-input-files ["/"])))
                (is (success? (*parse-input-files ["/qux.sdn"])))
                (is (success? (*parse-input-files ["/" "/qux.sdn"])))
@@ -87,23 +76,7 @@
                  [:empty-overrides.edn (str {})]
                  [:overrided.edn (str overrided)]
                  [:bad-overrides.edn "foo"]]
-                [:unix
-                 (testing "Sanity"
-                   (is (file? "/defaults.edn"))
-                   (is (file? "/empty-overrides.edn"))
-                   (is (file? "/bad-overrides.edn"))
-                   (is (not (file? "/nonexistent.edn"))))
-                 (is (success? (*configure! nil)))
-                 (is (success? (*configure! "/defaults.edn")))
-                 (is (success? (*configure! "/empty-overrides.edn")))
-                 (is (failure? (*configure! "/nonexistent.edn")))
-                 (is (failure? (*configure! "/bad-overrides.edn")))
-                 (is (= @(*configure! nil) @sc/*configs))
-                 (is (= @(*configure! "/empty-overrides.edn") @sc/*configs))
-                 (is (= @(*configure! "/defaults.edn") @sc/*configs))
-                 (is (and (= @(*configure! "/overrided.edn") @sc/*configs)
-                          (test-key @sc/*configs)))]
-                [:osx
+                [:unix+osx
                  (testing "Sanity"
                    (is (file? "/defaults.edn"))
                    (is (file? "/empty-overrides.edn"))

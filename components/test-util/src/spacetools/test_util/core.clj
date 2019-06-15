@@ -92,10 +92,15 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
   STRUCT is the file system initial structure - see `tu/create-fs`.
   Each element of TEST-FORMS has the shape: [OS BODY] where:
   OS is the operation system used in the test and mast be one of the
-  keywords: `:unix` `:osx` `:windows`. BODY is the `testing` macro body."
+  keywords: `:unix` `:osx` `:windows` `:unix+osx` - the last one runs
+  tests both for osx and unix file systems.
+  BODY is the `testing` macro body."
   [name struct & test-forms]
   (conj (for [test-form test-forms
-              :let [[os & body] test-form]]
+              :let [[os-key & body] test-form]
+              os (if (= :unix+osx os-key)
+                   [:unix :osx]
+                   [os-key])]
           `(testing (format "Testing %s with in-memory %s filesystem"
                             ~name
                             (str/capitalize (name ~os)))

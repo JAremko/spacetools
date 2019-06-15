@@ -26,10 +26,7 @@
 (deftest absolute-fn
   (testing-io "absolute function" []
               ;; NOTE: "work" is a default working directory for jimfs
-              [:unix
-               (is (= "/work/bar" (str (io/absolute "/work/bar"))))
-               (is (= "/work/bar" (str (io/absolute "bar"))))]
-              [:osx
+              [:unix+osx
                (is (= "/work/bar" (str (io/absolute "/work/bar"))))
                (is (= "/work/bar" (str (io/absolute "bar"))))]
               [:windows
@@ -39,13 +36,7 @@
 
 (deftest rebase-path-fn
   (testing-io "rebase-path function" []
-              [:unix
-               (are [new-path old-base new-base path]
-                   (= new-path (str (io/rebase-path old-base new-base path)))
-                 "/bar/baz" "/foo" "/bar" "/foo/baz"
-                 "/foo/bar" "/foo" "/foo" "/foo/bar"
-                 "/foo/bar" "/baz" "/qux" "/foo/bar")]
-              [:osx
+              [:unix+osx
                (are [new-path old-base new-base path]
                    (= new-path (str (io/rebase-path old-base new-base path)))
                  "/bar/baz" "/foo" "/bar" "/foo/baz"
@@ -61,11 +52,7 @@
 
 (deftest *spit-fn
   (testing-io "*spit function" []
-              [:unix
-               (is (success? (io/*spit "/foo/bar" "foo\nbar")))
-               (is (= (nio/read-all-lines (nio/path filesystem "/foo/bar"))
-                      ["foo" "bar"]))]
-              [:osx
+              [:unix+osx
                (is (success? (io/*spit "/foo/bar" "foo\nbar")))
                (is (= (nio/read-all-lines (nio/path filesystem "/foo/bar"))
                       ["foo" "bar"]))]
@@ -77,13 +64,7 @@
 
 (deftest *slurp-fn
   (testing-io "*slurp function" [[:foo "bar\nbaz"]]
-              [:unix
-               (is (= ["bar" "baz"] @(io/*slurp "/foo")))
-               (are [pred file-path] (true? (pred (io/*slurp file-path)))
-                 success? "/foo"
-                 failure? "/"
-                 failure? "/non-existing")]
-              [:osx
+              [:unix+osx
                (is (= ["bar" "baz"] @(io/*slurp "/foo")))
                (are [pred file-path] (true? (pred (io/*slurp file-path)))
                  success? "/foo"
@@ -99,10 +80,7 @@
 
 (deftest *slurp-*spit
   (testing-io "Slurping the spit." []
-              [:unix
-               (is (= (exc/success ["disgusting"])
-                      (io/*slurp @(io/*spit "/dev/mouth" "disgusting"))))]
-              [:osx
+              [:unix+osx
                (is (= (exc/success ["disgusting"])
                       (io/*slurp @(io/*spit "/dev/mouth" "disgusting"))))]
               [:windows
@@ -112,15 +90,7 @@
 
 (deftest file?-fn
   (testing-io "file? function" [[:foo [:bar.sdn] [:baz.edn]]]
-              [:unix
-               (are [pred file-path] (pred (io/file? file-path))
-                 true? "/foo/bar.sdn"
-                 true? "/foo/baz.edn"
-                 false? 42
-                 false? "/qux"
-                 false? "/foo"
-                 false? "/foo/qux.sdn")]
-              [:osx
+              [:unix+osx
                (are [pred file-path] (pred (io/file? file-path))
                  true? "/foo/bar.sdn"
                  true? "/foo/baz.edn"
@@ -140,12 +110,7 @@
 
 (deftest file-ref?-fn
   (testing-io "file-ref? function" [[:foo [:bar.txt]]]
-              [:unix
-               (is (not (io/file-ref? 5)))
-               (is (io/file-ref? "foo") "strings are file references")
-               (is (io/file-ref? (nio/path filesystem "/foo")))
-               (is (io/file-ref? (nio/path filesystem "/non-existent")))]
-              [:osx
+              [:unix+osx
                (is (not (io/file-ref? 5)))
                (is (io/file-ref? "foo") "strings are file references")
                (is (io/file-ref? (nio/path filesystem "/foo")))
@@ -159,14 +124,7 @@
 
 (deftest file-ref->path-fn
   (testing-io "file-ref->path function" [[:foo {:type :dir}]]
-              [:unix
-               (are [file-path] (true? (io/file-ref? file-path))
-                 "foo"
-                 (nio/path filesystem "/foo")
-                 "/non-existent"
-                 (nio/path filesystem "/non-existent"))
-               (is (thrown? Exception (io/file-ref->path 42)))]
-              [:osx
+              [:unix+osx
                (are [file-path] (true? (io/file-ref? file-path))
                  "foo"
                  (nio/path filesystem "/foo")
@@ -184,15 +142,7 @@
 
 (deftest sdn-file?-fn
   (testing-io "sdn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
-              [:unix
-               (are [pred file-path] (pred (io/sdn-file? file-path))
-                 true? "/foo/bar.sdn"
-                 false? 42
-                 false? "/qux"
-                 false? "/foo"
-                 false? "/foo/baz.edn"
-                 false? "/foo/qux.sdn")]
-              [:osx
+              [:unix+osx
                (are [pred file-path] (pred (io/sdn-file? file-path))
                  true? "/foo/bar.sdn"
                  false? 42
@@ -212,15 +162,7 @@
 
 (deftest edn-file?-fn
   (testing-io "edn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
-              [:unix
-               (are [pred file-path] (pred (io/edn-file? file-path))
-                 true? "/foo/baz.edn"
-                 false? 42
-                 false? "/qux"
-                 false? "/foo"
-                 false? "/foo/bar.sdn"
-                 false? "/foo/qux.edn")]
-              [:osx
+              [:unix+osx
                (are [pred file-path] (pred (io/edn-file? file-path))
                  true? "/foo/baz.edn"
                  false? 42
@@ -240,13 +182,7 @@
 
 (deftest drectory?-fn
   (testing-io "directory? function" [[:foo [:bar]]]
-              [:unix
-               (are [pred file-path] (pred (io/directory? file-path))
-                 true? "/foo"
-                 false? 42
-                 false? "/qux"
-                 false? "/foo/bar")]
-              [:osx
+              [:unix+osx
                (are [pred file-path] (pred (io/directory? file-path))
                  true? "/foo"
                  false? 42
@@ -267,23 +203,7 @@
                             [:bar {:type :dir}]
                             [:baz
                              [:qux.sdn]]]
-   [:unix
-    (is (success? (io/*flatten-fps ".sdn" [])))
-    (is (success? (io/*flatten-fps ".sdn" ["/"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/" "/"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
-    (is (success? (io/*flatten-fps ".edn" ["/foo.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
-    (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
-    (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
-    (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
-    (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
-    (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
-   [:osx
+   [:unix+osx
     (is (success? (io/*flatten-fps ".sdn" [])))
     (is (success? (io/*flatten-fps ".sdn" ["/"])))
     (is (success? (io/*flatten-fps ".sdn" ["/" "/"])))

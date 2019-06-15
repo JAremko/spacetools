@@ -26,18 +26,7 @@
                  [:double.sdn (str good-node good-node)]
                  [:qux [:quux.edn good-node]]
                  [:empty-dir {:type :dir}]]
-                [:unix
-                 (is (success? (*validate ["/good.sdn"])))
-                 (is (success? (*validate ["/qux"])))
-                 (is (success? (*validate ["/empty-dir"])))
-                 (is (success? (*validate ["/good.sdn" "/qux"])))
-                 (is (success? (*validate ["/good.sdn" "/good.sdn"])))
-                 (is ((complement str/blank?) @(*validate ["/good.sdn"])))
-                 (is (failure? (*validate ["/bad.sdn"])))
-                 (is (failure? (*validate ["/double.sdn"])))
-                 (is (failure? (*validate ["/good.sdn" "/bad.sdn"])))
-                 (is (failure? (*validate ["/"])))]
-                [:osx
+                [:unix+osx
                  (is (success? (*validate ["/good.sdn"])))
                  (is (success? (*validate ["/qux"])))
                  (is (success? (*validate ["/empty-dir"])))
@@ -72,17 +61,7 @@
                  [:bad.sdn bad-node]
                  [:qux [:quux.sdn good-node]]
                  [:empty-dir {:type :dir}]]
-                [:unix
-                 (is (success? (*orgify "/qux" "/foo")))
-                 (is (success? (*orgify "/empty-dir" "/new-dir")))
-                 (is (success? (*orgify "/empty-dir" "/new-dir")))
-                 (is (io/directory? "/foo"))
-                 (is ((complement io/directory?) "/new-dir"))
-                 (is (io/file? "/foo/quux.org"))
-                 (is (seq @(io/*slurp "/foo/quux.org")))
-                 (testing "Testing *orgify function with some bad input files."
-                   (is (failure? (*orgify "/" "/new-dir"))))]
-                [:osx
+                [:unix+osx
                  (is (success? (*orgify "/qux" "/foo")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
                  (is (success? (*orgify "/empty-dir" "/new-dir")))
@@ -122,24 +101,16 @@
                       str)
         bad-node {:bad :node}
         test-node (->> "foobar"
-                      sn/todo
-                      (sn/root "foo" #{})
-                      str)]
+                       sn/todo
+                       (sn/root "foo" #{})
+                       str)]
     (testing-io "*relations function"
                 [[:good.sdn good-node]
                  [:test.sdn test-node]
                  [:bad.sdn bad-node]
                  [:qux [:quux.sdn good-node]]
                  [:empty-dir {:type :dir}]]
-                [:unix
-                 (is (success? (*relations ["/good.sdn"])))
-                 (is (success? (*relations ["/good.sdn" "/good.sdn"])))
-                 (is (= (*relations ["/good.sdn" "/good.sdn"])
-                        (*relations ["/good.sdn"])))
-                 (is (success? (*relations ["/qux"])))
-                 (is (str/includes? @(*relations ["/test.sdn"]) ":root"))
-                 (is (failure? (*relations ["/bad.sdn"])))]
-                [:osx
+                [:unix+osx
                  (is (success? (*relations ["/good.sdn"])))
                  (is (success? (*relations ["/good.sdn" "/good.sdn"])))
                  (is (= (*relations ["/good.sdn" "/good.sdn"])

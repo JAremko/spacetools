@@ -93,7 +93,11 @@
                                 (nio/path filesystem)
                                 (nio/read-all-lines)
                                 (first)))]
+      (is (thrown? Exception
+                   (tu/testing-io "foo" [[:foo [:bar "baz"]]]
+                                  [:bad (is (= "baz" (f-line "/foo/bar")))])))
       (is (tu/testing-io "foo" [[:foo [:bar "baz"]]]
                          [:unix (is (= "baz" (f-line "/foo/bar")))]
+                         [:unix+osx (is (= "baz" (f-line "/foo/bar")))]
                          [:osx (is (= "baz" (f-line "/foo/bar")))]
                          [:windows (is (= "baz" (f-line "C:\\foo\\bar")))])))))
