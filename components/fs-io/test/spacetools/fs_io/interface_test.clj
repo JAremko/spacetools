@@ -91,7 +91,7 @@
 (deftest file?-fn
   (testing-io "file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix+osx
-               (are [pred file-path] (pred (io/file? file-path))
+               (are [pred x] (pred (io/file? x))
                  true? "/foo/bar.sdn"
                  true? "/foo/baz.edn"
                  false? 42
@@ -99,7 +99,7 @@
                  false? "/foo"
                  false? "/foo/qux.sdn")]
               [:windows
-               (are [pred file-path] (pred (io/file? file-path))
+               (are [pred x] (pred (io/file? x))
                  true? "C:\\foo\\bar.sdn"
                  true? "C:\\foo\\baz.edn"
                  false? 42
@@ -111,39 +111,41 @@
 (deftest file-ref?-fn
   (testing-io "file-ref? function" [[:foo [:bar.txt]]]
               [:unix+osx
-               (is (not (io/file-ref? 5)))
-               (is (io/file-ref? "foo") "strings are file references")
-               (is (io/file-ref? (nio/path filesystem "/foo")))
-               (is (io/file-ref? (nio/path filesystem "/non-existent")))]
+               (are [pred x] (pred (io/file-ref? x))
+                 false? 5
+                 true? "foo"
+                 true? (nio/path filesystem "/foo")
+                 true? (nio/path filesystem "/non-existent"))]
               [:windows
-               (is (not (io/file-ref? 5)))
-               (is (io/file-ref? "foo") "strings are file references")
-               (is (io/file-ref? (nio/path filesystem "C:\\foo")))
-               (is (io/file-ref? (nio/path filesystem "C:\\non-existent")))]))
+               (are [pred x] (pred (io/file-ref? x))
+                 false? 5
+                 true? "foo"
+                 true? (nio/path filesystem "C:\\foo")
+                 true? (nio/path filesystem "C:\\non-existent"))]))
 
 
 (deftest file-ref->path-fn
   (testing-io "file-ref->path function" [[:foo {:type :dir}]]
               [:unix+osx
-               (are [file-path] (true? (io/file-ref? file-path))
-                 "foo"
-                 (nio/path filesystem "/foo")
-                 "/non-existent"
-                 (nio/path filesystem "/non-existent"))
+               (are [pred file-path] (pred (io/file-ref? file-path))
+                 true? "foo"
+                 true? (nio/path filesystem "/foo")
+                 true? "/non-existent"
+                 true? (nio/path filesystem "/non-existent"))
                (is (thrown? Exception (io/file-ref->path 42)))]
               [:windows
-               (are [file-path] (true? (io/file-ref? file-path))
-                 "foo"
-                 (nio/path filesystem "C:\\foo")
-                 "C:\\non-existent"
-                 (nio/path filesystem "C:\\non-existent"))
+               (are [pred file-path] (pred (io/file-ref? file-path))
+                 true? "foo"
+                 true? (nio/path filesystem "C:\\foo")
+                 true? "C:\\non-existent"
+                 true? (nio/path filesystem "C:\\non-existent"))
                (is (thrown? Exception (io/file-ref->path 42)))]))
 
 
 (deftest sdn-file?-fn
   (testing-io "sdn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix+osx
-               (are [pred file-path] (pred (io/sdn-file? file-path))
+               (are [pred x] (pred (io/sdn-file? x))
                  true? "/foo/bar.sdn"
                  false? 42
                  false? "/qux"
@@ -151,7 +153,7 @@
                  false? "/foo/baz.edn"
                  false? "/foo/qux.sdn")]
               [:windows
-               (are [pred file-path] (pred (io/sdn-file? file-path))
+               (are [pred x] (pred (io/sdn-file? x))
                  true? "C:\\foo\\bar.sdn"
                  false?  42
                  false?  "C:\\qux"
@@ -163,7 +165,7 @@
 (deftest edn-file?-fn
   (testing-io "edn-file? function" [[:foo [:bar.sdn] [:baz.edn]]]
               [:unix+osx
-               (are [pred file-path] (pred (io/edn-file? file-path))
+               (are [pred x] (pred (io/edn-file? x))
                  true? "/foo/baz.edn"
                  false? 42
                  false? "/qux"
@@ -171,7 +173,7 @@
                  false? "/foo/bar.sdn"
                  false? "/foo/qux.edn")]
               [:windows
-               (are [pred file-path] (pred (io/edn-file? file-path))
+               (are [pred x] (pred (io/edn-file? x))
                  true? "C:\\foo\\baz.edn"
                  false? 42
                  false? "C:\\qux"
@@ -183,13 +185,13 @@
 (deftest drectory?-fn
   (testing-io "directory? function" [[:foo [:bar]]]
               [:unix+osx
-               (are [pred file-path] (pred (io/directory? file-path))
+               (are [pred x] (pred (io/directory? x))
                  true? "/foo"
                  false? 42
                  false? "/qux"
                  false? "/foo/bar")]
               [:windows
-               (are [pred file-path] (pred (io/directory? file-path))
+               (are [pred x] (pred (io/directory? x))
                  true? "C:\\foo"
                  false? 42
                  false? "C:\\qux"
@@ -245,10 +247,11 @@
           err-out (new java.io.StringWriter)]
       (binding [*out* ok-out
                 *err* err-out]
-        (with-redefs-fn {#'spacetools.fs-io.core/exit (constantly nil)}
-          #(do (io/try-m->output (exc/success "foo"))
-               (io/try-m->output (exc/failure (ex-info "bar" {})))
-               (is (str/includes? (str ok-out) "foo"))
-               (is (not (str/includes? (str ok-out) "bar")))
-               (is (str/includes? (str err-out) "bar"))
-               (is (not (str/includes? (str err-out) "foo")))))))))
+        (with-redefs-fn {#'spacetools.fs-io.core/exit identity}
+          #(do (is (zero? (io/try-m->output (exc/success "foo"))))
+               (is (pos? (io/try-m->output (exc/failure (ex-info "bar" {})))))
+               (are [pred out sub-out] (pred (str/includes? (str out) sub-out))
+                 true? ok-out "foo"
+                 false? ok-out "bar"
+                 true? err-out "bar"
+                 false? err-out "foo")))))))

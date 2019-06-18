@@ -165,7 +165,7 @@ NOTE: EXT must include .(dot)"
   (System/exit status-code))
 
 
-(defn-spec try-m->output nil?
+(defn-spec try-m->output any?
   "Print *OUTPUT value to stderr or stdout and `System/exit` with code 0 or 2."
   [*output (exception-of? any?)]
   (exit
