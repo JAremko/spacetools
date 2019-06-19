@@ -206,32 +206,34 @@
                             [:baz
                              [:qux.sdn]]]
    [:unix+osx
-    (is (success? (io/*flatten-fps ".sdn" [])))
-    (is (success? (io/*flatten-fps ".sdn" ["/"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/" "/"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/" "/foo.sdn"])))
-    (is (success? (io/*flatten-fps ".sdn" ["/foo.sdn"])))
-    (is (success? (io/*flatten-fps ".edn" ["/foo.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/foo/bar"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/" "/bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["/" "/foo/bar"])))
+    (are [pred ext file-paths] (pred (io/*flatten-fps ext file-paths))
+      success? ".sdn" []
+      success? ".sdn" ["/"]
+      success? ".sdn" ["/" "/"]
+      success? ".sdn" ["/" "/foo.sdn"]
+      success? ".sdn" ["/foo.sdn"]
+      success? ".edn" ["/foo.edn"]
+      failure? ".sdn" ["/bar.edn"]
+      failure? ".sdn" ["/foo/bar"]
+      failure? ".sdn" ["/" "/bar.edn"]
+      failure? ".sdn" ["/" "/foo/bar"])
     (is (= #{"/foo.sdn"} @(io/*flatten-fps ".sdn" ["/foo.sdn"])))
     (is (= @(io/*flatten-fps ".sdn" ["/"]) @(io/*flatten-fps ".sdn" ["/" "/"])))
     (is (= #{"/foo.sdn" "/baz/qux.sdn"} @(io/*flatten-fps ".sdn" ["/"])))
     (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
     (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
    [:windows
-    (is (success? (io/*flatten-fps ".sdn" [])))
-    (is (success? (io/*flatten-fps ".sdn" ["C:\\"])))
-    (is (success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
-    (is (success? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo.sdn"])))
-    (is (success? (io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
-    (is (success? (io/*flatten-fps ".edn" ["C:\\foo.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["C:\\bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["C:\\foo\\bar"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\bar.edn"])))
-    (is (failure? (io/*flatten-fps ".sdn" ["C:\\" "C:\\foo\\bar"])))
+    (are [pred ext file-paths] (pred (io/*flatten-fps ext file-paths))
+      success? ".sdn" []
+      success? ".sdn" ["C:\\"]
+      success? ".sdn" ["C:\\" "C:\\"]
+      success? ".sdn" ["C:\\" "C:\\foo.sdn"]
+      success? ".sdn" ["C:\\foo.sdn"]
+      success? ".edn" ["C:\\foo.edn"]
+      failure? ".sdn" ["C:\\bar.edn"]
+      failure? ".sdn" ["C:\\foo\\bar"]
+      failure? ".sdn" ["C:\\" "C:\\bar.edn"]
+      failure? ".sdn" ["C:\\" "C:\\foo\\bar"])
     (is (= #{"C:\\foo.sdn"} @(io/*flatten-fps ".sdn" ["C:\\foo.sdn"])))
     (is (= @(io/*flatten-fps ".sdn" ["C:\\"])
            @(io/*flatten-fps ".sdn" ["C:\\" "C:\\"])))
