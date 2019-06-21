@@ -24,7 +24,7 @@
   {:num-tests (tu/samples 30)}
   (prop/for-all
    [indentation gen/nat
-    s-sample (gen/fmap (partial str/join)
+    s-sample (gen/fmap str/join
                        (gen/tuple gen/string-alphanumeric
                                   (gen/elements ["\n" ""])
                                   gen/string-alphanumeric
@@ -53,10 +53,11 @@
 
 
 (deftest valid-node?-fn
-  (is (valid-node? (n/text "foo")))
-  (is (valid-node? (n/root "foo" #{} (n/todo "bar"))))
-  (is (not (valid-node? "baz")))
-  (is (not (valid-node? {:tag :qux})))
+  (are [pred x] (pred (valid-node? x))
+    true? (n/text "foo")
+    true? (n/root "foo" #{} (n/todo "bar"))
+    false? "baz"
+    false? {:tag :qux})
   (letfn [(set-roots-first-hl-val [new-val r-node]
             (setval [:children FIRST :value] new-val r-node))]
     (let [test-node (n/root "foo" #{} (n/todo "quux"))]
@@ -80,10 +81,11 @@
   (let [text (n/text "foo")
         text-spec-form (s/form :spacetools.spacedoc.node/text)
         problem {:foo :bar}]
-    (is (str/includes? (fmt-problem text problem) ":foo"))
-    (is (str/includes? (fmt-problem text problem) ":bar"))
-    (is (str/includes? (fmt-problem text problem) ":text"))
-    (is (str/includes? (fmt-problem text problem) (str text-spec-form)))))
+    (are [pred x] (pred (str/includes? (fmt-problem text problem) x))
+      true? ":foo"
+      true? ":bar"
+      true? ":text"
+      true? (str text-spec-form))))
 
 
 (deftest explain-deepest-fn
@@ -114,12 +116,12 @@
                :clojure.spec.alpha/value
                :value)
            :bad-text-val))
-    (is (= (-> bad-node explain-deepest :clojure.spec.alpha/value :value)
-           :bad-hl-val))
-    (is (= (-> double-bad-node explain-deepest :clojure.spec.alpha/value :value)
-           :bad-last-text-val))
-    (is (= (-> triple-bad-node explain-deepest :clojure.spec.alpha/value :value)
-           :bad-first-text-val))))
+    (are [b-node b-val]
+        (= (-> b-node explain-deepest :clojure.spec.alpha/value :value)
+           b-val)
+      bad-node :bad-hl-val
+      double-bad-node :bad-last-text-val
+      triple-bad-node :bad-first-text-val)))
 
 
 (deftest relation-fn
