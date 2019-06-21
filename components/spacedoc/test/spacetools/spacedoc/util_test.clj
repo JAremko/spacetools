@@ -177,19 +177,22 @@
 ;; Here we mainly test `cfg/custom-id-link-rep-map` regexps
 (deftest fmt-link-fn
   (testing "Formatting of custom-id links"
-    (is (= (fmt-link :custom-id "foo") "foo"))
-    (is (= (fmt-link :custom-id "Foo") "foo"))
-    (is (= (fmt-link :custom-id "#key-bindings") "#key-bindings"))
-    (is (= (fmt-link :custom-id "keybindings") "key-bindings"))
-    (is (= (fmt-link :custom-id "#keybindings") "#key-bindings"))
+    (are [link-type pre pos] (= (fmt-link link-type pre) pos)
+      :custom-id "foo" "foo"
+      :custom-id "Foo" "foo"
+      :custom-id "#key-bindings" "#key-bindings"
+      :custom-id "keybindings" "key-bindings"
+      :custom-id "#keybindings" "#key-bindings")
     (is (= (fmt-link {} :custom-id "keybindings") "keybindings"))
     (is (= (fmt-link {#"foo" "bar"} :custom-id "foo") "bar")))
+
   (testing "Formatting of non-custom-id links (currently noop)"
-    (is (= (fmt-link :qux "foo") "foo"))
-    (is (= (fmt-link :qux "Foo") "Foo"))
-    (is (= (fmt-link :qux "#key-bindings") "#key-bindings"))
-    (is (= (fmt-link :qux "keybindings") "keybindings"))
-    (is (= (fmt-link :qux "#keybindings") "#keybindings"))
+    (are [link-type pre pos] (= (fmt-link link-type pre) pos)
+      :qux "foo" "foo"
+      :qux "Foo" "Foo"
+      :qux "#key-bindings" "#key-bindings"
+      :qux "keybindings" "keybindings"
+      :qux "#keybindings" "#keybindings")
     (is (= (fmt-link {} :custom-id "keybindings") "keybindings"))
     (is (= (fmt-link {#"foo" "bar"} :qux "foo") "foo"))))
 
