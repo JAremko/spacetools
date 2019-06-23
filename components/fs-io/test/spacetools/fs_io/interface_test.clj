@@ -206,7 +206,7 @@
                             [:baz
                              [:qux.sdn]]]
    [:unix+osx
-    (are [pred ext file-paths] (pred (io/*flatten-fps ext file-paths))
+    (are [pred ext file-paths] (true? (pred (io/*flatten-fps ext file-paths)))
       success? ".sdn" []
       success? ".sdn" ["/"]
       success? ".sdn" ["/" "/"]
@@ -223,7 +223,7 @@
     (is (= #{"/foo.edn"} @(io/*flatten-fps ".edn" ["/"])))
     (is (= #{} @(io/*flatten-fps ".sdn" ["/bar"])))]
    [:windows
-    (are [pred ext file-paths] (pred (io/*flatten-fps ext file-paths))
+    (are [pred ext file-paths] (true? (pred (io/*flatten-fps ext file-paths)))
       success? ".sdn" []
       success? ".sdn" ["C:\\"]
       success? ".sdn" ["C:\\" "C:\\"]

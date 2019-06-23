@@ -27,27 +27,29 @@
                  [:qux [:quux.edn good-node]]
                  [:empty-dir {:type :dir}]]
                 [:unix+osx
-                 (is (success? (*validate ["/good.sdn"])))
-                 (is (success? (*validate ["/qux"])))
-                 (is (success? (*validate ["/empty-dir"])))
-                 (is (success? (*validate ["/good.sdn" "/qux"])))
-                 (is (success? (*validate ["/good.sdn" "/good.sdn"])))
                  (is ((complement str/blank?) @(*validate ["/good.sdn"])))
-                 (is (failure? (*validate ["/bad.sdn"])))
-                 (is (failure? (*validate ["/double.sdn"])))
-                 (is (failure? (*validate ["/good.sdn" "/bad.sdn"])))
-                 (is (failure? (*validate ["/"])))]
+                 (are [pred file-paths] (true? (pred (*validate file-paths)))
+                   success? ["/good.sdn"]
+                   success? ["/qux"]
+                   success? ["/empty-dir"]
+                   success? ["/good.sdn" "/qux"]
+                   success? ["/good.sdn" "/good.sdn"]
+                   failure? ["/bad.sdn"]
+                   failure? ["/double.sdn"]
+                   failure? ["/good.sdn" "/bad.sdn"]
+                   failure? ["/"])]
                 [:windows
-                 (is (success? (*validate ["C:\\good.sdn"])))
-                 (is (success? (*validate ["C:\\qux"])))
-                 (is (success? (*validate ["C:\\empty-dir"])))
-                 (is (success? (*validate ["C:\\good.sdn" "C:\\qux"])))
-                 (is (success? (*validate ["C:\\good.sdn" "C:\\good.sdn"])))
                  (is ((complement str/blank?) @(*validate ["C:\\good.sdn"])))
-                 (is (failure? (*validate ["C:\\bad.sdn"])))
-                 (is (failure? (*validate ["C:\\double.sdn"])))
-                 (is (failure? (*validate ["C:\\good.sdn" "C:\\bad.sdn"])))
-                 (is (failure? (*validate ["C:\\"])))])))
+                 (are [pred file-paths] (true? (pred (*validate file-paths)))
+                   success? ["C:\\good.sdn"]
+                   success? ["C:\\qux"]
+                   success? ["C:\\empty-dir"]
+                   success? ["C:\\good.sdn" "C:\\qux"]
+                   success? ["C:\\good.sdn" "C:\\good.sdn"]
+                   failure? ["C:\\bad.sdn"]
+                   failure? ["C:\\double.sdn"]
+                   failure? ["C:\\good.sdn" "C:\\bad.sdn"]
+                   failure? ["C:\\"])])))
 
 
 (deftest *orgify-fn

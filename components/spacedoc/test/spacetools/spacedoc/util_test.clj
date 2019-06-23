@@ -38,7 +38,7 @@
                (->> s-sample
                     (indent indentation)
                     (str/split-lines)
-                    ;; Empty lines aren't indented
+                    ;; Empty lines aren't indented.
                     (remove empty?))))))
 
 
