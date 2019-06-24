@@ -15,16 +15,17 @@
 
 (deftest *parse-fn
   (testing "*parse function."
-    (is (success? (*parse [""] [])))
-    (is (success? (*parse ["foo"] [])))
-    (is (success? (*parse ["foo" "bar"] [])))
-    (success? (*parse ["foo" "bar"] [["-b" "--baz" "Bazing."]]))
-    (success? (*parse ["-b" "bar"] [["-b" "--baz" "Bazing."]]))
-    (success? (*parse ["--baz" "bar"] [["-b" "--baz" "Bazing."]]))
-    (failure? (*parse ["-baz" "bar"] [["-b" "--baz" "Bazing."]]))
-    (failure? (*parse ["-f" "bar"] [["-b" "--baz" "Bazing."]]))
-    (failure? (*parse ["--foo" "bar"] [["-b" "--baz" "Bazing."]]))
-    (failure? (*parse ["-foo"] []))
+    (are [pred args ops] (true? (pred (*parse args ops)))
+      success? [""] []
+      success? ["foo"] []
+      success? ["foo" "bar"] []
+      success? ["foo" "bar"] [["-b" "--baz" "Bazing."]]
+      success? ["-b" "bar"] [["-b" "--baz" "Bazing."]]
+      success? ["--baz" "bar"] [["-b" "--baz" "Bazing."]]
+      failure? ["-baz" "bar"] [["-b" "--baz" "Bazing."]]
+      failure? ["-f" "bar"] [["-b" "--baz" "Bazing."]]
+      failure? ["--foo" "bar"] [["-b" "--baz" "Bazing."]]
+      failure? ["-foo"] [])
     (testing "Parsing of arguments with a flag."
       (let [{:keys [useless action a-args]}
             @(*parse ["doing" "stuff" "--useless"]
@@ -45,23 +46,25 @@
                [:quux.edn]
                [:quuz {:type :dir}]]
               [:unix+osx
-               (is (success? (*parse-input-files ["/"])))
-               (is (success? (*parse-input-files ["/qux.sdn"])))
-               (is (success? (*parse-input-files ["/" "/qux.sdn"])))
-               (is (success? (*parse-input-files ["/quuz"])))
-               (is (failure? (*parse-input-files ["/quux.edn"])))
-               (is (failure? (*parse-input-files ["/quux"])))
+               (are [pred files] (true? (pred (*parse-input-files files)))
+                 success? ["/"]
+                 success? ["/qux.sdn"]
+                 success? ["/" "/qux.sdn"]
+                 success? ["/quuz"]
+                 failure? ["/quux.edn"]
+                 failure? ["/quux"])
                (is (= #{"/qux.sdn"
                         "/foo/bar.sdn"
                         "/foo/qux/qux.sdn"}
                       @(*parse-input-files ["/"])))]
               [:windows
-               (is (success? (*parse-input-files ["C:\\"])))
-               (is (success? (*parse-input-files ["C:\\qux.sdn"])))
-               (is (success? (*parse-input-files ["C:\\" "C:\\qux.sdn"])))
-               (is (success? (*parse-input-files ["C:\\quuz"])))
-               (is (failure? (*parse-input-files ["C:\\quux.edn"])))
-               (is (failure? (*parse-input-files ["C:\\quux"])))
+               (are [pred files] (true? (pred (*parse-input-files files)))
+                 success? ["C:\\"]
+                 success? ["C:\\qux.sdn"]
+                 success? ["C:\\" "C:\\qux.sdn"]
+                 success? ["C:\\quuz"]
+                 failure? ["C:\\quux.edn"]
+                 failure? ["C:\\quux"])
                (is (= #{"C:\\qux.sdn"
                         "C:\\foo\\bar.sdn"
                         "C:\\foo\\qux\\qux.sdn"}
@@ -78,15 +81,17 @@
                  [:bad-overrides.edn "foo"]]
                 [:unix+osx
                  (testing "Sanity"
-                   (is (file? "/defaults.edn"))
-                   (is (file? "/empty-overrides.edn"))
-                   (is (file? "/bad-overrides.edn"))
-                   (is (not (file? "/nonexistent.edn"))))
-                 (is (success? (*configure! nil)))
-                 (is (success? (*configure! "/defaults.edn")))
-                 (is (success? (*configure! "/empty-overrides.edn")))
-                 (is (failure? (*configure! "/nonexistent.edn")))
-                 (is (failure? (*configure! "/bad-overrides.edn")))
+                   (are [pred x] (pred (file? x))
+                     true? "/defaults.edn"
+                     true? "/empty-overrides.edn"
+                     true? "/bad-overrides.edn"
+                     false? "/nonexistent.edn"))
+                 (are [pred file-path] (true? (pred (*configure! file-path)))
+                   success? nil
+                   success? "/defaults.edn"
+                   success? "/empty-overrides.edn"
+                   failure? "/nonexistent.edn"
+                   failure? "/bad-overrides.edn")
                  (is (= @(*configure! nil) @sc/*configs))
                  (is (= @(*configure! "/empty-overrides.edn") @sc/*configs))
                  (is (= @(*configure! "/defaults.edn") @sc/*configs))
@@ -94,15 +99,17 @@
                           (test-key @sc/*configs)))]
                 [:windows
                  (testing "Sanity"
-                   (is (file? "C:\\defaults.edn"))
-                   (is (file? "C:\\empty-overrides.edn"))
-                   (is (file? "C:\\bad-overrides.edn"))
-                   (is (not (file? "C:\\nonexistent.edn"))))
-                 (is (success? (*configure! nil)))
-                 (is (success? (*configure! "C:\\defaults.edn")))
-                 (is (success? (*configure! "C:\\empty-overrides.edn")))
-                 (is (failure? (*configure! "C:\\nonexistent.edn")))
-                 (is (failure? (*configure! "C:\\bad-overrides.edn")))
+                   (are [pred x] (pred (file? x))
+                     true? "C:\\defaults.edn"
+                     true? "C:\\empty-overrides.edn"
+                     true? "C:\\bad-overrides.edn"
+                     false? "C:\\nonexistent.edn"))
+                 (are [pred file-path] (true? (pred (*configure! file-path)))
+                   success? nil
+                   success? "C:\\defaults.edn"
+                   success? "C:\\empty-overrides.edn"
+                   failure? "C:\\nonexistent.edn"
+                   failure? "C:\\bad-overrides.edn")
                  (is (= @(*configure! nil) @sc/*configs))
                  (is (= @(*configure! "C:\\empty-overrides.edn") @sc/*configs))
                  (is (= @(*configure! "C:\\defaults.edn") @sc/*configs))

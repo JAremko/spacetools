@@ -1,6 +1,6 @@
 (ns spacetools.spacedoc-io.interface-test
   "Testing interface of the `spacedoc-io` component."
-  (:require [cats.monad.exception :as exc :refer [success? failure?]]
+  (:require [cats.monad.exception :refer [success? failure? exception?]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
@@ -47,11 +47,11 @@
                (is (success? (sio/*read-cfg-overrides "/foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(sio/*read-cfg-overrides "/foo.edn")))
-               (is (exc/exception? (sio/*read-cfg-overrides "/")))
-               (is (exc/exception? (sio/*read-cfg-overrides "/bar.edn")))]
+               (is (exception? (sio/*read-cfg-overrides "/")))
+               (is (exception? (sio/*read-cfg-overrides "/bar.edn")))]
               [:windows
                (is (success? (sio/*read-cfg-overrides "C:\\foo.edn")))
                (is (s/valid? :spacetools.spacedoc.config/overriding-configs
                              @(sio/*read-cfg-overrides "C:\\foo.edn")))
-               (is (exc/exception? (sio/*read-cfg-overrides "C:\\")))
-               (is (exc/exception? (sio/*read-cfg-overrides "C:\\bar.edn")))]))
+               (is (exception? (sio/*read-cfg-overrides "C:\\")))
+               (is (exception? (sio/*read-cfg-overrides "C:\\bar.edn")))]))
