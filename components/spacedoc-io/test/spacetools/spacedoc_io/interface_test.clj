@@ -25,19 +25,21 @@
                                      [:baz.txt valid-sdn]
                                      [:qux.sdn (str valid-sdn valid-sdn)]]
                 [:unix+osx
-                 (is (success? (sio/*fp->sdn "/foo.sdn")))
-                 (is (success? (sio/*fp->sdn "/baz.txt")))
-                 (is (= valid-sdn (str @(sio/*fp->sdn "/baz.txt"))))
-                 (is (failure? (sio/*fp->sdn "/qux.sdn")))
-                 (is (failure? (sio/*fp->sdn "/")))
-                 (is (failure? (sio/*fp->sdn "/bar.sdn")))]
+                 (are [pred file-path] (true? (pred (sio/*fp->sdn file-path)))
+                   success? "/foo.sdn"
+                   success? "/baz.txt"
+                   failure? "/qux.sdn"
+                   failure? "/"
+                   failure? "/bar.sdn")
+                 (is (= valid-sdn (str @(sio/*fp->sdn "/baz.txt"))))]
                 [:windows
-                 (is (success? (sio/*fp->sdn "C:\\foo.sdn")))
-                 (is (success? (sio/*fp->sdn "C:\\baz.txt")))
-                 (is (= valid-sdn (str @(sio/*fp->sdn "C:\\baz.txt"))))
-                 (is (failure? (sio/*fp->sdn "C:\\qux.sdn")))
-                 (is (failure? (sio/*fp->sdn "C:\\")))
-                 (is (failure? (sio/*fp->sdn "C:\\bar.sdn")))])))
+                 (are [pred file-path] (true? (pred (sio/*fp->sdn file-path)))
+                   success? "C:\\foo.sdn"
+                   success? "C:\\baz.txt"
+                   failure? "C:\\qux.sdn"
+                   failure? "C:\\"
+                   failure? "C:\\bar.sdn")
+                 (is (= valid-sdn (str @(sio/*fp->sdn "C:\\baz.txt"))))])))
 
 
 (deftest *read-cfg-overrides-fn
