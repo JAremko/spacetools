@@ -55,7 +55,7 @@
 
 
 (doall
- (for [v (filter (complement indirect-nodes) (sc/all-tags))
+ (for [v (remove indirect-nodes (sc/all-tags))
        :let [node-name (name v)]]
    (eval
     `(binding [s/*recursion-limit* 2]
@@ -73,6 +73,6 @@
 
 
 (deftest tag->kind-fn
-  (is (= (tag->kind :foo) nil))
-  (is (= (tag->kind nil) nil))
+  (is (nil? (tag->kind :foo)))
+  (is (nil? (tag->kind nil)))
   (is (= (tag->kind :paragraph) :block)))

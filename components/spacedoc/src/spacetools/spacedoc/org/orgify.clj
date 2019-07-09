@@ -51,21 +51,6 @@
       :else tag)))
 
 
-;;;; root node helpers
-
-(defn-spec remove-head-props :spacetools.spacedoc.node/root
-  "Remove title and tags nodes from the head of the root node."
-  [{[f-child & children] :children :as root} :spacetools.spacedoc.node/root]
-  (if (s/valid? :spacetools.spacedoc.node/section f-child)
-    (update-in
-     root
-     [:children 0 :children]
-     (partial into [] (->> :spacetools.spacedoc.org.head/root-head-prop
-                           (partial s/valid?)
-                           (remove))))
-    root))
-
-
 ;;;; general helpers
 
 (defn-spec assoc-level-and-path-id sdu/valid-hl?
