@@ -1,4 +1,4 @@
-FROM clojure:openjdk-11-lein as clojure
+FROM clojure:openjdk-14-lein as clojure
 
 ENV GENTEST_MULTIPLIER 1
 
@@ -54,12 +54,12 @@ RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
                  ./spacedoc/sdnize/sdnize.elc \
                  ./run
 
-RUN apt-get update && apt-get install -y python \
+RUN apt-get update && apt-get install -y python gnutls-bin gnupg \
     && cd /opt/spacetools/spacedoc/sdnize \
     && git clone https://github.com/cask/cask.git /tmp/caks \
     && /tmp/caks/bin/cask install \
     && /tmp/caks/bin/cask exec buttercup -L . -L tests \
-    && apt-get purge python -y \
+    && apt-get purge -y python \
     && rm -rf .cask /tmp/* /var/lib/apt/lists/*
 
 ENTRYPOINT ["/opt/spacetools/run"]

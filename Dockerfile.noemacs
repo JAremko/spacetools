@@ -1,4 +1,4 @@
-FROM clojure:openjdk-11-lein as clojure
+FROM clojure:openjdk-14-lein as clojure
 
 ENV GENTEST_MULTIPLIER 1
 
@@ -17,7 +17,7 @@ WORKDIR /tmp
 
 COPY --from=clojure /usr/src/app/systems/spacedoc-cli/target/spacedoc.jar ./
 
-RUN apt-get update && apt-get install -y wget gcc gnutls-bin gnupg libz-dev
+RUN apt-get update && apt-get install -y wget gcc libz-dev
 
 RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-linux-amd64-${GRAALVM_V}.tar.gz \
     && tar -xzf graalvm-ce-linux-amd64-${GRAALVM_V}.tar.gz
@@ -39,10 +39,10 @@ COPY --from=graalvm /tmp/spacedoc /usr/local/bin
 
 COPY ./scripts/docker/run /opt/spacetools/
 COPY ./scripts/docker/spacedoc-cfg.edn /opt/spacetools/
-RUN apt-get update && apt-get install -y git \
+RUN apt-get update && apt-get install -y git gnutls-bin gnupg \
     && git clone https://github.com/JAremko/sdnize.el.git \
            /opt/spacetools/spacedoc/sdnize \
-    && apt-get purge git -y \
+    && apt-get purge -y git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR  /opt/spacetools
