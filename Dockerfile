@@ -11,7 +11,7 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=19.2.1
+ENV GRAALVM_V=19.3.0
 
 WORKDIR /tmp
 
@@ -19,17 +19,16 @@ COPY --from=clojure /usr/src/app/systems/spacedoc-cli/target/spacedoc.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
-RUN wget --quiet https://github.com/oracle/graal/releases/download/vm-${GRAALVM_V}/graalvm-ce-linux-amd64-${GRAALVM_V}.tar.gz \
-    && tar -xzf graalvm-ce-linux-amd64-${GRAALVM_V}.tar.gz
+RUN wget --quiet "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_V}/graalvm-ce-java11-linux-amd64-${GRAALVM_V}.tar.gz" \
+    && tar -xzf "graalvm-ce-java11-linux-amd64-${GRAALVM_V}.tar.gz"
 
-RUN graalvm-ce-${GRAALVM_V}/bin/gu install native-image
+RUN graalvm-ce-java11-${GRAALVM_V}/bin/gu install native-image
 
-RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
+RUN graalvm-ce-java11-${GRAALVM_V}/bin/native-image \
     --no-server \
     --no-fallback \
     --initialize-at-build-time \
     -H:+ReportUnsupportedElementsAtRuntime \
-    -H:InitialCollectionPolicy='com.oracle.svm.core.genscavenge.CollectionPolicy$NeverCollect' \
     -jar /tmp/spacedoc.jar
 
 

@@ -11,7 +11,7 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=19.2.1
+ENV GRAALVM_V=19.3.0
 
 WORKDIR /tmp
 
@@ -29,7 +29,6 @@ RUN graalvm-ce-${GRAALVM_V}/bin/native-image \
     --no-fallback \
     --initialize-at-build-time \
     -H:+ReportUnsupportedElementsAtRuntime \
-    -H:InitialCollectionPolicy='com.oracle.svm.core.genscavenge.CollectionPolicy$NeverCollect' \
     -jar /tmp/spacedoc.jar
 
 
