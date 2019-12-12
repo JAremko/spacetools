@@ -28,13 +28,9 @@ after_success:
 before_deploy:
   - docker build -f Dockerfile         -t jare/spacetools:latest  .
   - docker build -f Dockerfile.noemacs -t jare/spacetools:noemacs .
-  - docker ps -a
 
 deploy:
   provider: script
+  script: bash scripts/travis/docker_push
   on:
     branch: master
-  script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - docker push jare/spacetools:latest
-    - docker push jare/spacetools:noemacs
