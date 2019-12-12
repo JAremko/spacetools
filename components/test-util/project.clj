@@ -2,9 +2,9 @@
   :description "A test-util component."
   :dependencies [[environ "1.1.0"]
                  [nio2 "0.2.3"]
-                 [orchestra "2019.02.17-SNAPSHOT"]
+                 [orchestra "development-SNAPSHOT"]
                  [com.google.jimfs/jimfs "1.1"]
                  [org.clojure/clojure "1.9.0"]
-                 [org.clojure/test.check "0.10.0-alpha4"]
+                 [org.clojure/test.check "0.10.0"]
                  [spacetools/interfaces "1.0"]]
   :aot :all)
