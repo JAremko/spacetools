@@ -104,9 +104,13 @@
                                   (apply n/headline "Skipped layers:")
                                   vector)))
                   (list (n/todo "No README.org files with \"layer\" tag.")))
+                 ;; TODO: Make this configurable:
                  (->> (str "Don't edit it directly.\n"
-                           "See \"README.org tags\" section of"
-                           " CONTRIBUTING.org for instructions.")
+                           "See [["
+                           "https://github.com/syl20bnr/spacemacs"
+                           "/blob/develop/CONTRIBUTING.org#readmeorg-tags"
+                           "][\"README.org tags\" section of"
+                           " CONTRIBUTING.org for instructions]].")
                       n/text
                       n/paragraph
                       n/section
