@@ -130,12 +130,11 @@
                               string?))
 
 (s/def ::layers-org-query
-  (s/coll-of
-   (s/or :join (s/map-of string? ::layers-org-query
-                         :count 1)
-         :select string?)
-   :kind vector?
-   :min-count 1))
+  (s/map-of string? (s/coll-of (s/or :join ::layers-org-query
+                                     :select string?)
+                               :kind vector?
+                               :min-count 1)
+            :count 1))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))
 
