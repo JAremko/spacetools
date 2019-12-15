@@ -53,46 +53,47 @@
        "web service" "Web services"
        }
       :layers-org-query
-      ["chat"
-       "checker"
-       "completion"
-       "e-mail"
-       "file tree"
-       "font"
-       "emacs"
-       "fun"
-       "i18n"
-       "misc"
-       "music"
-       "os"
-       "pairing"
-       "reader"
-       {"programming" [{"dsl" ["lisp"
-                               "markup"
-                               "script"
-                               ]}
-                       "dsl"
-                       {"general" ["imperative"
-                                   {"multi-paradigm" ["js"
-                                                      ]}
-                                   "multi-paradigm"
-                                   "pure"
-                                   ]}
-                       "general"
-                       "framework"
-                       "util"
-                       ]}
-       "versioning"
-       {"spacemacs" ["distribution"
-                     "util"
-                     ]}
-       "tag"
-       "theme"
-       "tool"
-       "vim"
-       "web service"
-       "uncategorized"
-       ]
+      {"layer" ["chat"
+                "checker"
+                "completion"
+                "e-mail"
+                "file tree"
+                "font"
+                "emacs"
+                "fun"
+                "i18n"
+                "misc"
+                "music"
+                "os"
+                "pairing"
+                "reader"
+                {"programming" [{"dsl" ["lisp"
+                                        "markup"
+                                        "script"
+                                        ]}
+                                "dsl"
+                                {"general" ["imperative"
+                                            {"multi-paradigm" ["js"
+                                                               ]}
+                                            "multi-paradigm"
+                                            "pure"
+                                            ]}
+                                "general"
+                                "framework"
+                                "util"
+                                ]}
+                "versioning"
+                {"spacemacs" ["distribution"
+                              "misc"
+                              ]}
+                "tag"
+                "theme"
+                "tool"
+                "vim"
+                "web service"
+                "uncategorized"
+                ]
+       }
       :text-separators-rigth #{\space \! \' \( \tab \newline \, \. \‘ \: \; \{ \“ \\ \} \? \"}
       :text-separators-left #{\space \! \' \tab \) \newline \, \. \’ \: \; \{ \\ \” \} \? \"}
       :text-replacement-map {"‘" "'"

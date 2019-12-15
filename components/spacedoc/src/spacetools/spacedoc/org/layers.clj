@@ -94,7 +94,6 @@
            (conj (or
                   (seq
                    (into (->> (cfg/layers-org-query)
-                              (hash-map "layer")
                               (walk (vreset! all-docs-v (set docs)))
                               :children)
                          (some->> @all-docs-v
