@@ -18,11 +18,20 @@
        first))
 
 
+(defn-spec capitalize-first string?
+  [str string?]
+  (str/join (into (rest str) (str/upper-case (first str)))))
+
+
 (defn-spec describe :spacetools.spacedoc.node/headline
   [node :spacetools.spacedoc.node/root]
   (apply
    n/headline
-   (-> node :title (str/replace-first #"\s+layer$" "") str/capitalize)
+   (-> node
+       (:title)
+       (str/trim)
+       (str/replace-first (:title node) #"\s+layer$" "")
+       (capitalize-first))
    (into (-> (if-let [src (:source node)]
                (n/link (str "file:" src) (n/text src))
                (n/text "<layer link is missing>"))
