@@ -21,7 +21,7 @@
    :dev {:global-vars {*warn-on-reflection* true *assert* true}
          :plugins [[lein-environ "1.1.0"]]
          :dependencies [[com.google.jimfs/jimfs "1.1"]
-                        [core.typed "0.1.8"]
+                        [org.clojure/core.typed "0.6.0"]
                         [http-kit.fake "0.2.2"]
                         [com.rpl/specter "1.1.3"]
                         [org.clojure/clojure "1.10.1"]
