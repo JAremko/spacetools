@@ -30,7 +30,7 @@
    (-> node
        (:title)
        (str/trim)
-       (str/replace-first (:title node) #"\s+layer$" "")
+       (str/replace-first #"\s+layer$" "")
        (capitalize-first))
    (into (-> (if-let [src (:source node)]
                (n/link (str "file:" src) (n/text src))
