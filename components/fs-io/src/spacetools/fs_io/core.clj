@@ -26,12 +26,14 @@
 (s/def ::file-ref (s/or :string-path (s/and string? (complement str/blank?))
                         :path path?))
 
+(s/def ::file-refs (s/coll-of ::file-ref :min-count 0))
+
+(s/def ::strings (s/coll-of string?))
 
 (defn-spec file-ref? boolean?
   "Returns true if X is one of file reference types or a string."
   [x any?]
   (s/valid? ::file-ref x))
-
 
 (defn-spec str->path path?
   "Construct `Path` form a `String`."
@@ -76,12 +78,17 @@
   (instance? java.util.regex.Pattern x))
 
 
-(s/def ::ext (s/and string? #(str/starts-with? % ".")))
+(s/def ::extension (s/and string? #(str/starts-with? % ".")))
+
+(s/def ::set-of-strings+  (s/coll-of (s/and string? (complement str/blank?))
+                                     :kind set?
+                                     :min-count 0
+                                     :distinct true))
 
 (defn-spec file-with-ext? boolean?
   "Returns true if X is a `::file-ref` with extension EXT.
 NOTE: EXT must include .(dot)"
-  [ext ::ext x any?]
+  [ext ::extension x any?]
   (true?
    (when (file? x)
      (let [fp (file-ref->path x)]
@@ -176,7 +183,7 @@ NOTE: EXT must include .(dot)"
        (output-ok (str output))))))
 
 
-(defn-spec *spit (exception-of? any?)
+(defn-spec *spit (exception-of? path?)
   "Spit CONTENT into PATH file and returns path wrapped into `exc/exception`."
   [path file-ref? content any?]
   (exc/try-or-recover
@@ -206,15 +213,10 @@ NOTE: EXT must include .(dot)"
      (exc/failure (ex-info "Can't read file" {:path path :error err})))))
 
 
-(defn-spec *fps-in-dir (exception-of?
-                        (s/coll-of (s/and string?
-                                          (complement str/blank?))
-                                   :kind set?
-                                   :min-count 0
-                                   :distinct true))
+(defn-spec *fps-in-dir (exception-of? ::set-of-strings+)
   "Return absolute paths of files with EXT extension in PATH directory.
 NOTE: EXT must include dot."
-  [ext ::ext path file-ref?]
+  [ext ::extension path file-ref?]
   (exc/try-on
    (let [p (file-ref->path path)]
      (if (directory? p)
@@ -233,15 +235,10 @@ NOTE: EXT must include dot."
          {:extension ext :file p}))))))
 
 
-(defn-spec *flatten-fps (exception-of?
-                         (s/coll-of (s/and string?
-                                           (complement str/blank?))
-                                    :kind set?
-                                    :min-count 0
-                                    :distinct true))
+(defn-spec *flatten-fps (exception-of? ::set-of-strings+)
   "Flatten sequence of EXT file PATHS and directories(searched for files).
   EXT is a file extension (including dot)."
-  [ext ::ext paths (s/coll-of file-ref? :min-count 0)]
+  [ext ::extension paths ::file-refs]
   (exc/try-on
    (r/fold
     (r/monoid (m/lift-m 2 union) (exc/wrap hash-set))

@@ -5,7 +5,6 @@
 (defn *flatten-fps [ext paths])
 (defn *slurp [path])
 (defn *spit [path content])
-(defn absolute [path])
 (defn directory? [x])
 (defn edn-file? [x])
 (defn file-ref->path [f-ref])
@@ -18,3 +17,4 @@
 (defn relativize [path other])
 (defn join [parent path])
 (defn parent [path])
+(defn absolute [path])
