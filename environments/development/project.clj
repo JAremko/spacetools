@@ -21,10 +21,10 @@
    :dev {:global-vars {*warn-on-reflection* true *assert* true}
          :plugins [[lein-environ "1.1.0"]]
          :dependencies [[com.google.jimfs/jimfs "1.1"]
-                        [org.clojure/core.typed "0.6.0"]
-                        [http-kit.fake "0.2.2"]
                         [com.rpl/specter "1.1.3"]
+                        [http-kit.fake "0.2.2"]
                         [org.clojure/clojure "1.10.1"]
+                        [org.clojure/core.typed "0.6.0"]
                         [org.clojure/test.check "0.10.0"]]
          :jvm-opts ["-Xmn4G" "-Xss8m"]}
    :test {:env {:gentest-multiplier "3"}}}

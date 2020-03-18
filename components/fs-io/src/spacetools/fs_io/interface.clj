@@ -87,5 +87,9 @@
   (io/parent path))
 
 (defmacro exception-of?
+  "Construct predicate function for testing exception monad value.
+  The predicate returns true if the monad contains `exc/failure`
+  or if `exc/success` wraps value satisfying PRED predicate.
+  PRED also can be a spec or qualified-ident referencing a spec."
   [pred]
   `(io/exception-of? ~pred))

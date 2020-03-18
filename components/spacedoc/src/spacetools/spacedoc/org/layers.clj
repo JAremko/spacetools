@@ -67,9 +67,10 @@
                      (n/headline "foo" (n/section (n/key-word "3" "foo")))
                      })
 
+(s/def ::maybe-root (s/nilable :spacetools.spacedoc.node/root))
 
 ;; TODO Replace TAG validation with SPEC on configs read.
-(defn-spec layers-sdn (s/nilable :spacetools.spacedoc.node/root)
+(defn-spec layers-sdn ::maybe-root
   "Create layers.org from a seq of documentation files."
   [docs :spacetools.spacedoc.node/root]
   (let [all-docs-v (volatile! #{})

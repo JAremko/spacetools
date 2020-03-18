@@ -42,7 +42,9 @@
                    :spec-form (s/form (sc/node->spec-k node)))))
 
 
-(defn-spec explain-deepest (s/nilable (s/keys :req [::spec/problems]))
+(s/def ::maybe-problems (s/nilable (s/keys :req [::spec/problems])))
+
+(defn-spec explain-deepest ::maybe-problems
   "Validate each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
@@ -65,9 +67,12 @@
    (tree-seq :children :children parent)))
 
 
-(defn-spec relations (s/map-of keyword? set?)
+(s/def ::key->set (s/map-of keyword? set?))
+(s/def ::nodes (s/coll-of node?))
+
+(defn-spec relations ::key->set
   "Apply `relation` to PARENTS and `union` the outputs.."
-  [parents (s/coll-of node?)]
+  [parents ::nodes]
   (r/fold (r/monoid (partial merge-with union) hash-map)
           (r/map relation parents)))
 
