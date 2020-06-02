@@ -11,7 +11,7 @@ RUN cd /usr/src/app \
 
 FROM ubuntu as graalvm
 
-ENV GRAALVM_V=19.3.0
+ENV GRAALVM_V=20.1.0
 
 WORKDIR /tmp
 
