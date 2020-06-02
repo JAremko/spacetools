@@ -80,18 +80,27 @@
 
 
 (defn-spec re-root-sdn valid-root?
+  "Adjust :source and :root-dir of a SDN root."
   [root-dir file-ref? path file-ref? doc valid-root?]
   (assoc doc
          :source (re-relativize root-dir path (rm-file-prefix path))
          :root-dir root-dir))
 
 
+(defn-spec extension? boolean?
+  "Return true if x has file extension like tail."
+  [x string?]
+  (re-matches #"^\..*" x))
+
+
 (defn-spec set-ext file-ref?
-  [ext (partial re-matches #"^\..*" ) fp file-ref?]
+  "Set FP file extension to EXT"
+  [ext extension? fp file-ref?]
   (-> fp (str/replace #"\.[^\.]+$" "") (str ext) fio/file-ref->path))
 
 
 (defn-spec re-root-relative-links valid-root?
+  "Adjust relative links to a new root."
   [root-dir file-ref? path file-ref? doc valid-root?]
   ((fn inner [f-p sdn]
      (if (= :link (:tag sdn))

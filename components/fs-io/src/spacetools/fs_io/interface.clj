@@ -1,4 +1,5 @@
 (ns spacetools.fs-io.interface
+  "File-system I/O."
   (:require [spacetools.fs-io.core :as io]
             [orchestra.core :refer [defn-spec]]))
 

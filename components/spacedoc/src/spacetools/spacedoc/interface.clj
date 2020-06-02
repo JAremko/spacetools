@@ -1,11 +1,11 @@
 (ns spacetools.spacedoc.interface
+  "Tools for processing Spacemacs documentation."
   (:require [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core  :as sdc]
             [spacetools.spacedoc.org.layers :as sdl]
             [spacetools.spacedoc.org.orgify :as sdo]
             [spacetools.spacedoc.util :as sdu]))
-
 
 (def config-file-name
   "File name of configurations overrides file."
