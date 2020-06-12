@@ -16,7 +16,7 @@
 
 (defmulti invariants
   "Given tested NODE and its ORG-STR(org string representation), returns true
-  if the data stays consistent between formats."
+  if the data stays consistent between the formats."
   (fn [node org-str]
     (if-let [node-spec (s/get-spec (sc/node->spec-k node))]
       (cond
@@ -55,13 +55,14 @@
 
 
 (doall
+ ;; Generate tests for SDN -> org string conversions.
  (for [v (remove indirect-nodes (sc/all-tags))
        :let [node-name (name v)]]
    (eval
     `(binding [s/*recursion-limit* 2]
        (defspec ~(symbol (str node-name "-node->org-string"))
          ~(tu/samples 10)
-         (testing (format (str "Any valid \"%s\" node can "
+         (testing (format (str "Every valid \"%s\" node can "
                                "be exported to the org format.")
                           ~node-name)
            (prop/for-all [node# (-> ~v

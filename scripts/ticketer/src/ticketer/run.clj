@@ -1,5 +1,16 @@
 (ns ticketer.run
-  "Entry point module for the app."
+  "Entry point module.
+  The app marks stale issues with updated tag if
+  the last comment in the issue isn't from the stale bot.
+  The app take no arguments and should be configured with
+  cfg.edn and secret.edn files in the run folder.
+
+  cfg.edn example:
+  {:owner \"syl20bnr\" :repo \"spacemacs\" :retry-after-sec 10}
+
+  secret.edn example:
+  {:user \"jaremko\" :token \"<GH API TOKEN\"}
+  "
   (:require [ticketer.core :as t]))
 
 
@@ -35,14 +46,12 @@
    (->> {:labels [label-stale]}
         t/issue-pages
         t/issues
-        (map (partial log #(format "Checking \"%s\" %s"
-                                   (% "title")
-                                   (% "url"))))
+        (map (partial log #(format "Checking \"%s\" %s" (% "title") (% "url"))))
         (filter (complement last-commented-by-action-bot?))
         (map (partial log #(format "Found updated issue: \"%s\" %s"
                                    (% "title")
                                    (% "url"))))
         (map #(t/label-add label-stale-updated %))
         (pmap (partial log #(format "Labeled \"%s\" with response code: %s"
-                                   (get-in % [:opts :url])
-                                   (:status %)))))))
+                                    (get-in % [:opts :url])
+                                    (:status %)))))))

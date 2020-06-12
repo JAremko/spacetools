@@ -4,6 +4,7 @@
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core  :as sdc]
             [spacetools.spacedoc.org.layers :as sdl]
+            [clojure.spec.alpha :as s]
             [spacetools.spacedoc.org.orgify :as sdo]
             [spacetools.spacedoc.util :as sdu]))
 
@@ -20,9 +21,9 @@
   [node sdc/node?]
   (sdo/sdn->org node))
 
-(defn-spec layers-sdn :spacetools.spacedoc.org.layers/maybe-root
+(defn-spec layers-sdn :spacetools.spacedoc.node/root
   "Create layers.org from a seq of documentation files."
-  [docs :spacetools.spacedoc.node/root]
+  [docs (s/coll-of :spacetools.spacedoc.node/root)]
   (sdl/layers-sdn docs))
 
 (defn-spec explain-deepest :spacetools.spacedoc.util/maybe-problems

@@ -33,13 +33,14 @@
                                   (gen/elements ["\n" ""])
                                   gen/string-alphanumeric
                                   (gen/elements ["\n" ""])))]
-   (is (every? #(= (- (count %) (count (str/triml %)))
-                   indentation)
-               (->> s-sample
-                    (indent indentation)
-                    (str/split-lines)
-                    ;; Empty lines aren't indented.
-                    (remove empty?))))))
+   (is (->> s-sample
+            (indent indentation)
+            (str/split-lines)
+            ;; Empty lines aren't indented.
+            (remove empty?)
+            (every? #(= (- (count %)
+                           (count (str/triml %)))
+                        indentation))))))
 
 
 (deftest node->children-tag-s-fn

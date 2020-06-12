@@ -65,7 +65,7 @@
 (st/instrument)
 
 
-;; Those are pretty naive but fast tests just to make sure that stuff isn't
+;; Pretty naive but fast tests just to make sure that stuff isn't
 ;; obviously broken. We use generative testing to catch non-trivial errors.
 (deftest headline-utility
   (let [headlines [(depth->headline 1)
