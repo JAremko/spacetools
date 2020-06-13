@@ -25,6 +25,29 @@
   (str/join (into (rest str) (str/upper-case (first str)))))
 
 
+(def missing-source-link-text
+  "Text for missing source link placeholder."
+  "<layer link is missing>")
+
+(def missing-source-link-ph
+  "Placeholder for missing source link."
+  (n/text missing-source-link-text))
+
+(def missing-description-text
+  "Text for missing description placeholder."
+  "README.org of the layer misses or has invalid \"Description\".")
+
+(def missing-description-ph
+  "Placeholder for missing description."
+  (->> missing-description-text
+       n/text
+       n/bold
+       n/paragraph
+       n/section
+       (n/headline "Placeholder")
+       vector))
+
+
 (defn-spec describe :spacetools.spacedoc.node/headline
   "Returns headline describing a SDN document."
   [root :spacetools.spacedoc.node/root]
@@ -37,22 +60,22 @@
        (capitalize-first))
    (into (-> (if-let [src (:source root)]
                (n/link (str "file:" src) (n/text src))
-               (n/text "<layer link is missing>"))
+               missing-source-link-ph)
              n/paragraph
              (n/section (n/paragraph (n/line-break)))
              vector)
          (if-let [description (root->description root)]
            (:children (flatten-headline 1 description))
-           (->> "README.org of the layer misses or has invalid \"Description\"."
-                n/text
-                n/bold
-                n/paragraph
-                n/section
-                (n/headline "Placeholder")
-                vector)))))
+           missing-description-ph))))
 
 
-(defn-spec layers-query-shaper map?
+(s/def :spacetools.spacedoc.org.layers.shaper/shaped any?)
+(s/def :spacetools.spacedoc.org.layers.shaper/leftover any?)
+(s/def ::shaped-ret-val
+  (s/keys :req-un [:spacetools.spacedoc.org.layers.shaper/shaped
+                   :spacetools.spacedoc.org.layers.shaper/leftover]))
+
+(defn-spec layers-query-shaper ::shaped-ret-val
   "Fills QUERY shape with data from DOCS documentation files."
   [docs spacetools.spacedoc.node/root
    query :spacetools.spacedoc.config/layers-org-query]
@@ -115,12 +138,39 @@
     {:shaped shaped :leftover @all-docs-v}))
 
 
+(def layers-org-autogen-note
+  "Note about layers.org being auto-generated."
+  (n/headline "THIS FILE IS AUTO GENERATED"
+              (->> (str "Don't edit it directly.\n"
+                        "See [["
+                        "https://github.com/syl20bnr/spacemacs"
+                        "/blob/develop/CONTRIBUTING.org#readmeorg-tags"
+                        "][\"README.org tags\" section of"
+                        " CONTRIBUTING.org for the instructions]].")
+                   n/text
+                   n/paragraph
+                   n/section)))
+
+(def no-layer-readme-files-ph
+  "Placeholder for layer readme.org files."
+  (n/todo "No README.org files with \"layer\" tag."))
+
+(def layers-org-title-text
+  "Title text of the layers.org file."
+  "Configuration layers")
+
+(def skipped-layers-text
+  "Text for the skipped layers headline.
+  NOTE: I extracted even short text literals into defs simply because
+  it should help with testing."
+  "Skipped layers:")
+
 (defn-spec layers-sdn :spacetools.spacedoc.node/root
   "Create layers.org from a seq of documentation files."
   [docs (s/coll-of :spacetools.spacedoc.node/root)]
   (let [{shape :shaped
          rest-docs :leftover} (layers-query-shaper docs (cfg/layers-org-query))]
-    (apply n/root "Configuration layers" #{}
+    (apply n/root layers-org-title-text #{}
            (conj (or (-> shape
                          (get :children)
                          (into (some->> rest-docs
@@ -128,18 +178,8 @@
                                         seq
                                         (sort-by (comp str/lower-case :title))
                                         (map describe)
-                                        (apply n/headline "Skipped layers:")
+                                        (apply n/headline skipped-layers-text)
                                         vector))
                          seq)
-                     (list (n/todo "No README.org files with \"layer\" tag.")))
-                 ;; TODO: Make this configurable:
-                 (->> (str "Don't edit it directly.\n"
-                           "See [["
-                           "https://github.com/syl20bnr/spacemacs"
-                           "/blob/develop/CONTRIBUTING.org#readmeorg-tags"
-                           "][\"README.org tags\" section of"
-                           " CONTRIBUTING.org for instructions]].")
-                      n/text
-                      n/paragraph
-                      n/section
-                      (n/headline "THIS FILE IS AUTO GENERATED"))))))
+                     (list no-layer-readme-files-ph))
+                 layers-org-autogen-note))))
