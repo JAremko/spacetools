@@ -5,16 +5,12 @@
             [clojure.test :refer :all]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
-            [spacetools.spacedoc.config :as cfg]
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc.core :as sc]
+            [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.org.layers :refer :all]
-            [spacetools.spacedoc.util :as sdu]
-            [spacetools.test-util.interface :as tu]
-            [clojure.set :as set]))
-
+            [spacetools.test-util.interface :as tu]))
 
 ;; Test vals
 (def test-text "test text from test-text var")
@@ -173,7 +169,9 @@
                       s/gen
                       (gen/such-that seq)
                       gen/no-shrink)
-      hl-children (s/gen :spacetools.spacedoc.node.headline/children)]
+      hl-children (->> :spacetools.spacedoc.node.headline/children
+                       s/gen
+                       gen/no-shrink)]
      (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
                       (fn [] valid-tags)}
        #(let [key (rand-nth (keys valid-tags))
