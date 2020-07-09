@@ -20,7 +20,8 @@ print_help () {
                              will be used.
     docfmt  ROOT [INPUTS]... Format Spacemacs documentation files.
                              If only the first argument is supplied
-                             all files in ROOT folder will be formatted.
+                             the default list of documentation files
+                             will be used.
 
   Common arguments:
     ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
@@ -75,17 +76,13 @@ case $action in
     docfmt)
         set -e
         cd ./spacedoc
-        prefmt_args="${@}"
-        if [[ -z "${prefmt_args// }" ]]; then
-            prefmt_args="${first_arg}"
-        fi
         echo_headline "Exporting documentation for formatting with SDN tools:"
         emacs -batch \
-              -l /opt/spacetools/spacedoc/sdnize/sdnize  \
+              -l /opt/spacetools/spacedoc/sdnize/sdnize \
               -no-site-file \
               -q \
               "${sdnize_args[@]}"
-        echo_headline "Generating \"LAYERS_WIP.sdn\" file:"
+        echo_headline "Generating \"LAYERS.sdn\" file:"
         spacedoc layers -c"/opt/spacetools/spacedoc-cfg.edn" \
                  "${tmp_dir}layers"
         echo_headline "Importing documentation back into .org format:"

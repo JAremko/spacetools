@@ -16,7 +16,8 @@ Actions:
                            will be used.
   docfmt  ROOT [INPUTS]... Format Spacemacs documentation files.
                            If only the first argument is supplied
-                           all files in ROOT folder will be formatted.
+                           the default list of documentation files
+                           will be used.
 
 Common arguments:
   ROOT   root directory of Spacemacs documentation. Example: "~/.emacs.d/".
