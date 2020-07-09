@@ -13,6 +13,11 @@
                  [org.clojure/tools.cli "0.4.2"]]
   :profiles
   {:user {:env {:gentest-multiplier "1"}
+          :test-selectors {:no-gen (fn [var-meta & _]
+                                     (not (clojure.string/ends-with?
+                                           (:name var-meta)
+                                           "-gen")))
+                           :fast (fn [var-meta & _] (not (:slow var-meta)))}
           :plugins [[lein-cloverage "1.1.2"]
                     [lein-exec "0.3.7"]
                     [lein-environ "1.1.0"]

@@ -10,11 +10,14 @@
 
 
 (defn-spec unqualify-kv unqualified-keyword?
+  "Makes keyword unqualified."
   [q-kv qualified-keyword?]
   (keyword (name q-kv)))
 
 
 (defn-spec sdn-key-rank int?
+  "Ranks keys of SDN nodes.
+Used for sorting args in auto-generated node constructors."
   [sdn-key unqualified-keyword?]
   (sdn-key
    {:tag (Integer/MIN_VALUE)
@@ -40,7 +43,8 @@
 
 
 (defn-spec defnode-spec-args seq?
-  "If You read this - I'm sorry..."
+  "If You read this - I'm sorry...
+NOTE: Hopefully will be able to clean this up wit spec2."
   [q-keys (partial every? qualified-keyword?)]
   (let [key-map (zipmap (mapv unqualify-kv q-keys) q-keys)
         q-keys-no-ch (remove #(#{(:children key-map)} %) q-keys)

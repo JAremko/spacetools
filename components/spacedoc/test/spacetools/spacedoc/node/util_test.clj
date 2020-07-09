@@ -164,7 +164,7 @@
                        ~v f-spec-desc#))))))))
 
 
-(deftest headline-utility-gen
+(deftest ^:slow headline-utility-gen
   (defspec valid-headline-gen
     {:num-tests (tu/samples 10)}
     (prop/for-all

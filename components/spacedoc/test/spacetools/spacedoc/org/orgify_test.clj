@@ -60,7 +60,8 @@
        :let [node-name (name v)]]
    (eval
     `(binding [s/*recursion-limit* 2]
-       (defspec ~(symbol (str node-name "-node->org-string"))
+       (defspec ~(with-meta (symbol (str node-name "-node->org-string-gen"))
+                   {:slow true})
          ~(tu/samples 10)
          (testing (format (str "Every valid \"%s\" node can "
                                "be exported to the org format.")

@@ -11,7 +11,7 @@
 (st/instrument)
 
 
-;; NOTE: This component consists primary out of thin wrapper over well tested
+;; NOTE: This component consists primary out of thin wrappers over well tested
 ;; third party code so the tests below are focused on making sure that the
 ;; wiring done right.
 

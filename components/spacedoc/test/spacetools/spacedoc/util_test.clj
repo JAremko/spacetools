@@ -20,7 +20,7 @@
 (st/instrument)
 
 
-(defspec indent-gen
+(defspec ^:slow indent-gen
   {:num-tests (tu/samples 30)}
   (prop/for-all
    [indentation gen/nat
@@ -70,7 +70,7 @@
                              test-node)))))))
 
 
-(defspec valid-node?-gen
+(defspec ^:slow valid-node?-gen
   {:num-tests (tu/samples 20)}
   (prop/for-all
    ;; NOTE: That's gonna have extremely divergent performance.

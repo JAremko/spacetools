@@ -22,7 +22,7 @@
 (defn-spec capitalize-first string?
   "Like str/capitalize but doesn't force rest of characters into low-case."
   [str string?]
-  (str/join (into (rest str) (str/upper-case (first str)))))
+  (str/join (into (rest str) ((fnil str/upper-case "") (first str)))))
 
 
 (def missing-source-link-text
@@ -35,7 +35,7 @@
 
 (def missing-description-text
   "Text for missing description placeholder."
-  "README.org of the layer misses or has invalid \"Description\".")
+  "<README.org of the layer misses or has invalid \"Description\".>")
 
 (def missing-description-ph
   "Placeholder for missing description."
@@ -44,7 +44,7 @@
        n/bold
        n/paragraph
        n/section
-       (n/headline "Placeholder")
+       (n/headline "<Placeholder>")
        vector))
 
 
@@ -69,73 +69,109 @@
            missing-description-ph))))
 
 
-(s/def :spacetools.spacedoc.org.layers.shaper/shaped any?)
-(s/def :spacetools.spacedoc.org.layers.shaper/leftover any?)
+(defn-spec fmt-invalid-tag :spacetools.spacedoc.node.val-spec/non-blank-string
+  "Formats TEXT-KEY for display as an invalid category tag value."
+  [text-key string?]
+  (->> text-key
+       (format "<\"%s\" invalid tag>")
+       str/upper-case))
+
+
+(defn-spec wrap-in-hl :spacetools.spacedoc.node/headline
+  "Wraps CHILDREN seq into headline with text val from `cfg/valid-tags`"
+  [text-key :spacetools.spacedoc.node.val-spec/non-blank-string
+   children (s/coll-of :spacetools.spacedoc.node/headline-child
+                       :min-count 0
+                       :distinct true)]
+  (apply n/headline
+         (get (cfg/valid-tags) text-key (fmt-invalid-tag text-key))
+         children))
+
+
+(defn-spec merge-same-hls (s/coll-of :spacetools.spacedoc.node/headline
+                                     :kind vector?
+                                     :distinct true)
+  "Merge headlines with the same `:value`."
+  [hls (s/coll-of :spacetools.spacedoc.node/headline)]
+  (->> hls
+       (r/reduce
+        (fn [acc {:keys [value children] :as hl}]
+          (if (acc value)
+            (update-in acc [value :children] #(into % children))
+            (assoc acc value hl)))
+        {})
+       vals
+       vec))
+
+
+(defn-spec query-node? boolean?
+  "Returns true if X is a query node."
+  [x any?]
+  (s/valid? :spacetools.spacedoc.config/layers-org-query x))
+
+
+(defn-spec query-node-parent? boolean?
+  "Returns true if X is a query node that has children."
+  [x any?]
+  ((every-pred query-node? #(-> % first val seq)) x))
+
+
+(defn-spec query-fragment->tag string?
+  "Given query node fragment return it's tag."
+  [fragment (s/or :q-node :spacetools.spacedoc.config/layers-org-query
+                  :tag #((cfg/valid-tags) %))]
+  (cond ((cfg/valid-tags) fragment) fragment
+        (query-node? fragment) (ffirst fragment)))
+
+
+(s/def :spacetools.spacedoc.org.layers.shaper/shaped
+  (s/nilable :spacetools.spacedoc.node/headline))
+(s/def :spacetools.spacedoc.org.layers.shaper/leftover
+  (s/coll-of :spacetools.spacedoc.node/root
+             :distinct true))
 (s/def ::shaped-ret-val
   (s/keys :req-un [:spacetools.spacedoc.org.layers.shaper/shaped
                    :spacetools.spacedoc.org.layers.shaper/leftover]))
 
+
+(def query-no-match
+  "Placeholder for shaped docs when query doesn't match any."
+  (n/section (n/paragraph (n/text "<No matched docs>"))))
+
+
 (defn-spec layers-query-shaper ::shaped-ret-val
   "Fills QUERY shape with data from DOCS documentation files."
-  [docs spacetools.spacedoc.node/root
+  [docs (s/coll-of :spacetools.spacedoc.node/root
+                   :distinct true)
    query :spacetools.spacedoc.config/layers-org-query]
-  (let [wrap-in-hl
-        (fn [text children] (apply n/headline
-                                  (get (cfg/valid-tags)
-                                       text
-                                       (->> text
-                                            (format "<\"%s\" invalid tag>")
-                                            str/upper-case))
-                                  children))
-
-        merge-same-hls
-        (fn [hls]
-          (->> hls
-               (r/reduce
-                (fn [acc {:keys [value children] :as hl}]
-                  (if (acc value)
-                    (update-in acc [value :children] #(into children %))
-                    (assoc acc value hl)))
-                {})
-               vals
-               vec))
-
-        all-docs-v (volatile! (set docs))
-
-        walker
-        (fn self [ds node]
-          (let [parent-node (map? node)
-                query-tag (if parent-node
-                            (ffirst node)
-                            node)]
-            (if-not ((cfg/valid-tags) query-tag)
-              (throw (ex-info "Query has invalid tag" {:tag query-tag}))
-              (when-let [matching-docs (->> ds
-                                            (filter
-                                             #(and
-                                               ;; When the document's tags
-                                               ;; contain current query tag.
-                                               ((:tags %) query-tag)
-                                               ;; And this document haven't
-                                               ;; been added yet.
-                                               (@all-docs-v %)))
-                                            seq)]
-                (wrap-in-hl query-tag
-                            (if parent-node
-                              (->> node
-                                   first
-                                   val
-                                   (map (partial self matching-docs))
-                                   (remove nil?)
-                                   merge-same-hls
-                                   (sort-by (comp str/upper-case :value)))
-                              (do (vswap! all-docs-v difference matching-docs)
-                                  (->> matching-docs
-                                       (sort-by (comp str/upper-case :title))
-                                       (mapv describe)))))))))
-
-        shaped (walker docs query)]
-    {:shaped shaped :leftover @all-docs-v}))
+  (let [all-docs-v (volatile! (set docs))]
+    {:shaped ((fn self [rest-of-matching-docs query-node]
+                (let [q-tag (query-fragment->tag query-node)]
+                  (when-let [matching-docs
+                             (seq (filter #(and
+                                            ;; When the document's tags
+                                            ;; contain current query tag.
+                                            ((:tags %) q-tag)
+                                            ;; And this document haven't
+                                            ;; been added yet.
+                                            (@all-docs-v %))
+                                          rest-of-matching-docs))]
+                    ((fnil wrap-in-hl nil [query-no-match])
+                     q-tag
+                     (seq (if (query-node-parent? query-node)
+                            (->> query-node
+                                 first
+                                 val
+                                 (map (partial self matching-docs))
+                                 (remove nil?)
+                                 merge-same-hls
+                                 (sort-by (comp str/upper-case :value)))
+                            (do (vswap! all-docs-v difference matching-docs)
+                                (->> matching-docs
+                                     (sort-by (comp str/upper-case :title))
+                                     (mapv describe)))))))))
+              docs query)
+     :leftover @all-docs-v}))
 
 
 (def layers-org-autogen-note
@@ -174,7 +210,6 @@
            (conj (or (-> shape
                          (get :children)
                          (into (some->> rest-docs
-                                        (filter #(contains? (:tags %) "layer"))
                                         seq
                                         (sort-by (comp str/lower-case :title))
                                         (map describe)

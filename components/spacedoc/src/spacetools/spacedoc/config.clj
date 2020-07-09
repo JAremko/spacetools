@@ -126,14 +126,16 @@
 
 
 (s/def ::valid-tags (s/map-of (s/and string?
-                                     (complement #(str/includes? % "|")))
-                              string?))
+                                     (complement #(str/includes? % "|"))
+                                     (complement #(str/blank? %)))
+                              (s/and string?
+                                     (complement #(str/blank? %)))))
 
 (s/def ::layers-org-query
-  (s/map-of string? (s/coll-of (s/or :join ::layers-org-query
-                                     :select string?)
-                               :kind vector?
-                               :min-count 1)
+  (s/map-of string? (s/coll-of (s/or :branch ::layers-org-query
+                                     :leaf (s/and string?
+                                                  (complement #(str/blank? %))))
+                               :kind vector?)
             :count 1))
 
 (s/def ::text-separators-rigth (s/coll-of char? :kind set?))

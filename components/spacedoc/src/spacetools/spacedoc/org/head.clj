@@ -1,5 +1,5 @@
 (ns spacetools.spacedoc.org.head
-  "Exporting to .org format."
+  "Specs and helpers for working with headers of documents."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [orchestra.core :refer [defn-spec]]

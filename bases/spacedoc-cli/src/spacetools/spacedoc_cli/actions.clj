@@ -55,7 +55,8 @@
 
 
 (defn-spec *layers (exception-of? string?)
-  "Create LAYERS.sdn file in DIR using SDN files from the directory."
+  "Create LAYERS.sdn file in DIR using SDN files from the directory.
+NOTE: Documents without \"layer\" tag are ignored."
   [dir string?]
   (m/do-let
    [sdn-fps (*parse-input-files dir)
@@ -68,6 +69,7 @@
                  (update $ :source #(->> % (sio/set-ext ".org") str))
                  (sio/re-root-relative-links dir fp $)))
              sdn-fps)
+        (filter #(contains? (:tags %) "layer"))
         (sd/layers-sdn)
         (io/*spit (io/join dir "LAYERS.sdn")))
    (m/return (format (str "%s Documentation files processed."
