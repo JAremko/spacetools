@@ -33,3 +33,9 @@ Format all files (add `--user <UID>:<GID>` to keep ownership):
 Validate:
 
 `docker run --rm -v <docs_dir>:/tmp/docs/ jare/spacetools validoc /tmp/docs/`
+
+To run with custom configuration file add:
+
+`-v <config_path>:/opt/spacetools/spacedoc-cfg.edn`
+
+Spacemacs uses [this config file](https://raw.githubusercontent.com/syl20bnr/spacemacs/develop/.ci/spacedoc-cfg.edn)
