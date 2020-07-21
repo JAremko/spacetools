@@ -418,4 +418,29 @@
          (is (every? (partial contains-string? src)
                      [(layers-sdn [d-with-src])
                       (layers-sdn [d-full])])
-             "With source it should be present in the out put.")))))
+             "With source it should be present in the out put."))))
+  (testing "Complex set of documents."
+    (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
+                     (constantly (tags->tag->tag-descr ["foo" "bar" "baz"]))
+                     #'spacetools.spacedoc.config/layers-org-query
+                     (constantly {"foo" ["bar"]})}
+      #(is (->> [(n/root "A title"
+                         #{"foo" "bar"}
+                         (n/description (n/todo "placeholder A")))
+                 (n/root "B title"
+                         #{"foo" "bar" "baz"}
+                         (n/description (n/todo "placeholder B")))
+                 (n/root "C title"
+                         #{"foo"}
+                         (n/description (n/todo "placeholder C")))
+                 (n/root "D title"
+                         #{"foo" "baz"}
+                         (n/description (n/todo "placeholder E")))
+                 (n/root "F title"
+                         #{"baz"}
+                         (n/description (n/todo "placeholder F")))
+                 (n/root "G title"
+                         #{}
+                         (n/description (n/todo "placeholder G")))]
+                layers-sdn
+                (s/valid? :spacetools.spacedoc.node/root))))))

@@ -120,8 +120,13 @@
   "Given query node fragment return it's tag."
   [fragment (s/or :q-node :spacetools.spacedoc.config/layers-org-query
                   :tag #((cfg/valid-tags) %))]
-  (cond ((cfg/valid-tags) fragment) fragment
-        (query-node? fragment) (ffirst fragment)))
+  ;; TODO: reformat it back.
+  (cond
+    (get
+     (cfg/valid-tags)
+     fragment)
+    fragment
+    (query-node? fragment) (ffirst fragment)))
 
 
 (s/def :spacetools.spacedoc.org.layers.shaper/shaped
