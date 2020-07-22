@@ -120,13 +120,8 @@
   "Given query node fragment return it's tag."
   [fragment (s/or :q-node :spacetools.spacedoc.config/layers-org-query
                   :tag #((cfg/valid-tags) %))]
-  ;; TODO: reformat it back.
-  (cond
-    (get
-     (cfg/valid-tags)
-     fragment)
-    fragment
-    (query-node? fragment) (ffirst fragment)))
+  (if (query-node? fragment) (ffirst fragment)
+      fragment))
 
 
 (s/def :spacetools.spacedoc.org.layers.shaper/shaped
@@ -212,14 +207,12 @@
   (let [{shape :shaped
          rest-docs :leftover} (layers-query-shaper docs (cfg/layers-org-query))]
     (apply n/root layers-org-title-text #{}
-           (conj (or (-> shape
-                         (get :children)
-                         (into (some->> rest-docs
-                                        seq
-                                        (sort-by (comp str/lower-case :title))
-                                        (map describe)
-                                        (apply n/headline skipped-layers-text)
-                                        vector))
-                         seq)
-                     (list no-layer-readme-files-ph))
-                 layers-org-autogen-note))))
+           (into [layers-org-autogen-note]
+                 (or (seq (into (:children shape [] #_ "<= ensures order")
+                                (when (seq rest-docs)
+                                  (->> rest-docs
+                                       (sort-by (comp str/lower-case :title))
+                                       (map describe)
+                                       (apply n/headline skipped-layers-text)
+                                       vector))))
+                     [no-layer-readme-files-ph])))))
