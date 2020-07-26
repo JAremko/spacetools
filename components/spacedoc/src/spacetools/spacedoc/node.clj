@@ -108,7 +108,10 @@
 
 
 ;; link
-
+;; TODO:  It can be a problem that link type and path aren't synchronized.
+;;        For example the generator will generate "file: foo" links for
+;;        :custom-id type and it will be valid. Link spec should ensure
+;;        internal consistency.
 (s/def :spacetools.spacedoc.node.link/type (s/with-gen #((cfg/link-types) %)
                                              #(gen/elements (cfg/link-types))))
 (s/def :spacetools.spacedoc.node.link/path
@@ -470,7 +473,9 @@
 ;; title meta node
 
 (s/def :spacetools.spacedoc.node.meta.title/key
-  (s/and string? #(= (str/lower-case %) "title")))
+  (s/with-gen (s/and string? (partial re-matches #"(?i)title"))
+    ;; FIXME: Randomize the generated string case
+    #(gen/elements ["title" "Title" "TITLE"])))
 (s/def :spacetools.spacedoc.node.meta.title/value ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.meta/title
   (s/keys :req-un [:spacetools.spacedoc.node.meta.title/key
@@ -480,7 +485,9 @@
 ;; tags meta node
 
 (s/def :spacetools.spacedoc.node.meta.tags/key
-  (s/and string? #(= (str/lower-case %) "tags")))
+  (s/with-gen (s/and string? (partial re-matches #"(?i)tags"))
+    ;; FIXME: Randomize the generated string case
+    #(gen/elements ["tags" "Tags" "TAGS"])))
 (s/def :spacetools.spacedoc.node.meta.tags/value ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.meta/tags
   (s/keys :req-un [:spacetools.spacedoc.node.meta.tags/key
@@ -562,12 +569,14 @@
     [(text \"foo\") (text \"bar\")]
     ...
     [(bold (text \"qux\"))])"
-  [& items (s/with-gen (s/+ :spacetools.spacedoc.node.item-children/children)
-             #(gen/vector
-               (s/gen :spacetools.spacedoc.node.item-children/children) 1 3))]
+  [& item-children
+   (s/with-gen (s/+ :spacetools.spacedoc.node.item-children/children)
+     #(gen/vector
+       (s/gen :spacetools.spacedoc.node.item-children/children) 1 3))]
   {:tag :plain-list
    :type :unordered
-   :children (vec (map-indexed (partial apply list-item :unordered) items))})
+   :children (vec (map-indexed (partial apply list-item :unordered)
+                               item-children))})
 
 
 (defn-spec ordered-list ::plain-list

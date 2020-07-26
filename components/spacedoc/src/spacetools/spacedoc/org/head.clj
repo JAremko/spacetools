@@ -2,10 +2,12 @@
   "Specs and helpers for working with headers of documents."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
+            [clojure.spec.gen.alpha :as gen]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.util :as sdu]
+            [clojure.string :as str]))
 
 
 ;;;;  TOC spec and constructor
@@ -20,6 +22,7 @@
   (s/coll-of :spacetools.spacedoc.node/text
              :kind vector?
              :min-count 1
+             :max-count 1
              :into []))
 (s/def ::toc-leaf (s/keys :req-un
                           [:spacetools.spacedoc.org.head.toc.leaf/tag
@@ -33,9 +36,13 @@
 (s/def :spacetools.spacedoc.org.head.item-children/children
   (s/cat
    :headline-link ::toc-leaf
-   :sub-headlines-links (s/?
-                         (s/cat :line-break :spacetools.spacedoc.node/line-break
-                                :brench (s/+ ::toc-branch)))))
+   :sub-headlines-links
+   (s/? (s/cat :line-break :spacetools.spacedoc.node/line-break
+               ;; TODO:  It's a recursive spec and `s/*recursion-limit*` seems
+               ;;        to be ignored.
+               ;;        see https://clojure.atlassian.net/browse/CLJ-1978
+               ;;        this needs a solution.
+               :brench (s/+ ::toc-branch)))))
 (s/def ::toc-item-children
   (s/keys :req-un [:spacetools.spacedoc.org.head.toc.item-children/tag
                    :spacetools.spacedoc.org.head.item-children/children]))
@@ -47,10 +54,7 @@
 (s/def :spacetools.spacedoc.org.head.toc.item/bullet #{"- "})
 (s/def :spacetools.spacedoc.org.head.toc.item/checkbox nil?)
 (s/def :spacetools.spacedoc.org.head.toc.item/children
-  (s/coll-of ::toc-item-children
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/coll-of ::toc-item-children :kind vector? :min-count 1))
 (s/def ::toc-item (s/keys :req-un
                           [:spacetools.spacedoc.org.head.toc.item/tag
                            :spacetools.spacedoc.org.head.toc.item/type
@@ -64,10 +68,7 @@
 (s/def :spacetools.spacedoc.org.head.toc.branch/tag #{:plain-list})
 (s/def :spacetools.spacedoc.org.head.toc.branch/type #{:unordered})
 (s/def :spacetools.spacedoc.org.head.toc.branch/children
-  (s/coll-of ::toc-item
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/coll-of ::toc-item :kind vector? :min-count 1))
 (s/def ::toc-branch
   (s/keys :req-un [:spacetools.spacedoc.org.head.toc.branch/tag
                    :spacetools.spacedoc.org.head.toc.branch/type
@@ -78,10 +79,7 @@
 
 (s/def :spacetools.spacedoc.org.head.toc.wrapper/tag #{:section})
 (s/def :spacetools.spacedoc.org.head.toc.wrapper/children
-  (s/coll-of ::toc-branch
-             :kind vector?
-             :min-count 1
-             :into []))
+  (s/coll-of ::toc-branch :kind vector? :min-count 1))
 (s/def ::toc-wrapper
   (s/keys :req-un [:spacetools.spacedoc.org.head.toc.wrapper/tag
                    :spacetools.spacedoc.org.head.toc.wrapper/children]))
@@ -91,11 +89,10 @@
 (s/def :spacetools.spacedoc.org.head.toc/tag #{:headline})
 (s/def :spacetools.spacedoc.org.head.toc/todo? boolean?)
 (s/def :spacetools.spacedoc.org.head.toc/children
-  (s/coll-of ::toc-wrapper
-             :kind vector?
-             :into []))
+  (s/coll-of ::toc-wrapper :kind vector?))
 (s/def :spacetools.spacedoc.org.head.toc/value
-  #(= (cfg/toc-hl-val) %))
+  (s/with-gen #(= (cfg/toc-hl-val) %)
+    #(s/gen (hash-set (cfg/toc-hl-val)))))
 (s/def ::toc (s/keys :req-un [:spacetools.spacedoc.org.head.toc/tag
                               :spacetools.spacedoc.org.head.toc/todo?
                               :spacetools.spacedoc.org.head.toc/value
@@ -171,11 +168,10 @@ Return nil if ROOT node doesn't have any headlines."
    :rest (s/* :spacetools.spacedoc.node/root-child)))
 
 (s/def ::root-with-head-props
-  (s/keys :req-un [:spacetools.spacedoc.node.root/title
-                   :spacetools.spacedoc.node.root/tags
-                   :spacetools.spacedoc.org.head.root-with-head-props/children]
-          :opt-un [:spacetools.spacedoc.node.root/source
-                   :spacetools.spacedoc.node.root/root-dir]))
+  (s/merge :spacetools.spacedoc.node/root
+           (s/keys
+            :req-un
+            [:spacetools.spacedoc.org.head.root-with-head-props/children])))
 
 
 ;;;; root node helpers
@@ -211,14 +207,17 @@ Return nil if ROOT node doesn't have any headlines."
         :tags :spacetools.spacedoc.node.meta/tags))
 
 
-(defn-spec remove-head-props :spacetools.spacedoc.node/root
-  "Remove title and tags nodes from the head of the root node."
-  [{[f-child & children] :children :as root} :spacetools.spacedoc.node/root]
-  (if (s/valid? :spacetools.spacedoc.node/section f-child)
-    (update-in
-     root
-     [:children 0 :children]
-     (partial into [] (->> :spacetools.spacedoc.org.head/root-head-prop
-                           (partial s/valid?)
-                           (remove))))
+(defn-spec remove-inline-head-props :spacetools.spacedoc.node/root
+  "Removes head props children nodes from the ROOT node."
+  [root :spacetools.spacedoc.node/root]
+  (if (s/valid? ::root-with-head-props root)
+    (assoc root :children
+           #(let [{{{title :title tags :tags head-rest :rest :as head} :head
+                    toc :toc
+                    root-rest :rest}
+                   :children :as children}
+                  (s/conform ::root-with-head-props root)]
+              (if head-rest
+                (into [(apply n/section head-rest)] (rest children))
+                children)))
     root))

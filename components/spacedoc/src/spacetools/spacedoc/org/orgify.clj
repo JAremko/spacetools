@@ -311,7 +311,7 @@
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
-       (head/remove-head-props)
+       (head/remove-inline-head-props)
        (head/inline-head-props)
        (head/conj-toc)
        (:children)
