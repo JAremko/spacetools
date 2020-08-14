@@ -9,15 +9,11 @@
   :tag)
 
 
-(defmethod node->spec-k :default [_] :spacetools.spacedoc.node/known-node)
-
-
 (defn-spec all-tags (s/coll-of keyword? :kind set?)
   "Return all node tags."
   []
   (-> node->spec-k
       (methods)
-      (dissoc :default)
       ;; NOTE: It will throw if called before any node added.
       ;; Which is good because it should never happen :D
       (keys)

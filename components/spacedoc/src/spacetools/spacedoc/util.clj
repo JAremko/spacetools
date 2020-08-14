@@ -52,7 +52,11 @@
   The function returns `nil` If all nodes are valid."
   [node node?]
   (or (first (sequence (keep explain-deepest) (:children node)))
-      (s/explain-data (sc/node->spec-k node) node)))
+      (s/explain-data
+       (if ((sc/all-tags) (:tag node))
+         (sc/node->spec-k node)
+         :spacetools.spacedoc.node/known-node)
+       node)))
 
 
 (defn-spec relation (s/map-of keyword? set?)
@@ -171,7 +175,8 @@
 (defn-spec valid-node? boolean?
   "Return true if NODE is a valid node."
   [node any?]
-  (s/valid? (sc/node->spec-k node) node))
+  (and (some? ((sc/all-tags) (:tag node)))
+       (s/valid? (sc/node->spec-k node) node)))
 
 
 ;;;; Headline stuff
