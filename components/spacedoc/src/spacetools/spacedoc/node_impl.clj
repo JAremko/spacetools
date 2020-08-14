@@ -1,7 +1,6 @@
 (ns spacetools.spacedoc.node-impl
   "`defnode` and `defnode*` implementation. Highly meh."
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.core :as sc]))
 
@@ -91,6 +90,10 @@ NOTE: Hopefully will be able to clean this up wit spec2."
            ~(merge {:tag tag} (zipmap (mapv unqualify-kv q-ks) ret-tmpl))))))))
 
 
+(s/fdef defnode
+  :args (s/cat :k keyword? :spec-form seq)
+  :ret seq)
+
 (defmacro defnode
   "Define node, its spec and constructor by SPEC-FORM. K is the spec key.
   NOTE: This macro has limitations:
@@ -101,6 +104,10 @@ NOTE: Hopefully will be able to clean this up wit spec2."
     `s/coll-of` or `s/cat` forms. To skip this step use `defnode*`."
   [k spec-form] (defnode-impl k true spec-form))
 
+
+(s/fdef defnode*
+  :args (s/cat :k keyword? :spec-form seq)
+  :ret seq)
 
 (defmacro defnode*
   "Same as `defnode` but doesn't create constructor."

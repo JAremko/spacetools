@@ -1,13 +1,13 @@
 (ns spacetools.spacedoc-cli.actions-test
   "Testing cli program actions."
-  (:require [cats.monad.exception :refer [success? failure?]]
+  (:require [cats.monad.exception :refer [failure? success?]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
-            [spacetools.fs-io.interface :as io :refer [filesystem]]
+            [spacetools.fs-io.interface :as io]
             [spacetools.spacedoc-cli.actions :refer :all]
-            [spacetools.spacedoc.node :as sn] ;; Also needed to define nodes.
+            [spacetools.spacedoc.node :as sn]
             [spacetools.test-util.interface :as tu :refer [testing-io]]))
 
 

@@ -1,6 +1,5 @@
 (ns spacetools.spacedoc.node-impl-test
-  "All public function in `spacetools.spacedoc.node` ns are node constructors.
-  So we simply select them and generate tests based on node specs."
+  "Testing node constructor spec bases generator."
   (:require [clojure.set :refer [difference]]
             [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
@@ -8,7 +7,6 @@
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
-            [spacetools.spacedoc.core :as sc]
             [spacetools.spacedoc.node-impl :refer :all]
             [spacetools.test-util.interface :as tu]))
 
@@ -70,7 +68,7 @@
 
 (s/def :testing.defnode-impl-fn/children (s/coll-of any?))
 
-;; Kinda sanity check. We test this function rigorously with node cons test.
+;; Kinda sanity check. Node constructor test this function more rigorously.
 (deftest defnode-impl-fn
   (testing "The function shouldn't fail with supported node spec."
     (defnode-impl ::foo false
@@ -78,7 +76,7 @@
     (defnode-impl ::bar true
       '(s/keys :req-un [:testing.defnode-impl-fn/children])))
   (testing (str "The function should fail if children spec doesn't exist"
-                " and we are generating constructor function")
+                " for constructor function generation.")
     (defnode-impl ::baz false '(s/keys :req-un [:nonexistent/children]))
     (is (thrown? Exception (defnode-impl ::qux true
                              '(s/keys :req-un [:nonexistent/children]))))))

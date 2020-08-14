@@ -1,15 +1,13 @@
 (ns spacetools.spacedoc-io.core
   "File-system I/O. Functions that can fail return `cats.monad.exception`."
-  (:require [cats.core :as m]
-            [cats.monad.exception :as exc]
+  (:require [cats.monad.exception :as exc]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.fs-io.interface
-             :refer [filesystem exception-of? file-ref?] :as fio]
+            [spacetools.fs-io.interface :as fio :refer [exception-of? file-ref?]]
             [spacetools.spacedoc.interface :as sd :refer [valid-root?]]))
 
 

@@ -12,6 +12,7 @@
             [spacetools.spacedoc.org.layers :refer :all]
             [spacetools.test-util.interface :as tu]))
 
+
 ;; Test vals
 (def test-text "test text from test-text var")
 (def test-children (->> test-text n/text n/paragraph n/section vector))
@@ -20,16 +21,6 @@
 
 
 ;; Helpers
-(defn contains-string?
-  "Returns true if TREE EDN structure contains S string at any level."
-  [s tree]
-  (->> tree
-       (tree-seq (some-fn map? vector?) #(or (:children %) %))
-       vec
-       (some #{s})
-       some?))
-
-
 (defn headline?
   "Returns true if X is a valid headline node."
   [x]
@@ -51,21 +42,9 @@
        (into {})))
 
 
-(defn has-n-children?
-  "Returns true if sdn NODE has N number of children."
-  [n node]
-  (= n (count (:children node))))
-
-
-(defn count-n?
-  "Returns true if COLL collection's  `count` is N."
-  [n coll]
-  (= n (count coll)))
-
-
 (def single?
   "Returns true if supplied collection has a singe element."
-  (partial count-n? 1))
+  (partial tu/count-n? 1))
 
 
 (st/instrument)
@@ -111,8 +90,8 @@
 (deftest describe-fn
   (let [source-link "source"
         asc-source #(assoc % :source source-link)
-        no-link? (partial contains-string? missing-source-link-text)
-        no-desc? (partial contains-string? missing-description-text)]
+        no-link? (partial tu/contains-string? missing-source-link-text)
+        no-desc? (partial tu/contains-string? missing-description-text)]
     ;; No link no description.
     (is ((every-pred no-link? no-desc?) (describe (make-root (n/todo "foo"))))
         (str "when supplied SDN doesn't have link and description, "
@@ -120,7 +99,7 @@
     ;; No source link but has description.
     (is (every? (every-pred no-link?
                             (complement no-desc?)
-                            (partial contains-string? test-description-text))
+                            (partial tu/contains-string? test-description-text))
                 (map describe
                      [(make-root test-description)
                       (make-root (n/todo "foo") test-description)]))
@@ -131,7 +110,7 @@
     ;; No description but has source link.
     (is ((every-pred no-desc?
                      (complement no-link?)
-                     (partial contains-string? source-link))
+                     (partial tu/contains-string? source-link))
          (describe (asc-source (make-root (n/todo "foo")))))
         (str "When only description is missing, the function's output "
              "should include description placeholder "
@@ -140,8 +119,8 @@
     ;; Both has description and source link.
     (is ((every-pred (complement no-desc?)
                      (complement no-link?)
-                     (partial contains-string? source-link)
-                     (partial contains-string? test-description-text))
+                     (partial tu/contains-string? source-link)
+                     (partial tu/contains-string? test-description-text))
          (describe (asc-source (make-root test-description))))
         (str "When both source link and description are present in the input - "
              "no placeholders should be inserted into the function's output. "
@@ -224,7 +203,7 @@
              [hl-foo-a hl-bar-a+b+c hl-baz-a])
           "Wrapping the sequence in other headlines doesn't affect merging."))
     (testing "Two pair of the same headlines are merged."
-      (is (count-n? 2 (merge-same-hls [hl-foo-a hl-foo-b hl-bar-a hl-bar-b]))
+      (is (tu/count-n? 2 (merge-same-hls [hl-foo-a hl-foo-b hl-bar-a hl-bar-b]))
           "Returned collection should have two elements.")
       (is (= (merge-same-hls [hl-foo-a hl-foo-b hl-bar-a hl-bar-b])
              (merge-same-hls [hl-foo-a hl-bar-a hl-foo-b hl-bar-b])
@@ -274,7 +253,7 @@
              [doc] {"foo" []} some? empty?
              [doc] {"foo" []} headline? empty?
              [doc] {"foo" []} (fn [hl] (= (tags "foo") (:value hl))) empty?
-             [doc] {"foo" []} (partial has-n-children? 1) empty?
+             [doc] {"foo" []} (partial tu/has-n-children? 1) empty?
              [doc] {"bar" []} nil? seq
              [doc] {"bar" []} nil? single?
              [doc] {"bar" []} nil? (fn [lft]
@@ -297,11 +276,11 @@
                  (and (shaped-pred shaped) (leftover-pred leftover)))
              ;; 2 docs have both foo and bar tags.
              [doc-foo doc-bar doc-foo+bar] {"foo" ["bar"]}
-             headline? (partial count-n? 2)
+             headline? (partial tu/count-n? 2)
 
              ;; 2 docs have both bar and foo tags.
              [doc-foo doc-bar doc-foo+bar] {"bar" ["foo"]}
-             headline? (partial count-n? 2)
+             headline? (partial tu/count-n? 2)
 
              ;; 2 docs with foo and bar tags + one doc that has only foo tag.
              [doc-foo doc-bar doc-foo+bar] {"foo" ["bar" "foo"]}
@@ -309,41 +288,42 @@
 
              ;; Only one doc with baz tag
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"baz" []}
-             (partial has-n-children? 1) (partial count-n? 2)
+             (partial tu/has-n-children? 1) (partial tu/count-n? 2)
 
              ;; All docs pulled into the top headline
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" []}
-             (partial has-n-children? 3) empty?
+             (partial tu/has-n-children? 3) empty?
 
              ;; All docs pulled into a singe sub headline.
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" ["foo"]}
-             (partial has-n-children? 1) empty?
+             (partial tu/has-n-children? 1) empty?
 
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" ["foo"]}
-             (fn [hl] (->> hl :children first (has-n-children? 3))) empty?
+             (fn [hl] (->> hl :children first (tu/has-n-children? 3))) empty?
 
              ;; Docs with tag foo and bar pulled into the first
              ;; sub headline and the rest of docs with foo tag
              ;; into the second.
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" ["bar" "foo"]}
-             (fn [hl] (->> hl :children first (has-n-children? 2))) empty?
+             (fn [hl] (->> hl :children first (tu/has-n-children? 2))) empty?
 
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" ["bar" "foo"]}
-             (fn [hl] (->> hl :children second (has-n-children? 1))) empty?
+             (fn [hl]
+               (->> hl :children second (tu/has-n-children? 1))) empty?
 
              ;; Nested query selects singe document
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"foo" [{"bar" ["baz"]}]}
-             (partial has-n-children? 1) (partial count-n? 2)
+             (partial tu/has-n-children? 1) (partial tu/count-n? 2)
 
              ;; Query selects singe document by nested part and then
              ;; the rest docs with "foo" tag.
              [doc-foo doc-foo+bar doc-foo+bar+baz]
              {"foo" [{"bar" ["baz"]} "foo"]}
-             (partial has-n-children? 2) empty?
+             (partial tu/has-n-children? 2) empty?
 
              [doc-foo doc-foo+bar doc-foo+bar+baz]
              {"foo" [{"bar" ["baz"]} "foo"]}
-             (fn [hl] (->> hl :children first (has-n-children? 1)))
+             (fn [hl] (->> hl :children first (tu/has-n-children? 1)))
              empty?)))))
 
   (testing "Minimal query with complex docs"
@@ -356,23 +336,24 @@
                d-with-desc (update-in d-simple [:children]
                                       (partial into [test-description]))
                d-full (merge d-with-src d-with-desc)]
-           (is (contains-string? missing-description-text
-                                 (layers-query-shaper [d-simple] {"foo" []}))
+           (is (tu/contains-string?
+                missing-description-text
+                (layers-query-shaper [d-simple] {"foo" []}))
                "With no description its placeholder must be present.")
-           (is ((complement (partial contains-string? test-text))
+           (is ((complement (partial tu/contains-string? test-text))
                 (layers-query-shaper [d-simple] {"foo" []}))
                "Without description there shouldn't be description text.")
-           (is (every? (partial contains-string? test-text)
+           (is (every? (partial tu/contains-string? test-text)
                        [(layers-query-shaper [d-with-desc] {"foo" []})
                         (layers-query-shaper [d-full] {"foo" []})])
                "Description text should be present when it is present.")
-           (is ((complement (partial contains-string? src))
+           (is ((complement (partial tu/contains-string? src))
                 (layers-query-shaper [d-simple] {"foo" []}))
                "Without source there shouldn't be source path.")
-           (is ((complement (partial contains-string? src))
+           (is ((complement (partial tu/contains-string? src))
                 (layers-query-shaper [d-simple] {"foo" []}))
                "Without source there shouldn't be source path.")
-           (is (every? (partial contains-string? src)
+           (is (every? (partial tu/contains-string? src)
                        [(layers-query-shaper [d-with-src] {"foo" []})
                         (layers-query-shaper [d-full] {"foo" []})])
                "With source it should be present in the out put."))))))
@@ -399,23 +380,23 @@
                          [d-full (n/root "title 2" #{"foo"} (n/todo "baz"))]]))
            "The function should always return valid root.")
        (testing "layers-query-shaper integration."
-         (is (contains-string? missing-description-text
-                               (layers-sdn [d-simple]))
+         (is (tu/contains-string? missing-description-text
+                                  (layers-sdn [d-simple]))
              "With no description its placeholder must be present.")
-         (is ((complement (partial contains-string? test-text))
+         (is ((complement (partial tu/contains-string? test-text))
               (layers-sdn [d-simple]))
              "Without description there shouldn't be description text.")
-         (is (every? (partial contains-string? test-text)
+         (is (every? (partial tu/contains-string? test-text)
                      [(layers-sdn [d-with-desc])
                       (layers-sdn [d-full])])
              "Description text should be present when it is present.")
-         (is ((complement (partial contains-string? src))
+         (is ((complement (partial tu/contains-string? src))
               (layers-sdn [d-simple]))
              "Without source there shouldn't be source path.")
-         (is ((complement (partial contains-string? src))
+         (is ((complement (partial tu/contains-string? src))
               (layers-sdn [d-simple]))
              "Without source there shouldn't be source path.")
-         (is (every? (partial contains-string? src)
+         (is (every? (partial tu/contains-string? src)
                      [(layers-sdn [d-with-src])
                       (layers-sdn [d-full])])
              "With source it should be present in the out put."))))

@@ -2,13 +2,12 @@
   "Shared helpers name-space."
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
-            [clojure.core.reducers :as r]
-            [spacetools.spacedoc.node :as n]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
-            [spacetools.spacedoc.core :as sc :refer [node?]]))
+            [spacetools.spacedoc.core :as sc :refer [node?]]
+            [spacetools.spacedoc.node :as n]))
 
 
 (s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems

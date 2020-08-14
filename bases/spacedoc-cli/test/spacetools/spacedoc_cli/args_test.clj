@@ -1,13 +1,12 @@
 (ns spacetools.spacedoc-cli.args-test
   "Testing parsing of the cli program inputs."
-  (:require [cats.monad.exception :refer [success? failure?]]
+  (:require [cats.monad.exception :refer [failure? success?]]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
-            [spacetools.fs-io.interface :refer [file? filesystem] :as io]
+            [spacetools.fs-io.interface :as io :refer [file?]]
             [spacetools.spacedoc-cli.args :refer :all]
             [spacetools.spacedoc.config :as sc]
-            [spacetools.test-util.interface :refer [testing-io]]
-            [nio2.core :as nio]))
+            [spacetools.test-util.interface :refer [testing-io]]))
 
 
 (st/instrument)

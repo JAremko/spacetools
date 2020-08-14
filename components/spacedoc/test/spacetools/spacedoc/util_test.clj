@@ -1,8 +1,6 @@
 (ns spacetools.spacedoc.util-test
-  "All public function in `spacetools.spacedoc.node` ns are node constructors.
-  So we simply select them and generate tests based on node specs."
-  (:require [clojure.set :refer [difference]]
-            [clojure.spec.alpha :as s]
+  "Testing general purpose helpers."
+  (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -175,7 +173,6 @@
   (is (= (fmt-str {} "key-bindings") "key-bindings")))
 
 
-;; Here we mainly test `cfg/custom-id-link-rep-map` regexps
 (deftest fmt-link-fn
   (testing "Formatting of custom-id links"
     (are [link-type pre pos] (= (fmt-link link-type pre) pos)

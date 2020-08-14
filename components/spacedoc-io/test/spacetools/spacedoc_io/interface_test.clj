@@ -1,12 +1,9 @@
 (ns spacetools.spacedoc-io.interface-test
   "Testing interface of the `spacedoc-io` component."
-  (:require [cats.monad.exception :refer [success? failure? exception?]]
+  (:require [cats.monad.exception :refer [exception? failure? success?]]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]
             [clojure.test :refer :all]
-            [nio2.core :as nio]
             [orchestra.spec.test :as st]
-            [spacetools.fs-io.interface :refer [filesystem]]
             [spacetools.spacedoc-io.interface :as sio]
             [spacetools.spacedoc.interface :refer [default-config]]
             [spacetools.spacedoc.node :as sn]

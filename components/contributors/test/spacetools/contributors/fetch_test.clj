@@ -1,11 +1,8 @@
 (ns spacetools.contributors.fetch-test
-  (:use org.httpkit.fake)
-  (:require [cats.monad.exception :as exc :refer [success? failure?]]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
+  (:require [cats.monad.exception :as exc :refer [failure? success?]]
             [clojure.test :refer :all]
             [orchestra.spec.test :as st]
-            [org.httpkit.client :as http]
+            [org.httpkit.fake :refer :all]
             [spacetools.contributors.fetch :as f]))
 
 

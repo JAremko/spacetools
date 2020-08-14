@@ -1,16 +1,13 @@
 (ns spacetools.spacedoc-cli.run
   "Tools for Spacemacs documentation files in .sdn format."
+  (:gen-class)
   (:require [cats.core :as m]
-            [cats.monad.exception :refer [failure]]
+            [cats.monad.exception :as exc :refer [failure]]
             [clojure.core.match :refer [match]]
-            [clojure.string :refer [join]]
+            [clojure.string :as str :refer [join]]
             [spacetools.fs-io.interface :refer [try-m->output]]
             [spacetools.spacedoc-cli.actions :as ac]
-            [spacetools.spacedoc-cli.args :refer [*parse *configure!]]
-            [spacetools.spacedoc.interface :refer [config-file-name]]
-            [clojure.string :as str]
-            [cats.monad.exception :as exc])
-  (:gen-class))
+            [spacetools.spacedoc-cli.args :refer [*configure! *parse]]))
 
 
 (defn usage [options-summary]

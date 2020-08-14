@@ -1,8 +1,6 @@
 (ns spacetools.spacedoc.core
   "Mainly `defmulti`s that other parts of the component populate."
-  (:require [clojure.set :refer [union map-invert]]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
+  (:require [clojure.spec.alpha :as s]
             [orchestra.core :refer [defn-spec]]))
 
 

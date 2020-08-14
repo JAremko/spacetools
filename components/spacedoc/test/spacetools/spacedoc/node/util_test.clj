@@ -1,18 +1,16 @@
 (ns spacetools.spacedoc.node.util-test
-  "All public function in `spacetools.spacedoc.node` ns are node constructors.
-  So we simply select them and generate tests based on node specs."
+  "Tests for SDN node helper functions."
   (:require [clojure.core.reducers :as r]
             [clojure.data :refer [diff]]
             [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
-            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [orchestra.core :refer [defn-spec]]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.config :as cfg]
-            [spacetools.spacedoc.node :as n] ;; Ensure node spec generation.
+            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.node.util :refer :all]
             [spacetools.test-util.interface :as tu]))
 
@@ -66,7 +64,7 @@
 
 
 ;; Pretty naive but fast tests just to make sure that stuff isn't
-;; obviously broken. We use generative testing to catch non-trivial errors.
+;; obviously broken.
 (deftest headline-utility
   (let [headlines [(depth->headline 1)
                    (depth->headline 2)
@@ -171,8 +169,7 @@
      [headline (gen/no-shrink (s/gen :spacetools.spacedoc.node/headline))]
 
      (testing "Generate valid headline"
-       (is (empty? (hl-problems headline))
-           "We generated valid headline."))
+       (is (empty? (hl-problems headline))))
 
      (testing "headline? function"
        (is (headline? headline)

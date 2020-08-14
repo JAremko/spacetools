@@ -1,9 +1,9 @@
 (ns spacetools.spacedoc-io.interface
   "Project specific File-system I/O."
-  (:require [spacetools.spacedoc-io.core :as sio]
+  (:require [clojure.spec.alpha :as s]
             [orchestra.core :refer [defn-spec]]
             [spacetools.fs-io.interface :as fio]
-            [clojure.spec.alpha :as s]
+            [spacetools.spacedoc-io.core :as sio]
             [spacetools.spacedoc.interface :as sd]))
 
 

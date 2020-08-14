@@ -3,15 +3,13 @@
   (:require [cats.core :as m]
             [cats.monad.exception :as exc]
             [clojure.core.reducers :as r]
-            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]])
-  (:import (java.io File)
-           (java.nio.file Path)))
+  (:import java.nio.file.Path))
 
 
 (def filesystem (nio/default-fs))
@@ -119,6 +117,11 @@ NOTE: EXT must include .(dot)"
   (let [[a-ob a-nb a-p] (map (comp str absolute file-ref->path)
                              [old-base new-base path])]
     (str->path (str/replace-first a-p a-ob a-nb))))
+
+
+(s/fdef exception-of?
+  :args (s/cat :pred (s/or :ident ident? :form seq?))
+  :ret fn?)
 
 
 (defmacro exception-of?

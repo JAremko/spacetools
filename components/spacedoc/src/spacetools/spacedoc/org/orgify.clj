@@ -7,7 +7,7 @@
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.node] ;; for specs
+            spacetools.spacedoc.node
             [spacetools.spacedoc.org.head :as head]
             [spacetools.spacedoc.util :as sdu]))
 
@@ -159,8 +159,9 @@
   [{:keys [tag children]}]
   (let [{[begin-token end-token] tag} block-container-delims]
     (str begin-token
-         ;; NOTE: We don't "hard-code" indentation into sections
-         (sdu/indent (if (= tag :section) 0 (cfg/begin-end-indentation))
+         (sdu/indent (if (= tag :section)
+                       0
+                       (cfg/begin-end-indentation))
                      (conv tag children))
          end-token)))
 

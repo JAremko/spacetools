@@ -2,12 +2,10 @@
   "Specs and helpers for working with headers of documents."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
-            [clojure.spec.gen.alpha :as gen]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]
-            [clojure.string :as str]))
+            [spacetools.spacedoc.util :as sdu]))
 
 
 ;;;;  TOC spec and constructor
@@ -123,7 +121,7 @@ Return nil if ROOT node doesn't have any headlines."
                              (list* (n/line-break) children)))))))
 
           (hls->toc [headlines]
-            ;; NOTE: We use local `volatile!` because with the counter state
+            ;; NOTE: `volatile!` simplifies code because with the counter state
             ;;       threading the code gates much more complex.
             (let [*gid->count (volatile! {})]
               ((fn inner [depth hl]

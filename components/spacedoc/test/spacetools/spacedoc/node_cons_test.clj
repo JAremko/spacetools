@@ -1,9 +1,8 @@
 (ns spacetools.spacedoc.node-cons-test
   "All public function in `spacetools.spacedoc.node` ns are node constructors.
-  So we simply select them and generate tests based on node specs."
+  So the code simply select them and generate tests based on node specs."
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
-            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
@@ -16,7 +15,7 @@
 (st/instrument)
 
 (deftest sanity-test
-  (testing "We have nodes defined"
+  (testing "Nodes are defined"
     (is (seq (sc/all-tags)))))
 
 ;; Grab all public functions in `spacetools.spacedoc.node`

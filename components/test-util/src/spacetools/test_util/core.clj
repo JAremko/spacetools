@@ -1,27 +1,51 @@
 (ns spacetools.test-util.core
-  "Shared utility for testing stuff."
+  "Shared utility for testing."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [clojure.test :refer [report]]
-            [clojure.test :refer [testing]]
+            [clojure.test :refer [report testing]]
             [clojure.test.check.clojure-test :refer [default-reporter-fn]]
             [environ.core :refer [env]]
             [nio2.core :as nio]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.fs-io.interface :as sio])
-  (:import  [com.google.common.jimfs Jimfs Configuration]))
+            [spacetools.fs-io.interface :as sio]
+            [spacetools.spacedoc.interface :as sd])
+  (:import [com.google.common.jimfs Configuration Jimfs]))
+
+
+(defn-spec contains-string? boolean?
+  "Returns true if TREE contains S string at any level."
+  [s string? tree seqable?]
+  (->> tree
+       (tree-seq (every-pred seqable? (complement string?))
+                 seq)
+       (some (every-pred string?
+                         #(str/includes? (str/lower-case %)
+                                         (str/lower-case s))))
+       some?))
+
+
+(defn-spec has-n-children? boolean?
+  "Returns true if SDN NODE has N number of children."
+  [n nat-int? node (s/nilable sd/node?)]
+  (= n (count (:children node))))
+
+
+(defn-spec count-n? boolean?
+  "Returns true if COLL collection's  `count` is N."
+  [n nat-int? coll coll?]
+  (= n (count coll)))
 
 
 (def gen-mult
   "Multiplier for generative testing."
   (delay
-   (let [g-m (max ((fnil read-string "0") (env :gentest-multiplier)) 1)]
-     (prn (format "Gentest sample's count multiplier is (%s)" g-m))
-     g-m)))
+    (let [g-m (max ((fnil read-string "0") (env :gentest-multiplier)) 1)]
+      (prn (format "Gentest sample's count multiplier is (%s)" g-m))
+      g-m)))
 
 
 (defn-spec samples pos-int?
-  "Multiplies BASE-SAMPLE-COUNT by `gen-mult` and returns it as `pos-int?`."
+  "Multiplies BASE-SAMPLE-COUNT by :gentest-multiplier."
   [base-sample-count pos-int?]
   (max 1 (int (* @gen-mult base-sample-count))))
 
@@ -84,6 +108,13 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
          fs (init-fs config)]
      (nio/create-fs-tree! fs (fs-root config) struct)
      fs)))
+
+
+(s/fdef testing-io
+  :args (s/cat :name (s/and string? seq)
+               :struct vector?
+               :test-forms (s/+ seq))
+  :ret seq)
 
 
 (defmacro testing-io

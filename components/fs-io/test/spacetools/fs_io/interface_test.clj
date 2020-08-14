@@ -1,6 +1,6 @@
 (ns spacetools.fs-io.interface-test
   "Testing interface of the `fs-io` component."
-  (:require [cats.monad.exception :as exc :refer [success? failure?]]
+  (:require [cats.monad.exception :as exc :refer [failure? success?]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.test :refer :all]

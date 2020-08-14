@@ -1,8 +1,7 @@
 (ns spacetools.spacedoc.node
   "Node specs and constructors. All public functions are constructors."
   (:require [clojure.core.reducers :as r]
-            [clojure.set :refer [map-invert]]
-            [clojure.set :as set]
+            [clojure.set :as set :refer [map-invert]]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
@@ -414,7 +413,6 @@
     (s/and
      (s/coll-of ::vs/non-blank-string
                 :kind set?)
-     ;; NOTE: We have to prevent this from inlining
      #(set/superset? (cfg/valid-tags) %))
     #(->> (cfg/valid-tags)
           keys
@@ -442,7 +440,7 @@
           :opt-un [:spacetools.spacedoc.node.root/source
                    :spacetools.spacedoc.node.root/root-dir]))
 
-;; For the cases when we need a nonempty headline children vector.
+;; For the cases when nonempty headline children vector is needed.
 (s/def :spacetools.spacedoc.node.meta.hl.nonempty/children
   (s/coll-of ::headline-child
              :kind vector?
@@ -654,5 +652,5 @@
 ;; ...
 ;; [<item-child>...]
 
-;; NOTE: We don't use checkboxes because GitHub doesn't support them
+;; NOTE: Spacetools don't use checkboxes because GitHub doesn't support them
 ;;       But they can be added in a similar way to `::item-tag`s.

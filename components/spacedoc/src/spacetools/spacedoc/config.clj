@@ -1,7 +1,16 @@
 (ns spacetools.spacedoc.config
-  "Global configurations."
-  (:require [clojure.edn :as edn]
-            [clojure.spec.alpha :as s]
+  "Global configurations.
+  NOTE: RATIONALE
+        There are two distinct ways to handle run-time configuration:
+          1. Use variable as a \"hidden\" argument:
+             + Value specs can be run-time configurable.
+             + Less verbose, end-user doesn't have to pass around configs.
+          2. Pass around something like ENV map argument:
+             + idiomatic FP way with referentially transparent functions.
+             + easier to test since you don't have to swap/redef configs.
+        I choose the second one because I wanted to parametrize node specs
+        for stuff like max headline depth, org-mode delimiters etc."
+  (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]))
 
@@ -104,6 +113,9 @@
                              "\\t" " "
                              "[ ]{2,}" " "
                              ;; Key-binding
+                             ;; FIXME: Splitting this regexp into
+                             ;; fragments with some kind of commentary attached
+                             ;; would be cool :D
                              "(?:(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey)(?:(?:(?i)[-_]*b)| B)(?:(?i)inding)((?i)s{0,1}(?:\\p{Blank}|\\p{Punct}+\\p{Blank}|\\p{Punct}+$|$))" "$1$2ey binding$3"
                              "((?i)k)ey bindingS" "$1ey bindings"}
       :link-custom-id-replacement-map {"(?i)([-]+|^|#)key(?:[_]*|-{2,})binding([s]{0,1})([-]+|$)" "$1key-binding$2$3"}
@@ -286,7 +298,6 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
 
 
 ;;;; Orgify
-
 (defn-spec emphasis-tokens ::org-emphasis-tokens
   "Return emphasis tokens of org-mode."
   []

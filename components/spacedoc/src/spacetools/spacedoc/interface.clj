@@ -1,10 +1,10 @@
 (ns spacetools.spacedoc.interface
   "Tools for processing Spacemacs documentation."
-  (:require [orchestra.core :refer [defn-spec]]
+  (:require [clojure.spec.alpha :as s]
+            [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
-            [spacetools.spacedoc.core  :as sdc]
+            [spacetools.spacedoc.core :as sdc]
             [spacetools.spacedoc.org.layers :as sdl]
-            [clojure.spec.alpha :as s]
             [spacetools.spacedoc.org.orgify :as sdo]
             [spacetools.spacedoc.util :as sdu]))
 

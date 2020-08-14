@@ -8,7 +8,6 @@
             [clojure.test.check.properties :as prop]
             [orchestra.spec.test :as st]
             [spacetools.spacedoc.core :as sc]
-            [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.org.orgify :refer :all]
             [spacetools.spacedoc.util :as sdu]
             [spacetools.test-util.interface :as tu]))

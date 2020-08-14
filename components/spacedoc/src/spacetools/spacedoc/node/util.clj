@@ -1,12 +1,7 @@
 (ns spacetools.spacedoc.node.util
   "Helpers for writing specs and constructors for nodes."
   (:require [clojure.core.reducers :as r]
-            [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as str]
-            [orchestra.core :refer [defn-spec]]
-            [spacetools.spacedoc.config :as cfg]
-            [spacetools.spacedoc.core :as sc]))
+            [orchestra.core :refer [defn-spec]]))
 
 
 ;;;; Headline utils
