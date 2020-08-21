@@ -24,7 +24,7 @@
 (defn valid-hl?
   "Returns true if X is a valid headline node."
   [x]
-  (s/valid? :spacetools.spacedoc.node/headline x))
+  (s/valid? ::n/headline x))
 
 
 (defn make-root
@@ -370,7 +370,7 @@
            d-with-desc (update-in d-simple [:children]
                                   (partial into [test-description]))
            d-full (merge d-with-src d-with-desc)]
-       (is (every? (partial s/valid? :spacetools.spacedoc.node/root)
+       (is (every? (partial s/valid? ::n/root)
                    (map layers-sdn
                         [[]
                          [d-simple]
@@ -424,4 +424,4 @@
                          #{}
                          (n/description (n/todo "placeholder G")))]
                 layers-sdn
-                (s/valid? :spacetools.spacedoc.node/root))))))
+                (s/valid? ::n/root))))))

@@ -15,7 +15,7 @@
             [spacetools.test-util.interface :as tu]))
 
 
-(defn-spec depth->headline :spacetools.spacedoc.node/headline
+(defn-spec depth->headline ::n/headline
   "Make headline dummy of given DEPTH and WIDTH."
   ([depth nat-int?] (depth->headline depth 1))
   ([depth nat-int? width nat-int?]
@@ -57,7 +57,7 @@
   "Return true if X is a valid headline."
   [x any?]
   (:clojure.spec.alpha/problems
-   (s/explain-data :spacetools.spacedoc.node/headline x)))
+   (s/explain-data ::n/headline x)))
 
 
 (st/instrument)
@@ -166,7 +166,7 @@
   (defspec valid-headline-gen
     {:num-tests (tu/samples 10)}
     (prop/for-all
-     [headline (gen/no-shrink (s/gen :spacetools.spacedoc.node/headline))]
+     [headline (gen/no-shrink (s/gen ::n/headline))]
 
      (testing "Generate valid headline"
        (is (empty? (hl-problems headline))))

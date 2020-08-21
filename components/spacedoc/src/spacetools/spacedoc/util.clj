@@ -11,11 +11,6 @@
             [spacetools.spacedoc.node :as n]))
 
 
-(s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems
-                                    :clojure.spec.alpha/spec
-                                    :clojure.spec.alpha/value]))
-
-
 ;;;; Generic stuff for SDN manipulation
 
 (defn-spec non-blank-string? boolean?

@@ -1,5 +1,9 @@
 (ns spacetools.spacedoc.org.head
-  "Specs and helpers for working with headers of documents."
+  "Specs and helpers for working with headers of documents.
+
+  TODO: `::toc` needs a custom generator. It will allow
+        generative testing of TOC generation/conversion.
+  TODO: head nodes also need a generator."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [orchestra.core :refer [defn-spec]]
@@ -18,7 +22,7 @@
 (s/def :spacetools.spacedoc.org.head.toc.leaf/path
   :spacetools.spacedoc.node.link/path)
 (s/def :spacetools.spacedoc.org.head.toc.leaf/children
-  (s/coll-of :spacetools.spacedoc.node/text
+  (s/coll-of ::n/text
              :kind vector?
              :min-count 1
              :max-count 1
@@ -33,18 +37,18 @@
 
 (s/def :spacetools.spacedoc.org.head.toc.item-children/tag #{:item-children})
 (s/def :spacetools.spacedoc.org.head.item-children/children
-  (s/cat
-   :headline-link ::toc-leaf
-   :sub-headlines-links
-   (s/? (s/cat :line-break :spacetools.spacedoc.node/line-break
-               ;; TODO:  It's a recursive spec and `s/*recursion-limit*` seems
-               ;;        to be ignored.
-               ;;        see https://clojure.atlassian.net/browse/CLJ-1978
-               ;;        this needs a solution.
-               :brench (s/+ ::toc-branch)))))
+  (s/alt :parent (s/cat
+                  :headline-link
+                  ::toc-leaf
+                  :sub-headlines-links
+                  (s/cat :line-break ::n/line-break
+                         :brench (s/+ ::toc-branch)))
+         :terminal (s/cat :headline-link ::toc-leaf)))
+
 (s/def ::toc-item-children
   (s/keys :req-un [:spacetools.spacedoc.org.head.toc.item-children/tag
                    :spacetools.spacedoc.org.head.item-children/children]))
+
 
 ;; TOC item (unordered list item)
 
@@ -101,7 +105,7 @@
 (defn-spec root->toc (s/nilable ::toc)
   "Generate table of content for ROOT node.
 Return nil if ROOT node doesn't have any headlines."
-  [{children :children :as root} :spacetools.spacedoc.node/root]
+  [{children :children :as root} ::n/root]
   (letfn [(hl->gid-base [headlin] (sdu/hl-val->gh-id-base
                                    (sdu/fmt-hl-val (:value headlin))))
 
@@ -144,25 +148,21 @@ Return nil if ROOT node doesn't have any headlines."
          (hls->toc))))
 
 
-;; head
-
-(s/def :spacetools.spacedoc.org.head/children
-  (s/cat :rest (s/+ :spacetools.spacedoc.node/block-element)))
-
-(s/def ::head (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                               :spacetools.spacedoc.org.head/children]))
-
-
 ;; root with head
 
 (s/def :spacetools.spacedoc.org.head.root-with-head/children
-  (s/cat
-   :head ::head
-   :toc (s/? ::toc)
-   :rest (s/* :spacetools.spacedoc.node/root-child)))
+  (s/alt :with-toc
+         (s/cat
+          :head ::n/section
+          :toc ::toc
+          :rest (s/* ::n/root-child))
+         :no-toc
+         (s/cat
+          :head ::n/section
+          :rest (s/* ::n/root-child))))
 
 (s/def ::root-with-head
-  (s/merge :spacetools.spacedoc.node/root
+  (s/merge ::n/root
            (s/keys :req-un
                    [:spacetools.spacedoc.org.head.root-with-head/children])))
 
@@ -170,9 +170,12 @@ Return nil if ROOT node doesn't have any headlines."
 ;; head with meta
 
 (s/def :spacetools.spacedoc.org.head.with-meta/children
-  (s/cat :title :spacetools.spacedoc.node.meta/title
-         :tags (s/? :spacetools.spacedoc.node.meta/tags)
-         :rest (s/* :spacetools.spacedoc.node/block-element)))
+  (s/alt :with-tags
+         (s/cat :title :spacetools.spacedoc.node.meta/title
+                :tags :spacetools.spacedoc.node.meta/tags
+                :rest (s/* ::n/block-element))
+         :no-tags (s/cat :title :spacetools.spacedoc.node.meta/title
+                         :rest (s/* ::n/block-element))))
 
 (s/def ::with-meta
   (s/keys :req-un [:spacetools.spacedoc.node.section/tag
@@ -181,25 +184,24 @@ Return nil if ROOT node doesn't have any headlines."
 
 ;; root with meta
 
-(s/def :spacetools.spacedoc.org.head.with-meta/children
-  (s/cat
-   :head ::with-meta
-   :toc (s/? ::toc)
-   :rest (s/* :spacetools.spacedoc.node/root-child)))
+(s/def :spacetools.spacedoc.org.head.root-with-meta/children
+  (s/alt :with-toc (s/cat :head ::with-meta
+                          :toc ::toc
+                          :rest (s/* ::n/root-child))
+         :no-toc (s/cat :head ::with-meta
+                        :rest (s/* ::n/root-child))))
 
 (s/def ::root-with-meta
   (s/merge
-   :spacetools.spacedoc.node/root
-   (s/keys
-    :req-un
-    [:spacetools.spacedoc.org.head.with-meta/children])))
+   ::n/root
+   (s/keys :req-un [:spacetools.spacedoc.org.head.root-with-meta/children])))
 
 
 ;;;; root node helpers
 
-(defn-spec conj-toc :spacetools.spacedoc.node/root
+(defn-spec conj-toc ::n/root
   "Adds Table of content based on headlines present in the ROOT node"
-  [{children :children :as root} :spacetools.spacedoc.node/root]
+  [{children :children :as root} ::n/root]
   (if-let [toc (root->toc root)]
     (let [[b-toc a-toc] (split-with (complement sdu/hl?) children)]
       (assoc root :children (vec (concat b-toc [toc] a-toc))))
@@ -209,29 +211,29 @@ Return nil if ROOT node doesn't have any headlines."
 (defn-spec add-root-meta any? #_ ::root-with-meta
   "Adds title and tags nodes to the ROOT node."
   [{tags :tags title :title [f-child & children] :children :as root}
-   :spacetools.spacedoc.node/root]
+   ::n/root]
   root
- #_ (let [title-n (n/key-word "TITLE" title)
-        tags-n (when (seq tags) (n/key-word "TAGS" (join "|" (sort tags))))
-        head-childen (when (s/valid? :spacetools.spacedoc.node/section f-child)
-                       (:children f-child))]
-    (update root :children
-            #(apply vector
-                    (->> head-childen
-                         (list* title-n tags-n)
-                         (remove nil?)
-                         (apply n/section))
-                    (if head-childen children %)))))
+  #_ (let [title-n (n/key-word "TITLE" title)
+           tags-n (when (seq tags) (n/key-word "TAGS" (join "|" (sort tags))))
+           head-childen (when (s/valid? ::n/section f-child)
+                          (:children f-child))]
+       (update root :children
+               #(apply vector
+                       (->> head-childen
+                            (list* title-n tags-n)
+                            (remove nil?)
+                            (apply n/section))
+                       (if head-childen children %)))))
 
 
 (s/def ::root-meta (s/or :title :spacetools.spacedoc.node.meta/title
                          :tags :spacetools.spacedoc.node.meta/tags))
 
 
-(defn-spec remove-root-meta (s/nilable :spacetools.spacedoc.node/root)
+(defn-spec remove-root-meta (s/nilable ::n/root)
   "Removes title and tags nodes from the ROOT node.
 Returns nil if the node becomes empty."
-  [root :spacetools.spacedoc.node/root]
+  [root ::n/root]
   (if (s/valid? ::root-with-meta root)
     (sdu/remove-invalid
      (sr/transform [:children sr/FIRST :children]

@@ -72,37 +72,23 @@
 
 
 (deftest remove-root-meta-fn
-  (let [meta-A (n/section (n/key-word "TITLE" "foo")
-                          (n/key-word "TAGS" "foo|bar|baz"))
-        meta-B (n/section (n/key-word "TITLE" "bar")
-                          (n/key-word "TAGS" "qux"))
-        meta+ (n/section (n/key-word "TITLE" "bar")
-                         (n/key-word "TAGS" "qux")
-                         (n/paragraph (n/text "text")))
+  (let [h+meta-a (n/section (n/key-word "TITLE" "foo")
+                            (n/key-word "TAGS" "foo|bar|baz"))
+        h+meta-b (n/section (n/key-word "TITLE" "bar")
+                            (n/key-word "TAGS" "qux"))
+        p (n/paragraph (n/text "text"))
+        h+meta+p (n/section (n/key-word "TITLE" "bar")
+                            (n/key-word "TAGS" "qux")
+                            p)
+        h+p (n/section p)
         root-no-meta (n/root "foo" #{} (n/todo "bar"))
-        add-meta (fn [m root] (update-in root [:children] (partial into [m])))
-        root-with-meta (add-meta meta-A root-no-meta)
-        root-with-2x-meta (add-meta meta-B root-with-meta)]
+        fadd (fn [n root] (update root :children (partial into [n])))
+        root-with-meta (fadd h+meta-a root-no-meta)
+        root-with-2x-meta (fadd h+meta-b root-with-meta)
+        root-with-meta+p (fadd h+meta+p root-no-meta)
+        root-with-p (fadd h+p root-no-meta)]
     (is (tu/identity? remove-root-meta root-no-meta))
+    (is (tu/identity? remove-root-meta root-with-p))
     (is (= root-no-meta (remove-root-meta root-with-meta)))
-   #_ (is (= root-with-meta (remove-root-meta root-with-2x-meta)))))
-
-
-;; (let [meta-A (n/section (n/key-word "TITLE" "foo")
-;;                         (n/key-word "TAGS" "foo|bar|baz"))
-;;       meta-B (n/section (n/key-word "TITLE" "bar")
-;;                         (n/key-word "TAGS" "qux"))
-;;       meta+ (n/section (n/key-word "TITLE" "bar")
-;;                        (n/key-word "TAGS" "qux")
-;;                        (n/paragraph (n/text "text")))
-;;       root-no-meta (n/root "foo" #{} (n/todo "bar"))
-;;       add-meta (fn [m root] (update-in root [:children] (partial into [m])))
-;;       root-with-meta (add-meta meta-A root-no-meta)
-;;       root-with-2x-meta (add-meta meta-B root-with-meta)]
-;;   (s/explain-str :spacetools.spacedoc.org.head/with-meta meta-A)
-;;   #_ root-with-meta
-;;   #_ (remove-root-meta root-with-meta)
-;;   #_ (s/explain-data :spacetools.spacedoc.org.head/root-with-meta root-with-meta))
-
-
-;; (s/exercise :spacetools.spacedoc.org.head/with-meta 1)
+    (is (= root-with-meta (remove-root-meta root-with-2x-meta)))
+    (is (= root-with-p (remove-root-meta root-with-meta+p)))))

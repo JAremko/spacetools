@@ -57,15 +57,15 @@
     true? (n/root "foo" #{} (n/todo "bar"))
     false? "baz"
     false? {:tag :qux})
-  (letfn [(set-roots-first-hl-val [new-val r-node]
-            (setval [:children FIRST :value] new-val r-node))]
-    (let [test-node (n/root "foo" #{} (n/todo "quux"))]
-      (is (valid-node? (set-roots-first-hl-val
-                        "quuz"
-                        test-node)))
-      (is (not (valid-node? (set-roots-first-hl-val
-                             :not-a-string
-                             test-node)))))))
+  (let [set-roots-first-hl-val
+        (fn [new-val r-node] (setval [:children FIRST :value] new-val r-node))
+        test-node (n/root "foo" #{} (n/todo "quux"))]
+    (is (valid-node? (set-roots-first-hl-val
+                      "quuz"
+                      test-node)))
+    (is (not (valid-node? (set-roots-first-hl-val
+                           :not-a-string
+                           test-node))))))
 
 
 (defspec ^:slow valid-node?-gen
@@ -78,7 +78,7 @@
 
 (deftest fmt-problem-fn
   (let [text (n/text "foo")
-        text-spec-form (s/form :spacetools.spacedoc.node/text)
+        text-spec-form (s/form ::n/text)
         problem {:foo :bar}]
     (are [pred x] (pred (str/includes? (fmt-problem text problem) x))
       true? ":foo"
