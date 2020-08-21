@@ -13,16 +13,7 @@
             [spacetools.spacedoc.node.val-spec :as vs]))
 
 
-;; Any node should satisfy this spec
-
-(s/def :spacetools.spacedoc.node.any-node/tag keyword?)
-(s/def :spacetools.spacedoc.node.any-node/children (s/coll-of
-                                                    ::any-node
-                                                    :min-count 0
-                                                    :kind vector?))
-(s/def ::any-node (s/keys
-                   :req-un [:spacetools.spacedoc.node.any-node/tag]
-                   :opt-un [:spacetools.spacedoc.node.any-node/children]))
+(s/def ::any-node (s/multi-spec sc/node->spec-k :tag))
 
 
 ;; inline leaf

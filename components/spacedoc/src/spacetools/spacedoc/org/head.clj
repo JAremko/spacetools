@@ -3,6 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [orchestra.core :refer [defn-spec]]
+            [com.rpl.specter :as sr]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :as sdu]))
@@ -143,39 +144,61 @@ Return nil if ROOT node doesn't have any headlines."
          (hls->toc))))
 
 
-;;;; root node head spec
+;; head
 
-;; root head
+(s/def :spacetools.spacedoc.org.head/children
+  (s/cat :rest (s/+ :spacetools.spacedoc.node/block-element)))
 
-(s/def :spacetools.spacedoc.org.head.root-head/children
-  (s/cat :title :spacetools.spacedoc.node.meta/title
-         :tags (s/? :spacetools.spacedoc.node.meta/tags)
-         :rest (s/* :spacetools.spacedoc.node/block-element)))
-
-(s/def ::root-head
-  (s/keys :req-un [:spacetools.spacedoc.node.section/tag
-                   :spacetools.spacedoc.org.head.root-head/children]))
+(s/def ::head (s/keys :req-un [:spacetools.spacedoc.node.section/tag
+                               :spacetools.spacedoc.org.head/children]))
 
 
 ;; root with head
 
-(s/def :spacetools.spacedoc.org.head.root-with-head-props/children
+(s/def :spacetools.spacedoc.org.head.root-with-head/children
   (s/cat
-   :head ::root-head
+   :head ::head
    :toc (s/? ::toc)
    :rest (s/* :spacetools.spacedoc.node/root-child)))
 
-(s/def ::root-with-head-props
+(s/def ::root-with-head
   (s/merge :spacetools.spacedoc.node/root
-           (s/keys
-            :req-un
-            [:spacetools.spacedoc.org.head.root-with-head-props/children])))
+           (s/keys :req-un
+                   [:spacetools.spacedoc.org.head.root-with-head/children])))
+
+
+;; head with meta
+
+(s/def :spacetools.spacedoc.org.head.with-meta/children
+  (s/cat :title :spacetools.spacedoc.node.meta/title
+         :tags (s/? :spacetools.spacedoc.node.meta/tags)
+         :rest (s/* :spacetools.spacedoc.node/block-element)))
+
+(s/def ::with-meta
+  (s/keys :req-un [:spacetools.spacedoc.node.section/tag
+                   :spacetools.spacedoc.org.head.with-meta/children]))
+
+
+;; root with meta
+
+(s/def :spacetools.spacedoc.org.head.with-meta/children
+  (s/cat
+   :head ::with-meta
+   :toc (s/? ::toc)
+   :rest (s/* :spacetools.spacedoc.node/root-child)))
+
+(s/def ::root-with-meta
+  (s/merge
+   :spacetools.spacedoc.node/root
+   (s/keys
+    :req-un
+    [:spacetools.spacedoc.org.head.with-meta/children])))
 
 
 ;;;; root node helpers
 
 (defn-spec conj-toc :spacetools.spacedoc.node/root
-  "Add Table of content based on headlines present in the ROOT node"
+  "Adds Table of content based on headlines present in the ROOT node"
   [{children :children :as root} :spacetools.spacedoc.node/root]
   (if-let [toc (root->toc root)]
     (let [[b-toc a-toc] (split-with (complement sdu/hl?) children)]
@@ -183,11 +206,12 @@ Return nil if ROOT node doesn't have any headlines."
     root))
 
 
-(defn-spec inline-head-props ::root-with-head-props
-  "Add title and tags nodes to the head of the root node."
+(defn-spec add-root-meta any? #_ ::root-with-meta
+  "Adds title and tags nodes to the ROOT node."
   [{tags :tags title :title [f-child & children] :children :as root}
    :spacetools.spacedoc.node/root]
-  (let [title-n (n/key-word "TITLE" title)
+  root
+ #_ (let [title-n (n/key-word "TITLE" title)
         tags-n (when (seq tags) (n/key-word "TAGS" (join "|" (sort tags))))
         head-childen (when (s/valid? :spacetools.spacedoc.node/section f-child)
                        (:children f-child))]
@@ -200,22 +224,17 @@ Return nil if ROOT node doesn't have any headlines."
                     (if head-childen children %)))))
 
 
-(s/def :spacetools.spacedoc.org.head/root-head-prop
-  (s/or :title :spacetools.spacedoc.node.meta/title
-        :tags :spacetools.spacedoc.node.meta/tags))
+(s/def ::root-meta (s/or :title :spacetools.spacedoc.node.meta/title
+                         :tags :spacetools.spacedoc.node.meta/tags))
 
 
-(defn-spec remove-inline-head-props :spacetools.spacedoc.node/root
-  "Removes head props children nodes from the ROOT node."
+(defn-spec remove-root-meta (s/nilable :spacetools.spacedoc.node/root)
+  "Removes title and tags nodes from the ROOT node.
+Returns nil if the node becomes empty."
   [root :spacetools.spacedoc.node/root]
-  (if (s/valid? ::root-with-head-props root)
-    (assoc root :children
-           #(let [{{{title :title tags :tags head-rest :rest :as head} :head
-                    toc :toc
-                    root-rest :rest}
-                   :children :as children}
-                  (s/conform ::root-with-head-props root)]
-              (if head-rest
-                (into [(apply n/section head-rest)] (rest children))
-                children)))
+  (if (s/valid? ::root-with-meta root)
+    (sdu/remove-invalid
+     (sr/transform [:children sr/FIRST :children]
+                   (partial filterv #(not (s/valid? ::root-meta %)))
+                   root))
     root))

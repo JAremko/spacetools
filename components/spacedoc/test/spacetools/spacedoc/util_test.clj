@@ -126,15 +126,13 @@
 (deftest relation-fn
   (is (= (relation (n/text "foo")) {:text #{}}))
   (is (thrown? Exception (relation {:not-a-tag :text})))
-  (let [good-node (n/section (n/paragraph (n/text "foo")
-                                          (n/text "bar")
-                                          (n/verbatim "baz")))
-        bad-node {:tag :bad-node :children [(n/text "qux")]}]
-    (is (= (relation bad-node) {:bad-node #{:text} :text #{}}))
-    (is (= (relation good-node) {:section #{:paragraph}
-                                 :paragraph #{:verbatim :text}
-                                 :text #{}
-                                 :verbatim #{}}))))
+  (is (= (relation (n/section (n/paragraph (n/text "foo")
+                                           (n/text "bar")
+                                           (n/verbatim "baz"))))
+         {:section #{:paragraph}
+          :paragraph #{:verbatim :text}
+          :text #{}
+          :verbatim #{}})))
 
 
 (deftest relations-fn
@@ -142,21 +140,22 @@
   (is (= (relations [(n/text "foo")]) {:text #{}}))
   (is (empty? (relations [])))
   (is (thrown? Exception (relations [{:not-a-tag :text}])))
-  (let [good-node (n/section (n/paragraph (n/text "foo")
-                                          (n/text "bar")
-                                          (n/verbatim "baz")))
-        bad-node {:tag :bad-node :children [(n/text "qux")]}]
-    (is (= (relations [bad-node]) {:bad-node #{:text} :text #{}}))
-    (is (= (relations [good-node]) {:section #{:paragraph}
-                                    :paragraph #{:verbatim :text}
-                                    :text #{}
-                                    :verbatim #{}}))
-    (is (= (relations [bad-node good-node])
-           {:bad-node #{:text}
-            :section #{:paragraph}
-            :paragraph #{:verbatim :text}
+  (let [node-a (n/section (n/paragraph (n/text "foo")
+                                       (n/text "bar")
+                                       (n/verbatim "baz")))
+        node-b (n/paragraph (n/line-break))]
+    (is (= (relations [node-a]) {:section #{:paragraph}
+                                 :paragraph #{:verbatim :text}
+                                 :text #{}
+                                 :verbatim #{}}))
+    (is (= (relations [node-b]) {:paragraph #{:line-break}
+                                 :line-break #{}}))
+    (is (= (relations [node-a node-b])
+           {:section #{:paragraph}
+            :paragraph #{:verbatim :text :line-break}
             :text #{}
-            :verbatim #{}}))))
+            :verbatim #{}
+            :line-break #{}}))))
 
 
 (deftest regex-pat?-fn
@@ -208,3 +207,17 @@
                         ""}
                        (cfg/toc-hl-val))
            (cfg/toc-hl-val)))))
+
+
+(deftest remove-invalid-fn
+  (let [valid (n/root "foo" #{} (n/todo "bar"))
+        invalid-node (dissoc (n/headline "foo" (n/todo "bar")) :children)
+        invalid-simpl (assoc-in valid [:children 1] {:tag :text})
+        valid-compl (n/root "foo" #{} (->> (n/todo "baz")
+                                           (n/headline "bar")
+                                           (n/headline "qux")))
+        invalid-compl (assoc-in valid-compl [:children 1 :children 1] 42)]
+    (is (nil? (remove-invalid invalid-node)))
+    (is (tu/identity? remove-invalid valid))
+    (is (= valid (remove-invalid invalid-simpl)))
+    (is (= valid-compl (remove-invalid invalid-compl)))))

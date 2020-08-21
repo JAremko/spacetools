@@ -3,6 +3,7 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
+            [medley.core :refer [update-existing]]
             [clojure.string :as str]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
@@ -13,9 +14,6 @@
 (s/def ::spec-problem (s/keys :req [:clojure.spec.alpha/problems
                                     :clojure.spec.alpha/spec
                                     :clojure.spec.alpha/value]))
-
-
-(alias 'spec 'clojure.spec.alpha)
 
 
 ;;;; Generic stuff for SDN manipulation
@@ -33,7 +31,7 @@
 
 
 (defn-spec fmt-problem string?
-  "Format one of `:clojure.spec.alpha/problems`."
+  "Formats one of `:clojure.spec.alpha/problems`."
   [node node? problem map?]
   (str/join \newline
             (assoc problem
@@ -41,26 +39,33 @@
                    :spec-form (s/form (sc/node->spec-k node)))))
 
 
-(s/def ::maybe-problems (s/nilable (s/keys :req [::spec/problems])))
+(defn-spec remove-invalid (s/nilable sc/node?)
+  "Removes all invalid SDN nodes.
+NOTE: Returns nil if the top node is or becomes invalid after
+children removal."
+  [maybe-node any?]
+  (as-> maybe-node n
+    (update-existing n :children (partial into [] (comp (map remove-invalid)
+                                                        (remove nil?))))
+    (when (s/valid? ::n/any-node n) n)))
+
+
+(s/def ::maybe-problems (s/nilable (s/keys :req [::s/problems])))
 
 (defn-spec explain-deepest ::maybe-problems
-  "Validate each NODE recursively.
+  "Validates each NODE recursively.
   Nodes will be validated in `postwalk` order and only
   the first invalidation will be reported.
   If multiply children of the same node are invalid the first one
   will be reported.
   The function returns `nil` If all nodes are valid."
-  [node node?]
+  [node any?]
   (or (first (sequence (keep explain-deepest) (:children node)))
-      (s/explain-data
-       (if ((sc/all-tags) (:tag node))
-         (sc/node->spec-k node)
-         :spacetools.spacedoc.node/known-node)
-       node)))
+      (s/explain-data ::n/any-node node)))
 
 
 (defn-spec relation (s/map-of keyword? set?)
-  "Return mapping between nodes and children sets."
+  "Returns mapping between nodes and children sets."
   [parent node?]
   (r/reduce
    (r/monoid (fn [m n] (update m (:tag n)
@@ -218,7 +223,7 @@ Fragments are  particular headline values in the \"/\" separated chain."
 (defn-spec valid-root? boolean?
   "Return true if NODE is a valid root node."
   [node any?]
-  (s/valid? :spacetools.spacedoc.node/root node))
+  (s/valid? ::n/root node))
 
 
 (defn-spec flatten-headline valid-hl?

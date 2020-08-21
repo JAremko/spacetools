@@ -312,14 +312,12 @@
 (defmethod sdn->org :root
   [{:keys [tag] :as root}]
   (->> root
-       (head/remove-inline-head-props)
-       (head/inline-head-props)
+       (head/remove-root-meta)
+       (head/add-root-meta)
        (head/conj-toc)
        (:children)
        (mapv #(if (sdu/hl? %) (assoc-level-and-path-id %) %))
        (conv tag)))
-
-
 
 
 ;;;; Pseudo-nodes

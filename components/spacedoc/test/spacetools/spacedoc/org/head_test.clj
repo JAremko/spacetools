@@ -23,42 +23,24 @@
 
 ;;;;;;;;; NOTE: DO SENITY CHEACK ON TOC HEADLINE VALUE
 
-;; (deftest remove-inline-head-props-fn
-;;   (let [prop-keys [:title :tags]
-;;         root (n/root "foo" #{} (n/todo "bar"))
-;;         stripped-root (reduce dissoc root prop-keys)]
-;;     (is (every? (partial = :missing) (map #(% root :missing) prop-keys))
-;;         "Head props should be removed")
-;;     (is (= stripped-root (remove-head-props root)))))
-
-
-;; (deftest remove-inline-head-props-fn
-;;   (let [title (n/key-word "title" "foo")
-;;         tags  (n/key-word "tags" "bar")
-;;         simple-root (n/root "foo" #{} title tags)]
-;;     (is (empty? (:children (remove-inline-head-props simple-root)))
-;;         "Head props should be removed")))
-
-
-;; (let [title (n/key-word "TITLE" "foo")
-;;       tags  (n/key-word "TAGS" "bar")
-;;       head (n/section title tags)
-;;       simple-root (n/root "foo" #{} head (n/todo "bar"))]
-;;   (remove-inline-head-props simple-root))
-
-
-;; (s/valid? :spacetools.spacedoc.node/root (n/root "foo" #{}))
-
 ;;;; Test helpers
-(defn mk-toc-tmpl [& children]
+(defn test-toc-tmpl
+  "Wraps TOC children into TOC headline."
+  [& children]
   (n/headline (cfg/toc-hl-val) (apply n/section children)))
+
+
+(def root-meta-tags
+  "Tags of root meta nodes.
+  See `:spacetools.spacedoc.org.head/root-meta`."
+  #{:tags :title})
 
 
 ;;;; Test data
 (def test-toc-simple
   "TOC with simple structure. "
   [(root->toc (n/root "foo" #{} (n/todo "bar")))
-   (mk-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))]))])
+   (test-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))]))])
 
 
 (def test-toc-flat
@@ -67,7 +49,7 @@
                       (n/todo "foo")
                       (n/todo "bar")
                       (n/todo "baz")))
-   (mk-toc-tmpl
+   (test-toc-tmpl
     (n/unordered-list [(n/link "#foo" (n/text "foo"))])
     (n/unordered-list [(n/link "#bar" (n/text "bar"))])
     (n/unordered-list [(n/link "#baz" (n/text "baz"))]))])
@@ -83,7 +65,44 @@
         (n/headline "bar")
         (n/root "foo" #{})
         root->toc)
-   (mk-toc-tmpl (n/unordered-list
-                 [(n/link "#bar" (n/text "bar"))
-                  (n/line-break)
-                  (n/unordered-list [(n/link "#baz" (n/text "baz"))])]))])
+   (test-toc-tmpl (n/unordered-list
+                   [(n/link "#bar" (n/text "bar"))
+                    (n/line-break)
+                    (n/unordered-list [(n/link "#baz" (n/text "baz"))])]))])
+
+
+(deftest remove-root-meta-fn
+  (let [meta-A (n/section (n/key-word "TITLE" "foo")
+                          (n/key-word "TAGS" "foo|bar|baz"))
+        meta-B (n/section (n/key-word "TITLE" "bar")
+                          (n/key-word "TAGS" "qux"))
+        meta+ (n/section (n/key-word "TITLE" "bar")
+                         (n/key-word "TAGS" "qux")
+                         (n/paragraph (n/text "text")))
+        root-no-meta (n/root "foo" #{} (n/todo "bar"))
+        add-meta (fn [m root] (update-in root [:children] (partial into [m])))
+        root-with-meta (add-meta meta-A root-no-meta)
+        root-with-2x-meta (add-meta meta-B root-with-meta)]
+    (is (tu/identity? remove-root-meta root-no-meta))
+    (is (= root-no-meta (remove-root-meta root-with-meta)))
+   #_ (is (= root-with-meta (remove-root-meta root-with-2x-meta)))))
+
+
+;; (let [meta-A (n/section (n/key-word "TITLE" "foo")
+;;                         (n/key-word "TAGS" "foo|bar|baz"))
+;;       meta-B (n/section (n/key-word "TITLE" "bar")
+;;                         (n/key-word "TAGS" "qux"))
+;;       meta+ (n/section (n/key-word "TITLE" "bar")
+;;                        (n/key-word "TAGS" "qux")
+;;                        (n/paragraph (n/text "text")))
+;;       root-no-meta (n/root "foo" #{} (n/todo "bar"))
+;;       add-meta (fn [m root] (update-in root [:children] (partial into [m])))
+;;       root-with-meta (add-meta meta-A root-no-meta)
+;;       root-with-2x-meta (add-meta meta-B root-with-meta)]
+;;   (s/explain-str :spacetools.spacedoc.org.head/with-meta meta-A)
+;;   #_ root-with-meta
+;;   #_ (remove-root-meta root-with-meta)
+;;   #_ (s/explain-data :spacetools.spacedoc.org.head/root-with-meta root-with-meta))
+
+
+;; (s/exercise :spacetools.spacedoc.org.head/with-meta 1)

@@ -16,6 +16,16 @@
 
 (st/instrument)
 
+
+(deftest identity?-fn
+  (let [foo #(if (string? %) % 42)]
+    (are [f x pred] (pred (identity? f x))
+      identity 42 true?
+      inc 42 false?
+      foo "foo" true?
+      foo :foo false?)))
+
+
 (deftest contains-string?-fn
   (are [s tree pred] (pred (contains-string? s tree))
     "" "" true?
@@ -69,18 +79,13 @@
                  (n/text "baz")) 3))
 
 
-;; (defspec ^:slow has-n-children?-gen
-;;   {:num-tests (samples 10)}
-;;   (prop/for-all
-;;    [node ]
-;;    (is (= (first (capitalize-first s))
-;;           (first (str/upper-case s))))
-;;    (is (= (rest (capitalize-first s))
-;;           (rest s)))))
-
-;; (deftest count-n?-fn
-;;   )
-
+(deftest count-n?-fn
+  (is (thrown? Exception (count-n? 1 "f")) "Doesn't work for strings")
+  (are [coll n] (count-n? n coll)
+    {:foo :bar} 1
+    #{:foo :bar} 2
+    ["foo" 42 \d] 3
+    `(1 {:foo :bar} "baz" 3) 4))
 
 
 (deftest create-fs-fn

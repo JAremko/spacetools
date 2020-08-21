@@ -21,7 +21,7 @@
 
 
 ;; Helpers
-(defn headline?
+(defn valid-hl?
   "Returns true if X is a valid headline node."
   [x]
   (s/valid? :spacetools.spacedoc.node/headline x))
@@ -251,7 +251,7 @@
              ;; docs query shaped leftover
              [] {"foo" []} nil? empty?
              [doc] {"foo" []} some? empty?
-             [doc] {"foo" []} headline? empty?
+             [doc] {"foo" []} valid-hl? empty?
              [doc] {"foo" []} (fn [hl] (= (tags "foo") (:value hl))) empty?
              [doc] {"foo" []} (partial tu/has-n-children? 1) empty?
              [doc] {"bar" []} nil? seq
@@ -276,15 +276,15 @@
                  (and (shaped-pred shaped) (leftover-pred leftover)))
              ;; 2 docs have both foo and bar tags.
              [doc-foo doc-bar doc-foo+bar] {"foo" ["bar"]}
-             headline? (partial tu/count-n? 2)
+             valid-hl? (partial tu/count-n? 2)
 
              ;; 2 docs have both bar and foo tags.
              [doc-foo doc-bar doc-foo+bar] {"bar" ["foo"]}
-             headline? (partial tu/count-n? 2)
+             valid-hl? (partial tu/count-n? 2)
 
              ;; 2 docs with foo and bar tags + one doc that has only foo tag.
              [doc-foo doc-bar doc-foo+bar] {"foo" ["bar" "foo"]}
-             headline? single?
+             valid-hl? single?
 
              ;; Only one doc with baz tag
              [doc-foo doc-foo+bar doc-foo+bar+baz] {"baz" []}

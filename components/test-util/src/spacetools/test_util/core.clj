@@ -12,6 +12,12 @@
   (:import [com.google.common.jimfs Configuration Jimfs]))
 
 
+(defn-spec identity? boolean?
+  "Returns true if (= x (f x))"
+  [f fn? x any?]
+  (= x (f x)))
+
+
 (defn-spec contains-string? boolean?
   "Returns true if TREE contains S string at any level."
   [s string? tree seqable?]

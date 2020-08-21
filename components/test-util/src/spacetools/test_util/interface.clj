@@ -4,6 +4,13 @@
             [spacetools.spacedoc.interface :as sd]
             [spacetools.test-util.core :as tu]))
 
+
+(defn-spec identity? boolean?
+  "Returns true if (= x (f x))"
+  [f fn? x any?]
+  (tu/identity? f x))
+
+
 (defn-spec samples pos-int?
   "Multiplies BASE-SAMPLE-COUNT by `gen-mult` and returns it as `pos-int?`."
   [base-sample-count pos-int?]
