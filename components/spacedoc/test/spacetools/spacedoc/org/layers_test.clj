@@ -33,15 +33,6 @@
   (apply n/root "Test root" #{} children))
 
 
-(defn tags->tag->tag-descr
-  "Create map of tags.
-  See :valid-tags of `spacetools.spacedoc.config/default-config`"
-  [tags]
-  (->> tags
-       (map (juxt identity (partial format "%s tag")))
-       (into {})))
-
-
 (def single?
   "Returns true if supplied collection has a singe element."
   (partial tu/count-n? 1))
@@ -238,7 +229,7 @@
 
 (deftest layers-query-shaper-fn
   (testing "Minimal query with simple docs"
-    (let [tags (tags->tag->tag-descr ["foo" "bar"])]
+    (let [tags (tu/tags->tag->tag-descr ["foo" "bar"])]
       (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
                        (constantly tags)}
         #(let [doc (n/root "title" #{"foo"} (n/todo "bar"))]
@@ -259,7 +250,7 @@
              [doc] {"bar" []} nil? (fn [lft]
                                      (-> lft first :tags (= #{"foo"}))))))))
   (testing "Complex query with simple docs"
-    (let [tags (tags->tag->tag-descr ["foo" "bar" "baz" "qux"])]
+    (let [tags (tu/tags->tag->tag-descr ["foo" "bar" "baz" "qux"])]
       (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
                        (constantly tags)}
         #(let [doc-foo (n/root "title foo" #{"foo"} (n/todo "child foo"))
@@ -327,7 +318,7 @@
              empty?)))))
 
   (testing "Minimal query with complex docs"
-    (let [tags (tags->tag->tag-descr ["foo"])]
+    (let [tags (tu/tags->tag->tag-descr ["foo"])]
       (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
                        (constantly tags)}
         #(let [src "/foo/bar"
@@ -361,7 +352,7 @@
 
 (deftest layers-sdn-fn
   (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
-                   (constantly (tags->tag->tag-descr ["foo"]))
+                   (constantly (tu/tags->tag->tag-descr ["foo"]))
                    #'spacetools.spacedoc.config/layers-org-query
                    (constantly {"foo" []})}
     #(let [src "/foo/bar"
@@ -402,7 +393,7 @@
              "With source it should be present in the out put."))))
   (testing "Complex set of documents."
     (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
-                     (constantly (tags->tag->tag-descr ["foo" "bar" "baz"]))
+                     (constantly (tu/tags->tag->tag-descr ["foo" "bar" "baz"]))
                      #'spacetools.spacedoc.config/layers-org-query
                      (constantly {"foo" ["bar"]})}
       #(is (->> [(n/root "A title"

@@ -21,6 +21,9 @@
   (s/and string? (complement str/blank?)))
 
 
+(s/def ::set-of-non-blank-strings (s/coll-of ::non-blank-string :kind set?))
+
+
 ;; (s/def ::path-id
 ;;   (s/with-gen
 ;;     (s/and

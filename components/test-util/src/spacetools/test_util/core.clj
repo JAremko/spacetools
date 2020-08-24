@@ -146,3 +146,12 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
                              spacetools.fs-io.interface/filesystem fs#]
                  ~@body))))
         'do))
+
+
+(defn-spec tags->tag->tag-descr (s/map-of string? string?)
+  "Create map of tags.
+  See :valid-tags of `spacetools.spacedoc.config/default-config`"
+  [tags (s/coll-of string?)]
+  (->> tags
+       (map (juxt identity (partial format "%s tag")))
+       (into {})))

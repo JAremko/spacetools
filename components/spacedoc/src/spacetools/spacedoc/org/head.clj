@@ -10,7 +10,8 @@
             [com.rpl.specter :as sr]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]))
+            [spacetools.spacedoc.util :as sdu]
+            [clojure.string :as str]))
 
 
 ;;;;  TOC spec and constructor
@@ -208,22 +209,28 @@ Return nil if ROOT node doesn't have any headlines."
     root))
 
 
-(defn-spec add-root-meta any? #_ ::root-with-meta
-  "Adds title and tags nodes to the ROOT node."
-  [{tags :tags title :title [f-child & children] :children :as root}
-   ::n/root]
-  root
-  #_ (let [title-n (n/key-word "TITLE" title)
-           tags-n (when (seq tags) (n/key-word "TAGS" (join "|" (sort tags))))
-           head-childen (when (s/valid? ::n/section f-child)
-                          (:children f-child))]
-       (update root :children
-               #(apply vector
-                       (->> head-childen
-                            (list* title-n tags-n)
-                            (remove nil?)
-                            (apply n/section))
-                       (if head-childen children %)))))
+(defn-spec str-tags->set
+  :spacetools.spacedoc.node.val-spec/set-of-non-blank-strings
+  "Given STR-TAGS string representation of ROOT tags return set of the tags."
+  [str-tags string?]
+  (into #{} (filter seq) (str/split str-tags #"\|")))
+
+
+(defn-spec set-tags->str string?
+  "Given SET-TAGS set of ROOT tags return string representation of the tags"
+  [set-tags :spacetools.spacedoc.node.val-spec/set-of-non-blank-strings]
+  (join "|" (sort set-tags)))
+
+
+(defn-spec add-root-meta ::root-with-meta
+  "Inline title and tags props of the ROOT node."
+  [{:keys [title tags] :as root} ::n/root]
+  (let [meta-vec (vec (list* (n/key-word "title" title)
+                             (when (seq tags)
+                               [(n/key-word "tags" (set-tags->str tags))])))]
+    (if (s/valid? ::root-with-head root)
+      (sr/transform [:children sr/FIRST :children] (partial into meta-vec) root)
+      (update root :children (partial into [(apply n/section meta-vec)])))))
 
 
 (s/def ::root-meta (s/or :title :spacetools.spacedoc.node.meta/title

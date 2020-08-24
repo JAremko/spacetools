@@ -157,3 +157,11 @@
                     [:unix+osx (is (= "baz" (f-line "/foo/bar")))]
                     [:osx (is (= "baz" (f-line "/foo/bar")))]
                     [:windows (is (= "baz" (f-line "C:\\foo\\bar")))]))))
+
+
+(deftest tags->tag->tag-descr-fn
+  (are [tags tag->descr] (= tag->descr (tags->tag->tag-descr tags))
+    ["foo"] {"foo" "foo tag"}
+    ["foo bar"] {"foo bar" "foo bar tag"}
+    [] {}
+    ["foo" "bar"] {"foo" "foo tag" "bar" "bar tag"}))

@@ -400,11 +400,8 @@
                           {:min-elements 1 :max-elements 2})))
 (s/def :spacetools.spacedoc.node.root/title ::vs/non-blank-string)
 (s/def :spacetools.spacedoc.node.root/tags
-  (s/with-gen
-    (s/and
-     (s/coll-of ::vs/non-blank-string
-                :kind set?)
-     #(set/superset? (cfg/valid-tags) %))
+  (s/with-gen (s/and ::vs/set-of-non-blank-strings
+                     #(set/superset? (cfg/valid-tags) %))
     #(->> (cfg/valid-tags)
           keys
           gen/elements

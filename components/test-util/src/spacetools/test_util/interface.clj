@@ -53,3 +53,10 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
   "Returns true if COLL collection's  `count` is N."
   [n nat-int? coll coll?]
   (tu/count-n? n coll))
+
+
+(defn-spec tags->tag->tag-descr (s/map-of string? string?)
+  "Create map of tags.
+  See :valid-tags of `spacetools.spacedoc.config/default-config`"
+  [tags (s/coll-of string?)]
+  (tu/tags->tag->tag-descr tags))

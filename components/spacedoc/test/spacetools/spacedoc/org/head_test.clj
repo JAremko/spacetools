@@ -30,6 +30,22 @@
   (n/headline (cfg/toc-hl-val) (apply n/section children)))
 
 
+(defn root-tags-n?
+  "Returns true if X is a root tags node."
+  [x]
+  (s/valid? :spacetools.spacedoc.node.meta/tags x))
+
+
+(defn extract-head
+  "Returns [TITLE TAGS REST-OF-HEAD] of the ROOT node"
+  [root]
+  (let [{[{[title & rst] :children}] :children} root
+        tag-or-fr (first rst)]
+    (into [title] (if (root-tags-n? tag-or-fr)
+                    [tag-or-fr (vec (rest rst))]
+                    [nil (vec rst)]))))
+
+
 (def root-meta-tags
   "Tags of root meta nodes.
   See `:spacetools.spacedoc.org.head/root-meta`."
@@ -71,6 +87,28 @@
                     (n/unordered-list [(n/link "#baz" (n/text "baz"))])]))])
 
 
+(deftest str-tags->set-fn
+  (are [string-tags set-tags] (= set-tags (str-tags->set string-tags))
+    "" #{}
+    "foo" #{"foo"}
+    "foo|bar" #{"foo" "bar"}
+    "Foo Bar" #{"Foo Bar"}
+    "Foo Bar|baz qux" #{"Foo Bar" "baz qux"}
+    "foo|bar|baz|qux" #{"foo" "bar" "baz" "qux"}))
+
+
+(deftest set-tags->str-fn
+  (are [set-tags string-tags] (= string-tags (set-tags->str set-tags))
+    #{} ""
+    #{"a" "b" "c"} "a|b|c"
+    #{"b" "a" "c"} "a|b|c"
+    #{"foo"} "foo"
+    #{"foo" "bar"} "bar|foo"
+    #{"Foo Bar"} "Foo Bar"
+    #{"Foo Bar" "baz qux"} "Foo Bar|baz qux"
+    #{"foo" "bar" "baz" "qux"} "bar|baz|foo|qux"))
+
+
 (deftest remove-root-meta-fn
   (let [h+meta-a (n/section (n/key-word "TITLE" "foo")
                             (n/key-word "TAGS" "foo|bar|baz"))
@@ -92,3 +130,24 @@
     (is (= root-no-meta (remove-root-meta root-with-meta)))
     (is (= root-with-meta (remove-root-meta root-with-2x-meta)))
     (is (= root-with-p (remove-root-meta root-with-meta+p)))))
+
+
+(deftest add-root-meta-fn
+  (let [tags (tu/tags->tag->tag-descr ["a" "b" "c"])
+        ph (n/todo "bar")
+        h-node (n/paragraph (n/text "text"))
+        head (n/section h-node)]
+    (with-redefs-fn {#'spacetools.spacedoc.config/valid-tags
+                     (constantly tags)}
+      #(are [root-node title-val tags-val rest-head]
+           (let [[title tags rest] (extract-head (add-root-meta root-node))]
+             (and (= title-val (:value title))
+                  (= tags-val (:value tags))
+                  (= rest-head rest)))
+         (n/root "foo" #{} ph) "foo" nil []
+         (n/root "foo" #{"a"} ph) "foo" "a" []
+         (n/root "foo" #{"a" "b"} ph) "foo" "a|b" []
+         (n/root "foo" #{"b" "a"} ph) "foo" "a|b" []
+         (n/root "foo" #{} head) "foo" nil [h-node]
+         (n/root "foo" #{"a"} head) "foo" "a" [h-node]
+         (n/root "foo" #{"a"} head ph) "foo" "a" [h-node]))))
