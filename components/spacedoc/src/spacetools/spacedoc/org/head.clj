@@ -7,7 +7,6 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [orchestra.core :refer [defn-spec]]
-            [com.rpl.specter :as sr]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
             [spacetools.spacedoc.util :as sdu]
@@ -229,7 +228,7 @@ Return nil if ROOT node doesn't have any headlines."
                              (when (seq tags)
                                [(n/key-word "tags" (set-tags->str tags))])))]
     (if (s/valid? ::root-with-head root)
-      (sr/transform [:children sr/FIRST :children] (partial into meta-vec) root)
+      (update-in root [:children 0 :children] (partial into meta-vec))
       (update root :children (partial into [(apply n/section meta-vec)])))))
 
 
@@ -243,7 +242,6 @@ Returns nil if the node becomes empty."
   [root ::n/root]
   (if (s/valid? ::root-with-meta root)
     (sdu/remove-invalid
-     (sr/transform [:children sr/FIRST :children]
-                   (partial filterv #(not (s/valid? ::root-meta %)))
-                   root))
+     (update-in root [:children 0 :children]
+                (partial filterv #(not (s/valid? ::root-meta %)))))
     root))
