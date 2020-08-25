@@ -117,6 +117,8 @@
 
 
 (deftest root->toc-fn
+  (is (nil? (root->toc (n/root "foo" #{} (n/section (n/key-word "foo" "bar")))))
+      "Root node without headlines shouldn't have TOC.")
   (is (= (:value (root->toc (n/root "foo" #{} (n/todo "bar"))))
          (cfg/toc-hl-val))
       "TOC headline value should be the same as in the setting.")
@@ -151,4 +153,7 @@
 (deftest conj-toc-fn
   (is (= (get-in (conj-toc (n/root "foo" #{} (n/todo "bar"))) [:children 0])
          (test-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))])))
-      "TOC should be conjed."))
+      "TOC should be conjed.")
+  (let [root-no-hls (n/root "foo" #{} (n/section (n/key-word "foo" "bar")))]
+    (is (= root-no-hls (conj-toc root-no-hls))
+        "Root node without headlines shouldn't be altered.")))

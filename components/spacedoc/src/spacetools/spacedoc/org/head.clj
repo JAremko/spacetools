@@ -103,46 +103,59 @@
   "Generate table of content for ROOT node.
 Return nil if ROOT node doesn't have any headlines."
   [{children :children :as root} ::n/root]
-  (letfn [(hl->gid-base [headlin] (sdu/hl-val->gh-id-base
-                                   (sdu/fmt-hl-val (:value headlin))))
+  (letfn [(hl->gid-base
+            ;; "Returns headline value formatted into GitHub link fragment."
+            [headlin]
+            (sdu/hl-val->gh-id-base (sdu/fmt-hl-val (:value headlin))))
 
-          (gh-id [gid-bs cnt] (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
+          (gh-id
+            ;; Adds counter to the GitHub style link fragment.
+            [gid-bs cnt]
+            (if (> cnt 1) (str gid-bs "-" (dec cnt)) gid-bs))
 
-          (up-*gid->count! [*gc hl]
+          (up-*gid->count!
+            ;; Returns and increments counter associated with headline link
+            ;; if the link occurs again.
+            ;; NOTE: Link must be unique to refer corresponding headlines but
+            ;;       the process of formatting headline into a link sometimes
+            ;;       create same links for different headlines. Adding counter
+            ;;       sub string to it fixes the problem.
+            [*gc hl]
             (let [gid-base (hl->gid-base hl)]
               ((vswap! *gc update gid-base (fnil inc 0)) gid-base)))
 
-          (hl->toc-el [{:keys [toc-wrapper? value gh-id children]}]
-            (if toc-wrapper?
-              (some->> children
-                       (apply n/section)
-                       (n/headline (cfg/toc-hl-val)))
-              (n/unordered-list
-               (vec (list* (n/link gh-id (n/text (sdu/fmt-hl-val value)))
-                           (when (seq children)
-                             (list* (n/line-break) children)))))))
+          (hl->toc-el
+            ;; Converts headline into TOC entry.
+            [{:keys [value gh-id children]}]
+            (n/unordered-list
+             (vec (list* (n/link gh-id (n/text (sdu/fmt-hl-val value)))
+                         (when (seq children)
+                           (list* (n/line-break) children))))))
 
-          (hls->toc [headlines]
+          (hls->toc-els
+            ;; Converts seq of headlines into TOC entries.
             ;; NOTE: `volatile!` simplifies code because with the counter state
             ;;       threading the code gates much more complex.
+            [headlines]
             (let [*gid->count (volatile! {})]
-              ((fn inner [depth hl]
-                 (-> hl
-                     (assoc :gh-id
-                            (when-not (:toc-wrapper? hl)
-                              (gh-id
-                               (hl->gid-base hl)
-                               (up-*gid->count! *gid->count hl))))
-                     (update :children
-                             #(when (< depth (cfg/toc-max-depth))
-                                (when-let [hls (seq (filter sdu/hl? %))]
-                                  (mapv (partial inner (inc depth)) hls))))
-                     hl->toc-el))
-               0 {:toc-wrapper? true :children (vec headlines)})))]
+              (map (fn inner [depth hl]
+                     (-> hl
+                         (assoc :gh-id (gh-id (hl->gid-base hl)
+                                              (up-*gid->count! *gid->count hl)))
+                         (update :children
+                                 #(when (< depth (cfg/toc-max-depth))
+                                    (when-let [hls (seq (filter sdu/hl? %))]
+                                      (mapv (partial inner (inc depth)) hls))))
+                         hl->toc-el))
+                   (repeatedly (constantly 0)) headlines)))
+          (toc-els->toc
+            ;; Wraps TOC elements into TOC node and returns it.
+            [els]
+            (when (seq els)
+              (n/headline (cfg/toc-hl-val) (apply n/section els))))]
 
-    (->> children
-         (filter sdu/hl?)
-         (hls->toc))))
+    (when-let [headlines (filter sdu/hl? children)]
+      (-> headlines hls->toc-els toc-els->toc))))
 
 
 ;; root with head
