@@ -152,6 +152,4 @@ OS-KW is a keyword specifying OS family: `:unix`(default), `:osx`, `:windows`."
   "Create map of tags.
   See :valid-tags of `spacetools.spacedoc.config/default-config`"
   [tags (s/coll-of string?)]
-  (->> tags
-       (map (juxt identity (partial format "%s tag")))
-       (into {})))
+  (->> tags (map (juxt identity (partial format "%s tag"))) (into {})))

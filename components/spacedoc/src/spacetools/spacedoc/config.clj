@@ -113,7 +113,7 @@
                              "\\t" " "
                              "[ ]{2,}" " "
                              ;; Key-binding
-                             ;; FIXME: Splitting this regexp into
+                             ;; TODO: Splitting this regexp into
                              ;; fragments with some kind of commentary attached
                              ;; would be cool :D
                              "(?:(?i)(\\p{Blank}|\\p{Blank}\\p{Punct}+|^)(k){1}ey)(?:(?:(?i)[-_]*b)| B)(?:(?i)inding)((?i)s{0,1}(?:\\p{Blank}|\\p{Punct}+\\p{Blank}|\\p{Punct}+$|$))" "$1$2ey binding$3"

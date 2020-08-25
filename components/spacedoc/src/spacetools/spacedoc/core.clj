@@ -41,7 +41,7 @@ NOTE: Node might not be valid."
   :tag)
 
 
-(s/def ::set-of-keys (s/coll-of keyword? :kind set? :into #{}))
+(s/def ::set-of-keys (s/coll-of keyword? :kind set?))
 
 
 (defn-spec inline-leaf-tags ::set-of-keys

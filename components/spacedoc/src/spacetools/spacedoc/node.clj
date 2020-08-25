@@ -281,7 +281,7 @@
                   (partition
                    cells-per-row
                    cells-per-row
-                   ;; FIXME Split out `:rule` rows into separate thing.
+                   ;; TODO: Split out `:rule` rows into separate thing.
                    (repeatedly (constantly {:tag :table-cell :children []}))
                    cells)))
                (gen/tuple

@@ -1,6 +1,5 @@
 (ns spacetools.spacedoc.org.head
   "Specs and helpers for working with headers of documents.
-
   TODO: `::toc` needs a custom generator. It will allow
         generative testing of TOC generation/conversion.
   TODO: head nodes also need a generator."
@@ -21,12 +20,10 @@
 (s/def :spacetools.spacedoc.org.head.toc.leaf/type #{:custom-id})
 (s/def :spacetools.spacedoc.org.head.toc.leaf/path
   :spacetools.spacedoc.node.link/path)
-(s/def :spacetools.spacedoc.org.head.toc.leaf/children
-  (s/coll-of ::n/text
-             :kind vector?
-             :min-count 1
-             :max-count 1
-             :into []))
+(s/def :spacetools.spacedoc.org.head.toc.leaf/children (s/coll-of ::n/text
+                                                                  :kind vector?
+                                                                  :min-count 1
+                                                                  :max-count 1))
 (s/def ::toc-leaf (s/keys :req-un
                           [:spacetools.spacedoc.org.head.toc.leaf/tag
                            :spacetools.spacedoc.org.head.toc.leaf/type

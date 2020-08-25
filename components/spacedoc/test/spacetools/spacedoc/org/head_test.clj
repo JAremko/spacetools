@@ -21,8 +21,6 @@
 (st/instrument)
 
 
-;;;;;;;;; NOTE: DO SENITY CHEACK ON TOC HEADLINE VALUE
-
 ;;;; Test helpers
 (defn test-toc-tmpl
   "Wraps TOC children into TOC headline."
@@ -51,42 +49,7 @@
   See `:spacetools.spacedoc.org.head/root-meta`."
   #{:tags :title})
 
-
-;;;; Test data
-(def test-toc-simple
-  "TOC with simple structure. "
-  [(root->toc (n/root "foo" #{} (n/todo "bar")))
-   (test-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))]))])
-
-
-(def test-toc-flat
-  "TOC with flat structure."
-  [(root->toc (n/root "foo" #{}
-                      (n/todo "foo")
-                      (n/todo "bar")
-                      (n/todo "baz")))
-   (test-toc-tmpl
-    (n/unordered-list [(n/link "#foo" (n/text "foo"))])
-    (n/unordered-list [(n/link "#bar" (n/text "bar"))])
-    (n/unordered-list [(n/link "#baz" (n/text "baz"))]))])
-
-
-(def test-toc-nested
-  "TOC with nested structure."
-  [(->> "qux"
-        n/text
-        n/paragraph
-        n/section
-        (n/headline "baz")
-        (n/headline "bar")
-        (n/root "foo" #{})
-        root->toc)
-   (test-toc-tmpl (n/unordered-list
-                   [(n/link "#bar" (n/text "bar"))
-                    (n/line-break)
-                    (n/unordered-list [(n/link "#baz" (n/text "baz"))])]))])
-
-
+;;;; Tests
 (deftest str-tags->set-fn
   (are [string-tags set-tags] (= set-tags (str-tags->set string-tags))
     "" #{}
@@ -151,3 +114,41 @@
          (n/root "foo" #{} head) "foo" nil [h-node]
          (n/root "foo" #{"a"} head) "foo" "a" [h-node]
          (n/root "foo" #{"a"} head ph) "foo" "a" [h-node]))))
+
+
+(deftest root->toc-fn
+  (is (= (:value (root->toc (n/root "foo" #{} (n/todo "bar"))))
+         (cfg/toc-hl-val))
+      "TOC headline value should be the same as in the setting.")
+  (is (= (root->toc (n/root "foo" #{} (n/todo "bar")))
+         (test-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))])))
+      "Simple TOC generation should work.")
+  (is (= (root->toc (n/root "foo" #{}
+                            (n/todo "foo")
+                            (n/todo "bar")
+                            (n/todo "baz")))
+         (test-toc-tmpl
+          (n/unordered-list [(n/link "#foo" (n/text "foo"))])
+          (n/unordered-list [(n/link "#bar" (n/text "bar"))])
+          (n/unordered-list [(n/link "#baz" (n/text "baz"))])))
+      "Flat TOC generation should work.")
+  (is (= (->> "qux"
+              n/text
+              n/paragraph
+              n/section
+              (n/headline "baz")
+              (n/headline "bar")
+              (n/root "foo" #{})
+              root->toc)
+         (test-toc-tmpl
+          (n/unordered-list
+           [(n/link "#bar" (n/text "bar"))
+            (n/line-break)
+            (n/unordered-list [(n/link "#baz" (n/text "baz"))])])))
+      "Nested TOC generation should work."))
+
+
+(deftest conj-toc-fn
+  (is (= (get-in (conj-toc (n/root "foo" #{} (n/todo "bar"))) [:children 0])
+         (test-toc-tmpl (n/unordered-list [(n/link "#bar" (n/text "bar"))])))
+      "TOC should be conjed."))
