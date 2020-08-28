@@ -234,9 +234,9 @@ Return nil if ROOT node doesn't have any headlines."
 (defn-spec add-root-meta ::root-with-meta
   "Inline title and tags props of the ROOT node."
   [{:keys [title tags] :as root} ::n/root]
-  (let [meta-vec (vec (list* (n/key-word "title" title)
+  (let [meta-vec (vec (list* (n/key-word "TITLE" title)
                              (when (seq tags)
-                               [(n/key-word "tags" (set-tags->str tags))])))]
+                               [(n/key-word "TAGS" (set-tags->str tags))])))]
     (if (s/valid? ::root-with-head root)
       (update-in root [:children 0 :children] (partial into meta-vec))
       (update root :children (partial into [(apply n/section meta-vec)])))))
