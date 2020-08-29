@@ -6,6 +6,10 @@ jdk:
 services:
   - docker
 
+cache:
+  directories:
+  - /home/travis/.m2
+
 env:
   global:
     - CLJ_WS="${TRAVIS_BUILD_DIR}/environments/development"
