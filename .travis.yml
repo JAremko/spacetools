@@ -25,6 +25,7 @@ script:
   - cd $DEV_WS && lein cloverage --codecov
 
 before_deploy:
+  - cd "${TRAVIS_BUILD_DIR}"
   - docker build -f Dockerfile         -t jare/spacetools:latest  .
   - docker build -f Dockerfile.noemacs -t jare/spacetools:noemacs .
 
