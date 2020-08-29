@@ -13,29 +13,28 @@ cache:
 
 env:
   global:
-    - CLJ_WS="${TRAVIS_BUILD_DIR}/environments/development"
+    - DEV_WS="${TRAVIS_BUILD_DIR}/environments/development"
 
 install:
-  - cd $CLJ_WS && lein deps
+  - cd $DEV_WS && lein deps
 
 script:
   # Build Spacetools
   - cd $TRAVIS_BUILD_DIR && lein polylith build -test
   # Testing files
-  - cd $CLJ_WS && lein cloverage --codecov
+  - cd $DEV_WS && lein cloverage --codecov
 
-# Upload coverage reports to codecov.io
-after_success:
-  - cd "${TRAVIS_BUILD_DIR}"
-  - curl -fsSL https://codecov.io/bash -o codecov.bash
-  - bash ./codecov.bash
-  
 before_deploy:
   - docker build -f Dockerfile         -t jare/spacetools:latest  .
   - docker build -f Dockerfile.noemacs -t jare/spacetools:noemacs .
 
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash scripts/travis/docker_push
+  on:
+    branch: master
+  provider: script
+  script: bash scripts/travis/upload_coverage
   on:
     branch: master

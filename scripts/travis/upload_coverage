@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cd "${TRAVIS_BUILD_DIR}"
+curl -fsSL https://codecov.io/bash -o codecov.bash
+bash ./codecov.bash
