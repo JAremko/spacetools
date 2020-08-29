@@ -1,5 +1,5 @@
 (defproject spacetools/contributors "0.1"
-  :description "A contributors component."
+  :description "A contributors fetching component."
   :dependencies [[cheshire "5.10.0"]
                  [funcool/cats "2.3.6"]
                  [http-kit "2.4.0"]

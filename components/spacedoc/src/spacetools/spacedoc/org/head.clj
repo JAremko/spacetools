@@ -4,13 +4,11 @@
         generative testing of TOC generation/conversion.
   TODO: head nodes also need a generator."
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :refer [join]]
+            [clojure.string :as str :refer [join]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.node :as n]
-            [spacetools.spacedoc.util :as sdu]
-            [clojure.string :as str]))
-
+            [spacetools.spacedoc.util :as sdu]))
 
 ;;;;  TOC spec and constructor
 

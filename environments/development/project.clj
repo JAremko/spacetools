@@ -1,12 +1,12 @@
 (defproject spacetools/development "0.1.0-SNAPSHOT"
   :description "The main development environment."
   :dependencies [[cheshire "5.10.0"]
+                 [com.rpl/specter "1.1.3"]
                  [environ "1.1.0"]
                  [funcool/cats "2.3.6"]
                  [http-kit "2.4.0"]
-                 [nio2 "0.2.3"]
                  [medley "1.3.0"]
-                 [com.rpl/specter "1.1.3"]
+                 [nio2 "0.2.3"]
                  [orchestra "2020.07.12-1"]
                  [org.clojure/clojure "1.10.2-alpha1"]
                  [org.clojure/core.match "1.0.0"]

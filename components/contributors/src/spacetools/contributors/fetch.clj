@@ -4,7 +4,7 @@
             [cats.monad.exception :as exc]
             [cheshire.core :as json]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]
+            [clojure.string :refer [blank?]]
             [orchestra.core :refer [defn-spec]]
             [org.httpkit.client :as client]
             [spacetools.fs-io.interface :refer [exception-of?]]))
@@ -65,7 +65,9 @@
 
 (alias 'ctrb-u (create-ns 'spacetools.contributors.contributor.user))
 
-(s/def ::ctrb-u/login (s/and string? (complement str/blank?)))
+(s/def ::non-blank-string (s/and string? (complement blank?)))
+
+(s/def ::ctrb-u/login ::non-blank-string)
 (s/def ::ctrb-u/contributions pos-int?)
 (s/def ::ctrb-u/avatar_url (s/and string? #(re-matches #"https://.*" %)))
 (s/def ::ctrb-u/type #{"User"})
@@ -73,7 +75,7 @@
 
 (alias 'ctrb-a (create-ns 'spacetools.contributors.contributor.anon))
 
-(s/def ::ctrb-a/name (s/and string? (complement str/blank?)))
+(s/def ::ctrb-a/name ::non-blank-string)
 (s/def ::ctrb-a/contributions pos-int?)
 (s/def ::ctrb-a/type #{"Anonymous"})
 

@@ -3,13 +3,12 @@
   (:require [clojure.core.reducers :as r]
             [clojure.set :refer [union]]
             [clojure.spec.alpha :as s]
-            [medley.core :refer [update-existing]]
             [clojure.string :as str]
+            [medley.core :refer [update-existing]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.spacedoc.config :as cfg]
             [spacetools.spacedoc.core :as sc :refer [node?]]
             [spacetools.spacedoc.node :as n]))
-
 
 ;;;; Generic stuff for SDN manipulation
 
