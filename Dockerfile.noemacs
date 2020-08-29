@@ -1,19 +1,12 @@
-FROM ubuntu as graalvm
+FROM oracle/graalvm-ce as graalvm
 
-ENV GRAALVM_V=20.2.0
+RUN gu install native-image
 
 WORKDIR /tmp
 
-RUN apt-get update && apt-get install -y wget gcc libz-dev
-
-RUN wget --quiet "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_V}/graalvm-ce-java11-linux-amd64-${GRAALVM_V}.tar.gz" \
-  && tar -xzf "graalvm-ce-java11-linux-amd64-${GRAALVM_V}.tar.gz"
-
-RUN graalvm-ce-java11-${GRAALVM_V}/bin/gu install native-image
-
 COPY ./systems/spacedoc-cli/target/spacedoc.jar ./
 
-RUN graalvm-ce-java11-${GRAALVM_V}/bin/native-image \
+RUN native-image \
   --no-server \
   --no-fallback \
   --initialize-at-build-time \
