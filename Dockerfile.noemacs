@@ -1,21 +1,8 @@
-FROM clojure:openjdk-14-lein as clojure
-
-ENV GENTEST_MULTIPLIER 1
-
-COPY ./ /usr/src/app/
-
-RUN cd /usr/src/app \
-  && lein deps \
-  && lein polylith build
-
-
 FROM ubuntu as graalvm
 
 ENV GRAALVM_V=20.2.0
 
 WORKDIR /tmp
-
-COPY --from=clojure /usr/src/app/systems/spacedoc-cli/target/spacedoc.jar ./
 
 RUN apt-get update && apt-get install -y wget gcc libz-dev
 
@@ -23,6 +10,8 @@ RUN wget --quiet "https://github.com/graalvm/graalvm-ce-builds/releases/download
   && tar -xzf "graalvm-ce-java11-linux-amd64-${GRAALVM_V}.tar.gz"
 
 RUN graalvm-ce-java11-${GRAALVM_V}/bin/gu install native-image
+
+COPY ./spacetools/systems/spacedoc-cli/target/spacedoc.jar ./
 
 RUN graalvm-ce-java11-${GRAALVM_V}/bin/native-image \
   --no-server \
