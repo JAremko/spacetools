@@ -30,12 +30,13 @@ before_deploy:
   - docker build -f Dockerfile.noemacs -t jare/spacetools:noemacs .
 
 deploy:
-  skip_cleanup: true
   provider: script
   script: bash scripts/travis/docker_push
+  skip_cleanup: true
   on:
     branch: master
   provider: script
   script: bash scripts/travis/upload_coverage
+  skip_cleanup: true
   on:
     branch: master

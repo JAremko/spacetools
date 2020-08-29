@@ -2,4 +2,5 @@
 
 cd "${TRAVIS_BUILD_DIR}"
 curl -fsSL https://codecov.io/bash -o codecov.bash
+unset DOCKER_PASSWORD
 bash ./codecov.bash
