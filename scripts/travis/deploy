@@ -4,6 +4,7 @@ echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 docker push jare/spacetools:latest
 docker push jare/spacetools:noemacs
 
+rm /home/travis/.docker/config.json
 unset DOCKER_PASSWORD
 
 curl -fsSL https://codecov.io/bash -o codecov.bash
