@@ -9,6 +9,7 @@ services:
 cache:
   directories:
   - /home/travis/.m2
+  - !home/travis/.m2/repository/spacetools
 
 env:
   global:
