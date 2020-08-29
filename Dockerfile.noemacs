@@ -11,7 +11,7 @@ RUN wget --quiet "https://github.com/graalvm/graalvm-ce-builds/releases/download
 
 RUN graalvm-ce-java11-${GRAALVM_V}/bin/gu install native-image
 
-COPY ./spacetools/systems/spacedoc-cli/target/spacedoc.jar ./
+COPY ./systems/spacedoc-cli/target/spacedoc.jar ./
 
 RUN graalvm-ce-java11-${GRAALVM_V}/bin/native-image \
   --no-server \
