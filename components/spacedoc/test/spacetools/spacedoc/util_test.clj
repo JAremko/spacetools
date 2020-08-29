@@ -19,7 +19,7 @@
 
 
 (defspec ^:slow indent-gen
-  {:num-tests (tu/samples 30)}
+  {:num-tests (tu/samples 10)}
   (prop/for-all
    [indentation gen/nat
     s-sample (gen/fmap str/join
@@ -66,14 +66,6 @@
     (is (not (valid-node? (set-roots-first-hl-val
                            :not-a-string
                            test-node))))))
-
-
-(defspec ^:slow valid-node?-gen
-  {:num-tests (tu/samples 20)}
-  (prop/for-all
-   ;; NOTE: That's gonna have extremely divergent performance.
-   [node (gen/one-of (map (comp s/gen sc/tag->spec-k) (sc/all-tags)))]
-   (is (valid-node? node))))
 
 
 (deftest fmt-problem-fn
