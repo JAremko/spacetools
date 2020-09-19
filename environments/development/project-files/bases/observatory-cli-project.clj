@@ -1,0 +1,1 @@
+../../../../bases/observatory-cli/project.clj
