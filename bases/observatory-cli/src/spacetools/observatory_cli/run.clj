@@ -90,9 +90,7 @@
 (def ident
   "Ident rule."
   {:ident
-  (let [esc-ch (->> ["[" "]" "(" ")" "\"" "s" "'" "," "`"]
-                    (interleave (repeatedly (constantly "\\")))
-                    str/join)
+   (let [esc-ch (str/join ["\\[" "\\]" "\\(" "\\)" "\"" "\\s" "'" "," "`"])
         tmpl "(?!;)(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
     (->> esc-ch (str/replace tmpl "{{ec}}") c/regexp c/hide-tag))})
 
@@ -106,6 +104,7 @@
 
 
 ;; (elisp-parser ";; (1 2 3) foo
+;; \"fff\"
 ;;      ((file-exists-p layer-dir)
 ;;       (configuration-layer/message
 ;;        (concat \"Cannot create configuration layer \\\"\\\", \"
@@ -119,16 +118,16 @@
 ;;               (let ((a [1 2 3])) a)
 ;; ;")
 
-;; (defn -main [& args]
-;;   (let [foo (slurp "/tmp/foo.el")]
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))))
+(defn -main [& args]
+  (let [foo (slurp "/tmp/foo.el")]
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))
+  (time (do (elisp-parser foo) "done"))))
