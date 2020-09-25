@@ -8,15 +8,15 @@
 ;;;; Rules:
 (def root-s
   "Root rule."
-  "<root> = ( element / comment / whitespace / Epsilon ) +")
+  "<root> = ( element | comment | whitespace | Epsilon ) +")
 
 (def comment-s
   "Comment line."
-  "comment = comment-tok #'[^\\n]*|$'")
+  "comment = #';(?:[^\\n]*|$)'")
 
 (def element-s
   "Any element rule."
-  "<element> = ( sexp / expr / vector / atom ) +")
+  "<element> = ( sexp | ident | expr | string | vector ) +")
 
 (def seqs-s
   "Sequences."
@@ -25,18 +25,15 @@
 
 (def coll-els-s
   "Sequence elements."
-  "<coll-el> =  sexp / atom / expr / vector / comment")
+  "<coll-el> =  sexp | ident | string | expr | vector | comment")
 
-(def atoms-s
-  "Terminal elements."
-  "<atom>  = string / number / keyword / symbol
+(def string-s
+  "String rule."
+  "string    = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
 
-   symbol    = ident
-   keyword   = kv-tok ident
-   string    = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>
-   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
-   <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-zA-Z0-9]+'
-   number    = num-b10 / num-bx")
+;; number    = num-b10 | num-bx
+;; <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
+;; <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-zA-Z0-9]+'
 
 (def tokens-s
   "Markers of elements."
@@ -48,8 +45,6 @@
 
    <str-l-tok>   = <'\"'>
    <str-r-tok>   = <str-l-tok>
-
-   <comment-tok>   = <';'>
 
    <quote-tok>   = <'#'?> <\"'\">
 
@@ -63,66 +58,63 @@
 
    <kv-tok>      = <':'>
 
-   <whitespace> = <#'\\s+'>
+   <whitespace> = <#'\\s+'>")
 
-   <new-line>    = <#'\n'>")
-
-(def left-tokens-s
-  "Tokens marking start of an element."
-  "<l-tok> = sexp-l-tok | vec-l-tok | str-l-tok | quote-tok | tmpl-tok |
-             hole-tok | spread-tok | kv-tok")
+(def quotable-s
+  "Rule for things that can be quoted."
+  "<qtbl> = sexp | ident | expr")
 
 (def expression-s
   "Expression rule."
   "<expr>   = quote | template | hole | spread
 
-   quote    = quote-tok element
-   template = tmpl-tok element
-   hole     = hole-tok element
-   spread   = spread-tok element")
+   quote    = quote-tok qtbl
+   template = tmpl-tok qtbl
+   hole     = hole-tok qtbl
+   spread   = spread-tok qtbl")
 
 (def ident
   "Ident rule."
   {:ident
-   (let [esc-ch (str/join ["\\[" "\\]" "\\(" "\\)" "\"" "\\s" "'" "," "`"])
-        tmpl "(?!;)(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
-    (->> esc-ch (str/replace tmpl "{{ec}}") c/regexp c/hide-tag))})
+   (let [esc-ch (str/join ["\\[" "\\]" "\\(" "\\)" "\"" "\\s" "'" "," "`" ";"])
+         tmpl "(?!;)(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
+     (c/regexp  (str/replace tmpl "{{ec}}" esc-ch)))})
 
-(defparser elisp-parser
-  (->> [element-s seqs-s atoms-s tokens-s left-tokens-s expression-s
-        coll-els-s root-s comment-s]
+(defparser first-stage-parser
+  (->> [element-s seqs-s string-s tokens-s expression-s
+        coll-els-s root-s comment-s quotable-s]
        (mapv c/ebnf)
        (apply merge ident))
   :start :root
   :output-format :enlive)
 
 
-(elisp-parser ";; (1 2 3) foo
-:zzz
-\"fff\"
-     ((file-exists-p layer-dir)
-      (configuration-layer/message
-       (concat \"Cannot create configuration layer \\\"\\\", \"
-               \"this layer already exists.\") name))
-1011;; baz
-   ;; Note:
-(1+
-;; bar
-)
-(+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2'2 +1.2b [])
-              (let ((a [1 2 3])) a)
-;")
+;; (first-stage-parser ";; (1 2 3) foo
+;; :zzz
+;; \"fff\"
+;;      ((file-exists-p layer-dir)
+;;       (configuration-layer/message
+;;        (concat \"Cannot create configuration layer \\\"\\\", \"
+;;                \"this layer already exists.\") name))
+;; 1011;; baz
+;;    ;; Note:
+;; (1+
+;; ;; bar
+;; )
+;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2'2 +1.2b [])
+;;               (let ((a [1 2 3])) a)
+;; ;")
 
-;; (defn -main [& args]
-;;   (let [foo (slurp "/tmp/foo.el")]
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))
-;;   (time (do (elisp-parser foo) "done"))))
+(defn -main [& args]
+  (let [foo (slurp "/tmp/foo.el")]
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))
+  (time (do (first-stage-parser foo) "done"))))
