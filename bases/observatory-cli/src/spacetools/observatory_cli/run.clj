@@ -12,25 +12,36 @@
 
 (def any-s
   "Any element rule."
-  "any = sexp | ident | expr | string | vector | comment | whitespace |
-         Epsilon")
+  "<any> = sexp | ident | expr | string | vector | comment | whitespace |
+           Epsilon")
 
 (def comment-s
   "Comment line."
   "comment = #';(?:[^\\n]*|$)'")
+
+(def string-s
+  "String rule."
+  "string = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
+
+(def whitespace-s
+  "Whitespace rule."
+  "<whitespace> = <#'\\s+'>")
 
 (def seqs-s
   "Sequences."
   "sexp   = sexp-l-tok any + sexp-r-tok
    vector = vec-l-tok any + vec-r-tok")
 
-(def string-s
-  "String rule."
-  "string = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
+(def expr-s
+  "Expression rule."
+  "<expr>   = quote | template | ( spread / hole )
 
-;; number    = num-b10 | num-bx
-;; <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
-;; <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-zA-Z0-9]+'
+   <qtbl> = sexp | ident | expr
+
+   quote    = quote-tok qtbl
+   template = tmpl-tok qtbl
+   hole     = hole-tok qtbl
+   spread   = spread-tok qtbl")
 
 (def tokens-s
   "Markers of elements."
@@ -49,28 +60,15 @@
 
    <num-b-x-tok> = '#'
 
-   <hole-tok>    = <','> ! '@'
+   <hole-tok>    = <','>
 
    <spread-tok>  = <',@'>
 
    <kv-tok>      = <':'>")
 
-(def whitespace-s
-  "Whitespace rule."
-  "<whitespace> = <#'\\s+'>")
-
-(def quotable-s
-  "Rule for things that can be quoted."
-  "<qtbl> = sexp | ident")
-
-(def expression-s
-  "Expression rule."
-  "<expr>   = quote | template | hole | spread
-
-   quote    = quote-tok qtbl
-   template = tmpl-tok qtbl
-   hole     = hole-tok qtbl
-   spread   = spread-tok qtbl")
+;; number    = num-b10 | num-bx
+;; <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
+;; <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-zA-Z0-9]+'
 
 (def ident
   "Ident rule."
@@ -80,8 +78,7 @@
      (c/regexp  (str/replace tmpl "{{ec}}" esc-ch)))})
 
 (defparser first-stage-parser
-  (->> [seqs-s string-s tokens-s expression-s root-s comment-s
-        quotable-s whitespace-s any-s]
+  (->> [seqs-s string-s tokens-s expr-s root-s comment-s whitespace-s any-s]
        (mapv c/ebnf)
        (apply merge ident))
   :start :root
@@ -89,6 +86,8 @@
 
 
 ;; (first-stage-parser ";; (1 2 3) foo
+;; `,@foo
+;; ,bar
 ;; :zzz
 ;; \"fff\"
 ;;      ((file-exists-p layer-dir)
