@@ -44,7 +44,7 @@
    <vec-r-tok>   = <']'>
 
    <str-l-tok>   = <'\"'>
-   <str-r-tok>   = <str-l-tok>
+   <str-r-tok>   = <'\"'>
 
    <quote-tok>   = <'#'?> <\"'\">
 
@@ -56,9 +56,11 @@
 
    <spread-tok>  = <',@'>
 
-   <kv-tok>      = <':'>
+   <kv-tok>      = <':'>")
 
-   <whitespace> = <#'\\s+'>")
+(def whitespace-s
+  "Whitespace rule."
+  "<whitespace> = <#'\\s+'>")
 
 (def quotable-s
   "Rule for things that can be quoted."
@@ -82,7 +84,7 @@
 
 (defparser first-stage-parser
   (->> [element-s seqs-s string-s tokens-s expression-s
-        coll-els-s root-s comment-s quotable-s]
+        coll-els-s root-s comment-s quotable-s whitespace-s]
        (mapv c/ebnf)
        (apply merge ident))
   :start :root
