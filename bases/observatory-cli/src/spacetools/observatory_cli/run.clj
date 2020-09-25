@@ -98,20 +98,20 @@
   (time (do (first-stage-parser foo) "done"))
   (time (do (first-stage-parser foo) "done"))))
 
-(first-stage-parser ";; (1 2 3) foo
-`,@foo
-,bar
-:zzz
-\"fff\"
-     ((file-exists-p layer-dir)
-      (configuration-layer/message
-       (concat \"Cannot create configuration layer \\\"\\\", \"
-               \"this layer already exists.\") name))
-1011;; baz
-   ;; Note:
-(1+
-;; bar
-)
-(+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2'2 +1.2b [])
-              (let ((a [1 2 3])) a)
-;")
+;; (first-stage-parser ";; (1 2 3) foo
+;; `,@foo
+;; ,bar
+;; :zzz
+;; \"fff\"
+;;      ((file-exists-p layer-dir)
+;;       (configuration-layer/message
+;;        (concat \"Cannot create configuration layer \\\"\\\", \"
+;;                \"this layer already exists.\") name))
+;; 1011;; baz
+;;    ;; Note:
+;; (1+
+;; ;; bar
+;; )
+;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2'2 +1.2b [])
+;;               (let ((a [1 2 3])) a)
+;; ;")
