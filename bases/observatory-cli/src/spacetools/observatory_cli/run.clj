@@ -8,28 +8,25 @@
 ;;;; Rules:
 (def root-s
   "Root rule."
-  "<root> = ( element | comment | whitespace | Epsilon ) +")
+  "<root> = any +")
+
+(def any-s
+  "Any element rule."
+  "any = sexp | ident | expr | string | vector | comment | whitespace |
+         Epsilon")
 
 (def comment-s
   "Comment line."
   "comment = #';(?:[^\\n]*|$)'")
 
-(def element-s
-  "Any element rule."
-  "<element> = ( sexp | ident | expr | string | vector ) +")
-
 (def seqs-s
   "Sequences."
-  "sexp   = sexp-l-tok ( coll-el ? | whitespace ? ) * sexp-r-tok
-   vector = vec-l-tok (coll-el ? | whitespace ? ) * vec-r-tok")
-
-(def coll-els-s
-  "Sequence elements."
-  "<coll-el> =  sexp | ident | string | expr | vector | comment")
+  "sexp   = sexp-l-tok any + sexp-r-tok
+   vector = vec-l-tok any + vec-r-tok")
 
 (def string-s
   "String rule."
-  "string    = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
+  "string = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
 
 ;; number    = num-b10 | num-bx
 ;; <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
@@ -83,8 +80,8 @@
      (c/regexp  (str/replace tmpl "{{ec}}" esc-ch)))})
 
 (defparser first-stage-parser
-  (->> [element-s seqs-s string-s tokens-s expression-s
-        coll-els-s root-s comment-s quotable-s whitespace-s]
+  (->> [seqs-s string-s tokens-s expression-s root-s comment-s
+        quotable-s whitespace-s any-s]
        (mapv c/ebnf)
        (apply merge ident))
   :start :root
