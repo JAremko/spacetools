@@ -61,7 +61,7 @@
 
 (def quotable-s
   "Rule for things that can be quoted."
-  "<qtbl> = sexp | ident | expr")
+  "<qtbl> = sexp | ident")
 
 (def expression-s
   "Expression rule."
