@@ -17,7 +17,7 @@
 
 (def comment-s
   "Comment line."
-  "comment = #';(?:[^\\n]*|$)'")
+  "comment = comment-tok #'(?:[^\\n]*|$)'")
 
 (def string-s
   "String."
@@ -67,6 +67,8 @@
 
    <spread-tok>  = <'@'>
 
+   <comment-tok> = <';'>
+
    <kv-tok>      = <':'>")
 
 (def atom-s
@@ -78,13 +80,13 @@
 
    keyword   = kv-tok ident
 
-   symbol    = ! number ident")
+   symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok ) ident")
 
 (def ident
   "Ident."
   {:ident
    (let [esc-ch (str/join ["\\[" "\\]" "\\(" "\\)" "\"" "\\s" "'" "," "`" ";"])
-         tmpl "(?![;#:])(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
+         tmpl "(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
      (c/hide-tag (c/regexp  (str/replace tmpl "{{ec}}" esc-ch))))})
 
 (defparser elisp-parser
@@ -111,8 +113,10 @@
 ;; (insta/parses elisp-parser ";; (1 2 3) foo
 ;; `,@foo")
 
-;; (insta/parses elisp-parser ";; (1 2 3) foo
-;; `,@foo
+;; (def text
+;;   "foo"
+;;   ";; (1 2 3) foo
+;; `,@foo #'baz
 ;; (1.0)
 ;; (defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
 ;;   \"Timeout in seconds to reach a package archive page.\")
@@ -130,4 +134,12 @@
 ;; )
 ;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2'2 +1.2b [])
 ;;               (let ((a [1 2 3])) a)
-;; ;")
+;; ;"
+;;   )
+
+;; (meta
+;;  (nth
+;;   (insta/add-line-and-column-info-to-metadata
+;;    text
+;;    (insta/parse elisp-parser text))
+;;   5))
