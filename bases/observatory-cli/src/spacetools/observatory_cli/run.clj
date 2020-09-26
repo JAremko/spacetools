@@ -143,3 +143,15 @@
 ;;    text
 ;;    (insta/parse elisp-parser text))
 ;;   5))
+
+
+;; (insta/transform
+;;  {:comment (fn pad [text]
+;;              (assoc {:tag :comment} :value (str ";" text)))
+;;   :quote (fn add-fn-prop [f & [s]]
+;;            (assoc {:tag :quote} :fn? (= f "#") :value (or s f)))}
+;;  (insta/add-line-and-column-info-to-metadata
+;;   text
+;;   (insta/parse elisp-parser text)))
+
+;; (insta/parse elisp-parser text)
