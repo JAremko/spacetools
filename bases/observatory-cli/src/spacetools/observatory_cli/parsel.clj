@@ -19,21 +19,23 @@
   https://github.com/pest-parser/pest since it is \"native\" but the lib
   seems to struggle with recursive rules as well and I might have to
   implement line number metadata generator for it. Also I doubt it will
-  be faster as a hole. I will have to output parsed .el as EDN string and
-  re-read it into the rest of my stuff. it should add a lot of overhead.
-  Overall I would call something like 10X time reduction a win but I doubt
-  it can be achieved using this family of parsing strategy. Unless I did
+  be faster overall. I will have to output parsed .el as EDN string and
+  re-read it into the rest of my stuff. it should add noticeable overhead.
+  Overall, I would call something like 10X time reduction a win but I doubt
+  it can be achieved using this family of parsing strategies. Unless I did
   something extremely stupid.
 
-  Does speed even matter? Not really :D in 80+% use cases I will parse
-  a singe .el file that will be 100-300 lines long. But if the parser
-  worked much much faster it might be viable option to parse all .el files
-  in CI cases like detecting key binding collisions. Without the speed
-  required I can do it only in branch updates since it would be too slow
-  for PR CI. Workaround can be keeping cache of keybindings or parsed files.
+  Does speed even matter? It does when I have to parse a lot of .el files
+  in PR job. For example, to detect keybinding collisions.
+  Workaround can be keeping cache of keybindings or parsed files.
   But passing something between CI jobs is a big pain in the rear end.
   Especially since I'll have to generate it on branch updates and access
-  in PRs. Figuring out where to store it makes things even more difficult."
+  in PRs. Figuring out where to store it makes things even more difficult.
+
+  Additionally compiling parser into a native-image makes it 3X times slower
+  so I'll have to run it via jdk. Good thing TravisCI has runners with it
+  pre-installed and I don't use this CI in PR jobs so I can run it totally
+  independent from the rest of the CIs."
   (:require [clojure.string :as str]
             [instaparse.combinators :as c]
             [instaparse.core :as insta]
