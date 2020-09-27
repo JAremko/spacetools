@@ -10,7 +10,7 @@
                  [medley "1.3.0"]
                  [nio2 "0.2.3"]
                  [orchestra "2020.07.12-1"]
-                 [org.clojure/clojure "1.10.2-alpha1"]
+                 [org.clojure/clojure "1.10.2-alpha2"]
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/test.check "1.1.0"]
                  [org.clojure/tools.cli "1.0.194"]]

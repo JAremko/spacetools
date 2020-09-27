@@ -4,7 +4,8 @@ RUN gu install native-image
 
 WORKDIR /tmp
 
-COPY ./systems/spacedoc-cli/target/spacedoc.jar ./
+COPY ./systems/spacedoc-cli/target/spacedoc.jar \
+     ./systems/spacedoc-cli/target/observatory.jar ./
 
 RUN native-image \
   --no-server \
@@ -13,10 +14,17 @@ RUN native-image \
   -H:+ReportUnsupportedElementsAtRuntime \
   -jar /tmp/spacedoc.jar
 
+RUN native-image \
+  --no-server \
+  --no-fallback \
+  --initialize-at-build-time \
+  -H:+ReportUnsupportedElementsAtRuntime \
+  -jar /tmp/observatory.jar
+
 
 FROM jare/emacs
 
-COPY --from=graalvm /tmp/spacedoc /usr/local/bin
+COPY --from=graalvm /tmp/spacedoc /tmp/observatory /usr/local/bin
 
 COPY ./scripts/docker/run /opt/spacetools/
 COPY ./scripts/docker/spacedoc-cfg.edn /opt/spacetools/
@@ -31,6 +39,7 @@ RUN emacs --batch \
 
 RUN chmod 777 /opt/spacetools/spacedoc/sdnize \
   && chmod 775 /usr/local/bin/spacedoc \
+  /usr/local/bin/observatory \
   ./spacedoc/sdnize/sdnize.el \
   ./spacedoc/sdnize/sdnize.elc \
   ./run
