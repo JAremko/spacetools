@@ -5,7 +5,7 @@ RUN gu install native-image
 WORKDIR /tmp
 
 COPY ./systems/spacedoc-cli/target/spacedoc.jar \
-     ./systems/spacedoc-cli/target/observatory.jar ./
+  ./systems/observatory-cli/target/observatory.jar ./
 
 RUN native-image \
   --no-server \
