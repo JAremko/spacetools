@@ -24,7 +24,7 @@ RUN native-image \
 
 FROM ubuntu
 
-COPY --from=graalvm /tmp/spacedoc /tmp/observatory /usr/local/bin
+COPY --from=graalvm /tmp/spacedoc /tmp/observatory /usr/local/bin/
 
 COPY ./scripts/docker/run /opt/spacetools/
 COPY ./scripts/docker/spacedoc-cfg.edn /opt/spacetools/
