@@ -102,7 +102,8 @@
 (def tokens-s
   "Markers of elements."
   "<end-tok>         = sexp-r-tok | sexp-l-tok | vec-r-tok | vec-l-tok |
-                       whitespace | comment | #'$'
+                       whitespace | quote-tok | tmpl-tok | hole-tok | comment |
+                       #'$'
 
    <sexp-l-tok>      = <'('>
    <sexp-r-tok>      = <')'>
@@ -141,7 +142,7 @@
 
    symbol    = ! ( num-b10 | kv-tok | comment-tok | num-b-x-tok ) ident
 
-   ident-g = ! char-tok ident ! quote-tok-not-f")
+   ident-g = ! char-tok ident & end-tok")
 
 (def ident
   "Ident."
@@ -178,44 +179,44 @@
 
 ;; (ident-parser "#23rfffz")
 
-(def text
-  "Test text"
-  ";; (1 2 3) foo
-`,@foo #'baz
-(1.0)
-(defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
-  \"Timeout in seconds to reach a package archive page.\")
-,bar
-:zzz
-\"fff\"
-     ((file-exists-p layer-dir)
-      (configuration-layer/message
-       (concat \"Cannot create configuration layer \\\"\\\", \"
-               \"this layer already exists.\") name))
-1011;; baz
-   ;; Note:
-(1+
-;; bar
-)
-(+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
-              (let ((a [1 2 3])) a)
-'[1 2 3]
-or()
-(?/ ?\\\\) ? ?
-??
-?\\C-s ?\\M-s ?\\M- fff
-\"\\\\\"
-\"'\"
-;")
+;; (def text
+;;   "Test text"
+;;   ";; (1 2 3) foo
+;; `,@foo #'baz
+;; (1.0)
+;; (defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
+;;   \"Timeout in seconds to reach a package archive page.\")
+;; ,bar
+;; :zzz
+;; \"fff\"
+;;      ((file-exists-p layer-dir)
+;;       (configuration-layer/message
+;;        (concat \"Cannot create configuration layer \\\"\\\", \"
+;;                \"this layer already exists.\") name))
+;; 1011;; baz
+;;    ;; Note:
+;; (1+
+;; ;; bar
+;; )
+;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
+;;               (let ((a [1 2 3])) a)
+;; '[1 2 3]
+;; or()
+;; (?/ ?\\\\) ? ?
+;; ??
+;; ?\\C-s ?\\M-s ?\\M- fff
+;; \"\\\\\"
+;; \"'\"
+;; bar'(foo)
+;; ;")
 
-
-;; (count (insta/parses elisp-parser text))
+;; (second (insta/parses elisp-parser text))
 
 ;; (insta/parse elisp-parser text)
 
-(def path "/mnt/workspace/spacemacs-pr/layers/+spacemacs/spacemacs-navigation/local/info+/info+.el")
+;; (def path "/mnt/workspace/spacemacs-pr/layers/auto-layer.el")
 
-(elisp-parser (slurp path))
+;; (elisp-parser (slurp path))
 
 ;; ((shell-command-switches (cond
 ;;                            ((or(eq system-type 'darwin)
