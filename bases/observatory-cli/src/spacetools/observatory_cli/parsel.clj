@@ -56,7 +56,7 @@
 ;; NOTE:  VECTORS ARE ALSO QUOTABLE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Rules:
+;;; Grammar:
 (def roots-s
   "Root rules."
   "<root>         = any +
@@ -73,11 +73,11 @@
 
 (def string-s
   "String."
-  "string = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
+  "string = <str-l-tok> #'(?:(?:\\\\\\\\)|(?:\\\\\")|[^\"])*' <str-r-tok>")
 
 (def char-s
-  "Char"
-  "char = <char-tok> #'(?:\\\\(?:C|M)-|\\\\)?(?:.|\\s)'")
+  "Char."
+  "char = <char-tok> #'(?:(?:\\\\(?:C|M)-)|(?:\\\\))?(?:.|\\s)'")
 
 (def whitespace-s
   "Whitespace."
@@ -139,7 +139,7 @@
 
    keyword   = kv-tok ident
 
-   symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok ) ident
+   symbol    = ! ( num-b10 | kv-tok | comment-tok | num-b-x-tok ) ident
 
    ident-g = ! char-tok ident ! quote-tok-not-f")
 
@@ -178,40 +178,44 @@
 
 ;; (ident-parser "#23rfffz")
 
-;; (def text
-;;   "Test text"
-;;   ";; (1 2 3) foo
-;; `,@foo #'baz
-;; (1.0)
-;; (defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
-;;   \"Timeout in seconds to reach a package archive page.\")
-;; ,bar
-;; :zzz
-;; \"fff\"
-;;      ((file-exists-p layer-dir)
-;;       (configuration-layer/message
-;;        (concat \"Cannot create configuration layer \\\"\\\", \"
-;;                \"this layer already exists.\") name))
-;; 1011;; baz
-;;    ;; Note:
-;; (1+
-;; ;; bar
-;; )
-;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
-;;               (let ((a [1 2 3])) a)
-;; '[1 2 3]
-;; or()
-;; (?/ ?\\\\) ? ?
-;; ??
-;; ?\\C-s ?\\M-s ?\\M- fff
-;; ;")
+(def text
+  "Test text"
+  ";; (1 2 3) foo
+`,@foo #'baz
+(1.0)
+(defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
+  \"Timeout in seconds to reach a package archive page.\")
+,bar
+:zzz
+\"fff\"
+     ((file-exists-p layer-dir)
+      (configuration-layer/message
+       (concat \"Cannot create configuration layer \\\"\\\", \"
+               \"this layer already exists.\") name))
+1011;; baz
+   ;; Note:
+(1+
+;; bar
+)
+(+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
+              (let ((a [1 2 3])) a)
+'[1 2 3]
+or()
+(?/ ?\\\\) ? ?
+??
+?\\C-s ?\\M-s ?\\M- fff
+\"\\\\\"
+\"'\"
+;")
 
 
 ;; (count (insta/parses elisp-parser text))
 
 ;; (insta/parse elisp-parser text)
 
-;; (elisp-parser (slurp "/mnt/workspace/spacemacs-pr/tests/layers/+distribution/spacemacs-base/evil-evilified-state-utest.el"))
+(def path "/mnt/workspace/spacemacs-pr/layers/+spacemacs/spacemacs-navigation/local/info+/info+.el")
+
+(elisp-parser (slurp path))
 
 ;; ((shell-command-switches (cond
 ;;                            ((or(eq system-type 'darwin)
