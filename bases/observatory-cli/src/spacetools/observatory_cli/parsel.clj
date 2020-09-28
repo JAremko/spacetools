@@ -11,11 +11,10 @@
 
   Malformed code like \"2'2\" throws parser error instead of being
   treated as \"2 '2\"(Emacs does this) - It's ok because we want to detect
-  such code. But in other cases it can be interpreted differently instead of
-  throwing. For example, Emacs parses \"#b0.0\" as 2 numbers \"#b0\" and
-  \".0\" while the parser will see it as a single ident-g \"#b0.0\". I haven't
-  seen such code \"in the wild\" so it's hard to tell if this is a problem for
-  the use cases of the parser or not.
+  such code. Emacs parses \"#b0.0\" as 2 numbers \"#b0\" and \".0\". The
+  parser will interpreter this as a singe ident but will throw if you to
+  parse it into a specific ident (symbol, number, keyword) so for the sake
+  of code validation it makes sense to parse all idents.
 
   How can I make it go faster while still using instaparse:
   40%+ boost can be achieved by avoiding \"expression\" (quotes) parsing.
@@ -45,15 +44,28 @@
             [instaparse.core :as insta]
             [orchestra.core :refer [defn-spec]]))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; FIXME: Rename expr rules into prefix and embed it into the child
+;;        via optional prefix par. Basically, quotes will be a prop
+;;        of lists and symbols. Don't forget to lift (quote ...)
+;;        into a prop of its child. AND HANDLE THE CASE WHEN IT IS
+;;        QUOTED. The lifting will have to be done at sexp node.
+;;        and it also can be quoted... So I have to fold the quotes
+;;        deep deep into the child.
+;; NOTE:  VECTORS ARE ALSO QUOTABLE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; Rules:
-(def root-s
-  "Root."
-  "<root> = any +")
+(def roots-s
+  "Root rules."
+  "<root>         = any +
+   <parsed-ident> = keyword | number | symbol")
 
 (def any-s
   "Any element."
   "<any> = sexp | ident-g | expr | string | vector | comment | whitespace |
-           Epsilon")
+           char | Epsilon")
 
 (def comment-s
   "Comment line."
@@ -62,6 +74,10 @@
 (def string-s
   "String."
   "string = <str-l-tok> #'(?:\\\\\"|[^\"])*' <str-r-tok>")
+
+(def char-s
+  "Char"
+  "char = <char-tok> #'(?:\\\\(?:C|M)-|\\\\)?(?:.|\\s)'")
 
 (def whitespace-s
   "Whitespace."
@@ -85,43 +101,47 @@
 
 (def tokens-s
   "Markers of elements."
-  "<end-tok>     = sexp-r-tok | vec-r-tok | whitespace | comment | #'$'
+  "<end-tok>         = sexp-r-tok | sexp-l-tok | vec-r-tok | vec-l-tok |
+                       whitespace | comment | #'$'
 
-   <sexp-l-tok>  = <'('>
-   <sexp-r-tok>  = <')'>
+   <sexp-l-tok>      = <'('>
+   <sexp-r-tok>      = <')'>
 
-   <vec-l-tok>   = <'['>
-   <vec-r-tok>   = <']'>
+   <vec-l-tok>       = <'['>
+   <vec-r-tok>       = <']'>
 
-   <str-l-tok>   = <'\"'>
-   <str-r-tok>   = <'\"'>
+   <str-l-tok>       = <'\"'>
+   <str-r-tok>       = <'\"'>
 
-   <quote-tok>   = '#' ? <\"'\">
+   <quote-tok-not-f> = <\"'\">
+   <quote-tok>       = '#' ? <quote-tok-not-f>
 
-   <tmpl-tok>    = <'`'>
+   <tmpl-tok>        = <'`'>
 
-   <num-b-x-tok> = '#'
+   <num-b-x-tok>     = '#'
 
-   <hole-tok>    = <','>
+   <hole-tok>        = <','>
 
-   <spread-tok>  = <'@'>
+   <spread-tok>      = <'@'>
 
-   <comment-tok> = <';'>
+   <comment-tok>     = <';'>
 
-   <kv-tok>      = <':'>")
+   <char-tok>        = '?'
 
-(def atom-s
-  "Terminal elements."
+   <kv-tok>          = <':'>")
+
+(def idents-s
+  "Ident group elements."
   "number    = num-b10 | num-bx
-   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' &
-               end-tok
+   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' !
+               <quote-tok-not-f>
    <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'
 
    keyword   = kv-tok ident
 
    symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok ) ident
 
-   ident-g =  ident & end-tok")
+   ident-g = ! char-tok ident ! quote-tok-not-f")
 
 (def ident
   "Ident."
@@ -130,15 +150,19 @@
          tmpl "(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
      (->> esc-ch (str/replace tmpl "{{ec}}") c/regexp c/hide-tag))})
 
-;;; Parser:
-(insta/defparser ^{:doc "raw parser. Considered private."} elisp-parser
-  (->> [seqs-s string-s tokens-s expr-s root-s comment-s whitespace-s any-s
-        atom-s]
+(def all-rules
+  "All rules combined"
+  (->> [seqs-s string-s tokens-s expr-s roots-s comment-s whitespace-s any-s
+        idents-s char-s]
        (mapv c/ebnf)
-       (apply merge ident))
-  :start :root
-  :output-format :enlive)
+       (apply merge ident)))
 
+;;; Parsers:
+(insta/defparser ^{:doc "raw elisp parser."} elisp-parser
+  all-rules :start :root :output-format :enlive)
+
+(insta/defparser ^{:doc "ident parser"} ident-parser
+  all-rules :start :parsed-ident :output-format :enlive)
 
 (defn-spec elisp-str->edn list?
   "Emacs Lisp parser."
@@ -148,8 +172,11 @@
                (assoc {:tag :comment} :value (str ";" text)))
     :quote (fn add-fn-prop [f & [s]]
              (assoc {:tag :quote} :fn? (= f "#") :value (or s f)))}
-   (insta/add-line-and-column-info-to-metadata s (elisp-parser s))))
+   (insta/add-line-and-column-info-to-metadata s (elisp-parser s))
+   ;; (elisp-parser s)
+   ))
 
+;; (ident-parser "#23rfffz")
 
 ;; (def text
 ;;   "Test text"
@@ -172,8 +199,31 @@
 ;; )
 ;; (+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
 ;;               (let ((a [1 2 3])) a)
+;; '[1 2 3]
+;; or()
+;; (?/ ?\\\\) ? ?
+;; ??
+;; ?\\C-s ?\\M-s ?\\M- fff
 ;; ;")
 
-;; (elisp-str->edn text)
 
-;; (insta/parses elisp-parser text)
+;; (count (insta/parses elisp-parser text))
+
+;; (insta/parse elisp-parser text)
+
+;; (elisp-parser (slurp "/mnt/workspace/spacemacs-pr/tests/layers/+distribution/spacemacs-base/evil-evilified-state-utest.el"))
+
+;; ((shell-command-switches (cond
+;;                            ((or(eq system-type 'darwin)
+;;                                (eq system-type 'gnu/linux))
+;;                             ;; execute env twice, once with a
+;;                             ;; non-interactive login shell and
+;;                             ;; once with an interactive shell
+;;                             ;; in order to capture all the init
+;;                             ;; files possible.
+;;                             '("-lc" "-ic"))
+;;                            ((eq system-type 'windows-nt) '("-c"))))
+;;  (tmpfile (make-temp-file spacemacs-env-vars-file))
+;;  (executable (cond ((or(eq system-type 'darwin)
+;;                        (eq system-type 'gnu/linux)) "env")
+;;                    ((eq system-type 'windows-nt) "set"))))
