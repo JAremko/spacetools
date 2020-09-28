@@ -64,8 +64,8 @@
 
 (def any-s
   "Any element."
-  "<any> = sexp | ident-g | expr | string | vector | comment | whitespace |
-           char | Epsilon")
+  "<any> = sexp | keyword | number | symbol | expr | string | vector |
+           comment | whitespace | char | Epsilon")
 
 (def comment-s
   "Comment line."
@@ -92,7 +92,7 @@
   "Expression (various quotes)."
   "<expr>   = quote | template | spread | hole
 
-   <qtbl> = sexp | ident-g | expr | vector
+   <qtbl> = sexp | symbol | keyword | number | expr | vector
 
    quote    = quote-tok qtbl
    template = tmpl-tok qtbl
@@ -134,15 +134,13 @@
 (def idents-s
   "Ident group elements."
   "number    = num-b10 | num-bx
-   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' !
-               <quote-tok-not-f>
+   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
    <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'
 
    keyword   = kv-tok ident
 
-   symbol    = ! ( num-b10 | kv-tok | comment-tok | num-b-x-tok ) ident
-
-   ident-g = ! char-tok ident & end-tok")
+   symbol    = ! ( num-b10 | kv-tok | comment-tok | num-b-x-tok | char-tok)
+               ident")
 
 (def ident
   "Ident."
@@ -210,7 +208,7 @@
 ;; bar'(foo)
 ;; ;")
 
-;; (second (insta/parses elisp-parser text))
+;; (count (insta/parses elisp-parser text))
 
 ;; (insta/parse elisp-parser text)
 
