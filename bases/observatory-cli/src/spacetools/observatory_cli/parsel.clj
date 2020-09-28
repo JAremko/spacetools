@@ -134,12 +134,13 @@
 (def idents-s
   "Ident group elements."
   "number    = num-b10 | num-bx
-   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))'
+   <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' &
+               end-tok
    <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'
 
    keyword   = kv-tok ident
 
-   symbol    = ! ( num-b10 | kv-tok | comment-tok | num-b-x-tok | char-tok)
+   symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok | char-tok )
                ident")
 
 (def ident
