@@ -1,32 +1,7 @@
 (ns spacetools.observatory-cli.parsel
   "Elisp parser. Kinda slow one. I ensured that there is no ambiguity,
   look back/ahead and recursive rules are at minimum but it still pretty slow.
-  Howe slow? Well, it parses 1k of normal Elisp lines per ~700ms.
-  Yeah, it is pretty slow. Good thing that time seems to be linear.
-
-  Current trade-offs for better performance:
-  I ended up deferring some work - symbols, keywords and numbers parsed
-  as the same \"thing\" - ident-g (ident group). It reduces the time by ~30%.
-  This is not that bad since I usually only need value of an ident, not type.
-
-  Malformed code like \"2'2\" throws parser error instead of being
-  treated as \"2 '2\"(Emacs does this) - It's ok because we want to detect
-  such code. Emacs parses \"#b0.0\" as 2 numbers \"#b0\" and \".0\". The
-  parser will interpreter this as a singe ident but will throw if you to
-  parse it into a specific ident (symbol, number, keyword) so for the sake
-  of code validation it makes sense to parse all idents.
-
-  How can I make it go faster while still using instaparse:
-  40%+ boost can be achieved by avoiding \"expression\" (quotes) parsing.
-  It can be fine since quoted things usually are value and in the most cases
-  I look for something specific and only then want to check its value.
-
-  Maybe I should try replacing the whole thing with something similar, like
-  https://github.com/pest-parser/pest since it is \"native\" but the lib
-  seems to struggle with recursive rules as well. And I might have to
-  implement line number metadata generator for it. Also I doubt it will
-  be faster overall. I will have to output parsed .el as EDN string and
-  re-read it into the rest of my stuff. it should add noticeable overhead.
+  It parses entire Spacemacs project (singe thread) in around one minute.
 
   Does speed even matter? It does when I have to parse a lot of .el files
   in PR jobs. For example, to detect keybinding collisions.
@@ -35,26 +10,18 @@
   Especially since I'll have to generate it on branch updates and access
   in PRs. Figuring out where to store it makes things even more difficult.
 
-  Additionally compiling parser into a native-image makes it 3X times slower
+  NOTE: compiling parser into a native-image makes it 3X times slower
   so I'll have to run it via JDK. Good thing TravisCI has runners with it
   pre-installed and I don't currently use this CI in PR jobs so I can run it
-  concurrently with the rest of the CIs."
+  concurrently with the rest of the CIs.
+
+  NOTE: I tried parsing numbers keywords and symbols as idents - basically
+  deffer the parse. It's ok sine I usually need ident value - not its type.
+  Saved me ~30% parse time. I don't think this justifies additional complexity."
   (:require [clojure.string :as str]
             [instaparse.combinators :as c]
             [instaparse.core :as insta]
             [orchestra.core :refer [defn-spec]]))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; FIXME: Rename expr rules into prefix and embed it into the child
-;;        via optional prefix par. Basically, quotes will be a prop
-;;        of lists and symbols. Don't forget to lift (quote ...)
-;;        into a prop of its child. AND HANDLE THE CASE WHEN IT IS
-;;        QUOTED. The lifting will have to be done at sexp node.
-;;        and it also can be quoted... So I have to fold the quotes
-;;        deep deep into the child.
-;; NOTE:  VECTORS ARE ALSO QUOTABLE
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Grammar:
 (def roots-s
@@ -64,7 +31,7 @@
 
 (def any-s
   "Any element."
-  "<any> = sexp | keyword | number | symbol | expr | string | vector |
+  "<any> = sexp | keyword | number | symbol | prefix | string | vector |
            comment | whitespace | char | Epsilon")
 
 (def comment-s
@@ -88,16 +55,16 @@
   "sexp   = sexp-l-tok any + sexp-r-tok
    vector = vec-l-tok any + vec-r-tok")
 
-(def expr-s
-  "Expression (various quotes)."
-  "<expr>   = quote | template | spread | hole
+(def prefixes-s
+  "Prefixes (various quotes)."
+  "<prefix>   = quote | template | spread | hole
 
-   <qtbl> = sexp | symbol | keyword | number | expr | vector
+   <prfxbl> = sexp | symbol | keyword | number | prefix | vector
 
-   quote    = quote-tok qtbl
-   template = tmpl-tok qtbl
-   hole     = hole-tok ! spread-tok qtbl
-   spread   = hole-tok spread-tok qtbl")
+   quote    = quote-tok prfxbl
+   template = tmpl-tok prfxbl
+   hole     = hole-tok ! spread-tok prfxbl
+   spread   = hole-tok spread-tok prfxbl")
 
 (def tokens-s
   "Markers of elements."
@@ -152,7 +119,7 @@
 
 (def all-rules
   "All rules combined"
-  (->> [seqs-s string-s tokens-s expr-s roots-s comment-s whitespace-s any-s
+  (->> [seqs-s string-s tokens-s prefixes-s roots-s comment-s whitespace-s any-s
         idents-s char-s]
        (mapv c/ebnf)
        (apply merge ident)))
