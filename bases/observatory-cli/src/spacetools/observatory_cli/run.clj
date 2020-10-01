@@ -13,9 +13,9 @@
              (when (not= parses-c 1)
                (prn (first %) parses-c)))
           files)
-    (time (mapv #(do (prn (first %))
-                     (p/elisp-str->edn (second %)))
-                files)))
+    (time (vec (map #(do (prn (first %))
+                         (p/elisp-str->edn (second %)))
+                    files))))
   (prn "Done!"))
 
 ;; (def foo (->> "/mnt/workspace/spacemacs-pr"

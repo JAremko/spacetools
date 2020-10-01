@@ -17,45 +17,51 @@
 
   NOTE: I tried parsing numbers keywords and symbols as idents - basically
   deffer the parse. It's ok sine I usually need ident value - not its type.
-  Saved me ~30% parse time. I don't think this justifies additional complexity."
+  Saved me ~30% parse time. I don't think this justifies additional complexity.
+
+  NOTE: Also I tried to embed prefixes into prefixed elements but it didn't
+  help since the grammar for them still has to be recursive."
   (:require [clojure.string :as str]
             [instaparse.combinators :as c]
             [instaparse.core :as insta]
+            [spacetools.observatory-cli.parsel-util :refer [defrule]]
             [orchestra.core :refer [defn-spec]]))
 
-;;; Grammar:
-(def roots-s
-  "Root rules."
-  "<root>         = any +
-   <parsed-ident> = keyword | number | symbol")
 
-(def any-s
+;; TODO: PROMOTE (quote x)
+
+;;; Grammar:
+(defrule roots
+  "Parser root."
+  "<root> = any +")
+
+(defrule element
   "Any element."
   "<any> = sexp | keyword | number | symbol | prefix | string | vector |
            comment | whitespace | char | Epsilon")
 
-(def comment-s
+(defrule comment
   "Comment line."
   "comment = comment-tok #'(?:[^\\n]*|$)'")
 
-(def string-s
+(defrule string
   "String."
   "string = <str-l-tok> #'(?:(?:\\\\\\\\)|(?:\\\\\")|[^\"])*' <str-r-tok>")
 
-(def char-s
+(defrule char
   "Char."
   "char = <char-tok> #'(?:(?:\\\\(?:C|M)-)|(?:\\\\))?(?:.|\\s)'")
 
-(def whitespace-s
+(defrule whitespace
   "Whitespace."
   "<whitespace> = <#'\\s+'>")
 
-(def seqs-s
+(defrule seqs
   "Sequences."
   "sexp   = sexp-l-tok any + sexp-r-tok
    vector = vec-l-tok any + vec-r-tok")
 
-(def prefixes-s
+(defrule prefixes
   "Prefixes (various quotes)."
   "<prefix>   = quote | template | spread | hole
 
@@ -66,7 +72,7 @@
    hole     = hole-tok ! spread-tok prfxbl
    spread   = hole-tok spread-tok prfxbl")
 
-(def tokens-s
+(defrule tokens
   "Markers of elements."
   "<end-tok>         = sexp-r-tok | sexp-l-tok | vec-r-tok | vec-l-tok |
                        whitespace | quote-tok | tmpl-tok | hole-tok | comment |
@@ -98,20 +104,24 @@
 
    <kv-tok>          = <':'>")
 
-(def idents-s
-  "Ident group elements."
+(defrule symbol
+  "Symbol."
+  "symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok | char-tok )
+               ident")
+
+(defrule keyword
+  "Keyword."
+  "keyword = kv-tok ident")
+
+(defrule number
+  "Numbers."
   "number    = num-b10 | num-bx
    <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' &
                end-tok
-   <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'
+   <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'")
 
-   keyword   = kv-tok ident
-
-   symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok | char-tok )
-               ident")
-
-(def ident
-  "Ident."
+(defrule ident
+  "Ident part of symbols and keywords."
   {:ident
    (let [esc-ch (str/join ["\\[" "\\]" "\\(" "\\)" "\"" "\\s" "'" "," "`" ";"])
          tmpl "(?:(?:\\\\[{{ec}}])|[^{{ec}}])+"]
@@ -119,17 +129,12 @@
 
 (def all-rules
   "All rules combined"
-  (->> [seqs-s string-s tokens-s prefixes-s roots-s comment-s whitespace-s any-s
-        idents-s char-s]
-       (mapv c/ebnf)
-       (apply merge ident)))
+  (merge ident seqs string tokens prefixes roots comment whitespace element
+         char number keyword symbol))
 
 ;;; Parsers:
 (insta/defparser ^{:doc "raw elisp parser."} elisp-parser
   all-rules :start :root :output-format :enlive)
-
-(insta/defparser ^{:doc "ident parser"} ident-parser
-  all-rules :start :parsed-ident :output-format :enlive)
 
 (defn-spec elisp-str->edn list?
   "Emacs Lisp parser."
@@ -139,11 +144,7 @@
                (assoc {:tag :comment} :value (str ";" text)))
     :quote (fn add-fn-prop [f & [s]]
              (assoc {:tag :quote} :fn? (= f "#") :value (or s f)))}
-   (insta/add-line-and-column-info-to-metadata s (elisp-parser s))
-   ;; (elisp-parser s)
-   ))
-
-;; (ident-parser "#23rfffz")
+   (insta/add-line-and-column-info-to-metadata s (elisp-parser s))))
 
 ;; (def text
 ;;   "Test text"
