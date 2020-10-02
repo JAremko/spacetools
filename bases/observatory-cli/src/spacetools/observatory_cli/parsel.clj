@@ -28,8 +28,6 @@
             [orchestra.core :refer [defn-spec]]))
 
 
-;; TODO: PROMOTE (quote x)
-
 ;;; Grammar:
 (defrule roots
   "Parser root."
@@ -40,7 +38,7 @@
   "<any> = sexp | keyword | number | symbol | prefix | string | vector |
            comment | whitespace | char | Epsilon")
 
-(defrule comment
+(defrule comment_
   "Comment line."
   "comment = comment-tok #'(?:[^\\n]*|$)'")
 
@@ -48,7 +46,7 @@
   "String."
   "string = <str-l-tok> #'(?:(?:\\\\\\\\)|(?:\\\\\")|[^\"])*' <str-r-tok>")
 
-(defrule char
+(defrule char_
   "Char."
   "char = <char-tok> #'(?:(?:\\\\(?:C|M)-)|(?:\\\\))?(?:.|\\s)'")
 
@@ -74,11 +72,7 @@
 
 (defrule tokens
   "Markers of elements."
-  "<end-tok>         = sexp-r-tok | sexp-l-tok | vec-r-tok | vec-l-tok |
-                       whitespace | quote-tok | tmpl-tok | hole-tok | comment |
-                       #'$'
-
-   <sexp-l-tok>      = <'('>
+  "<sexp-l-tok>      = <'('>
    <sexp-r-tok>      = <')'>
 
    <vec-l-tok>       = <'['>
@@ -104,12 +98,12 @@
 
    <kv-tok>          = <':'>")
 
-(defrule symbol
+(defrule symbol_
   "Symbol."
   "symbol    = ! ( number | kv-tok | comment-tok | num-b-x-tok | char-tok )
                ident")
 
-(defrule keyword
+(defrule keyword_
   "Keyword."
   "keyword = kv-tok ident")
 
@@ -117,7 +111,7 @@
   "Numbers."
   "number    = num-b10 | num-bx
    <num-b10> = #'[-+]?(?:(?:[\\d]*\\.[\\d]+)|(?:[\\d]+\\.[\\d]*)|(?:[\\d]+))' &
-               end-tok
+               ( ! ident )
    <num-bx>  = #'(?i)#(?:b|o|x|(?:\\d+r))[-+]?[a-z0-9]+'")
 
 (defrule ident
@@ -129,8 +123,8 @@
 
 (def all-rules
   "All rules combined"
-  (merge ident seqs string tokens prefixes roots comment whitespace element
-         char number keyword symbol))
+  (merge ident seqs string tokens prefixes roots comment_ whitespace element
+         char_ number keyword_ symbol_))
 
 ;;; Parsers:
 (insta/defparser ^{:doc "raw elisp parser."} elisp-parser
@@ -143,8 +137,18 @@
    {:comment (fn pad [text]
                (assoc {:tag :comment} :value (str ";" text)))
     :quote (fn add-fn-prop [f & [s]]
-             (assoc {:tag :quote} :fn? (= f "#") :value (or s f)))}
+             (assoc {:tag :quote} :fn? (= f "#") :value (or s f)))
+    :sexp (fn promote-quote [& [fst & rest :as cont]]
+            (if (= fst {:tag :symbol, :content '("quote")})
+              {:tag :quote :fn? false :value (first rest)}
+              {:tag :sexp :content cont}))}
    (insta/add-line-and-column-info-to-metadata s (elisp-parser s))))
+
+
+;; (elisp-str->edn "(quote (foo))")
+
+;; {:tag :sexp, :content ({:tag :symbol, :content ("quote")}
+;;                        {:tag :sexp, :content ({:tag :symbol, :content ("foo")})})}
 
 ;; (def text
 ;;   "Test text"
@@ -179,7 +183,10 @@
 
 ;; (count (insta/parses elisp-parser text))
 
-;; (insta/parse elisp-parser text)
+;; (elisp-str->edn text)
+
+;; (= (elisp-str->edn "(quote 1)")
+;;    (elisp-str->edn "'1"))
 
 ;; (def path "/mnt/workspace/spacemacs-pr/layers/auto-layer.el")
 
