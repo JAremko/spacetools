@@ -7,6 +7,7 @@
                  [funcool/cats "2.3.6"]
                  [http-kit "2.4.0"]
                  [instaparse "1.4.10"]
+                 [clj-antlr "0.2.6"]
                  [medley "1.3.0"]
                  [nio2 "0.2.3"]
                  [orchestra "2020.07.12-1"]

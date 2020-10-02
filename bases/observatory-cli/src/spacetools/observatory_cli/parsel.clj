@@ -15,6 +15,7 @@
   (:require [clojure.string :as str]
             [instaparse.combinators :as c]
             [instaparse.core :as insta]
+            [clj-antlr.core :as antlr]
             [spacetools.observatory-cli.parsel-util :refer [defrule]]
             [orchestra.core :refer [defn-spec]]))
 
@@ -196,3 +197,65 @@
 ;;  (executable (cond ((or(eq system-type 'darwin)
 ;;                        (eq system-type 'gnu/linux)) "env")
 ;;                    ((eq system-type 'windows-nt) "set"))))
+
+(def grammar
+  "Elisp grammar."
+  "grammar EmacsLisp;
+
+   form: sexp | keyword | number | symbol | prefix | string | vector | char;
+
+   vector: '[' form* ']';
+
+   list: '(' form* ')';
+
+   prefix: quote | template | spread | hole;
+
+   quote: '\\'' form;
+
+   template: '`' form;
+
+   spread: '`' ',@' form;
+
+   hole: ',' form;
+
+   number : NUMB10 | NUMBX;
+
+   char: CHAR;
+
+   string: STRING;
+
+   keyword: ':' symbol;
+
+   CHAR: '?' (('\\\\'('C'|'M')'-')|'\\\\')?.;
+
+   fragment D: '0'..'9';
+
+   fragment A: 'a'..'z';
+
+   NUMB10: [+-] ? (D*.D+)|(D+.D*)|(D+);
+
+   NUMBX: '#'('b'|'o'|'x'|(D+'r'))[-+]?(A|D)+;
+
+   fragment SPC: [ \n\r\t];
+
+
+")
+
+;; NOTE: CHAR rule needs a way to specify that the last
+;;       character can't be end.
+;; NOTE: CHAR supports only upper case in for C- and M-
+;;       I don't think I care about it.
+
+(def aaa (antlr/parser "grammar Aaa;
+char: CHAR;
+
+CHAR: '?' (('\\\\'('C'|'M')'-')|'\\\\')?.;
+
+                           WS : ' ' -> channel(HIDDEN) ;"))
+
+ (aaa "?\\")
+
+
+;; (+ 1 2)
+
+;; => {:clj-antlr/position {:row 0, :column 0, :index 0}, :errors nil}
