@@ -1,23 +1,14 @@
 (ns spacetools.observatory-cli.parsel
-  "Elisp parser. Kinda slow one. I ensured that there is no ambiguity,
-  look back/ahead and recursive rules are at minimum but it still pretty slow.
-  It parses entire Spacemacs project (singe thread) in around one minute.
-
-  Does speed even matter? It does when I have to parse a lot of .el files
-  in PR jobs. For example, to detect keybinding collisions.
-  Workaround can be keeping cache of keybindings or parsed files.
-  But passing something between CI jobs is a big pain in the rear end.
-  Especially since I'll have to generate it on branch updates and access
-  in PRs. Figuring out where to store it makes things even more difficult.
+  "Slowest Elisp parser in the World!
 
   NOTE: compiling parser into a native-image makes it 3X times slower
   so I'll have to run it via JDK. Good thing TravisCI has runners with it
   pre-installed and I don't currently use this CI in PR jobs so I can run it
   concurrently with the rest of the CIs.
 
-  NOTE: I tried parsing numbers keywords and symbols as idents - basically
-  deffer the parse. It's ok sine I usually need ident value - not its type.
-  Saved me ~30% parse time. I don't think this justifies additional complexity.
+  NOTE: I tried parsing numbers, keywords and symbols as idents - basically
+  deffer the parse. It's ok sine I usually need only ident value. Saved me ~30%
+  parse time. I don't think this justifies additional complexity.
 
   NOTE: Also I tried to embed prefixes into prefixed elements but it didn't
   help since the grammar for them still has to be recursive."
@@ -143,7 +134,6 @@
               {:tag :quote :fn? false :value (first rest)}
               {:tag :sexp :content cont}))}
    (insta/add-line-and-column-info-to-metadata s (elisp-parser s))))
-
 
 ;; (elisp-str->edn "(quote (foo))")
 
