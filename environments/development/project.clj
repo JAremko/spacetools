@@ -1,13 +1,13 @@
 (defproject spacetools/development "0.1.0-SNAPSHOT"
   :description "The main development environment."
   :dependencies [[cheshire "5.10.0"]
+                 [clj-antlr "0.2.6"]
                  [com.google.jimfs/jimfs "1.1"]
                  [com.rpl/specter "1.1.3"]
                  [environ "1.1.0"]
                  [funcool/cats "2.3.6"]
                  [http-kit "2.4.0"]
                  [instaparse "1.4.10"]
-                 [clj-antlr "0.2.6"]
                  [medley "1.3.0"]
                  [nio2 "0.2.3"]
                  [orchestra "2020.07.12-1"]
