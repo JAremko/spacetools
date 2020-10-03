@@ -71,7 +71,7 @@ bar'(foo)
 
    comment: COMLINE ;
 
-   CHAR: '?' '\\\\\\\\' ;
+   CHAR: '?' ( ( '\\\\' ( 'C' | 'M' ) '-' ) | '\\\\' )? . ;
 
    STRING: '\"' ( '\\\\\\\\' | '\\\\\"' | . )*? '\"' ;
 
@@ -98,4 +98,4 @@ bar'(foo)
 
 ;; (def test-f (slurp "/tmp/foo.el"))
 
-;; (time (elisp-str->edn test-f))
+;; (time (elisp-str->edn text))
