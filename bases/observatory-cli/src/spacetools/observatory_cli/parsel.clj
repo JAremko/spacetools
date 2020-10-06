@@ -6,8 +6,8 @@
 
 (def grammar
   "Elisp grammar."
-  (str/replace ;; Replaces {{ANY}} with inline any element rule
-               ;; to prevent wrapping.
+  (str/replace ;; FIXME: Replaces {{ANY}} with inline any element rule
+               ;; to prevent wrapping. There should be a better way..
    "grammar EmacsLisp ;
 
    root: {{ANY}}* ;
@@ -15,8 +15,6 @@
    vector: '[' {{ANY}}* ']' ;
 
    list: '(' {{ANY}}* ')' ;
-
-   prefix: quote | template | spread | hole ;
 
    quote: '#' ? '\\'' {{ANY}} ;
 
@@ -65,8 +63,8 @@
 
    "{{ANY}}"
 
-   "( list | keyword | number | symbol | prefix | string | vector | char |
-      whitespace | comment )"))
+   "( list | keyword | number | symbol | string | vector | char | whitespace |
+      comment | quote | template | spread | hole )"))
 
 (def grammar-prune
   "Version of EmacsLisp grammar that hides comments and white-spaces."
@@ -117,3 +115,23 @@ bar'(foo) (quote 10)
 ;; (w/walk (map ) (elisp-str->pruned-parse-tree text))
 
 ;; (elisp-str->pruned-parse-tree text)
+
+;; (defmulti sdn->org
+;;   "Given node return its org-mode text representation."
+;;   (fn [{tag :tag :as node}]
+;;     {:pre  [((complement indirect-nodes) tag)
+;;             (map? node)
+;;             (keyword? tag)]}
+;;     (cond
+;;       ;; List node group.
+;;       (#{:feature-list :plain-list} tag) :list
+
+;;       ;; Emphasis containers.
+;;       (#{:bold :italic :underline :strike-through} tag) :emphasis-container
+
+;;       ;; Block-container node group.
+;;       ((set (keys block-container-delims)) tag) :block-container
+
+;;       ;; Everything else.
+;;       :else tag)))
+
