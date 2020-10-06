@@ -9,6 +9,6 @@
                    (keep (comp (partial re-matches #".*\.el$") str))
                    (map #(vector % (slurp %))))]
     (time (vec (map #(do (prn (first %))
-                         (p/elisp-str->edn (second %)))
+                         (p/elisp-str->pruned-parse-tree (second %)))
                     files))))
   (prn "Done!"))

@@ -1,30 +1,30 @@
 (ns spacetools.observatory-cli.parsel
   "Emacs lisp parser."
-  (:require [clj-antlr.core :as antlr]))
+  (:require [clj-antlr.core :as antlr]
+            [clojure.string :as str]))
 
 
 (def grammar
   "Elisp grammar."
-  "grammar EmacsLisp ;
+  (str/replace ;; Replaces {{ANY}} with inline any element rule
+               ;; to prevent wrapping.
+   "grammar EmacsLisp ;
 
-   source: any* EOF ;
+   root: {{ANY}}* ;
 
-   any: list | keyword | number | symbol | prefix | string | vector | char |
-        whitespace | comment;
+   vector: '[' {{ANY}}* ']' ;
 
-   vector: '[' any* ']' ;
-
-   list: '(' any* ')' ;
+   list: '(' {{ANY}}* ')' ;
 
    prefix: quote | template | spread | hole ;
 
-   quote: '#' ? '\\'' any ;
+   quote: '#' ? '\\'' {{ANY}} ;
 
-   template: '`' any ;
+   template: '`' {{ANY}} ;
 
-   spread: ',@' any ;
+   spread: ',@' {{ANY}} ;
 
-   hole: ',' any ;
+   hole: ',' {{ANY}} ;
 
    number: NUMB10 | NUMBX ;
 
@@ -59,14 +59,26 @@
    IDENT: ( ( '\\\\' [\\\\[\\]() \\n\\t\\r\"',`;] )+? |
             ( ~[[\\]() \\n\\t\\r\"',`;] )+? )+ ;
 
-   COMLINE: ';' ~[\\n\\r]* ;
+   COMLINE: ';' ~[\\n\\r]* /*{{JUNK}}*/;
 
-   WS: [ \\n\\t\\r]+ ;")
+   WS: [ \\n\\t\\r]+ /*{{JUNK}}*/;"
 
-;; -> channel(HIDDEN) ;
+   "{{ANY}}"
 
-(def elisp-str->parse-tree
-  "Parses Emacs Lisp string into parse tree."
+   "( list | keyword | number | symbol | prefix | string | vector | char |
+      whitespace | comment )"))
+
+(def grammar-prune
+  "Version of EmacsLisp grammar that hides comments and white-spaces."
+  (str/replace grammar "/*{{JUNK}}*/" "-> channel(HIDDEN)"))
+
+
+(def elisp-str->pruned-parse-tree
+  "Parses Emacs Lisp string into parse tree without white-spaces and comments."
+  (antlr/parser grammar-prune))
+
+(def elisp-str->full-parse-tree
+  "Parses Emacs Lisp string into parse tree with comments and white-spaces."
   (antlr/parser grammar))
 
 
@@ -102,4 +114,6 @@ bar'(foo) (quote 10)
 \\\\\\\\\\[foo
 ;")
 
-(elisp-str->parse-tree text)
+;; (w/walk (map ) (elisp-str->pruned-parse-tree text))
+
+;; (elisp-str->pruned-parse-tree text)
