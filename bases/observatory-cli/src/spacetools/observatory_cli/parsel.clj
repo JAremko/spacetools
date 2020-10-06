@@ -1,16 +1,16 @@
 (ns spacetools.observatory-cli.parsel
   "Emacs lisp parser."
-  (:require [clj-antlr.core :as antlr]
-            [clojure.walk :as w]))
+  (:require [clj-antlr.core :as antlr]))
 
 
 (def grammar
   "Elisp grammar."
   "grammar EmacsLisp ;
 
-   root: any* EOF ;
+   source: any* EOF ;
 
-   any: list | keyword | number | symbol | prefix | string | vector | char ;
+   any: list | keyword | number | symbol | prefix | string | vector | char |
+        whitespace | comment;
 
    vector: '[' any* ']' ;
 
@@ -36,6 +36,8 @@
 
    symbol: IDENT ;
 
+   whitespace: WS ;
+
    comment: COMLINE ;
 
    CHAR: '?' ( ( '\\\\' ( 'C' | 'M' ) '-' ) | '\\\\' )? . ;
@@ -54,12 +56,14 @@
 
    KEYWORD: ':' IDENT ;
 
-   IDENT: ( ( '\\\\' [\\\\[\\]() \\n\\t\\r\"',`] )+? |
-            ( ~[[\\]() \\n\\t\\r\"',`] )+? )+ ;
+   IDENT: ( ( '\\\\' [\\\\[\\]() \\n\\t\\r\"',`;] )+? |
+            ( ~[[\\]() \\n\\t\\r\"',`;] )+? )+ ;
 
-   COMLINE: ';' ~[\\n\\r]* -> channel(HIDDEN) ;
+   COMLINE: ';' ~[\\n\\r]* ;
 
-   WS: [ \\n\\t\\r]+ -> channel(HIDDEN) ;")
+   WS: [ \\n\\t\\r]+ ;")
+
+;; -> channel(HIDDEN) ;
 
 (def elisp-str->parse-tree
   "Parses Emacs Lisp string into parse tree."
@@ -98,4 +102,4 @@ bar'(foo) (quote 10)
 \\\\\\\\\\[foo
 ;")
 
-;; (elisp-str->parse-tree text)
+(elisp-str->parse-tree text)
