@@ -1,6 +1,70 @@
 (ns spacetools.observatory-cli.parsel
   "Emacs lisp parser."
-  (:require [clj-antlr.core :as antlr]))
+  (:require [clj-antlr.core :as antlr]
+            [clojure.walk :as w]))
+
+
+(def grammar
+  "Elisp grammar."
+  "grammar EmacsLisp ;
+
+   root: any* EOF ;
+
+   any: list | keyword | number | symbol | prefix | string | vector | char ;
+
+   vector: '[' any* ']' ;
+
+   list: '(' any* ')' ;
+
+   prefix: quote | template | spread | hole ;
+
+   quote: '#' ? '\\'' any ;
+
+   template: '`' any ;
+
+   spread: ',@' any ;
+
+   hole: ',' any ;
+
+   number: NUMB10 | NUMBX ;
+
+   char: CHAR ;
+
+   string: STRING ;
+
+   keyword: KEYWORD ;
+
+   symbol: IDENT ;
+
+   comment: COMLINE ;
+
+   CHAR: '?' ( ( '\\\\' ( 'C' | 'M' ) '-' ) | '\\\\' )? . ;
+
+   STRING: '\"' ( '\\\\\\\\' | '\\\\\"' | . )*? '\"' ;
+
+   NUMB10: [+-] ? ( ( D* '.' D+ ) | ( D+ '.' D* ) | D+ ) ;
+
+   NUMBX: '#' ( 'b' | 'o' | 'x' | ( D+ 'r' ) ) [-+]? ( A | D )+ ;
+
+   fragment
+   D: '0'..'9' ;
+
+   fragment
+   A: 'a'..'z' ;
+
+   KEYWORD: ':' IDENT ;
+
+   IDENT: ( ( '\\\\' [\\\\[\\]() \\n\\t\\r\"',`] )+? |
+            ( ~[[\\]() \\n\\t\\r\"',`] )+? )+ ;
+
+   COMLINE: ';' ~[\\n\\r]* -> channel(HIDDEN) ;
+
+   WS: [ \\n\\t\\r]+ -> channel(HIDDEN) ;")
+
+(def elisp-str->parse-tree
+  "Parses Emacs Lisp string into parse tree."
+  (antlr/parser grammar))
+
 
 (def text
   "Test text"
@@ -30,72 +94,8 @@
 or()
 \"\\\\\\\\\" a
 \"'\"
-bar'(foo)
+bar'(foo) (quote 10)
 \\\\\\\\\\[foo
 ;")
 
-(def grammar
-  "Elisp grammar."
-  "grammar EmacsLisp ;
-
-   source: any* EOF ;
-
-   any: list | keyword | number | symbol | prefix | string | vector | char |
-        whitespace | comment ;
-
-   vector: '[' any* ']' ;
-
-   list: '(' any* ')' ;
-
-   prefix: quote | template | spread | hole ;
-
-   quote: '#' ? '\\'' any ;
-
-   template: '`' any ;
-
-   spread: ',@' any ;
-
-   hole: ',' any ;
-
-   number: NUMB10 | NUMBX ;
-
-   char: CHAR ;
-
-   string: STRING ;
-
-   keyword: KEYWORD ;
-
-   symbol: IDENT ;
-
-   whitespace: WS ;
-
-   comment: COMLINE ;
-
-   CHAR: '?' ( ( '\\\\' ( 'C' | 'M' ) '-' ) | '\\\\' )? . ;
-
-   STRING: '\"' ( '\\\\\\\\' | '\\\\\"' | . )*? '\"' ;
-
-   NUMB10: [+-] ? ( ( D* '.' D+ ) | ( D+ '.' D* ) | D+ ) ;
-
-   NUMBX: '#' ( 'b' | 'o' | 'x' | ( D+ 'r' ) ) [-+]? ( A | D )+ ;
-
-   fragment
-   D: '0'..'9' ;
-
-   fragment
-   A: 'a'..'z' ;
-
-   KEYWORD: ':' IDENT ;
-
-   IDENT: ( ( '\\\\' [\\\\[\\]() \\n\\t\\r\"',`] )+? |
-            ( ~[[\\]() \\n\\t\\r\"',`] )+? )+ ;
-
-   COMLINE: ';' ~[\\n\\r]* ;
-
-   WS: [ \\n\\t\\r]+ ;")
-
-(def elisp-str->edn (antlr/parser grammar))
-
-;; (def test-f (slurp "/tmp/foo.el"))
-
-;; (time (elisp-str->edn text))
+;; (elisp-str->parse-tree text)
