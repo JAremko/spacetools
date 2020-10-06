@@ -70,7 +70,7 @@
 
 (def grammar-prune
   "Version of EmacsLisp grammar that hides comments and white-spaces."
-  (str/replace grammar "/*{{JUNK}}*/" "-> channel(HIDDEN)"))
+  (str/replace grammar "/*{{JUNK}}*/" " -> skip"))
 
 
 (def elisp-str->pruned-parse-tree
