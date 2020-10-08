@@ -1,13 +1,16 @@
-(ns spacetools.observatory-cli.parsel
+(ns spacetools.observatory-cli.elisp.parser
   "Emacs lisp parser."
   (:require [clj-antlr.core :as antlr]
-            [clojure.string :as str]))
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [medley.core :refer [deep-merge]]
+            [orchestra.core :refer [defn-spec]]))
 
 
 (def grammar
   "Elisp grammar."
   (str/replace ;; FIXME: Replaces {{ANY}} with inline any element rule
-               ;; to prevent wrapping. There should be a better way..
+   ;; to prevent wrapping. There should be a better way..
    "grammar EmacsLisp ;
 
    root: {{ANY}}* ;
@@ -71,67 +74,40 @@
   (str/replace grammar "/*{{JUNK}}*/" " -> skip"))
 
 
+;;;; Predicates
+
+(defn-spec cons? boolean?
+  "Returns true if X has type `clojure.lang.Cons`"
+  [x any?]
+  (= (type x) clojure.lang.Cons))
+
+
+;;;; Specs
+
+(s/def ::parse-tree (s/coll-of (s/or :terminal string? :child cons?)))
+
+
+;;;; Helpers
+
+(defn-spec walk-parse-tree any?
+  "Walk parse tree FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
+NOTE: Return value of PRE should be mapable."
+  [pre fn? post fn? form ::parse-tree]
+  (if ((some-fn string? keyword?) form)
+    form
+    (vary-meta (post (map (partial walk-parse-tree pre post) (pre form)))
+               deep-merge
+               (meta form))))
+
+
+;;;; Parsers
+
 (def elisp-str->pruned-parse-tree
   "Parses Emacs Lisp string into parse tree without white-spaces and comments."
   (antlr/parser grammar-prune))
 
+
 (def elisp-str->full-parse-tree
   "Parses Emacs Lisp string into parse tree with comments and white-spaces."
   (antlr/parser grammar))
-
-
-(def text
-  "Test text"
-  ";; (1 2 3) foo
-`,@foo #'baz
-,@()
-(1.0)
-(defvar configuration-layer--refresh-package-timeout dotspacemacs-elpa-timeout
-  \"Timeout in seconds to reach a package archive page.\")
-,bar
-:zzz
-\"fff\"
-     ((file-exists-p layer-dir)
-      (configuration-layer/message
-       (concat \"Cannot create configuration layer \\\"\\\", \"
-               \"this layer already exists.\") name))
-1011;; baz
-   ;; Note:
-(1+
-;; bar
-)
-(+1.0 +2 .0 0.0.0 #24r5 #b0.0 #b111 '() 2+2 2 '2 +1.2b [])
-              (let ((a [1 2 3])) a)
-?b ?  ?? ?\\C-m ?\\\\  ( ?\\\\ )
-'[1 2 3]
- ((equal event 32) ?')   ; space 
-or()
-\"\\\\\\\\\" a
-\"'\"
-bar'(foo) (quote 10)
-\\\\\\\\\\[foo
-;")
-
-;; (w/walk (map ) (elisp-str->pruned-parse-tree text))
-
-;; (elisp-str->pruned-parse-tree text)
-
-;; (defmulti sdn->org
-;;   "Given node return its org-mode text representation."
-;;   (fn [{tag :tag :as node}]
-;;     {:pre  [((complement indirect-nodes) tag)
-;;             (map? node)
-;;             (keyword? tag)]}
-;;     (cond
-;;       ;; List node group.
-;;       (#{:feature-list :plain-list} tag) :list
-
-;;       ;; Emphasis containers.
-;;       (#{:bold :italic :underline :strike-through} tag) :emphasis-container
-
-;;       ;; Block-container node group.
-;;       ((set (keys block-container-delims)) tag) :block-container
-
-;;       ;; Everything else.
-;;       :else tag)))
 

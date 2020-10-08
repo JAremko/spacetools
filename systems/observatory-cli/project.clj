@@ -2,6 +2,7 @@
   :description "A observatory-cli system."
   :plugins [[lein-environ "1.1.0"]]
   :dependencies [[clj-antlr "0.2.6"]
+                 [medley "1.3.0"]
                  [orchestra "2020.07.12-1"]
                  [org.clojure/clojure "1.10.2-alpha2"]]
   :main spacetools.observatory-cli.run
