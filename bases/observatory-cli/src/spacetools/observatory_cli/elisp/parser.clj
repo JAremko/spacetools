@@ -110,4 +110,3 @@ NOTE: Return value of PRE should be mapable."
 (def elisp-str->full-parse-tree
   "Parses Emacs Lisp string into parse tree with comments and white-spaces."
   (antlr/parser grammar))
-

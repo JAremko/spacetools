@@ -3,7 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             [medley.core :refer [deep-merge update-existing]]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.observatory-cli.elisp.parser :as p]))
+            [spacetools.observatory-cli.elisp.parser :as parser]))
 
 
 ;;;; Values
@@ -75,7 +75,7 @@
   (ast-node :tag tag :children (vec children)))
 
 
-(defmulti parse-tree->ast*
+(defmulti parse-tree->ast-visitor
   "Turns parse tree nodes into AST nodes."
   (fn [[tag]]
     {:pre  (keyword? tag)}
@@ -84,30 +84,25 @@
       (get terminal-nodes-tags tag) :terminal-g
       :else tag)))
 
-
-(defmethod parse-tree->ast* :prefix-g
+(defmethod parse-tree->ast-visitor :prefix-g
   [[tag tok cont-or-tag & rst :as node]]
   (let [fn-q? (string? cont-or-tag)
         child (if fn-q? (first rst) cont-or-tag)]
     (inline-prefix child (if fn-q? :fn-quote tag))))
 
-
-(defmethod parse-tree->ast* :terminal-g
+(defmethod parse-tree->ast-visitor :terminal-g
   [[tag value]]
   (ast-node :tag tag :value value))
 
-
-(defmethod parse-tree->ast* :root
+(defmethod parse-tree->ast-visitor :root
   [[tag & rst]]
   (ast-parent tag rst))
 
-
-(defmethod parse-tree->ast* :vector
+(defmethod parse-tree->ast-visitor :vector
   [[tag & rst]]
   (ast-parent tag (shrink-coll rst)))
 
-
-(defmethod parse-tree->ast* :list
+(defmethod parse-tree->ast-visitor :list
   [[tag & [_ fc sc :as rst]]]
   (if (and (= "quote" (:value fc))
            ((complement seq) (:prefix fc)))
@@ -127,10 +122,7 @@ NOTE: Return value of PRE should be mapable."
    (meta form)))
 
 
-;;;; Core functions
-
 (defn-spec parse-tree->ast ::ast
   "Convert parse tree into AST saving meta."
   [pt :spacetools.observatory-cli.elisp.parser/parse-tree]
-  (let [m (meta pt)]
-    (with-meta (parse-tree->ast* pt) m)))
+  (parser/walk-parse-tree identity parse-tree->ast-visitor pt))
