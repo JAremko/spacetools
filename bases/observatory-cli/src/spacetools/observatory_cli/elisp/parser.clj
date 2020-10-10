@@ -4,7 +4,8 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [medley.core :refer [deep-merge]]
-            [orchestra.core :refer [defn-spec]]))
+            [orchestra.core :refer [defn-spec]]
+            [spacetools.observatory-cli.elisp.spec :as es]))
 
 
 (def grammar
@@ -74,25 +75,12 @@
   (str/replace grammar "/*{{JUNK}}*/" " -> skip"))
 
 
-;;;; Predicates
-
-(defn-spec cons? boolean?
-  "Returns true if X has type `clojure.lang.Cons`"
-  [x any?]
-  (= (type x) clojure.lang.Cons))
-
-
-;;;; Specs
-
-(s/def ::parse-tree (s/coll-of (s/or :terminal string? :child cons?)))
-
-
 ;;;; Helpers
 
 (defn-spec walk-parse-tree any?
   "Walk parse tree FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
 NOTE: Return value of PRE should be mapable."
-  [pre fn? post fn? form ::parse-tree]
+  [pre fn? post fn? form ::es/parse-tree]
   (if ((some-fn string? keyword?) form)
     form
     (vary-meta (post (map (partial walk-parse-tree pre post) (pre form)))
@@ -102,11 +90,17 @@ NOTE: Return value of PRE should be mapable."
 
 ;;;; Parsers
 
-(def elisp-str->pruned-parse-tree
+(def parser (antlr/parser grammar))
+(def parser-prune (antlr/parser grammar-prune))
+
+
+(defn-spec elisp-str->pruned-parse-tree ::es/pruned-parse-tree
   "Parses Emacs Lisp string into parse tree without white-spaces and comments."
-  (antlr/parser grammar-prune))
+  [s string?]
+  (parser-prune s))
 
 
-(def elisp-str->full-parse-tree
+(defn-spec elisp-str->full-parse-tree ::es/parse-tree
   "Parses Emacs Lisp string into parse tree with comments and white-spaces."
-  (antlr/parser grammar))
+  [s string?]
+  (parser s))

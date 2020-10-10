@@ -3,51 +3,40 @@
   (:require [clojure.spec.alpha :as s]
             [medley.core :refer [deep-merge update-existing]]
             [orchestra.core :refer [defn-spec]]
-            [spacetools.observatory-cli.elisp.parser :as parser]))
+            [spacetools.observatory-cli.elisp.parser :as parser]
+            [spacetools.observatory-cli.elisp.spec :as es]))
 
+
+;; FIXME: FIX COMPARATOR BY ADDING ALNUM SORTING TAIL.
+;; FIXME: Scrub comments and whitespaces by returning and removing nils.
 
 ;;;; Values
-
-(def prefix-nodes-tags
-  "All tags of prefix nodes."
-  #{:template :spread :quote :hole})
-
-(def coll-nodes-tags
-  "All tags of collections nodes."
-  #{:list :vector})
-
-(def terminal-nodes-tags
-  "All tags of terminal nodes."
-  #{:symbol :keyword :char :string :number})
 
 (def key->wight
   "Map for sorting keys."
   {:tag 4 :prefix 3 :value 2 :children 1 :extra 0})
-
-
-;;;; Specs
-
-(s/def ::ast (s/map-of keyword? any?))
-
 
 ;;;; Predicates
 
 (defn-spec terminal-node? boolean?
   "Returns true if X is a terminal node."
   [x any?]
-  (some? (terminal-nodes-tags (first x))))
-
+  (some? (es/terminal-node-tags (:tag x))))
 
 (defn-spec prefix-node? boolean?
   "Returns true if X is a prefix node."
   [x any?]
-  (some? (prefix-nodes-tags (first x))))
-
+  (some? (es/prefix-node-tags (:tag x))))
 
 (defn-spec coll-node? boolean?
   "Returns true if X is a collection node."
   [x any?]
-  (some? (coll-nodes-tags (first x))))
+  (some? (es/coll-node-tags (:tag x))))
+
+(defn-spec junk-node? boolean?
+  "Returns true if X is a  junk node."
+  [x any?]
+  (some? (es/junk-node-tags (:tag x))))
 
 
 ;;;; Helpers
@@ -57,9 +46,9 @@
   (partial sorted-map-by (fn comp [a b] (apply > (map key->wight [a b])))))
 
 
-(defn-spec inline-prefix ::ast
+(defn-spec inline-prefix ::es/ast
   "Add PREFIX to the inline prefixes of the NODE"
-  [node ::ast prefix keyword?]
+  [node ::es/ast prefix keyword?]
   (update node :prefix #(into [prefix] %)))
 
 
@@ -69,8 +58,8 @@
   (-> coll rest butlast))
 
 
-(defn-spec ast-parent ::ast
-  "Make parent AST onde with TAG and CHILDREN."
+(defn-spec ast-parent ::es/ast
+  "Make parent AST node with TAG and CHILDREN."
   [tag keyword? children seqable?]
   (ast-node :tag tag :children (vec children)))
 
@@ -80,8 +69,8 @@
   (fn [[tag]]
     {:pre  (keyword? tag)}
     (cond
-      (get prefix-nodes-tags tag) :prefix-g
-      (get terminal-nodes-tags tag) :terminal-g
+      (get es/prefix-node-tags tag) :prefix-g
+      (get es/terminal-node-tags tag) :terminal-g
       :else tag)))
 
 (defmethod parse-tree->ast-visitor :prefix-g
@@ -113,7 +102,7 @@
 (defn-spec walk-ast any?
   "Walk ast FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
 NOTE: Return value of PRE should be mapable."
-  [pre fn? post fn? form ::ast]
+  [pre fn? post fn? form ::es/ast]
   (vary-meta
    (post (update-existing
           (pre form)
@@ -122,7 +111,7 @@ NOTE: Return value of PRE should be mapable."
    (meta form)))
 
 
-(defn-spec parse-tree->ast ::ast
+(defn-spec parse-tree->ast ::es/ast
   "Convert parse tree into AST saving meta."
-  [pt :spacetools.observatory-cli.elisp.parser/parse-tree]
+  [pt ::es/parse-tree]
   (parser/walk-parse-tree identity parse-tree->ast-visitor pt))

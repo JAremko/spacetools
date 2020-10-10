@@ -3,13 +3,14 @@
   (:require [clojure.spec.alpha :as s]
             [medley.core :refer [deep-merge update-existing]]
             [orchestra.core :refer [defn-spec]]
+            [spacetools.observatory-cli.elisp.ast :as ast]
             [spacetools.observatory-cli.elisp.parser :as parser]
-            [spacetools.observatory-cli.elisp.ast :as ast]))
+            [spacetools.observatory-cli.elisp.spec :as es]))
 
 
 ;;;; Core functions
 
-(defn-spec read-str :spacetools.observatory-cli.elisp.ast/ast
+(defn-spec read-str ::es/ast
   "Converts EmacsLisp string into AST representation."
   [s string?]
   (parser/walk-parse-tree identity
@@ -17,4 +18,6 @@
                           (parser/elisp-str->pruned-parse-tree s)))
 
 
-;; (meta (second (:children (read-str "foo bar"))))
+;; (s/valid? :spacetools.observatory-cli.elisp.spec/ast
+;;           (read-str "foo ( bar)")
+;;           )
