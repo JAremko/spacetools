@@ -83,9 +83,10 @@ NOTE: Return value of PRE should be mapable."
   [pre fn? post fn? form ::es/parse-tree]
   (if ((some-fn string? keyword?) form)
     form
-    (vary-meta (post (map (partial walk-parse-tree pre post) (pre form)))
-               deep-merge
-               (meta form))))
+    ((fnil vary-meta '())
+     (post (map (partial walk-parse-tree pre post) (pre form)))
+     deep-merge
+     (meta form))))
 
 
 ;;;; Parsers

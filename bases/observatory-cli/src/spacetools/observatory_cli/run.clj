@@ -1,16 +1,25 @@
 (ns spacetools.observatory-cli.run
   (:gen-class)
-  (:require [spacetools.observatory-cli.elisp.core :as el]))
+  (:require [spacetools.observatory-cli.elisp.core :as el]
+            [spacetools.observatory-cli.elisp.keybinding :as kb]))
+
 
 (defn -main [file & args]
-  (let [files (->> file
+  (let [lbs-dump-f "/tmp/legacy_bindings.org"
+        files (->> file
                    clojure.java.io/file
                    file-seq
                    (keep (comp (partial re-matches #".*\.el$") str))
                    (map #(vector % (slurp %))))]
-    (time (vec (map #(do (prn (first %))
-                         (el/read-str (second %)))
-                    files))))
+    (->> files
+         (map  (fn [[f s]]
+                 (prn "Parsing: " f)
+                 [f (el/read-str s)]))
+         (map  (fn [[f s]]
+                 (prn "Looking for legacy bindings in: " f)
+                 [f (kb/collect-legacy-bindings s)]))
+         (vec)
+         (spit lbs-dump-f)))
   (prn "Done!"))
 
 
@@ -45,5 +54,3 @@ or()
 bar'(foo) (quote 10)	
 \\\\\\\\\\[foo	
 ;")
-
-;; (el/read-str text)

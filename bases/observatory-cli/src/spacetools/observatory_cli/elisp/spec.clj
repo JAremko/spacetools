@@ -48,6 +48,7 @@
                                   :content (s/+ (s/or :terminal string?
                                                       :child ::parse-tree))))
 
+
 ;; AST spec
 (s/def ::ast-tag all-ast-nodes)
 (s/def ::ast-prefix (s/coll-of prefix-node-tags :kind vector?))
@@ -58,14 +59,12 @@
                      :opt-un [::ast-prefix ::ast-value ::ast-children]))
 
 
-;; (s/def ::position
-;;   (s/keys :req-un [::row nat-int? ::col nat-int? ::idx nat-int?]) )
+(s/def ::position
+  (s/keys :req-un [::row nat-int? ::col nat-int? ::idx nat-int?]) )
 
 
-;; => #:clj-antlr{:position {:row 0, :column 4, :index 4}}
+(s/def ::fn-symbol (s/and string? seq))
 
+(s/def ::legacy-binding (s/keys :req-un [::fn-symbol ::position]))
 
-;; (s/def ::legacy-binding (s/keys :req-un []))
-
-;; (s/def ::legacy-bindings (s/coll-of ::legcy-binding))
-
+(s/def ::legacy-bindings (s/coll-of ::legcy-binding :kind vector?))

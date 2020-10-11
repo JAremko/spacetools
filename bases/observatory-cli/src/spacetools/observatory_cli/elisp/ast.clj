@@ -7,7 +7,8 @@
             [spacetools.observatory-cli.elisp.spec :as es]))
 
 
-;; FIXME: FIX COMPARATOR BY ADDING ALNUM SORTING TAIL.
+;; FIXME: FIX COMPARATOR IN SORTED MAP BY ADDING ALNUM SORTING TAIL
+;;        SO THE MAP WILL BE EXTEBDEBLE.
 ;; FIXME: Scrub comments and whitespaces by returning and removing nils.
 
 ;;;; Values
@@ -103,7 +104,7 @@
   "Walk ast FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
 NOTE: Return value of PRE should be mapable."
   [pre fn? post fn? form ::es/ast]
-  (vary-meta
+  ((fnil vary-meta {})
    (post (update-existing
           (pre form)
           :children #(mapv (partial walk-ast pre post) %)))
