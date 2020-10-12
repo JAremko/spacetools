@@ -1,12 +1,10 @@
 (ns spacetools.observatory-cli.elisp.parser
   "Emacs lisp parser."
   (:require [clj-antlr.core :as antlr]
-            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [medley.core :refer [deep-merge]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.observatory-cli.elisp.spec :as es]))
-
 
 (def grammar
   "Elisp grammar."
@@ -81,12 +79,12 @@
   "Walk parse tree FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
 NOTE: Return value of PRE should be mapable."
   [pre fn? post fn? form ::es/parse-tree]
-  (if ((some-fn string? keyword?) form)
-    form
-    ((fnil vary-meta '())
-     (post (map (partial walk-parse-tree pre post) (pre form)))
-     deep-merge
-     (meta form))))
+  (let [rv (if ((some-fn string? keyword?) form)
+             form
+             (post (map (partial walk-parse-tree pre post) (pre form))))]
+    (if (es/metable? rv)
+      (vary-meta rv deep-merge (meta form))
+      rv)))
 
 
 ;;;; Parsers

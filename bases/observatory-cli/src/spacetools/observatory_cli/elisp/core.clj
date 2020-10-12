@@ -1,11 +1,9 @@
 (ns spacetools.observatory-cli.elisp.core
   "Elisp tools core functions."
-  (:require [clojure.spec.alpha :as s]
-            [orchestra.core :refer [defn-spec]]
+  (:require [orchestra.core :refer [defn-spec]]
             [spacetools.observatory-cli.elisp.ast :as ast]
             [spacetools.observatory-cli.elisp.parser :as parser]
             [spacetools.observatory-cli.elisp.spec :as es]))
-
 
 ;;;; Core functions
 

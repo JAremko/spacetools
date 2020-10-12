@@ -1,10 +1,8 @@
 (ns spacetools.observatory-cli.elisp.keybinding
   "Keybinding extraction tools.."
-  (:require [clojure.spec.alpha :as s]
-            [orchestra.core :refer [defn-spec]]
+  (:require [orchestra.core :refer [defn-spec]]
             [spacetools.observatory-cli.elisp.ast :as ast]
             [spacetools.observatory-cli.elisp.spec :as es]))
-
 
 ;;;; Values
 

@@ -37,6 +37,14 @@
              terminal-node-tags))
 
 
+;;;; Predicates
+
+(defn-spec metable? boolean?
+  "Returns true if X can hold meta."
+  [x any?]
+  (instance? clojure.lang.IObj x))
+
+
 ;;;; Specs
 
 (s/def ::parse-tree (s/cat :tag all-pt-nodes

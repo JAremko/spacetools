@@ -1,21 +1,11 @@
 (ns spacetools.observatory-cli.elisp.ast
   "Emacs lisp AST."
-  (:require [clojure.spec.alpha :as s]
-            [medley.core :refer [deep-merge update-existing]]
+  (:require [medley.core :refer [deep-merge update-existing]]
             [orchestra.core :refer [defn-spec]]
             [spacetools.observatory-cli.elisp.parser :as parser]
             [spacetools.observatory-cli.elisp.spec :as es]))
 
-
-;; FIXME: FIX COMPARATOR IN SORTED MAP BY ADDING ALNUM SORTING TAIL
-;;        SO THE MAP WILL BE EXTEBDEBLE.
-;; FIXME: Scrub comments and whitespaces by returning and removing nils.
-
-;;;; Values
-
-(def key->wight
-  "Map for sorting keys."
-  {:tag 4 :prefix 3 :value 2 :children 1 :extra 0})
+;; FIXME: Scrub comments and whitespaces by returning and removing {}.
 
 ;;;; Predicates
 
@@ -42,11 +32,6 @@
 
 ;;;; Helpers
 
-(def ast-node
-  "Create ast node from KEY VAL pairs like in `hash-map`."
-  (partial sorted-map-by (fn comp [a b] (apply > (map key->wight [a b])))))
-
-
 (defn-spec inline-prefix ::es/ast
   "Add PREFIX to the inline prefixes of the NODE"
   [node ::es/ast prefix keyword?]
@@ -62,7 +47,7 @@
 (defn-spec ast-parent ::es/ast
   "Make parent AST node with TAG and CHILDREN."
   [tag keyword? children seqable?]
-  (ast-node :tag tag :children (vec children)))
+  (->> children (remove nil?) vec (hash-map :tag tag :children)))
 
 
 (defmulti parse-tree->ast-visitor
@@ -72,7 +57,10 @@
     (cond
       (get es/prefix-node-tags tag) :prefix-g
       (get es/terminal-node-tags tag) :terminal-g
+      (get es/junk-node-tags tag) :junk-g
       :else tag)))
+
+(defmethod parse-tree->ast-visitor :junk-g [_] nil)
 
 (defmethod parse-tree->ast-visitor :prefix-g
   [[tag tok cont-or-tag & rst :as node]]
@@ -82,7 +70,7 @@
 
 (defmethod parse-tree->ast-visitor :terminal-g
   [[tag value]]
-  (ast-node :tag tag :value value))
+  {:tag tag :value value})
 
 (defmethod parse-tree->ast-visitor :root
   [[tag & rst]]
@@ -104,12 +92,12 @@
   "Walk ast FORM applying PRE and POST to it: (POST (WALK (PRE NODE))).
 NOTE: Return value of PRE should be mapable."
   [pre fn? post fn? form ::es/ast]
-  ((fnil vary-meta {})
-   (post (update-existing
-          (pre form)
-          :children #(mapv (partial walk-ast pre post) %)))
-   deep-merge
-   (meta form)))
+  (let [rv (post (update-existing
+                  (pre form)
+                  :children #(mapv (partial walk-ast pre post) %)))]
+    (if (es/metable? rv)
+      (vary-meta rv deep-merge (meta form))
+      rv)))
 
 
 (defn-spec parse-tree->ast ::es/ast
