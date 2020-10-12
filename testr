@@ -1,2 +1,0 @@
-java -jar /mnt/workspace/spacetools/systems/observatory-cli/target/observatory.jar /mnt/workspace/spacemacs-pr/
-lein polylith build -test

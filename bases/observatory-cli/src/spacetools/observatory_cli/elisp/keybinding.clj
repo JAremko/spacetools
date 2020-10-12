@@ -22,13 +22,15 @@
   [ast ::es/ast]
   (let [lbs (volatile! [])]
     (ast/walk-ast
-     identity
      (fn log-lb
        [{:keys [tag value] :as node}]
-       (when (and (= :symbol tag)
-                  (legacy-binding-symbols value))
+       (if (and (= :symbol tag)
+                (legacy-binding-symbols value))
          (let [{{:keys [row column index]} :clj-antlr/position} (meta node)]
            (vswap! lbs conj {:fn-symbol value
-                             :position {:row row :col column :idx index}}))))
+                             :position {:row row :col column :idx index}})
+           nil)
+         node))
+     identity
      ast)
     @lbs))
