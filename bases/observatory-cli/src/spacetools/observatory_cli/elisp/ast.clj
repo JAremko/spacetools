@@ -5,7 +5,6 @@
             [spacetools.observatory-cli.elisp.parser :as parser]
             [spacetools.observatory-cli.elisp.spec :as es]))
 
-;; FIXME: Scrub comments and whitespaces by returning and removing {}.
 
 ;;;; Predicates
 

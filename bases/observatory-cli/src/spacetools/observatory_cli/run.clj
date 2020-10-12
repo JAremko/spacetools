@@ -16,10 +16,10 @@
                                slurp
                                el/read-str
                                kb/collect-legacy-bindings
-                               (vector %2)
+                               (hash-map :file %2 :legacy-bindings)
                                (conj %1))
                          vector))
-       (remove (complement (comp seq second)))
-       vec
+       (remove (complement (comp seq :legacy-bindings)))
+       (hash-map :spacetools.shared-spec/legacy-binding-report)
        (spit target-f))
   (prn "Done!"))
