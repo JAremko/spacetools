@@ -1,4 +1,5 @@
 (ns spacetools.observatory-cli.run
+  (:gen-class)
   (:require [clojure.core.reducers :as r]
             [spacetools.observatory-cli.elisp.core :as el]
             [spacetools.observatory-cli.elisp.keybinding :as kb]))
