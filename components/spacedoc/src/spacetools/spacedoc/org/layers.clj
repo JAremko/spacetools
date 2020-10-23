@@ -174,26 +174,18 @@
      :leftover @all-docs-v}))
 
 
-(def layers-org-autogen-note
-  "Note about layers.org being auto-generated."
-  (n/headline "THIS FILE IS AUTO GENERATED"
-              (->> (str "Don't edit it directly.\n"
-                        "See [["
-                        "https://github.com/syl20bnr/spacemacs"
-                        "/blob/develop/CONTRIBUTING.org#readmeorg-tags"
-                        "][\"README.org tags\" section of"
-                        " CONTRIBUTING.org for the instructions]].")
-                   n/text
-                   n/paragraph
-                   n/section)))
+(defn-spec text->layers-org-desc :spacetools.spacedoc.node.meta/description
+  "Wraps text into Description headline."
+  [text (s/and string? seq)]
+  (n/description (->> text
+                      n/text
+                      n/paragraph
+                      n/section)))
+
 
 (def no-layer-readme-files-ph
   "Placeholder for layer readme.org files."
   (n/todo "No README.org files with \"layer\" tag."))
-
-(def layers-org-title-text
-  "Title text of the layers.org file."
-  "Configuration layers")
 
 (def skipped-layers-text
   "Text for the skipped layers headline.
@@ -206,8 +198,8 @@
   [docs (s/coll-of :spacetools.spacedoc.node/root)]
   (let [{shape :shaped
          rest-docs :leftover} (layers-query-shaper docs (cfg/layers-org-query))]
-    (apply n/root layers-org-title-text #{}
-           (into [layers-org-autogen-note]
+    (apply n/root (cfg/layers-org-title-text) #{}
+           (into [(text->layers-org-desc (cfg/layers-org-description))]
                  (or (seq (into (:children shape [] #_ "<= ensures order")
                                 (when (seq rest-docs)
                                   (->> rest-docs

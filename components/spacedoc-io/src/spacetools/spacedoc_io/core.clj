@@ -113,3 +113,19 @@
          sdn)
        (update sdn :children (partial mapv (partial inner path)))))
    path doc))
+
+
+(defn-spec *fp->repors (exception-of? map?)
+  "Read and validate report file."
+  [path file-ref?]
+  ;; FIXME: Add report spec validation.
+  (io! (exc/try-or-recover
+        (->> path
+             fio/file-ref->path
+             nio/buffered-reader
+             io/reader
+             java.io.PushbackReader.
+             edn/read)
+        (fn [^Exception err]
+          (exc/failure
+           (ex-info (.getMessage err) (merge {:file path} (ex-data err))))))))

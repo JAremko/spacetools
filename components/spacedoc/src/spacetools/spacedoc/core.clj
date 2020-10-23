@@ -24,8 +24,7 @@
 
 
 (defn-spec node? boolean?
-  "Return true if X is a node.
-NOTE: Node might not be valid."
+  "Return true if X is a node."
   [x any?]
   (s/valid? :spacetools.spacedoc.node/any-node x))
 

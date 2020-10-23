@@ -134,7 +134,16 @@
                             :kbd "~"  ;; Called code in the "classic" org.
                             :strike-through "+"}
       :org-block-indentation 2
-      :org-table-indentation 0})
+      :org-table-indentation 0
+      ;; layers.org template configs
+      :layers-org-title-text "Configuration layers"
+      :layers-org-description (str "This file is auto-generated!\n"
+                                   "Don't edit it directly.\n"
+                                   "See [["
+                                   "https://github.com/syl20bnr/spacemacs"
+                                   "/blob/develop/CONTRIBUTING.org#readmeorg-tags"
+                                   "][\"README.org tags\" section of"
+                                   " CONTRIBUTING.org for the instructions]].")})
 
 
 (s/def ::valid-tags (s/map-of (s/and string?
@@ -172,6 +181,10 @@
 
 (s/def ::org-table-indentation nat-int?)
 
+(s/def ::layers-org-title-text (s/and string? seq))
+
+(s/def ::layers-org-description (s/and string? seq))
+
 (s/def ::configs (s/keys :req [::valid-tags
                                ::layers-org-query
                                ::text-separators-rigth
@@ -184,7 +197,9 @@
                                ::org-toc-template
                                ::org-emphasis-tokens
                                ::org-block-indentation
-                               ::org-table-indentation]))
+                               ::org-table-indentation
+                               ::layers-org-title-text
+                               ::layers-org-description]))
 
 (s/def ::overriding-configs (s/keys :op [::valid-tags
                                          ::layers-org-query
@@ -198,7 +213,9 @@
                                          ::org-toc-template
                                          ::org-emphasis-tokens
                                          ::org-block-indentation
-                                         ::org-table-indentation]))
+                                         ::org-table-indentation
+                                         ::layers-org-title-text
+                                         ::layers-org-description]))
 
 
 (def *configs
@@ -314,3 +331,17 @@ Same as `valid-configs?` but all elements of the CONFIGS map are optional."
   "Return indentation of org-mode tables."
   []
   (::org-table-indentation @*configs))
+
+
+;;;;; Layers.org
+
+(defn-spec layers-org-title-text ::layers-org-title-text
+  "Returns title text of the layers.org file."
+  []
+  (::layers-org-title-text @*configs))
+
+
+(defn-spec layers-org-description ::layers-org-description
+  "Returns Description text of the layers.org file."
+  []
+  (::layers-org-description @*configs))

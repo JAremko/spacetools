@@ -1,5 +1,4 @@
 (ns spacetools.observatory-cli.run
-  (:gen-class)
   (:require [clojure.core.reducers :as r]
             [spacetools.observatory-cli.elisp.core :as el]
             [spacetools.observatory-cli.elisp.keybinding :as kb]))
@@ -20,6 +19,6 @@
                                (conj %1))
                          vector))
        (remove (complement (comp seq :legacy-bindings)))
-       (hash-map :spacetools.shared-spec/legacy-binding-report)
+       (hash-map :tag :legacy-bindings-report :content)
        (spit target-f))
   (prn "Done!"))

@@ -13,7 +13,7 @@
 
 
 (defn-spec *validate (exception-of? string?)
-  "Validate Spacemacs documentation files with specs."
+  "Validates Spacemacs documentation files with specs."
   [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]
   (m/mlet
@@ -24,7 +24,7 @@
 
 
 (defn-spec *orgify (exception-of? string?)
-  "Export .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
+  "Exports .SDN files from SRC-DIR to TARGET-DIR as .ORG files."
   [src-dir (s/and string? io/directory?) target-dir string?]
   (m/do-let [sdn-fps (*parse-input-files [src-dir])
              docs (m/sequence (pmap sio/*fp->sdn sdn-fps))
@@ -41,7 +41,7 @@
 
 
 (defn-spec *describe-spec (exception-of? string?)
-  "Describe spec by qualified keyword."
+  "Describes spec by qualified keyword."
   [spec-key string?]
   (exc/try-on
    (let [key (edn/read-string spec-key)]
@@ -55,7 +55,7 @@
 
 
 (defn-spec *layers (exception-of? string?)
-  "Create LAYERS.sdn file in DIR using SDN files from the directory.
+  "Creates LAYERS.sdn file in DIR using SDN files from the directory.
 NOTE: Documents without \"layer\" tag are ignored."
   [dir string?]
   (m/do-let
@@ -79,7 +79,7 @@ NOTE: Documents without \"layer\" tag are ignored."
 
 
 (defn-spec *relations (exception-of? string?)
-  "Output nodes relations in SDN files."
+  "Outputs nodes relations in SDN files."
   [fs (s/coll-of (s/and string? (some-fn io/directory? io/sdn-file?))
                  :min-count 1)]
   (m/mlet [sdn-fps (*parse-input-files fs)

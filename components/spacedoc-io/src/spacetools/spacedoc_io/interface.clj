@@ -37,3 +37,10 @@
 (defn-spec set-ext fio/file-ref?
   [ext sio/extension? fp fio/file-ref?]
   (sio/set-ext ext fp))
+
+
+;; FIXME: Use better than map spec.
+(defn-spec *fp->repors (fio/exception-of? map?)
+  "Read and validate report file."
+  [path fio/file-ref?]
+  (sio/*fp->repors path))
