@@ -1,4 +1,4 @@
-FROM oracle/graalvm-ce as graalvm
+FROM ghcr.io/graalvm/graalvm-ce as graalvm
 
 RUN gu install native-image
 
